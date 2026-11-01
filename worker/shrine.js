@@ -70,7 +70,7 @@ export class Shrine extends DurableObject {
       const saved = await ctx.storage.get('altar');
       this.stored = saved !== undefined;
       this.alarmAt = (await ctx.storage.getAlarm()) ?? 0;
-      this.state = { ...EMPTY, ...saved, meta: { ...EMPTY.meta, ...saved?.meta } };
+      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta } };
     });
   }
 
@@ -86,7 +86,7 @@ export class Shrine extends DurableObject {
       avatar: AVATARS.includes(url.searchParams.get('avatar')) ? url.searchParams.get('avatar') : '🧘',
     };
     if (url.searchParams.get('watch') === '1') person.watcher = true; // a screen on the wall: sees everything, counts as nobody
-    if (this.demo) { person.name = DEMO_NAMES[parseInt(person.id, 16) % DEMO_NAMES.length]; this.state.meta = { ...DEMO_META }; }
+    if (this.demo) person.name = DEMO_NAMES[parseInt(person.id, 16) % DEMO_NAMES.length];
 
     const { 0: client, 1: server } = new WebSocketPair();
     this.ctx.acceptWebSocket(server);
