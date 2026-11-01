@@ -103,7 +103,7 @@
             <input class="name-form__input" type="text" maxlength="48" placeholder="prod-is-down" data-i18n-placeholder="namePlaceholder" spellcheck="false" />
           </label>
           <button class="btn btn--accent btn--lg" type="submit"><span data-i18n="heroCta">Open a shrine</span></button>
-          <p class="hero-cta__fine"><span data-i18n="heroFine">Free, no account, ready in one click.</span> <a href="#how" data-i18n="heroHow">See how it works ↓</a></p>
+          <p class="hero-cta__fine"><span data-i18n="heroFine">Free, no account, ready in one click.</span> <a href="#live" data-i18n="heroHow">See it live ↓</a></p>
         </form>
       </div>
 
@@ -340,8 +340,20 @@
             <li><b data-i18n="landFact1">Live previews.</b> <span data-i18n="landFact1Text">The pasted link says how long you have been down, who is praying and the last prayer, every time it is unfurled.</span></li>
             <li><b data-i18n="landFact2">A badge for the README.</b> <span data-i18n="landFact2Text">One line of Markdown shows the room's state on any status page.</span> <img class="facts__badge" id="land-badge" alt="" height="20" /></li>
             <li><b data-i18n="landFact3">A screen for the war room.</b> <span data-i18n="landFact3Text">Add</span> <code>?tv=1</code> <span data-i18n="landFact3Text2">and the altar fills the wall with the timer and a QR code to kneel.</span></li>
-            <li><b data-i18n="landFact4">A maintenance page.</b> <span data-i18n="landFact4Text">This page with</span> <code>?title=…&amp;eta=…</code> <span data-i18n="landFact4Text2">is a status page people enjoy refreshing.</span></li>
           </ul>
+          <form class="mp" id="mp-form" autocomplete="off">
+            <h3 data-i18n="mpLabel">Make it your maintenance page</h3>
+            <p data-i18n="mpText">Give this page a title and a time, put the link on your status page, and refreshing becomes a ritual.</p>
+            <div class="mp__fields">
+              <label class="mp__field"><span data-i18n="mpTitle">What’s down</span><input type="text" id="mp-title" maxlength="60" placeholder="Payments are taking a nap" data-i18n-placeholder="mpTitlePlaceholder" /></label>
+              <label class="mp__field"><span data-i18n="mpEta">Back at</span><input type="datetime-local" id="mp-eta" /></label>
+            </div>
+            <div class="linkbox">
+              <input class="linkbox__input" id="mp-url" type="text" readonly aria-label="Maintenance page link" />
+              <button class="btn btn--accent btn--sm" type="submit" data-i18n="mpCopy">Copy link</button>
+              <a class="btn btn--glass btn--sm" id="mp-preview" href="/?solo=1" target="_blank" rel="noopener" data-i18n="mpPreview">Preview</a>
+            </div>
+          </form>
         </div>
         <div class="unfurl" aria-hidden="true">
           <div class="unfurl__msg">
@@ -357,6 +369,25 @@
             <p class="unfurl__desc">down for 23 min · 4 praying · incense burning, 6 min left · 212 karma · 9 prayers. Last prayer: “Rollback, I beg you”</p>
             <img class="unfurl__img" src="/og.png" alt="" width="1200" height="630" />
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="land land--alt" id="live">
+      <div class="land__inner">
+        <p class="eyebrow eyebrow--live" data-i18n="liveEyebrow">Live from the war room</p>
+        <h2 class="land__title"><span data-i18n="liveTitle">A real shrine, on a real</span> <em data-i18n="liveAccent">screen.</em></h2>
+        <div class="tv" id="tv">
+          <div class="tv__bezel">
+            <iframe class="tv__screen" id="tv-frame" title="The public demo shrine, in TV mode" loading="lazy" referrerpolicy="same-origin"></iframe>
+            <p class="tv__poster" id="tv-poster" data-i18n="livePoster">The live demo plays on larger screens.</p>
+          </div>
+          <span class="tv__stand" aria-hidden="true"></span>
+        </div>
+        <p class="tv__text" data-i18n="liveText">This is the public demo shrine in TV mode, the way it looks on the wall of a war room: the vigil timer, who is kneeling, what just happened. Anyone can join it. Only the ready-made prayers are allowed there, so it stays fit for a wall.</p>
+        <div class="sheet__row tv__actions">
+          <a class="btn btn--accent" href="/r/demo" data-i18n="liveKneel">Kneel at the demo altar</a>
+          <a class="btn btn--glass" href="/r/demo?tv=1" target="_blank" rel="noopener" data-i18n="liveTv">Open it on your TV</a>
         </div>
       </div>
     </section>
@@ -393,6 +424,7 @@
       <a href="https://wotdafong.dev/" target="_blank" rel="noopener"><img class="credit__mark credit__mark--ink" src="/wotdafong-ink.svg" alt="" width="16" height="16" /><img class="credit__mark credit__mark--paper" src="/wotdafong-paper.svg" alt="" width="16" height="16" /><span data-i18n="madeBy">Made by</span> Wot Da Fong ↗</a>
       <a href="https://github.com/fongfan999/wot-da-shrine" target="_blank" rel="noopener"><span data-i18n="openSource">Open source</span> ↗</a>
       <a href="https://github.com/fongfan999/wot-da-shrine#url-parameters" target="_blank" rel="noopener" data-i18n="landParams">URL parameters ↗</a>
+      <a href="https://wotdafong.dev/posts/praying-to-the-servers" target="_blank" rel="noopener" data-i18n="landStory">Read the story ↗</a>
     </footer>
   </div>
 
@@ -539,15 +571,15 @@
       </button>
     </div>
     <div class="panel__body">
-      <label class="field">
+      <label class="field field--page">
         <span data-i18n="fTitle">Title</span>
         <input type="text" name="title" maxlength="60" />
       </label>
-      <label class="field">
+      <label class="field field--page">
         <span data-i18n="fSubtitle">Subtitle</span>
         <input type="text" name="subtitle" maxlength="140" />
       </label>
-      <label class="field">
+      <label class="field field--page">
         <span data-i18n="fEta">Back at</span>
         <input type="datetime-local" name="eta" />
       </label>
@@ -589,7 +621,7 @@
         <button class="btn btn--glass btn--sm" type="button" id="btn-rename" hidden>
           <span data-i18n="renameBtn">Change name</span>
         </button>
-        <button class="btn btn--glass btn--sm" type="button" id="btn-copy-link">
+        <button class="btn btn--glass btn--sm field--page" type="button" id="btn-copy-link">
           <span data-i18n="copyLink">Copy share link</span>
         </button>
         <button class="btn btn--glass btn--sm" type="button" id="btn-reset">

@@ -6,6 +6,7 @@
  * WebSockets. Uses the hibernation API, so an idle room costs nothing.
  */
 import { DurableObject } from 'cloudflare:workers';
+import { QUICK_PRAYERS } from '../shared/prayers.js';
 
 export const BURN_SECONDS = 600; // keep in sync with src/main.js
 const MAX_PRAYERS = 12;
@@ -24,6 +25,16 @@ const VIGIL_IDLE = 6 * 3600 * 1000; // a vigil nobody has touched for six hours 
 const MAX_HISTORY = 12;
 export const FORTUNES = ['great', 'good', 'small', 'bad', 'terrible']; // omikuji levels, see src/omikuji.js
 const META_MAX = { title: 60, subtitle: 140, eta: 40 };
+
+/**
+ * The public demo shrine, streamed onto the landing page. Anyone can kneel
+ * there, so it is kept safe for a screen on a wall: names come from a list,
+ * only the ready-made prayers are accepted, and the title cannot be changed.
+ */
+export const DEMO_ROOM = 'demo';
+const DEMO_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader', 'Pager novice', 'Cache warmer', 'Rollback artist', 'Certificate renewer'];
+const DEMO_META = { title: 'The demo rack is down', subtitle: 'This is the public demo shrine. Light the incense, ring the bowl, say a ready-made prayer: it shows on the home page, live.', eta: '' };
+const PRESET = new Set(QUICK_PRAYERS);
 
 /**
  * A vigil is one incident: it begins when the incense is lit in a room with no
@@ -54,6 +65,7 @@ export class Shrine extends DurableObject {
     this.stored = false; // nothing is written until the first action, so drive-by connects leave no trace
     this.bows = new Map(); // person → when they last bowed, for the chorus
     this.chorusAt = 0;
+    this.demo = ctx.id.name === DEMO_ROOM;
     ctx.blockConcurrencyWhile(async () => {
       const saved = await ctx.storage.get('altar');
       this.stored = saved !== undefined;
@@ -74,6 +86,7 @@ export class Shrine extends DurableObject {
       avatar: AVATARS.includes(url.searchParams.get('avatar')) ? url.searchParams.get('avatar') : '🧘',
     };
     if (url.searchParams.get('watch') === '1') person.watcher = true; // a screen on the wall: sees everything, counts as nobody
+    if (this.demo) { person.name = DEMO_NAMES[parseInt(person.id, 16) % DEMO_NAMES.length]; this.state.meta = { ...DEMO_META }; }
 
     const { 0: client, 1: server } = new WebSocketPair();
     this.ctx.acceptWebSocket(server);
@@ -152,6 +165,7 @@ export class Shrine extends DurableObject {
         break;
       case 'meta': {
         // What's down, and when it's back: one title for the whole room.
+        if (this.demo) return;
         const meta = { ...s.meta };
         for (const k of Object.keys(META_MAX)) if (k in msg) meta[k] = clean(msg[k], META_MAX[k]);
         if (meta.eta && Number.isNaN(Date.parse(meta.eta))) meta.eta = '';
@@ -167,7 +181,7 @@ export class Shrine extends DurableObject {
         break;
       case 'prayer': {
         const text = clean(msg.text, 60);
-        if (!text) return;
+        if (!text || (this.demo && !PRESET.has(text))) return;
         out.text = text;
         s.prayers = [...s.prayers, { name: by.name, avatar: by.avatar, text, at: Date.now() }].slice(-MAX_PRAYERS);
         s.prayed += 1;
@@ -185,6 +199,7 @@ export class Shrine extends DurableObject {
         break;
       }
       case 'rename': {
+        if (this.demo) return;
         const name = clean(msg.name, 24);
         const avatar = AVATARS.includes(msg.avatar) ? msg.avatar : by.avatar;
         if (!name) return;

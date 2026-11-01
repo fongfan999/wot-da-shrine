@@ -25,9 +25,13 @@ shrine.
   nothing done on the demo is counted in the world totals. Below it: how a
   vigil works, the rituals, how the link travels through Slack, and the
   live world count.
-- Give `/` a `title`, `subtitle` or `eta` (in the URL or in Customize) and
-  it becomes your maintenance page: the full solo shrine, with the landing
-  sections gone. `?solo=1` does the same without a title.
+- Give `/` a `title`, `subtitle` or `eta` in the URL and it becomes your
+  maintenance page: the full solo shrine, with the landing sections gone.
+  The landing page has a builder for that link; `?solo=1` does the same
+  without a title. On the home page Customize is preferences only.
+- `/r/demo` is the public demo shrine, streamed onto the landing page in TV
+  mode. Names there come from a list, only the ready-made prayers are
+  accepted and the title is fixed, so it stays fit for a wall.
 - `/new` redirects to a freshly named shared shrine, e.g. `/r/serene-rack-42`.
   `/new?name=Prod is down` names it `/r/prod-is-down` instead, and the landing
   page has a field for exactly that.

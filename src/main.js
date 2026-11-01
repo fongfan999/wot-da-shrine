@@ -1237,6 +1237,14 @@ function enterRoom() {
   presence.hidden = false;
   $('#join-room').textContent = fmt('roomEyebrow', { room: roomName });
   if (tv) { me = { name: t('tvWatch'), avatar: '🤖' }; connect(); return; }
+  if (roomName === 'demo') { // the public demo names you itself and takes only the ready-made prayers
+    me = me ?? { name: gsap.utils.random(DEFAULT_NAMES), avatar: gsap.utils.random(AVATARS) };
+    $('#btn-rename').hidden = true;
+    wishInput.disabled = true;
+    wishInput.placeholder = t('demoPrayers');
+    connect();
+    return;
+  }
   if (me) connect();
   else openJoin();
 }
@@ -1493,10 +1501,10 @@ function pingPerson(id, iconName) {
 }
 
 peopleList.addEventListener('click', (e) => {
-  if (e.target.closest('button.person')) openJoin();
+  if (e.target.closest('button.person') && roomName !== 'demo') openJoin();
 });
 presence.addEventListener('click', () => {
-  if (feedVisible()) { openJoin(); return; }
+  if (feedVisible() && roomName !== 'demo') { openJoin(); return; }
   toast(`${t('inShrine')}: ${[...people.values()].map((p) => (p.id === myId ? t('you') : p.name)).join(', ')}`);
 });
 
@@ -1523,6 +1531,9 @@ function setupLanding() {
   const landingEl = $('#landing');
   landingEl.hidden = false;
   $('#hero-form').hidden = false;
+  $('#panel .panel__hint').textContent = t('panelHintPrefs');
+  setupBuilder();
+  setupTv();
   // The altar is alive when you arrive: lit after the intro, with a hint that it can be touched.
   const hint = $('#hero-hint');
   setTimeout(() => { if (!lit) ignite(Date.now()); hint.hidden = false; }, reduceMotion ? 300 : 2200);
@@ -1551,6 +1562,38 @@ function setupLanding() {
       }
     }, reduceMotion ? 0 : 500);
   });
+}
+
+/** The maintenance-page builder: a title and a time become a link. */
+function setupBuilder() {
+  const titleEl = $('#mp-title');
+  const etaEl = $('#mp-eta');
+  const urlEl = $('#mp-url');
+  const preview = $('#mp-preview');
+  const build = () => {
+    const q = new URLSearchParams();
+    if (titleEl.value.trim()) q.set('title', titleEl.value.trim());
+    if (etaEl.value) q.set('eta', new Date(etaEl.value).toISOString());
+    if (![...q].length) q.set('solo', '1');
+    const url = `${location.origin}/?${q}`;
+    urlEl.value = url;
+    preview.href = url;
+  };
+  build();
+  $('#mp-form').addEventListener('input', build);
+  $('#mp-form').addEventListener('submit', (e) => { e.preventDefault(); copyText(urlEl.value, t('mpCopied')); });
+}
+
+/** The war-room TV: the demo shrine, streamed in once it scrolls near, on screens wide enough to carry a second page. */
+function setupTv() {
+  const frame = $('#tv-frame');
+  if (innerWidth < 900 || navigator.connection?.saveData) return;
+  const near = new IntersectionObserver((entries) => {
+    if (!entries.some((en) => en.isIntersecting)) return;
+    frame.src = `/r/demo?tv=1&music=0`;
+    near.disconnect();
+  }, { rootMargin: '400px 0px' });
+  near.observe(frame.parentElement);
 }
 
 /** The big numbers on the landing page share the world's snapshot. */
