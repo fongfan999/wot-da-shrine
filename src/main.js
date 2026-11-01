@@ -1885,16 +1885,32 @@ function setupBuilder() {
   $('#mp-form').addEventListener('submit', (e) => { e.preventDefault(); build(); copyText(url, t('mpCopied')); });
 }
 
-/** The war-room TV: the demo shrine, streamed in once it scrolls near, on screens wide enough to carry a second page. */
+/** The war-room TV: the demo shrine at 1920x1080, scaled onto the screen once it scrolls near, on screens wide enough to carry a second page. */
 function setupTv() {
   const frame = $('#tv-frame');
+  const glass = frame.parentElement;
+  new ResizeObserver(([en]) => glass.style.setProperty('--tv-scale', en.contentRect.width / 1920)).observe(glass);
+
+  // The chip on the bezel: how many are kneeling at the demo altar right now.
+  const liveText = $('#tv-live-text');
+  let onScreen = false;
+  const poll = async () => {
+    if (!onScreen || document.visibilityState !== 'visible') return;
+    try {
+      const st = await fetch('/api/rooms/demo/status', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null));
+      if (st) liveText.textContent = `Live · ${st.people} kneeling${st.lit ? ' · burning' : ''}`;
+    } catch { /* the chip just says Live */ }
+  };
+  setInterval(poll, 15000);
+  new IntersectionObserver(([en]) => { onScreen = en.isIntersecting; poll(); }).observe(glass);
+
   if (innerWidth < 900 || navigator.connection?.saveData) return;
   const near = new IntersectionObserver((entries) => {
     if (!entries.some((en) => en.isIntersecting)) return;
     frame.src = `/r/demo?tv=1&music=0`;
     near.disconnect();
   }, { rootMargin: '400px 0px' });
-  near.observe(frame.parentElement);
+  near.observe(glass);
 }
 
 /** The big numbers on the landing page share the world's snapshot. */
