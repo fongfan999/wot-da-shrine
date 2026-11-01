@@ -208,12 +208,17 @@ a { color: inherit; }
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 50%;
+  left: var(--altar-x, 50%); /* centered on the altar, wherever the layout puts it */
   width: min(100%, max(64%, 640px));
   height: 100%;
   transform: translateX(-50%);
   z-index: 4;
   pointer-events: none;
+  /* feathered on every side, so smoke that drifts out of the column dissolves instead of being cut on a straight edge */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent), linear-gradient(transparent var(--bar-h, 70px), #000 calc(var(--bar-h, 70px) + 80px));
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent), linear-gradient(transparent var(--bar-h, 70px), #000 calc(var(--bar-h, 70px) + 80px));
+  mask-composite: intersect;
 }
 
 .lanterns { position: fixed; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; }

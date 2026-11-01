@@ -117,6 +117,16 @@ const smoke = new IncenseSmoke($('#smoke'), () => art.tips());
 const fog = new Fog($('#fog'));
 const petals = new Petals($('#petals'));
 const motes = new Motes($('#motes'));
+/** Smoke and motes live in a column centered on the altar, which is off-center on wide layouts. */
+function placeSmoke() {
+  const r = burner.getBoundingClientRect();
+  if (!r.width) return;
+  body.style.setProperty('--altar-x', `${Math.round(r.left + r.width / 2)}px`);
+  smoke.resize();
+  motes.resize();
+}
+placeSmoke();
+window.addEventListener('resize', placeSmoke);
 const congregation = new Congregation($('#congregation'), burner);
 const vitals = new Vitals($('#ekg'), $('#vitals-bpm'));
 const wishes = new WishBoard($('#ema'));
@@ -1528,6 +1538,7 @@ for (const form of document.querySelectorAll('#name-form, #name-form-2, #hero-fo
 function setupLanding() {
   if (!landing) return;
   body.dataset.landing = '1';
+  placeSmoke();
   const landingEl = $('#landing');
   landingEl.hidden = false;
   $('#hero-form').hidden = false;
