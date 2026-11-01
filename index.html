@@ -81,6 +81,7 @@
     </div>
   </header>
 
+  <div class="app" id="app">
   <main class="stage">
     <!-- Center: heading + altar -->
     <section class="center">
@@ -256,6 +257,134 @@
       <a href="https://github.com/fongfan999/wot-da-shrine" target="_blank" rel="noopener"><span data-i18n="openSource">Open source</span> ↗</a>
     </p>
   </footer>
+  </div>
+
+  <!-- The landing page: everything below the shrine on / (hidden on rooms and maintenance pages) -->
+  <div class="landing" id="landing" hidden>
+    <section class="land" id="how">
+      <div class="land__inner">
+        <p class="eyebrow" data-i18n="landHowEyebrow">How a vigil works</p>
+        <h2 class="land__title"><span data-i18n="landHowTitle">Three steps, then</span> <em data-i18n="landHowAccent">pray.</em></h2>
+        <ol class="steps">
+          <li class="step">
+            <span class="step__n">1</span>
+            <svg class="step__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 20V9M12 20V7M15 20V9"/><path d="M12 4.5c-1-1 .8-2-.2-3"/><path d="M5 20h14"/></svg>
+            <h3 data-i18n="landStep1">Open a shrine</h3>
+            <p data-i18n="landStep1Text">Name it after what is down, or let the rack name it. It is ready in one click, with no account and nothing to install.</p>
+          </li>
+          <li class="step">
+            <span class="step__n">2</span>
+            <svg class="step__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
+            <h3 data-i18n="landStep2">Send the link</h3>
+            <p data-i18n="landStep2Text">It unfurls in Slack, Teams or Discord with who is praying and how long you have been down. Everyone who opens it kneels at the same altar.</p>
+          </li>
+          <li class="step">
+            <span class="step__n">3</span>
+            <svg class="step__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4L19 6"/></svg>
+            <h3 data-i18n="landStep3">Pray, then say they’re back</h3>
+            <p data-i18n="landStep3Text">Incense, bowl, bows, offerings and prayers, live. When the servers return, press They’re back: the shrine files the vigil and hands you the card to post.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="land land--alt" id="rituals">
+      <div class="land__inner">
+        <p class="eyebrow" data-i18n="landRitualsEyebrow">Rituals</p>
+        <h2 class="land__title"><span data-i18n="landRitualsTitle">Things to do while</span> <em data-i18n="landRitualsAccent">waiting.</em></h2>
+        <div class="rituals">
+          <article class="ritual">
+            <svg class="ritual__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-4 0-6.5-2.6-6.5-6 0-3 2-4.6 2.6-7.2.3 1.2.9 2 1.9 2.6C10.3 7.5 11.2 5 13.6 3c-.4 2.6.9 4.2 2.4 5.8 1.4 1.5 2.5 3 2.5 6.2 0 3.4-2.5 6-6.5 6z"/></svg>
+            <h3 data-i18n="landBlame">Burn a blame</h3>
+            <p data-i18n="landBlameText">Write what happened and burn it in the censer. The words never leave your browser; the room only learns that a confession was burned. Blameless, with a flame.</p>
+            <button class="btn btn--glass btn--sm" type="button" data-try="blame" data-i18n="landTry">Try it</button>
+          </article>
+          <article class="ritual">
+            <svg class="ritual__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l-1 18H9z"/><path d="M10 8h4M10 11.5h4M10 15h3"/></svg>
+            <h3 data-i18n="landFortune">Draw a fortune</h3>
+            <p data-i18n="landFortuneText">An omikuji for engineers: five levels from Great blessing to Great curse, with a line about the deploy, the night on call and plain luck. One per vigil.</p>
+            <button class="btn btn--glass btn--sm" type="button" data-try="fortune" data-i18n="landTry">Try it</button>
+          </article>
+          <article class="ritual">
+            <svg class="ritual__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><path d="M5 17l2-6 2 6M15 17l2-6 2 6"/></svg>
+            <h3 data-i18n="landChorus">Bow in chorus</h3>
+            <p data-i18n="landChorusText">Three or more people bowing within four seconds earn the room a peal of bells and bonus karma. The shrine counts it, so nobody can fake it alone.</p>
+            <a class="btn btn--glass btn--sm" href="/new" data-i18n="landNeedsTeam">Needs a team</a>
+          </article>
+          <article class="ritual">
+            <svg class="ritual__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3h4M12 3v2"/><path d="M8 7.5C8 6 9.5 5 12 5s4 1 4 2.5v7c0 1.5-1.5 2.5-4 2.5s-4-1-4-2.5z"/><path d="M8 11h8"/><path d="M11 17v2h2v-2M12 19v2"/></svg>
+            <h3 data-i18n="landRemembers">A shrine that remembers</h3>
+            <p data-i18n="landRemembersText">Every vigil survived hangs a paper lantern above the altar. Karma grows the shrine itself: a torii gate, a lucky cat on the table, a golden censer.</p>
+            <button class="btn btn--glass btn--sm" type="button" data-try="records" data-i18n="landSeeRecords">See the records</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="land" id="channel">
+      <div class="land__inner channel">
+        <div class="channel__text">
+          <p class="eyebrow" data-i18n="landChannelEyebrow">Made for the incident channel</p>
+          <h2 class="land__title"><span data-i18n="landChannelTitle">The link does the</span> <em data-i18n="landChannelAccent">inviting.</em></h2>
+          <ul class="facts">
+            <li><b data-i18n="landFact1">Live previews.</b> <span data-i18n="landFact1Text">The pasted link says how long you have been down, who is praying and the last prayer, every time it is unfurled.</span></li>
+            <li><b data-i18n="landFact2">A badge for the README.</b> <span data-i18n="landFact2Text">One line of Markdown shows the room's state on any status page.</span> <img class="facts__badge" id="land-badge" alt="" height="20" /></li>
+            <li><b data-i18n="landFact3">A screen for the war room.</b> <span data-i18n="landFact3Text">Add</span> <code>?tv=1</code> <span data-i18n="landFact3Text2">and the altar fills the wall with the timer and a QR code to kneel.</span></li>
+            <li><b data-i18n="landFact4">A maintenance page.</b> <span data-i18n="landFact4Text">This page with</span> <code>?title=…&amp;eta=…</code> <span data-i18n="landFact4Text2">is a status page people enjoy refreshing.</span></li>
+          </ul>
+        </div>
+        <div class="unfurl" aria-hidden="true">
+          <div class="unfurl__msg">
+            <span class="unfurl__avatar">🧑‍💻</span>
+            <div>
+              <p class="unfurl__who"><b>phong</b> <time>2:14 PM</time></p>
+              <p class="unfurl__text">🪔 The servers are down. The shrine is open, come pray with us: <span class="unfurl__link" id="unfurl-link">shrine.wotdafong.dev/r/serene-rack-42</span></p>
+            </div>
+          </div>
+          <div class="unfurl__card">
+            <p class="unfurl__site">Wot Da Shrine</p>
+            <p class="unfurl__title">Payments API is down · pray at serene-rack-42</p>
+            <p class="unfurl__desc">down for 23 min · 4 praying · incense burning, 6 min left · 212 karma · 9 prayers. Last prayer: “Rollback, I beg you”</p>
+            <img class="unfurl__img" src="/og.png" alt="" width="1200" height="630" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="land land--alt" id="world-now">
+      <div class="land__inner">
+        <p class="eyebrow eyebrow--live" data-i18n="landWorldEyebrow">Right now, across every shrine</p>
+        <dl class="bignums">
+          <div class="bignum"><dd id="lw-prayers">–</dd><dt data-i18n="landWorldPrayers">prayers sent to the cloud</dt></div>
+          <div class="bignum"><dd id="lw-shrines">–</dd><dt data-i18n="landWorldShrines">shrines opened</dt></div>
+          <div class="bignum"><dd id="lw-burning">–</dd><dt data-i18n="landWorldBurning">burning right now</dt></div>
+          <div class="bignum"><dd id="lw-resolved">–</dd><dt data-i18n="landWorldResolved">times the servers came back</dt></div>
+        </dl>
+        <p class="bignums__ticker" id="lw-ticker"></p>
+      </div>
+    </section>
+
+    <section class="land land--cta" id="open">
+      <div class="land__inner land__inner--narrow">
+        <h2 class="land__title"><span data-i18n="landCtaTitle">Your servers will go down again. Have the shrine</span> <em data-i18n="landCtaAccent">ready.</em></h2>
+        <form class="name-form name-form--row" id="name-form-2" autocomplete="off">
+          <label class="name-form__field">
+            <span class="name-form__prefix" aria-hidden="true">/r/</span>
+            <span class="sr-only" data-i18n="nameLabel">Name your shrine</span>
+            <input class="name-form__input" type="text" maxlength="48" placeholder="prod-is-down" data-i18n-placeholder="namePlaceholder" spellcheck="false" />
+          </label>
+          <button class="btn btn--accent" type="submit"><span data-i18n="soloCta">Open a team shrine</span></button>
+        </form>
+        <p class="land__fine" data-i18n="landFine">No accounts. Nothing stored but the altar. Free and open source.</p>
+      </div>
+    </section>
+
+    <footer class="land__foot">
+      <a href="https://wotdafong.dev/" target="_blank" rel="noopener"><img class="credit__mark credit__mark--ink" src="/wotdafong-ink.svg" alt="" width="16" height="16" /><img class="credit__mark credit__mark--paper" src="/wotdafong-paper.svg" alt="" width="16" height="16" /><span data-i18n="madeBy">Made by</span> Wot Da Fong ↗</a>
+      <a href="https://github.com/fongfan999/wot-da-shrine" target="_blank" rel="noopener"><span data-i18n="openSource">Open source</span> ↗</a>
+      <a href="https://github.com/fongfan999/wot-da-shrine#url-parameters" target="_blank" rel="noopener" data-i18n="landParams">URL parameters ↗</a>
+    </footer>
+  </div>
 
   <!-- Breathing guide (hidden until toggled) -->
   <div class="breath" id="breath" hidden>

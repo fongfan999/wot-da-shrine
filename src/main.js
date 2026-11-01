@@ -48,6 +48,10 @@ const recentPrayers = []; // the last few prayers, with names, for the share car
 let roomMeta = { title: '', subtitle: '', eta: '' }; // what's down and when it's back, shared by the room
 const urlParams = new URLSearchParams(location.search);
 const tv = urlParams.get('tv') === '1'; // the war-room screen: watches, never kneels
+// The home page is the landing page, unless it is being used as a maintenance page (a title, subtitle or ETA
+// in the URL or saved in this browser) or asked to be the bare shrine.
+const landing = !roomName && !tv && urlParams.get('landing') !== '0' && !urlParams.has('solo')
+  && !['title', 'subtitle', 'eta'].some((k) => urlParams.has(k) || settings[k]);
 
 /* ---------- Vigils: one incident, from the first incense to "they're back" ---------- */
 const VIGIL_KEY = 'incense:vigil:v1';   // the solo page's open vigil
@@ -213,8 +217,9 @@ function applySettings(animate = false) {
   applyTheme();
   applyFx();
   if (body.dataset.resolved) applyStrings({ eyebrow: t('resolvedEyebrow'), title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
+  else if (landing && !meta('title') && !meta('subtitle')) applyStrings({ eyebrow: t('landEyebrow'), title: t('landTitle'), subtitle: t('landSubtitle') });
   else applyStrings({ title: meta('title'), subtitle: meta('subtitle') });
-  document.title = `${body.dataset.resolved ? t('resolvedTitle') : meta('title') || t('title')} · ${BRAND}`;
+  document.title = body.dataset.resolved ? `${t('resolvedTitle')} · ${BRAND}` : meta('title') ? `${meta('title')} · ${BRAND}` : landing ? `${BRAND}: ${t('landDocTitle')}` : `${t('title')} · ${BRAND}`;
   if (roomName) $('#eyebrow').textContent = body.dataset.resolved ? `${t('resolvedEyebrow')} / ${roomName}` : fmt('roomEyebrow', { room: roomName });
   if (animate || !title.querySelector('.word')) splitTitle(animate);
 
@@ -286,6 +291,7 @@ function intro() {
   gsap.set('.side .card', { y: 20, opacity: 0 });
   gsap.set(dock, { y: 24, opacity: 0 });
   gsap.set('.burner', { y: 60, opacity: 0, scale: 0.92 });
+  gsap.set('.plantern-row', { opacity: 0 });
 
   // Camera pushes down the server corridor.
   gsap.fromTo('.layer--bg', { scale: 1.35, opacity: 0 }, { scale: 1, opacity: 1, duration: 3.6, ease: 'power2.out' });
@@ -296,6 +302,7 @@ function intro() {
     .to('.title .ch', { y: 0, opacity: 1, rotateX: 0, duration: 1, stagger: 0.022 }, 0.35)
     .to(['.subtitle', '.mantra'], { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }, 0.8)
     .to('.burner', { y: 0, opacity: 1, scale: 1, duration: 1.3, ease: 'elastic.out(1, 0.7)' }, 0.5)
+    .to('.plantern-row', { opacity: 1, duration: 1, ease: 'power2.out' }, 1.2)
     .to('.side .card', { y: 0, opacity: 1, duration: 0.8, stagger: 0.08 }, 0.9)
     .to(dock, { y: 0, opacity: 1, duration: 0.8, stagger: 0.08 }, 1.0);
 
@@ -1481,18 +1488,69 @@ $('#btn-invite').addEventListener('click', () => { sound.unlock(); openShare(tru
 $('#btn-share').addEventListener('click', () => { sound.unlock(); openShare(true); });
 
 /* ---------- Name your shrine: /r/prod-is-down, or a generated name when the field is empty ---------- */
-$('#name-form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  sound.unlock();
-  const raw = $('#name-input').value.trim();
-  const slug = raw.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48).replace(/-+$/, '');
-  location.href = slug.length >= 3 ? `/r/${slug}` : raw ? `/new?name=${encodeURIComponent(raw)}` : '/new';
-});
+for (const form of document.querySelectorAll('#name-form, #name-form-2')) {
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    sound.unlock();
+    const raw = form.querySelector('input').value.trim();
+    const slug = raw.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48).replace(/-+$/, '');
+    location.href = slug.length >= 3 ? `/r/${slug}` : raw ? `/new?name=${encodeURIComponent(raw)}` : '/new';
+  });
+}
+
+/* ---------- The landing page below the shrine ---------- */
+function setupLanding() {
+  if (!landing) return;
+  body.dataset.landing = '1';
+  const landingEl = $('#landing');
+  landingEl.hidden = false;
+  $('#land-badge').src = `/api/rooms/serene-rack-42/badge.svg`;
+  $('#unfurl-link').textContent = `${location.host}/r/serene-rack-42`;
+  // Sections reveal as they scroll in.
+  const seen = new IntersectionObserver((entries) => {
+    for (const en of entries) if (en.isIntersecting) { en.target.classList.add('is-in'); seen.unobserve(en.target); }
+  }, { rootMargin: '0px 0px -12% 0px' });
+  landingEl.querySelectorAll('.land').forEach((el) => seen.observe(el));
+  // "Try it": back up to the shrine, then the ritual.
+  landingEl.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-try]');
+    if (!b) return;
+    sound.unlock();
+    const what = b.dataset.try;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    setTimeout(() => {
+      if (what === 'blame') $('#btn-blame').click();
+      else if (what === 'fortune') $('#btn-fortune').click();
+      else if (what === 'records') {
+        const card = $('#records-card');
+        card.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+        gsap.fromTo(card, { boxShadow: '0 0 0 3px var(--accent)' }, { boxShadow: 'var(--shadow-sheet)', duration: 1.6, ease: 'power2.out', delay: 0.4 });
+      }
+    }, reduceMotion ? 0 : 500);
+  });
+}
+
+/** The big numbers on the landing page share the world's snapshot. */
+function renderLandingWorld(w) {
+  if (!landing) return;
+  const n = (x) => Number(x || 0).toLocaleString();
+  $('#lw-prayers').textContent = n(w.prayers);
+  $('#lw-shrines').textContent = n(w.shrines);
+  $('#lw-burning').textContent = n(w.burningNow);
+  $('#lw-resolved').textContent = n(w.resolved);
+  const ticker = $('#lw-ticker');
+  ticker.innerHTML = '';
+  const last = (w.recent ?? []).find((r) => WORLD_KINDS[r.kind]);
+  if (!last) return;
+  const b = document.createElement('b');
+  b.textContent = last.text ? `“${last.text}”` : t(WORLD_KINDS[last.kind]);
+  ticker.append(b, document.createTextNode(` · ${fmt('worldAgo', { t: agoShort(last.ago) })}`));
+}
 
 /* ---------- The world: what every shrine is doing, on the landing page ---------- */
 const worldEl = $('#world');
 const WORLD_EVERY = 45000;
-const WORLD_KINDS = { light: 'worldLight', prayer: 'worldPrayer', bow: 'worldBow', offer: 'worldOffer', resolve: 'worldResolve' };
+const WORLD_KINDS = { light: 'worldLight', prayer: 'worldPrayer', bow: 'worldBow', offer: 'worldOffer', resolve: 'worldResolve', blame: 'worldBlame', omikuji: 'worldOmikuji' };
 let worldTimer = 0;
 function agoShort(s) {
   if (s < 60) return `${s}s`;
@@ -1523,6 +1581,7 @@ async function loadWorld() {
       ticker.append(b, document.createTextNode(` · ${fmt('worldAgo', { t: agoShort(last.ago) })}`));
     }
     worldEl.hidden = false;
+    renderLandingWorld(w);
   } catch { /* no world today */ }
   worldTimer = setTimeout(loadWorld, WORLD_EVERY);
 }
@@ -1735,6 +1794,7 @@ if (import.meta.env.DEV) window.__incense = { gsap, sound, smoke, fog, petals, g
 
 buildTray();
 dealQuick();
+setupLanding();
 applySettings();
 renderResolve();
 renderRecords();

@@ -18,8 +18,11 @@ shrine.
 
 ## How it works
 
-- `/` is a solo shrine. It also works as a maintenance page (custom title,
-  subtitle and "back at" time).
+- `/` is the landing page: the solo shrine as the first screen (it is the
+  demo), then how a vigil works, the rituals, how the link travels through
+  Slack, and the live world count. Give it a `title`, `subtitle` or `eta`
+  (in the URL or in Customize) and the landing sections disappear: it is your
+  maintenance page. `?solo=1` does the same without a title.
 - `/new` redirects to a freshly named shared shrine, e.g. `/r/serene-rack-42`.
   `/new?name=Prod is down` names it `/r/prod-is-down` instead, and the landing
   page has a field for exactly that.

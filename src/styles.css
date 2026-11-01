@@ -139,6 +139,12 @@ body {
   grid-template-rows: auto minmax(0, 1fr) auto;
   min-height: 100dvh;
 }
+/* The shrine (stage + dock) fills the first screen; the dock sticks to its bottom only while the shrine is on screen */
+.app {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: calc(100dvh - var(--bar-h, 70px));
+}
 button { font: inherit; color: inherit; cursor: pointer; }
 a { color: inherit; }
 ::selection { background: var(--selection); color: var(--selection-ink); }
@@ -1295,6 +1301,104 @@ body[data-resolved="1"] #btn-resolve { background: var(--live); color: var(--pap
 .sharecard__loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .sharecard__img[src] + .sharecard__loading { display: none; }
 
+/* ---------- The landing page, below the shrine on / ---------- */
+.landing { position: relative; z-index: 3; background: var(--paper); border-top: 1px solid var(--line); }
+.land { padding: clamp(56px, 8vw, 104px) var(--gutter); }
+.land--alt { background: var(--paper-sunk); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.land__inner { max-width: 1080px; margin: 0 auto; }
+.land__inner--narrow { max-width: 720px; text-align: center; }
+.land .eyebrow { margin: 0 0 10px; }
+.land__title {
+  margin: 0 0 clamp(28px, 4vw, 44px);
+  max-width: 24ch;
+  font-weight: 500;
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
+  line-height: 1.04;
+  letter-spacing: -.04em;
+  text-wrap: balance;
+}
+.land__inner--narrow .land__title { margin-inline: auto; }
+.land__title em { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -.03em; color: var(--accent); }
+.land h3 { margin: 0 0 8px; font-size: 19px; font-weight: 650; letter-spacing: -.02em; }
+.land p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.55; text-wrap: pretty; }
+
+/* Reveal on scroll */
+.land__inner > *:not(.eyebrow) { opacity: 0; transform: translateY(16px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.land.is-in .land__inner > * { opacity: 1; transform: none; }
+.land.is-in .land__inner > *:nth-child(2) { transition-delay: .08s; }
+.land.is-in .land__inner > *:nth-child(3) { transition-delay: .16s; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); counter-reset: step; }
+.step {
+  position: relative;
+  padding: 22px 20px 20px;
+  border: 1px solid var(--sheet-line);
+  border-radius: var(--radius-md);
+  background: var(--sheet);
+  box-shadow: var(--shadow-sheet);
+}
+.step__n { position: absolute; right: 16px; top: 14px; font-family: var(--font-serif); font-style: italic; font-size: 32px; line-height: 1; color: var(--line-strong); }
+.step__ico, .ritual__ico { width: 28px; height: 28px; margin-bottom: 14px; fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.rituals { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+.ritual { display: flex; flex-direction: column; padding: 22px 20px 20px; border: 1px solid var(--sheet-line); border-radius: var(--radius-md); background: var(--paper-raised); box-shadow: var(--shadow-sheet); }
+.ritual__ico { stroke: var(--ember); }
+.ritual p { flex: 1; margin-bottom: 16px; font-size: 15px; }
+.ritual .btn { align-self: flex-start; }
+
+.channel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 440px); gap: clamp(28px, 5vw, 72px); align-items: center; }
+.facts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.facts li { padding-left: 18px; border-left: 2px solid var(--accent); color: var(--muted); font-size: 16px; line-height: 1.5; }
+.facts b { color: var(--ink); font-weight: 650; }
+.facts code { padding: 1px 6px; border-radius: var(--radius-xs); background: var(--paper-sunk); font-family: var(--font-mono); font-size: 13px; color: var(--ink); }
+.facts__badge { display: inline-block; height: 20px; vertical-align: middle; margin-left: 6px; }
+
+/* A pretend Slack message, so people see what the pasted link turns into */
+.unfurl { padding: 18px 20px 20px; border: 1px solid var(--ink); border-radius: var(--radius-lg); background: var(--paper-raised); box-shadow: var(--shadow-float); font-size: 14px; }
+.unfurl__msg { display: flex; gap: 10px; align-items: flex-start; }
+.unfurl__avatar { width: 36px; height: 36px; display: grid; place-items: center; flex-shrink: 0; border-radius: var(--radius-sm); background: var(--accent-soft); font-size: 1.2rem; }
+.unfurl__who { margin: 0 0 2px; color: var(--ink); }
+.unfurl__who time { margin-left: 6px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.unfurl__text { margin: 0; color: var(--ink); line-height: 1.45; }
+.unfurl__link { color: var(--accent); text-decoration: underline; overflow-wrap: anywhere; }
+.unfurl__card { margin: 12px 0 0 46px; padding: 2px 0 0 12px; border-left: 4px solid var(--accent); }
+.unfurl__site { margin: 0; font-size: 12px; font-weight: 600; color: var(--muted); }
+.unfurl__title { margin: 2px 0 0; font-weight: 650; color: var(--accent); }
+.unfurl__desc { margin: 4px 0 10px; color: var(--muted); line-height: 1.4; }
+.unfurl__img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+
+.eyebrow--live::before { background: var(--ember); animation: world-beat 2.4s ease-out infinite; }
+.bignums { margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+.bignum { display: flex; flex-direction: column; gap: 4px; padding: 18px 0 0; border-top: 1px solid var(--line-strong); }
+.bignum dd { margin: 0; font-family: var(--font-mono); font-size: clamp(2rem, 4vw, 3rem); font-weight: 500; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.bignum dt { font-size: 14px; color: var(--muted); }
+.bignums__ticker { margin: 22px 0 0 !important; font-family: var(--font-serif); font-style: italic; font-size: 17px !important; color: var(--muted); }
+.bignums__ticker b { font-weight: 500; color: var(--ink); }
+.bignums__ticker:empty { display: none; }
+
+.land--cta { padding-bottom: clamp(64px, 9vw, 120px); }
+.name-form--row { flex-direction: row; justify-content: center; max-width: 560px; margin: 0 auto; }
+.name-form--row .name-form__field { flex: 1; min-width: 0; }
+.land__fine { margin-top: 16px !important; font-family: var(--font-mono); font-size: 12px !important; letter-spacing: .04em; }
+.land__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
+  padding: 22px var(--gutter) max(22px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+.land__foot a { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.land__foot a:hover { color: var(--accent); }
+
+/* On the landing page the hero speaks for the product, not for a maintenance window */
+body[data-landing="1"] .card--solo .label { display: none; }
+body[data-landing="1"] .card--solo .card__text { display: none; }
+
 /* ---------- Mode switches ---------- */
 body[data-mode="room"] .card--solo { display: none; }
 
@@ -1325,6 +1429,13 @@ body[data-fx="lite"] .stick__halo, body[data-fx="lite"] .kneeler__halo { display
   .act--primary { min-width: 140px; }
 }
 
+@media (max-width: 1099px) {
+  .steps { grid-template-columns: 1fr; }
+  .rituals { grid-template-columns: 1fr 1fr; }
+  .channel { grid-template-columns: 1fr; }
+  .bignums { grid-template-columns: 1fr 1fr; }
+}
+
 /* Narrow tablet and phone: the dock stacks */
 @media (max-width: 899px) {
   .dock { grid-template-columns: minmax(0, 1fr); grid-template-areas: "quick" "pray" "actions" "credit"; }
@@ -1353,6 +1464,9 @@ body[data-fx="lite"] .stick__halo, body[data-fx="lite"] .kneeler__halo { display
   .vigil { font-size: 13px; }
   .vigil__time { font-size: 16px; }
   .tv-join { display: none; }
+  .rituals { grid-template-columns: 1fr; }
+  .name-form--row { flex-direction: column; }
+  .land__title { max-width: none; }
   .tray { padding: 10px; }
   .tray__item { padding: 8px 4px 7px; }
   .tray__name { white-space: normal; font-size: 11px; line-height: 1.15; text-align: center; }
