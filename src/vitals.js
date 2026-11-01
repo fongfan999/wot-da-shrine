@@ -80,6 +80,7 @@ export class Vitals {
   }
 
   frame(time, dt) {
+    if (this.paused) return; // hidden (the home page has no side panel): draw nothing
     this.time = time;
     if (!this.w || !this.ys.length) return;
     if (dt > 0.1) dt = 0.1;

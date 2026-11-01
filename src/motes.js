@@ -79,6 +79,7 @@ export class Motes {
   }
 
   frame(time, dt) {
+    if (this.paused) return; // the scene is off screen: draw nothing
     if (dt > 0.1) dt = 0.1;
     if (this.lite) {
       this.acc += dt;

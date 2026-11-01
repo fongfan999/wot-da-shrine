@@ -115,6 +115,7 @@ export class IncenseSmoke {
   }
 
   frame(dt) {
+    if (this.paused) return; // the scene is off screen: draw nothing
     const ms = Math.min(dt, 100) * STEP;
     this.time += ms;
     const ctx = this.ctx;

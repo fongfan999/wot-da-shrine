@@ -65,6 +65,7 @@ export class Fog {
   }
 
   frame(dt) {
+    if (this.paused) return; // the scene is off screen: draw nothing
     if (this.opacity <= 0.001) {
       if (this.cleared) return;
       this.ctx.clearRect(0, 0, this.w, this.h);

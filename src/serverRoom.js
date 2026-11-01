@@ -114,7 +114,9 @@ export function buildServerRoom(host) {
   const nodes = [...host.querySelectorAll('.leds circle')];
   let acc = 0;
   let lite = false;
+  let paused = false;
   gsap.ticker.add((time, dt) => {
+    if (paused) return;
     acc += dt; // ms
     if (acc < (lite ? 300 : 150)) return;
     acc = 0;
@@ -132,5 +134,7 @@ export function buildServerRoom(host) {
     },
     /** Lite mode: the LEDs blink less often. */
     setLite(on) { lite = on; },
+    /** Off screen: no blinking at all. */
+    setPaused(on) { paused = on; },
   };
 }

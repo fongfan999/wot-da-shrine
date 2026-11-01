@@ -135,6 +135,15 @@ const vitals = new Vitals($('#ekg'), $('#vitals-bpm'));
 const wishes = new WishBoard($('#ema'));
 const BURN_SECONDS = 600; // keep in sync with worker/shrine.js
 
+/* ---------- Embedded as the home page's TV: sleep while scrolled out of sight ---------- */
+if (tv && window.parent !== window) {
+  window.addEventListener('message', (e) => {
+    if (e.origin !== location.origin || e.data?.shrine !== 'tv') return;
+    if (e.data.awake) gsap.ticker.wake(); else gsap.ticker.sleep();
+    document.body.dataset.paused = e.data.awake ? '' : '1';
+  });
+}
+
 /* ---------- Effects level: full, or lite on phones and anything that can't keep up ---------- */
 const LITE_KEY = 'incense:lite:v1'; // this device fell behind once this session: stay lite
 let lite = false;
@@ -196,20 +205,24 @@ function watchFrameRate() {
   let frames = 0;
   let slow = 0;
   let elapsed = 0;
+  let strikes = 0; // one slow reading can be a hiccup (a tab switch, a page loading); two in a row is the device
   const tick = (time, dt) => {
-    if (document.visibilityState !== 'visible' || performance.now() - started < 6000) return;
+    if (document.visibilityState !== 'visible' || body.dataset.scene === 'off' || performance.now() - started < 6000) return;
     frames += 1;
     elapsed += dt;
     if (dt > 34) slow += 1;
     if (elapsed < 4000) return;
-    gsap.ticker.remove(tick);
     const fps = frames / (elapsed / 1000);
-    if (fps < 40 || slow / frames > 0.35) {
-      degraded = true;
-      try { sessionStorage.setItem(LITE_KEY, '1'); } catch { /* ignore */ }
-      applyFx();
-      toast(t('liteToast'));
-    }
+    const behind = fps < 40 || slow / frames > 0.35;
+    frames = slow = elapsed = 0;
+    strikes = behind ? strikes + 1 : 0;
+    if (!behind) { gsap.ticker.remove(tick); return; }
+    if (strikes < 2) return;
+    gsap.ticker.remove(tick);
+    degraded = true;
+    try { sessionStorage.setItem(LITE_KEY, '1'); } catch { /* ignore */ }
+    applyFx();
+    toast(t('liteToast'));
   };
   gsap.ticker.add(tick);
 }
@@ -1571,6 +1584,7 @@ function setupLanding() {
   const hint = $('#hero-hint');
   setTimeout(() => { if (!lit) ignite(Date.now()); hint.hidden = false; }, reduceMotion ? 300 : 2200);
   burner.addEventListener('pointerdown', () => { hint.hidden = true; }, { once: true });
+  setupScene();
   setupRibbon();
   setupSteps();
   setupRituals();
@@ -1588,6 +1602,27 @@ function setupLanding() {
     sound.unlock();
     $(b.dataset.try === 'blame' ? '#btn-blame' : '#btn-fortune').click();
   });
+}
+
+/**
+ * The home page is long, and the shrine at its top is the expensive part: smoke, motes, fog and
+ * blinking racks redraw every frame. While the hero is off screen they draw nothing, their full-screen
+ * layers are hidden so the GPU stops compositing them, and the hero's CSS animations pause. The EKG
+ * lives in the side panel, which the home page never shows, so it never draws here at all.
+ */
+function setupScene() {
+  vitals.paused = true;
+  const setAwake = (awake) => {
+    smoke.paused = motes.paused = fog.paused = !awake;
+    room.setPaused(!awake);
+    body.dataset.scene = awake ? 'on' : 'off';
+  };
+  new IntersectionObserver(([en]) => setAwake(en.isIntersecting)).observe($('.center'));
+  // Each landing section's own CSS animations run only while it is on screen.
+  const live = new IntersectionObserver((entries) => {
+    for (const en of entries) en.target.classList.toggle('is-on', en.isIntersecting);
+  }, { rootMargin: '120px 0px' });
+  document.querySelectorAll('#landing .land').forEach((el) => live.observe(el));
 }
 
 /** The footer: the header's wordmark signed huge across the bottom, and a way back up to the altar. */
@@ -1934,7 +1969,10 @@ function setupTv() {
     } catch { /* the chip just says Live */ }
   };
   setInterval(poll, 15000);
-  new IntersectionObserver(([en]) => { onScreen = en.isIntersecting; poll(); }).observe(glass);
+  // The TV is a whole second shrine: it sleeps while it is scrolled out of sight.
+  const tell = () => frame.contentWindow?.postMessage({ shrine: 'tv', awake: onScreen }, location.origin);
+  frame.addEventListener('load', tell);
+  new IntersectionObserver(([en]) => { onScreen = en.isIntersecting; poll(); tell(); }).observe(glass);
 
   if (innerWidth < 900 || navigator.connection?.saveData) return;
   const near = new IntersectionObserver((entries) => {
