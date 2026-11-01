@@ -18,6 +18,7 @@ import { icon } from './icons.js';
 import { cardSvg, cardPng, shareFile, download, copyImage, canCopyImage, canShareFiles } from './share.js';
 import { draw as drawFortune, LEVELS as FORTUNE_LEVELS, asText as fortuneText } from './omikuji.js';
 import qrcode from 'qrcode-generator';
+import { describe as describeRoom, previewTitle } from '../shared/preview.js';
 
 const $ = (sel) => document.querySelector(sel);
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1736,7 +1737,7 @@ function setupRituals() {
 
 /** The link does the inviting: three panes that play in turn until the visitor picks one. */
 function setupShowcase() {
-  const ROOM = 'serene-rack-42';
+  const ROOM = 'demo'; // the public demo shrine: the same room the war-room TV below is showing
   const el = $('#showcase');
   const tabs = [...el.querySelectorAll('.showcase__tab')];
   const panes = [...el.querySelectorAll('.showcase__pane')];
@@ -1790,7 +1791,28 @@ function setupShowcase() {
   el.querySelector('.showcase__stage').addEventListener('pointerdown', stopTour);
   el.querySelector('.showcase__stage').addEventListener('focusin', stopTour);
 
-  // The unfurl is alive: the minutes, the people and the 🙏 keep counting while it is on screen.
+  // The unfurl shows what Slack would print if the demo shrine's link were pasted now. When nobody is
+  // there (no one praying, nothing lit) a scripted example plays instead, and the tag says which it is.
+  const tag = $('#uf-tag');
+  const exampleEl = $('#uf-example');
+  const liveEl = $('#uf-live');
+  let isLive = false;
+  let polledAt = 0;
+  async function poll() {
+    polledAt = Date.now();
+    let st = null;
+    try { st = await fetch(`/api/rooms/${ROOM}/status`, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)); } catch { /* keep the example */ }
+    isLive = Boolean(st && (st.people > 0 || st.lit));
+    tag.dataset.live = isLive ? '1' : '0';
+    tag.textContent = t(isLive ? 'landUfLive' : 'landUfExample');
+    exampleEl.hidden = isLive;
+    liveEl.hidden = !isLive;
+    $('#uf-title').textContent = isLive ? previewTitle(st, ROOM) : `The demo rack is down · pray at ${ROOM}`;
+    if (isLive) liveEl.textContent = describeRoom(st);
+  }
+  setInterval(() => { if (onScreen && current === 0 && document.visibilityState === 'visible' && Date.now() - polledAt > 10000) poll(); }, 1000);
+
+  // The example is alive too: its minutes, people and 🙏 keep counting while it is on screen.
   const live = { min: 23, praying: 4, karma: 212, pray: 4, last: 0 };
   const bump = (id, value) => {
     const b = $(id);
@@ -1800,7 +1822,7 @@ function setupShowcase() {
     b.classList.add('is-tick');
   };
   setInterval(() => {
-    if (!onScreen || current !== 0 || reduceMotion) return;
+    if (!onScreen || current !== 0 || reduceMotion || isLive) return;
     const roll = Math.random();
     if (roll < 0.3) bump('#uf-min', ++live.min);
     else if (roll < 0.5 && live.praying < 9) bump('#uf-praying', ++live.praying);

@@ -411,7 +411,7 @@
           <div class="showcase__tabs" role="tablist" aria-label="Where the link lands">
             <button class="showcase__tab" id="sc-tab-0" type="button" role="tab" aria-selected="true" aria-controls="sc-pane-0" data-pane="0">
               <span class="showcase__ico" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg></span>
-              <span class="showcase__copy"><b data-i18n="landFact1">Live previews</b><span data-i18n="landFact1Text">The pasted link says how long you have been down, who is praying and the last prayer, every time it is unfurled.</span></span>
+              <span class="showcase__copy"><b data-i18n="landFact1">Live previews</b><span data-i18n="landFact1Text">Paste the link and it unfurls with the room as it is at that moment: how long you have been down, who is praying, the last prayer.</span></span>
               <span class="showcase__bar" aria-hidden="true"></span>
             </button>
             <button class="showcase__tab" id="sc-tab-1" type="button" role="tab" aria-selected="false" aria-controls="sc-pane-1" data-pane="1" tabindex="-1">
@@ -440,11 +440,12 @@
                   <span class="chat__av">🧑‍💻</span>
                   <div>
                     <p class="chat__who"><b>phong</b> <time>2:14 PM</time></p>
-                    <p class="chat__text">The servers are down. The shrine is open, come pray with us: <span class="chat__link" id="unfurl-link">shrine.wotdafong.dev/r/serene-rack-42</span></p>
+                    <p class="chat__text">The servers are down. The shrine is open, come pray with us: <a class="chat__link" id="unfurl-link" href="/r/demo">shrine.wotdafong.dev/r/demo</a></p>
                     <div class="chat__card">
-                      <p class="chat__site">Wot Da Shrine</p>
-                      <p class="chat__title">Payments API is down · pray at serene-rack-42</p>
-                      <p class="chat__desc">down for <b id="uf-min">23</b> min · <b id="uf-praying">4</b> praying · incense burning · <b id="uf-karma">212</b> karma. Last prayer: “<span id="uf-last">Rollback, I beg you</span>”</p>
+                      <p class="chat__site">Wot Da Shrine <span class="chat__tag" id="uf-tag" data-live="0">Example</span></p>
+                      <p class="chat__title" id="uf-title">The demo rack is down · pray at demo</p>
+                      <p class="chat__desc" id="uf-example">down for <b id="uf-min">23</b> min · <b id="uf-praying">4</b> praying · incense burning · <b id="uf-karma">212</b> karma. Last prayer: “<span id="uf-last">Rollback, I beg you</span>”</p>
+                      <p class="chat__desc" id="uf-live" hidden></p>
                       <img class="chat__img" src="/og.png" alt="" width="1200" height="630" />
                     </div>
                     <p class="chat__reacts"><span class="chat__react is-mine">🙏 <b id="uf-pray">4</b></span><span class="chat__react">🔥 2</span><span class="chat__react">🪔 1</span></p>

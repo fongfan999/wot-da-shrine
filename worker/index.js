@@ -15,6 +15,7 @@
 
 import { Shrine } from './shrine.js';
 import { World } from './world.js';
+import { describe, previewTitle } from '../shared/preview.js';
 
 export { Shrine, World };
 
@@ -63,19 +64,6 @@ function world(env) {
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-/** One line about the room, for link previews: "3 praying · incense burning · 48 karma". */
-function describe(st) {
-  const bits = [];
-  if (st.downFor) bits.push(`down for ${st.downFor < 60 ? `${st.downFor} min` : `${Math.floor(st.downFor / 60)}h ${st.downFor % 60}m`}`);
-  bits.push(st.people === 1 ? '1 praying' : `${st.people} praying`);
-  bits.push(st.lit ? `incense burning, ${Math.ceil(st.burnLeft / 60)} min left` : 'incense is cold');
-  if (st.karma) bits.push(`${st.karma} karma`);
-  if (st.prayers) bits.push(st.prayers === 1 ? '1 prayer' : `${st.prayers} prayers`);
-  let line = bits.join(' · ') + '.';
-  if (st.lastPrayer) line += ` Last prayer: “${st.lastPrayer}”`;
-  return line;
-}
-
 /** A shields-style badge. Drawn by hand so it needs no fonts beyond the ones GitHub's proxy has. */
 function badge(st) {
   const left = 'shrine';
@@ -106,10 +94,7 @@ async function roomPage(request, env, room) {
   if (!page.ok) return page;
   let st = null;
   try { st = await shrine(env, room).fetch(`${url.origin}/api/rooms/${room}/status`).then((r) => r.json()); } catch { /* the page still works without it */ }
-  const back = st?.resolvedAt && Date.now() - st.resolvedAt < 3600 * 1000;
-  const title = st?.title
-    ? `${st.title} · ${st.downFor ? 'pray at' : back ? 'back online ·' : ''} ${room}`.replace(/\s+/g, ' ')
-    : st?.downFor ? `The servers are down · pray at ${room}` : back ? `The servers are back · ${room}` : `Pray for the servers · ${room}`;
+  const title = previewTitle(st, room);
   const description = st ? describe(st) : 'Your team is praying for the servers. Light incense, ring the bowl and send a prayer to the rack.';
   const pageUrl = `${url.origin}/r/${room}`;
   const rewriter = new HTMLRewriter()
