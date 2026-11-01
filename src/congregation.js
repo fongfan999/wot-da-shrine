@@ -42,7 +42,7 @@ export class Congregation {
     for (const [id, item] of this.items) {
       if (ids.has(id)) continue;
       this.items.delete(id);
-      gsap.to(item.el, { opacity: 0, y: 14, duration: 0.6, ease: 'power2.in', onComplete: () => item.el.remove() });
+      gsap.to(item.el, { opacity: 0, y: 14, duration: 0.6, ease: 'power2.in', onComplete: () => { gsap.killTweensOf([item.upper, item.ember, item.halo]); item.el.remove(); } });
     }
     for (const p of list) {
       const item = this.items.get(p.id);

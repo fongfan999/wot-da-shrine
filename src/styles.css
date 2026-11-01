@@ -2072,6 +2072,7 @@ body[data-landing="1"] .card--solo.is-nudged { animation: nudge 1.2s var(--ease)
 body[data-scene="off"] :is(.scene, .smoke-layer, .motes-layer) { visibility: hidden; }
 body[data-scene="off"] .center :is(*, *::before, *::after),
 #landing .land:not(.is-on) :is(*, *::before, *::after),
+.foot:not(.is-on) :is(*, *::before, *::after),
 body[data-paused="1"] :is(*, *::before, *::after) { animation-play-state: paused !important; }
 
 /* ---------- Mode switches ---------- */

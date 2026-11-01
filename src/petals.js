@@ -1,5 +1,5 @@
 /**
- * Falling petals, driven entirely by GSAP tweens on DOM nodes.
+ * Falling petals: DOM nodes moved by one GSAP ticker callback.
  */
 import gsap from 'gsap';
 
@@ -11,6 +11,8 @@ export class Petals {
     this.rate = 1; // petals per second
     this.scale = 1; // 0.5 in lite mode
     this._spawnLoop = null;
+    this.live = [];
+    this._frame = (time, dt) => this.frame(Math.min(dt, 100) / 1000);
   }
 
   setLite(on) { this.scale = on ? 0.5 : 1; }
@@ -44,21 +46,49 @@ export class Petals {
     const size = gsap.utils.random(10, 20);
     el.style.width = `${size}px`;
     el.style.height = `${size * 0.72}px`;
+    el.style.opacity = '0';
     this.container.appendChild(el);
+    const r = gsap.utils.random;
+    this.live.push({
+      el,
+      t: 0,
+      dur: r(7, 13),
+      x: r(-40, innerWidth + 40),
+      drift: r(-120, 120),
+      sway: r(20, 60),
+      swayEvery: r(1.2, 2.4),
+      flutterEvery: r(1.5, 3),
+      spin: r(0, 360),
+      turn: r(180, 540),
+      peak: r(0.5, 0.95),
+      fall: innerHeight + 100,
+    });
+    if (this.live.length === 1) gsap.ticker.add(this._frame);
+  }
 
-    const startX = gsap.utils.random(-40, innerWidth + 40);
-    const drift = gsap.utils.random(-120, 120);
-    const dur = gsap.utils.random(7, 13);
-
-    gsap.set(el, { x: startX, y: -40, rotation: gsap.utils.random(0, 360), opacity: 0 });
-    const tl = gsap.timeline({ onComplete: () => el.remove() });
-    tl.to(el, { opacity: gsap.utils.random(0.5, 0.95), duration: 0.8 }, 0)
-      .to(el, { y: innerHeight + 60, duration: dur, ease: 'none' }, 0)
-      .to(el, { x: `+=${drift}`, duration: dur, ease: 'sine.inOut' }, 0)
-      .to(el, { rotation: `+=${gsap.utils.random(180, 540)}`, duration: dur, ease: 'none' }, 0)
-      .to(el, { rotationY: 360, duration: gsap.utils.random(1.5, 3), repeat: -1, ease: 'sine.inOut' }, 0)
-      .to(el, { opacity: 0, duration: 1.2 }, dur - 1.2);
-    // sway
-    gsap.to(el, { x: `+=${gsap.utils.random(20, 60)}`, duration: gsap.utils.random(1.2, 2.4), yoyo: true, repeat: -1, ease: 'sine.inOut' });
+  /**
+   * Every petal moves in one pass: one transform and one opacity written per petal per frame.
+   * (A tween per property per petal rewrote each petal's transform half a dozen times a frame.)
+   */
+  frame(dt) {
+    for (let i = this.live.length - 1; i >= 0; i--) {
+      const p = this.live[i];
+      p.t += dt;
+      if (p.t >= p.dur) {
+        p.el.remove();
+        this.live.splice(i, 1);
+        continue;
+      }
+      const k = p.t / p.dur;
+      const swing = (p.t / p.swayEvery) % 2; // there and back
+      const x = p.x + p.drift * sineInOut(k) + p.sway * sineInOut(swing > 1 ? 2 - swing : swing);
+      const y = -40 + p.fall * k;
+      const flip = 360 * sineInOut((p.t / p.flutterEvery) % 1);
+      p.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${(p.spin + p.turn * k).toFixed(1)}deg) rotateY(${flip.toFixed(1)}deg)`;
+      p.el.style.opacity = Math.min(p.t / 0.8, (p.dur - p.t) / 1.2, 1) * p.peak;
+    }
+    if (!this.live.length) gsap.ticker.remove(this._frame);
   }
 }
+
+const sineInOut = (p) => -(Math.cos(Math.PI * p) - 1) / 2;

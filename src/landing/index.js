@@ -66,7 +66,7 @@ function setupScene() {
   const live = new IntersectionObserver((entries) => {
     for (const en of entries) en.target.classList.toggle('is-on', en.isIntersecting);
   }, { rootMargin: '120px 0px' });
-  document.querySelectorAll('#landing .land').forEach((el) => live.observe(el));
+  document.querySelectorAll('#landing .land, .foot').forEach((el) => live.observe(el));
 }
 
 /** The footer: the header's wordmark signed huge across the bottom, and a way back up to the altar. */
