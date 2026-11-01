@@ -16,6 +16,8 @@ import { WishBoard } from './ema.js';
 import { syncPalette } from './palette.js';
 import { icon } from './icons.js';
 import { cardSvg, cardPng, shareFile, download, copyImage, canCopyImage, canShareFiles } from './share.js';
+import { draw as drawFortune, LEVELS as FORTUNE_LEVELS, asText as fortuneText } from './omikuji.js';
+import qrcode from 'qrcode-generator';
 
 const $ = (sel) => document.querySelector(sel);
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -39,11 +41,47 @@ let clockSkew = 0;       // server clock minus ours
 let pendingLightAt = 0;  // we lit it and are waiting for the shrine to confirm
 let greeted = false;     // the first state message restores the altar
 const people = new Map();
-const sessionStart = Date.now(); // the solo vigil starts when the page opens
 let roomSince = 0;       // a shared shrine's first action (the shrine tells us)
 let roomPrayed = 0;      // every prayer ever said in the room
 let resolvedAt = 0;      // the last "they're back"
 const recentPrayers = []; // the last few prayers, with names, for the share card
+let roomMeta = { title: '', subtitle: '', eta: '' }; // what's down and when it's back, shared by the room
+const urlParams = new URLSearchParams(location.search);
+const tv = urlParams.get('tv') === '1'; // the war-room screen: watches, never kneels
+
+/* ---------- Vigils: one incident, from the first incense to "they're back" ---------- */
+const VIGIL_KEY = 'incense:vigil:v1';   // the solo page's open vigil
+const RECORDS_KEY = 'incense:records:v1'; // and what it has survived
+let vigil = null;      // { startedAt, lastAt, peak, prayers, karma, blames, fortunes, lights }
+let lastVigil = null;  // the record of the vigil that just ended, for the heading and the card
+let records = { survived: 0, longest: 0, history: [] };
+if (!roomName) {
+  try { vigil = JSON.parse(localStorage.getItem(VIGIL_KEY) || 'null'); } catch { /* ignore */ }
+  try { records = { ...records, ...JSON.parse(localStorage.getItem(RECORDS_KEY) || '{}') }; } catch { /* ignore */ }
+  if (vigil && Date.now() - vigil.lastAt > 6 * 3600 * 1000) { fileVigil(vigil.lastAt, 'forgotten'); }
+}
+function saveVigil() {
+  if (roomName) return;
+  try { localStorage.setItem(VIGIL_KEY, JSON.stringify(vigil)); localStorage.setItem(RECORDS_KEY, JSON.stringify(records)); } catch { /* ignore */ }
+}
+/** The solo page files its own vigils; a room's shrine does it for everyone. */
+function fileVigil(endedAt, outcome) {
+  const v = vigil;
+  const record = { startedAt: v.startedAt, endedAt, minutes: Math.max(1, Math.round((endedAt - v.startedAt) / 60000)), peak: 1, prayers: v.prayers, karma: v.karma, blames: v.blames, fortunes: v.fortunes, outcome };
+  records.history = [record, ...records.history].slice(0, 12);
+  if (outcome === 'survived') { records.survived += 1; records.longest = Math.max(records.longest, record.minutes); }
+  vigil = null;
+  saveVigil();
+  return record;
+}
+/** Something happened during the vigil (solo). */
+function vigilTouch(karma = 0, field = null) {
+  if (roomName || !vigil) return;
+  vigil.lastAt = Date.now();
+  vigil.karma += karma;
+  if (field) vigil[field] = (vigil[field] ?? 0) + 1;
+  saveVigil();
+}
 
 /* ---------- Elements ---------- */
 const body = document.body;
@@ -169,12 +207,14 @@ $('#fx-seg').addEventListener('click', (e) => {
 });
 
 /* ---------- Apply settings ---------- */
+/** Title, subtitle and ETA: in a room the shrine's shared ones, unless this URL says otherwise. */
+const meta = (k) => (roomName && !urlParams.has(k) ? roomMeta[k] : settings[k]) || '';
 function applySettings(animate = false) {
   applyTheme();
   applyFx();
   if (body.dataset.resolved) applyStrings({ eyebrow: t('resolvedEyebrow'), title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
-  else applyStrings({ title: settings.title, subtitle: settings.subtitle });
-  document.title = `${body.dataset.resolved ? t('resolvedTitle') : settings.title || t('title')} · ${BRAND}`;
+  else applyStrings({ title: meta('title'), subtitle: meta('subtitle') });
+  document.title = `${body.dataset.resolved ? t('resolvedTitle') : meta('title') || t('title')} · ${BRAND}`;
   if (roomName) $('#eyebrow').textContent = body.dataset.resolved ? `${t('resolvedEyebrow')} / ${roomName}` : fmt('roomEyebrow', { room: roomName });
   if (animate || !title.querySelector('.word')) splitTitle(animate);
 
@@ -184,9 +224,10 @@ function applySettings(animate = false) {
   sound.setSfx(settings.sfx);
 
   // Panel reflects state
-  panel.querySelector('[name=title]').value = settings.title;
-  panel.querySelector('[name=subtitle]').value = settings.subtitle;
-  panel.querySelector('[name=eta]').value = settings.eta ? toLocalInput(settings.eta) : '';
+  panel.querySelector('[name=title]').value = meta('title');
+  panel.querySelector('[name=subtitle]').value = meta('subtitle');
+  panel.querySelector('[name=eta]').value = meta('eta') ? toLocalInput(meta('eta')) : '';
+  $('#meta-note').hidden = !roomName;
   for (const k of ['music', 'sfx', 'petals', 'fog']) panel.querySelector(`[name=${k}]`).checked = settings[k];
   $('#theme-seg').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.theme === settings.theme)));
 
@@ -443,8 +484,10 @@ function addKarma(n = 1) {
   if (roomName) return; // the room's karma is shared; the shrine sends the new total
   counters.karma += n;
   saveCounters(counters);
+  vigilTouch(n);
   updateStats();
   bump(statKarma);
+  renderRecords();
 }
 
 const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -460,6 +503,7 @@ function tickProgress() {
   progressPct.textContent = `${pct}%`;
   progress.setAttribute('aria-valuenow', pct);
 
+  tickVigil();
   if (lit) {
     const s = Math.floor(elapsed);
     statTime.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -471,11 +515,115 @@ function tickProgress() {
 }
 setInterval(tickProgress, 250);
 
+/* ---------- The vigil strip: how long they have been down, who is praying ---------- */
+const vigilEl = $('#vigil');
+const vigilTime = $('#vigil-time');
+const vigilMeta = $('#vigil-meta');
+const vigilLabel = $('#vigil-label');
+const hhmmss = (ms) => {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600);
+  return `${h ? `${h}:` : ''}${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+};
+const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
+function tickVigil() {
+  if (body.dataset.resolved && lastVigil) {
+    vigilEl.hidden = false;
+    vigilLabel.textContent = '';
+    vigilTime.textContent = fmt('vigilSurvived', { t: minutesText(lastVigil.minutes) });
+    vigilMeta.textContent = [fmt('vigilPraying', { n: lastVigil.peak }), fmt('vigilPrayers', { n: lastVigil.prayers }), fmt('vigilNo', { n: records.survived })].join(' · ');
+    return;
+  }
+  if (!vigil) { vigilEl.hidden = true; return; }
+  vigilEl.hidden = false;
+  vigilLabel.textContent = t('vigilDown');
+  vigilTime.textContent = hhmmss(Date.now() - vigil.startedAt);
+  const bits = [];
+  if (roomName) bits.push(fmt('vigilPraying', { n: people.size }));
+  if (vigil.prayers) bits.push(fmt('vigilPrayers', { n: vigil.prayers }));
+  bits.push(fmt('vigilNo', { n: records.survived + 1 }));
+  vigilMeta.textContent = bits.join(' · ');
+}
+
+/* ---------- Shrine records: what this altar has survived, and how far it has grown ---------- */
+const recordsList = $('#records');
+let shownLevel = -1;
+function shrineLevel(karma = counters.karma) {
+  return STRINGS.shrineLevels.reduce((idx, [at], k) => (karma >= at ? k : idx), 0);
+}
+function renderRecords() {
+  $('#rec-survived').textContent = records.survived;
+  $('#rec-longest').textContent = records.longest ? minutesText(records.longest) : '–';
+  $('#rec-prayers').textContent = roomPrayed;
+  const i = shrineLevel();
+  const [, name] = STRINGS.shrineLevels[i];
+  const next = STRINGS.shrineLevels[i + 1];
+  $('#records-level').textContent = name;
+  $('#records-next').textContent = next ? fmt('shrineNext', { n: next[0] - counters.karma, name: next[1] }) : '';
+  burner.dataset.level = String(i);
+  if (shownLevel !== -1 && i > shownLevel) {
+    toast(fmt('shrineUnlocked', { name }));
+    sound.bowl(392);
+    petals.burst(40);
+    shockwave();
+  }
+  shownLevel = i;
+
+  recordsList.innerHTML = '';
+  for (const r of records.history.slice(0, 5)) {
+    const li = document.createElement('li');
+    li.dataset.outcome = r.outcome;
+    const mins = document.createElement('span');
+    mins.className = 'records__mins';
+    mins.textContent = minutesText(r.minutes);
+    const facts = document.createElement('span');
+    facts.className = 'records__facts';
+    facts.textContent = r.outcome === 'forgotten' ? t('recForgotten') : [fmt('recPeople', { n: r.peak }), fmt('vigilPrayers', { n: r.prayers }), `${r.karma} karma`].join(' · ');
+    const when = document.createElement('time');
+    when.className = 'records__when';
+    when.textContent = ago(r.endedAt);
+    li.append(mins, facts, when);
+    recordsList.appendChild(li);
+  }
+  renderLanterns();
+}
+
+/** Paper lanterns above the altar: one for every vigil survived. */
+const lanternRow = $('#planterns');
+const LANTERN_SVG = '<svg viewBox="0 0 34 60"><rect class="plantern__cap" x="11" y="0" width="12" height="4" rx="1"/><path class="plantern__glow" d="M17 8c12 0 15 10 15 22s-3 22-15 22S2 42 2 30 5 8 17 8z"/><ellipse class="plantern__core" cx="17" cy="30" rx="7" ry="12"/><path class="plantern__body" d="M17 6c11 0 15 11 15 24s-4 24-15 24S2 43 2 30 6 6 17 6z"/><path class="plantern__rib" d="M9 10v40M17 6v48M25 10v40M3 22h28M3 38h28"/><rect class="plantern__cap" x="11" y="52" width="12" height="4" rx="1"/><path class="plantern__rib" d="M17 56v4"/></svg>';
+let shownLanterns = -1;
+function renderLanterns() {
+  const n = records.survived;
+  lanternRow.hidden = n === 0;
+  const max = 10;
+  const show = Math.min(n, max);
+  const existing = lanternRow.querySelectorAll('.plantern').length;
+  for (let i = existing; i < show; i++) {
+    const el = document.createElement('span');
+    el.className = 'plantern';
+    el.innerHTML = LANTERN_SVG;
+    el.style.left = `${(i / (max - 1)) * 100}%`;
+    el.style.marginLeft = '-17px';
+    el.style.transform = `rotate(${gsap.utils.random(-4, 4)}deg)`;
+    lanternRow.appendChild(el);
+    if (shownLanterns !== -1 && !reduceMotion) {
+      gsap.fromTo(el, { y: -80, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, ease: 'bounce.out' });
+    }
+  }
+  let more = lanternRow.querySelector('.plantern-row__more');
+  if (n > max) {
+    if (!more) { more = document.createElement('span'); more.className = 'plantern-row__more'; lanternRow.appendChild(more); }
+    more.textContent = `+${n - max}`;
+  } else more?.remove();
+  lanternRow.title = fmt('lanternsTitle', { n });
+  shownLanterns = n;
+}
+
 /* ---------- ETA ---------- */
 const etaText = $('#eta-text');
 function updateEta() {
-  if (!settings.eta) { etaText.textContent = t('anyMoment'); return; }
-  const d = new Date(settings.eta);
+  if (!meta('eta')) { etaText.textContent = t('anyMoment'); return; }
+  const d = new Date(meta('eta'));
   const diff = d - Date.now();
   if (diff <= 0) { etaText.textContent = t('anyMoment'); return; }
   const h = Math.floor(diff / 3600000);
@@ -503,6 +651,11 @@ function light() {
   if (myId) congregation.bow(myId, 3);
   logMine('light', t('fLight'), { toastText: t('litToast') });
   pulse('light');
+  if (!roomName) {
+    if (!vigil) { vigil = { startedAt: Date.now(), lastAt: Date.now(), peak: 1, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0 }; if (body.dataset.resolved) clearResolved(); renderResolve(); }
+    vigilTouch(0, 'lights');
+    tickVigil();
+  }
 }
 
 /** Set the altar burning, `at` being when it was lit (earlier than now for late joiners). */
@@ -787,7 +940,7 @@ function sendPrayer(text) {
 function remember(text, name) {
   recentPrayers.push({ text, name });
   if (recentPrayers.length > 6) recentPrayers.shift();
-  if (!roomName) roomPrayed += 1;
+  if (!roomName) { roomPrayed += 1; vigilTouch(0, 'prayers'); }
 }
 
 /** The solo page tells the world what happened (rooms report through their own shrine). Best effort. */
@@ -800,24 +953,147 @@ function pulse(kind, text = '') {
 
 /* ---------- Quick prayers: three ready-made ones, reshuffled every time ---------- */
 const quick = $('#quick');
+const quickDeal = $('#quick-deal');
 function dealQuick() {
-  quick.innerHTML = '';
+  quickDeal.innerHTML = '';
   for (const text of gsap.utils.shuffle([...STRINGS.quickPrayers]).slice(0, 3)) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'quick__chip';
     b.textContent = text;
-    quick.appendChild(b);
+    quickDeal.appendChild(b);
   }
-  if (!reduceMotion) gsap.fromTo('.quick__chip', { y: 6, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: 'power3.out' });
+  if (!reduceMotion) gsap.fromTo(quickDeal.children, { y: 6, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: 'power3.out' });
 }
 quick.addEventListener('click', (e) => {
-  const b = e.target.closest('.quick__chip');
+  const b = e.target.closest('.quick__chip:not(.quick__chip--ritual)');
   if (!b) return;
   sound.unlock();
   sendPrayer(b.textContent);
-  gsap.to(quick.children, { opacity: 0, y: -6, duration: 0.25, stagger: 0.03, onComplete: dealQuick });
+  gsap.to(quickDeal.children, { opacity: 0, y: -6, duration: 0.25, stagger: 0.03, onComplete: dealQuick });
 });
+
+/* ---------- Rituals ---------- */
+/** A small dialog: `#blame`, `#fortune`. */
+const ritualOpen = { blame: false, fortune: false };
+function openRitual(id, open) {
+  if (ritualOpen[id] === open) return;
+  ritualOpen[id] = open;
+  const el = $(`#${id}`);
+  if (!open) { gsap.to(el, { opacity: 0, duration: 0.25, onComplete: () => { el.hidden = true; } }); return; }
+  openTray(false);
+  el.hidden = false;
+  gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+  gsap.fromTo(el.querySelector('.sheet__card'), { y: 24, opacity: 0, scale: 0.98 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' });
+  sound.tick(660, 0.06);
+}
+document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => openRitual(b.dataset.close, false)));
+for (const id of ['blame', 'fortune']) $(`#${id}`).addEventListener('click', (e) => { if (e.target.id === id) openRitual(id, false); });
+const anySheetOpen = () => shareOpen || ritualOpen.blame || ritualOpen.fortune;
+
+/* Burn a blame: the words go into the censer and nowhere else */
+const blameText = $('#blame-text');
+$('#btn-blame').addEventListener('click', () => { sound.unlock(); openRitual('blame', true); setTimeout(() => blameText.focus(), 120); });
+$('#blame-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const text = blameText.value.trim();
+  if (!text) { toast(t('blameEmpty')); return; }
+  blameText.value = '';
+  openRitual('blame', false);
+  blameFx(text, $('#blame-slip'));
+  addKarma(5);
+  vigilTouch(0, 'blames');
+  logMine('blame', t('fBlame'), { toastText: t('blameBurned') });
+  shrine?.send('blame');
+  pulse('blame');
+});
+
+/** A paper slip flies into the censer and burns. `text` is only ever shown on this screen. */
+function blameFx(text, fromEl = null) {
+  kick(10);
+  sound.whoosh();
+  const r = burner.getBoundingClientRect();
+  const target = { x: r.left + r.width / 2, y: r.top + r.height * 0.5 };
+  if (!reduceMotion) {
+    const slip = document.createElement('div');
+    slip.className = 'slip slip--flying';
+    const p = document.createElement('p');
+    p.className = 'slip__text';
+    p.textContent = text ?? '…';
+    slip.appendChild(p);
+    document.body.appendChild(slip);
+    const from = fromEl?.getBoundingClientRect() ?? { left: target.x - 140, top: innerHeight, width: 280, height: 80 };
+    gsap.set(slip, { left: from.left, top: from.top, width: from.width || 280, rotation: -1 });
+    gsap.timeline({ onComplete: () => slip.remove() })
+      .to(slip, { left: target.x - 70, top: target.y - 30, width: 140, rotation: 8, duration: 1.1, ease: 'power2.inOut' })
+      .to(slip, { rotation: -6, duration: 0.3, ease: 'sine.inOut' }, '<0.8')
+      .call(() => { slip.classList.add('slip--burning'); sound.lighter(); smoke.puff(1.6); art.tips().forEach((tip) => motes.burst(tip.x, tip.y, 18, 1.4)); })
+      .to(slip, { opacity: 0, scale: 0.6, y: -30, duration: 1, ease: 'power2.in' }, '+=0.1');
+  } else {
+    smoke.puff(1.4);
+    sound.lighter();
+  }
+  gsap.delayedCall(1.3, () => gsap.fromTo('.burner', { scale: 1.03 }, { scale: 1, duration: 0.9, ease: 'elastic.out(1, 0.4)' }));
+}
+
+/* Draw a fortune: one omikuji per person per vigil */
+const FORTUNE_KEY = () => `incense:fortune:${roomName || 'solo'}:${vigil?.startedAt ?? 0}`;
+let fortune = null;
+$('#btn-fortune').addEventListener('click', () => {
+  sound.unlock();
+  let saved = null;
+  try { saved = JSON.parse(sessionStorage.getItem(FORTUNE_KEY()) || 'null'); } catch { /* ignore */ }
+  const again = Boolean(saved);
+  fortune = saved ?? drawFortune();
+  if (!again) {
+    try { sessionStorage.setItem(FORTUNE_KEY(), JSON.stringify(fortune)); } catch { /* ignore */ }
+    addKarma(2);
+    vigilTouch(0, 'fortunes');
+    logMine('omikuji', fmt('fOmikuji', { level: FORTUNE_LEVELS[fortune.level].name }));
+    shrine?.send('omikuji', { level: fortune.level });
+    pulse('omikuji');
+    fortuneFx();
+  } else toast(t('fortuneAgain'));
+  renderFortune(fortune, !again);
+  openRitual('fortune', true);
+});
+function renderFortune(f, flip) {
+  const l = FORTUNE_LEVELS[f.level];
+  const slip = $('#omikuji-slip');
+  slip.dataset.level = f.level;
+  $('#omikuji-kanji').textContent = l.kanji;
+  $('#omikuji-level').textContent = l.name;
+  $('#omikuji-advice').textContent = l.advice;
+  const ul = $('#omikuji-lines');
+  ul.innerHTML = '';
+  for (const line of f.lines) { const li = document.createElement('li'); li.textContent = line; ul.appendChild(li); }
+  if (flip && !reduceMotion) gsap.fromTo(slip, { rotationY: 90, opacity: 0 }, { rotationY: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.25 });
+}
+function fortuneFx() {
+  kick(4);
+  sound.tick(880, 0.07);
+  gsap.delayedCall(0.3, () => sound.tick(1175, 0.06));
+  petals.burst(6);
+}
+$('#btn-fortune-tie').addEventListener('click', () => {
+  if (!fortune) return;
+  wishes.hang(FORTUNE_LEVELS[fortune.level].name, roomName ? me?.name ?? '' : '');
+  openRitual('fortune', false);
+  toast(t('fortuneTied'));
+  sound.tick(990, 0.08);
+});
+$('#btn-fortune-copy').addEventListener('click', () => copyText(fortuneText(fortune, roomUrl()), t('fortuneCopied')));
+
+/** Enough people bowed together. */
+function chorusFx(n, bonus) {
+  toast(fmt('chorus', { n, bonus }));
+  [196, 261, 329].forEach((f, i) => gsap.delayedCall(i * 0.15, () => sound.bowl(f)));
+  petals.burst(30 + n * 4);
+  shockwave();
+  room.pulse();
+  kick(16, 1.4);
+  logEvent({ what: fmt('chorus', { n, bonus }), quiet: true, avatar: '🙇' });
+}
 
 function prayerFx(text, author, quiet = false, from = null) {
   releaseLantern($('#lanterns'), text, from ?? $('.pray'), author);
@@ -867,15 +1143,23 @@ function openPanel(open) {
 $('#btn-settings').addEventListener('click', () => { sound.unlock(); openPanel(!panelOpen); });
 $('#btn-close-panel').addEventListener('click', () => openPanel(false));
 backdrop.addEventListener('click', () => openPanel(false));
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (panelOpen) openPanel(false); if (shareOpen) openShare(false); openTray(false); } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (panelOpen) openPanel(false); if (shareOpen) openShare(false); openRitual('blame', false); openRitual('fortune', false); openTray(false); } });
 
+let metaTimer = 0;
 panel.addEventListener('input', (e) => {
   const el = e.target;
   if (!el.name) return;
-  if (el.type === 'checkbox') settings[el.name] = el.checked;
-  else if (el.name === 'eta') settings.eta = el.value ? new Date(el.value).toISOString() : '';
-  else settings[el.name] = el.value;
-  persist();
+  const value = el.type === 'checkbox' ? el.checked : el.name === 'eta' ? (el.value ? new Date(el.value).toISOString() : '') : el.value;
+  if (roomName && ['title', 'subtitle', 'eta'].includes(el.name)) {
+    // Shared with the room: the shrine keeps it and tells everyone (a moment after you stop typing).
+    roomMeta[el.name] = value;
+    urlParams.delete(el.name);
+    clearTimeout(metaTimer);
+    metaTimer = setTimeout(() => shrine?.send('meta', { [el.name]: value }), 400);
+  } else {
+    settings[el.name] = value;
+    persist();
+  }
   applySettings();
   if (el.type === 'checkbox') sound.tick(el.checked ? 880 : 440, 0.06);
 });
@@ -907,7 +1191,7 @@ $('#btn-reset').addEventListener('click', () => {
 
 /* ---------- Shared shrine ---------- */
 const DEFAULT_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader'];
-const ACT_ICONS = { light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe' };
+const ACT_ICONS = { light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check' };
 const joinEl = $('#join');
 const joinName = $('#join-name');
 const joinAvatars = $('#join-avatars');
@@ -927,8 +1211,21 @@ function enterRoom() {
   $('#btn-rename').hidden = false;
   presence.hidden = false;
   $('#join-room').textContent = fmt('roomEyebrow', { room: roomName });
+  if (tv) { me = { name: t('tvWatch'), avatar: '🤖' }; connect(); return; }
   if (me) connect();
   else openJoin();
+}
+
+/* ---------- TV mode: a screen on the war-room wall ---------- */
+function renderTv() {
+  body.dataset.tv = '1';
+  const url = roomUrl();
+  const qr = qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  $('#tv-qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  $('#tv-url').textContent = url.replace(/^https?:\/\//, '');
+  $('#tv-join').hidden = false;
 }
 
 function openJoin() {
@@ -975,6 +1272,7 @@ $('#join-form').addEventListener('submit', (e) => {
 
 function connect() {
   shrine = connectRoom(roomName, me, {
+    watch: tv,
     onMessage: onShrineMessage,
     onStatus(status) {
       body.dataset.conn = status;
@@ -993,6 +1291,7 @@ function onShrineMessage(msg) {
       people.clear();
       for (const p of msg.people) people.set(p.id, p);
       renderPeople();
+      if (msg.meta) { roomMeta = { ...roomMeta, ...msg.meta }; applySettings(); }
       syncCounters(msg);
       syncAltar(msg.litAt);
       if (!greeted) {
@@ -1001,7 +1300,16 @@ function onShrineMessage(msg) {
         msg.offerings.forEach((kind, i) => gsap.delayedCall(1.6 + i * 0.25, () => art.offer(kind)));
         for (const p of msg.prayers) logEvent({ avatar: p.avatar, who: p.name, what: t('fPrayer'), quote: p.text, at: p.at });
         for (const p of msg.prayers.slice(-6)) recentPrayers.push({ text: p.text, name: p.name });
+        records.history = msg.history ?? [];
+        records.longest = msg.longest ?? 0;
+        lastVigil = records.history[0]?.outcome === 'survived' ? records.history[0] : null;
         if (msg.resolvedAt && msg.now - msg.resolvedAt < RESOLVED_FOR) showResolved(msg.resolvedAt - clockSkew, true);
+        // Arrived with ?title=… or ?eta=… on a shrine that has none yet: that becomes the room's.
+        const seed = {};
+        for (const k of ['title', 'subtitle', 'eta']) if (urlParams.has(k) && settings[k] && !roomMeta[k]) seed[k] = settings[k];
+        if (Object.keys(seed).length) shrine.send('meta', seed);
+        if (tv) renderTv();
+        renderRecords();
         msg.prayers.slice(-6).forEach((p, i) => gsap.delayedCall(1.2 + i * 0.12, () => wishes.hang(p.text, p.name, false)));
         msg.prayers.slice(-3).forEach((p, i) => gsap.delayedCall(2.4 + i * 1.8, () => prayerFx(p.text, `${p.avatar} ${p.name}`, true)));
       } else {
@@ -1009,6 +1317,12 @@ function onShrineMessage(msg) {
       }
       break;
     }
+    case 'meta':
+      roomMeta = { ...roomMeta, ...msg.meta };
+      for (const k of Object.keys(msg.meta)) urlParams.delete(k);
+      applySettings(msg.by.id !== myId && Boolean(msg.meta.title));
+      if (msg.by.id !== myId && msg.meta.title) toast(fmt('metaChanged', { name: msg.by.name, title: msg.meta.title }));
+      break;
     case 'join':
       people.set(msg.person.id, msg.person);
       renderPeople(msg.person.id);
@@ -1032,15 +1346,21 @@ function onShrineMessage(msg) {
       break;
     case 'act':
       activity(); // the room is alive even if this person is just watching
+      if (msg.kind === 'resolve' && msg.record) {
+        lastVigil = msg.record;
+        records.history = [msg.record, ...records.history].slice(0, 12);
+        records.longest = Math.max(records.longest, msg.record.minutes);
+      }
       syncCounters(msg);
       if (msg.kind === 'light' || msg.by.id === myId) syncAltar(msg.litAt);
       if (msg.by.id !== myId) remoteAct(msg);
+      if (msg.chorus) chorusFx(msg.chorus, msg.bonus);
       pingPerson(msg.by.id, ACT_ICONS[msg.kind]);
       break;
   }
 }
 
-function remoteAct({ kind, by, note, item, text }) {
+function remoteAct({ kind, by, note, item, text, level }) {
   const log = (what, extra = {}) => logEvent({ key: `${by.id}:${kind}${item ? `:${item}` : ''}`, avatar: by.avatar, who: by.name, what, toastText: `${by.name} ${what}.`, ...extra });
   if (kind === 'light') { congregation.bow(by.id, 3); log(t('fLight')); }
   else if (kind === 'bowl') { bowlFx(note); log(t('fBowl')); }
@@ -1048,15 +1368,25 @@ function remoteAct({ kind, by, note, item, text }) {
   else if (kind === 'offer') { const label = offerFx(item); if (label) log(fmt('fOffer', { item: label })); }
   else if (kind === 'prayer') { prayerFx(text, `${by.avatar} ${by.name}`, false, congregation.element(by.id)); wishes.hang(text, by.name); remember(text, by.name); log(t('fPrayer'), { quote: text, toastText: `${by.name}: “${text}”` }); }
   else if (kind === 'puff') puffFx();
+  else if (kind === 'blame') { blameFx(null); log(t('fBlame')); }
+  else if (kind === 'omikuji') { fortuneFx(); log(fmt('fOmikuji', { level: FORTUNE_LEVELS[level]?.name ?? level })); }
   else if (kind === 'resolve') { resolveFx(); showResolved(Date.now()); log(t('fResolve'), { toastText: fmt('resolvedToast', { name: by.name }) }); }
 }
 
 /** The shrine is the source of truth for the room's counters. */
-function syncCounters({ incense, karma, since, prayed }) {
+function syncCounters({ incense, karma, since, prayed, vigil: v, survived }) {
   if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); bump(statIncense); }
   if (karma !== undefined && karma !== counters.karma) { counters.karma = karma; updateStats(!greeted); bump(statKarma); }
   if (since) roomSince = since - clockSkew;
   if (prayed !== undefined) roomPrayed = prayed;
+  if (v !== undefined) {
+    vigil = v ? { ...v, startedAt: v.startedAt - clockSkew, lastAt: v.lastAt - clockSkew } : null;
+    if (vigil && body.dataset.resolved) clearResolved(); // a new vigil: the celebration is over
+    renderResolve();
+    tickVigil();
+  }
+  if (survived !== undefined && survived !== records.survived) { records.survived = survived; if (greeted) renderRecords(); }
+  if (greeted) renderRecords();
 }
 
 /** Match our altar to the shrine's: lit since `serverLitAt`, or out (0). */
@@ -1202,16 +1532,25 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 const RESOLVED_FOR = 10 * 60 * 1000; // the heading celebrates for ten minutes, then the shrine is a shrine again
 const resolveBtn = $('#btn-resolve');
 let resolvedTimer = 0;
-/** Minutes of prayer so far: the room's first action, or this vigil's start. */
-const minutesPrayed = () => Math.max(0, Math.round((Date.now() - (roomName ? roomSince || Date.now() : sessionStart)) / 60000));
+/** Minutes of prayer: this vigil so far, or the one that just ended. */
+const minutesPrayed = () => (vigil ? Math.max(0, Math.round((Date.now() - vigil.startedAt) / 60000)) : lastVigil?.minutes ?? 0);
+
+/** The button only works while a vigil is open: light the incense first. */
+function renderResolve() {
+  const open = Boolean(vigil) && !body.dataset.resolved;
+  resolveBtn.disabled = !open;
+  resolveBtn.title = open ? '' : t('resolveHint');
+}
 
 function resolve() {
   sound.unlock();
+  if (!vigil) { toast(t('resolveHint')); return; }
   if (Date.now() - resolvedAt < 60000) return;
+  if (!roomName) { vigilTouch(20); lastVigil = fileVigil(Date.now(), 'survived'); }
   resolveFx();
   showResolved(Date.now());
   addKarma(20);
-  logMine('resolve', t('fResolve'), { toastText: t('resolvedMine') });
+  logMine('resolve', t('fResolve'), { toastText: t('resolveMessage') });
   shrine?.send('resolve');
   pulse('resolve');
   setTimeout(() => openShare(true, true), 1600); // a plain timer: GSAP's ticker sleeps in background tabs
@@ -1237,6 +1576,8 @@ function resolveFx() {
 function showResolved(at, quiet = false) {
   resolvedAt = at;
   body.dataset.resolved = '1';
+  resolveBtn.classList.add('is-resolved');
+  renderResolve();
   const mins = minutesPrayed();
   applyStrings({
     eyebrow: t('resolvedEyebrow'),
@@ -1248,11 +1589,18 @@ function showResolved(at, quiet = false) {
   if (roomName) $('#eyebrow').textContent = `${t('resolvedEyebrow')} / ${roomName}`;
   splitTitle(!quiet);
   clearTimeout(resolvedTimer);
-  resolvedTimer = setTimeout(() => {
-    delete body.dataset.resolved;
-    resolveBtn.disabled = false;
-    applySettings(true);
-  }, Math.max(1000, RESOLVED_FOR - (Date.now() - at)));
+  resolvedTimer = setTimeout(clearResolved, Math.max(1000, RESOLVED_FOR - (Date.now() - at)));
+  renderRecords();
+}
+
+/** The shrine is a shrine again. */
+function clearResolved() {
+  clearTimeout(resolvedTimer);
+  delete body.dataset.resolved;
+  resolveBtn.classList.remove('is-resolved');
+  renderResolve();
+  applySettings(true);
+  tickVigil();
 }
 resolveBtn.addEventListener('click', resolve);
 
@@ -1290,7 +1638,8 @@ async function drawCard() {
     avatars: roomName ? list.map((p) => p.avatar) : [],
     minutes: minutesPrayed(),
     karma: counters.karma,
-    prayers: roomPrayed,
+    prayers: vigil?.prayers ?? lastVigil?.prayers ?? roomPrayed,
+    survived: records.survived,
     incense: counters.incense,
     quotes: recentPrayers,
     url: roomUrl().replace(/^https?:\/\//, ''),
@@ -1362,7 +1711,7 @@ $('#btn-card-download').addEventListener('click', () => { if (cardBlob) { downlo
 
 /* ---------- Keyboard shortcuts ---------- */
 document.addEventListener('keydown', (e) => {
-  if (e.target.matches('input, textarea') || !joinEl.hidden || shareOpen || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target.matches('input, textarea') || !joinEl.hidden || anySheetOpen() || tv || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key === 'l') light();
   if (e.key === 'b') ringBowl();
   if (e.key === 'p') bow();
@@ -1387,6 +1736,8 @@ if (import.meta.env.DEV) window.__incense = { gsap, sound, smoke, fog, petals, g
 buildTray();
 dealQuick();
 applySettings();
+renderResolve();
+renderRecords();
 intro();
 watchFrameRate();
 parallax();

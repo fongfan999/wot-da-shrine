@@ -47,6 +47,10 @@ function drawingCss(c) {
     .stick__halo, .devotee__halo { fill: ${c['ember-soft']}; }
     .stick__ember, .devotee__ember { fill: ${c.flame}; }
     .burner__shine { display: none; }
+    .torii, .cat { display: none; }
+    [data-level="1"] .torii, [data-level="2"] .torii, [data-level="3"] .torii { display: block; }
+    [data-level="2"] .cat, [data-level="3"] .cat { display: block; }
+    [data-level="3"] .censer-body, [data-level="3"] .censer-rim { fill: ${c['ember-soft']}; }
     .brand__wot { fill: ${c.ink}; }
     .brand__shrine { color: ${c.accent}; }
     .brand__bowl, .brand__sticks { stroke: ${c.ink}; }
@@ -75,7 +79,8 @@ function altarMarkup(host) {
     copy.querySelectorAll('[class*="halo"], .soft').forEach((el) => el.remove()); // blurred glows need filters we don't ship
     return copy.innerHTML;
   }).join('\n');
-  return `<svg viewBox="0 0 520 470" x="650" y="86" width="500" height="452" overflow="visible">${inner}</svg>`;
+  const level = host.closest('.burner')?.dataset.level ?? '0';
+  return `<svg viewBox="0 0 520 470" x="650" y="86" width="500" height="452" overflow="visible" data-level="${level}">${inner}</svg>`;
 }
 
 /**
@@ -98,6 +103,7 @@ export function cardSvg(data) {
   if (data.incense) facts.push(`${data.incense} incense lit`);
   if (data.karma) facts.push(`${data.karma} karma`);
   if (data.prayers) facts.push(`${data.prayers} prayer${data.prayers === 1 ? '' : 's'}`);
+  if (data.survived) facts.push(`vigil #${data.survived + (data.resolved ? 0 : 1)}`);
   const factsLine = facts.join(' · ') || 'The incense is lit. The rack is listening.';
 
   const quotes = (data.quotes ?? []).slice(-3).reverse();

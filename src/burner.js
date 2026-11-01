@@ -90,6 +90,16 @@ export function buildBurner(host) {
     </clipPath>
   </defs>
 
+  <!-- a torii gate behind the altar: the shrine has grown into a village shrine -->
+  <g class="torii">
+    <path class="d-thin" d="M 60 400 L 60 60 M 460 400 L 460 60" stroke-width="7"/>
+    <path class="d-thin" d="M 60 400 L 60 60 M 460 400 L 460 60" stroke-width="5" style="stroke: var(--paper)"/>
+    <path class="d-paper" d="M 28 46 Q 260 22 492 46 L 492 62 Q 260 40 28 62 Z"/>
+    <rect class="d-paper" x="54" y="92" width="412" height="12" rx="2"/>
+    <rect class="d-paper" x="246" y="62" width="28" height="30" rx="2"/>
+    <path class="d-thin" d="M 72 104 L 72 400 M 448 104 L 448 400" opacity="0.35"/>
+  </g>
+
   <!-- table -->
   <g class="altar-table">
     <ellipse class="d-shade" cx="260" cy="452" rx="250" ry="8"/>
@@ -113,6 +123,19 @@ export function buildBurner(host) {
     <rect class="d-ink" x="${c.x - 1}" y="310" width="2" height="12"/>
   </g>`).join('')}
 
+  <!-- a lucky cat, waving at the rack: the shrine has grown into a temple -->
+  <g class="cat" transform="translate(56 ${TABLE_Y}) scale(1.1)">
+    <ellipse class="d-shade" cx="2" cy="0" rx="18" ry="3.5"/>
+    <path class="d-paper" d="M -14 0 Q -18 -24 -4 -30 L 10 -30 Q 20 -22 14 0 Z"/>
+    <circle class="d-paper" cx="2" cy="-38" r="12"/>
+    <path class="d-paper" d="M -8 -46 L -10 -56 L -2 -48 Z M 12 -46 L 14 -56 L 6 -48 Z"/>
+    <path class="d-thin" d="M -3 -39 l 2 2 l 2 -2 M -9 -36 h 5 M 6 -36 h 5"/>
+    <circle class="d-ink" cx="-3" cy="-41" r="1.2"/><circle class="d-ink" cx="7" cy="-41" r="1.2"/>
+    <path class="d-tube-out" stroke-width="7" d="M 12 -30 Q 22 -40 16 -52"/>
+    <path class="d-tube-in" stroke-width="4" d="M 12 -30 Q 22 -40 16 -52"/>
+    <ellipse class="d-ember-soft" cx="2" cy="-16" rx="6" ry="5"/><path class="d-thin" d="M -1 -16 h6"/>
+  </g>
+
   <!-- offerings land here -->
   <g class="offerings"></g>
 
@@ -135,7 +158,7 @@ export function buildBurner(host) {
   <ellipse class="d-paper" cx="260" cy="404" rx="12" ry="5"/>
 
   <!-- belly -->
-  <path class="d-paper" d="M 150 ${RIM_Y + 4} C 112 322, 168 380, 260 380 C 352 380, 408 322, 370 ${RIM_Y + 4} Z"/>
+  <path class="d-paper censer-body" d="M 150 ${RIM_Y + 4} C 112 322, 168 380, 260 380 C 352 380, 408 322, 370 ${RIM_Y + 4} Z"/>
   <g clip-path="url(#bBodyClip)">
     <path d="M 118 290 Q 260 334 402 290 L 402 306 Q 260 350 118 306 Z" fill="url(#bFret)" opacity="0.7"/>
     <path class="d-thin" d="M 118 290 Q 260 334 402 290"/>
@@ -150,7 +173,7 @@ export function buildBurner(host) {
   <path class="d-line" d="M 150 ${RIM_Y + 4} C 112 322, 168 380, 260 380 C 352 380, 408 322, 370 ${RIM_Y + 4}"/>
 
   <!-- rim -->
-  <ellipse class="d-paper" cx="260" cy="${RIM_Y}" rx="124" ry="29"/>
+  <ellipse class="d-paper censer-rim" cx="260" cy="${RIM_Y}" rx="124" ry="29"/>
   <ellipse class="d-sunk" cx="260" cy="${RIM_Y - 1}" rx="102" ry="20"/>
   <ellipse class="d-ash" cx="260" cy="${RIM_Y + 2}" rx="88" ry="12"/>
 

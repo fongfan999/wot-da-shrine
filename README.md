@@ -26,12 +26,42 @@ shrine.
 - `/r/:room` asks for a name and avatar, then joins that room's `Shrine`
   Durable Object over a WebSocket. The room keeps the shared state: who is
   here, incense burn time, karma, the offerings on the table, the last 12
-  prayers and when the servers last came back. Late joiners see the incense
-  mid-burn and the prayers they missed.
+  prayers, the title and ETA, the open vigil and the last 12 vigils. Late
+  joiners see the incense mid-burn and the prayers they missed.
+- `/r/:room?tv=1` is the war-room screen: it watches without kneeling (it is
+  not counted as praying), shows the vigil timer big, and a QR code to join.
 - Every shrine reports its actions to one `World` Durable Object, which keeps
   the site-wide totals the landing page shows.
 - Durable Objects use the WebSocket Hibernation API, so idle shrines cost
   nothing. A shrine nobody visits for 30 days deletes itself.
+
+## A vigil, not a visit
+
+An incident is a *vigil*. It begins when the incense is lit in a shrine with
+no open vigil, and ends when someone presses **They're back!** (or when it is
+forgotten for six hours). While it is open the heading counts how long the
+servers have been down, who is praying and how many prayers were said. When
+it ends the shrine files it: minutes, people, prayers, karma. The **Shrine
+records** card shows what the altar has survived, a paper lantern hangs
+above the altar for every vigil survived, and the altar itself grows with the
+room's karma: a torii gate at 150, a lucky cat on the table at 400, a golden
+censer at 1000.
+
+Title, subtitle and "back at" are shared by the whole room: set them in
+Customize, or open `/new?title=Payments+API+is+down&eta=…` and the first
+person in sets them for everyone.
+
+### Rituals
+
+- **Burn a blame**: write what happened, press burn, and a paper slip flies
+  into the censer and catches fire. The words never leave the browser; the
+  room only learns that a confession was burned. +5 karma, blameless.
+- **Draw a fortune**: an omikuji for engineers, one per person per vigil.
+  Five levels from Great blessing to Great curse, each with a line about the
+  deploy, the night on call and plain luck. Tie it to the rail, or copy it.
+- **Chorus**: three or more people bowing within four seconds earn the room
+  a bonus and a peal of bells. The shrine counts it, so no single tab can
+  fake it.
 
 ## Spreading the word
 
@@ -104,7 +134,8 @@ The shrine is built to travel from one incident channel to the next:
   `M` mute · `T` theme.
 - **Worker API**: `GET /api/status` (JSON), `GET /api/health` (`om`),
   `GET /api/world` (totals across every shrine), `GET /api/rooms/:room/status`
-  (the room at a glance), `GET /api/rooms/:room/badge.svg`,
+  (the room at a glance, including how long it has been down and how many
+  vigils it survived), `GET /api/rooms/:room/badge.svg`,
   `GET /api/rooms/:room/ws` (WebSocket), `POST /api/pulse` (the solo page
   reporting a light, prayer, bow, offering or recovery to the world counter).
 
@@ -147,6 +178,7 @@ index.html          page shell
 src/main.js         wiring, intro, actions, activity feed, shared-shrine client
 src/room.js         room URL, saved name, reconnecting WebSocket
 src/share.js        the share card: live altar + stats as SVG, rasterised to PNG
+src/omikuji.js      the fortunes: five levels, three lines each
 src/burner.js       inline-SVG incense burner (burn-down, embers, offerings)
 src/serverRoom.js   procedural SVG server room with blinking LEDs
 src/audio.js        Web Audio sound kit (one-shot effects)

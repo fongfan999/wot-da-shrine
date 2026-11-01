@@ -13,11 +13,11 @@ import { QUICK_PRAYERS } from '../shared/prayers.js';
 export const BURN_SECONDS = 600; // keep in sync with shrine.js
 const ACTIVE_FOR = 10 * 60 * 1000; // a shrine counts as "praying now" for ten minutes after its last action
 const RECENT_MAX = 12;
-const KINDS = ['light', 'prayer', 'bow', 'bowl', 'offer', 'resolve', 'burnout'];
-const COUNTED = { light: 'incense', prayer: 'prayers', bow: 'bows', bowl: 'bowls', offer: 'offerings', resolve: 'resolved' };
+const KINDS = ['light', 'prayer', 'bow', 'bowl', 'offer', 'resolve', 'burnout', 'blame', 'omikuji'];
+const COUNTED = { light: 'incense', prayer: 'prayers', bow: 'bows', bowl: 'bowls', offer: 'offerings', resolve: 'resolved', blame: 'blames', omikuji: 'fortunes' };
 const PRESET = new Set(QUICK_PRAYERS);
 
-const EMPTY = { shrines: 0, incense: 0, prayers: 0, bows: 0, bowls: 0, offerings: 0, resolved: 0, karma: 0, recent: [] };
+const EMPTY = { shrines: 0, incense: 0, prayers: 0, bows: 0, bowls: 0, offerings: 0, resolved: 0, blames: 0, fortunes: 0, karma: 0, recent: [] };
 
 export class World extends DurableObject {
   constructor(ctx, env) {

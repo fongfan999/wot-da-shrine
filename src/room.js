@@ -30,7 +30,7 @@ export function saveMe(me) {
  * Connect to a room. `onMessage(msg)` receives every server message;
  * `onStatus('connecting' | 'open' | 'closed')` tracks the connection.
  */
-export function connectRoom(room, me, { onMessage, onStatus }) {
+export function connectRoom(room, me, { onMessage, onStatus, watch = false }) {
   let ws = null;
   let retry = 0;
   let timer = null;
@@ -40,6 +40,7 @@ export function connectRoom(room, me, { onMessage, onStatus }) {
     onStatus('connecting');
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     const q = new URLSearchParams({ name: me.name, avatar: me.avatar });
+    if (watch) q.set('watch', '1');
     ws = new WebSocket(`${proto}//${location.host}/api/rooms/${room}/ws?${q}`);
     ws.addEventListener('open', () => { retry = 0; onStatus('open'); });
     ws.addEventListener('message', (e) => {

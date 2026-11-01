@@ -16,11 +16,27 @@ const OFFERING_KINDS = ['energy', 'noodles', 'duck', 'coffee', 'keyboard', 'usb'
 const AVATARS = ['🧘', '🙇', '🙏', '🧑‍💻', '👩‍💻', '👨‍💻', '🐒', '🤖', '🦆', '🐱'];
 
 // What each action is worth.
-const KARMA = { bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20 };
-const RESOLVE_COOLDOWN = 60 * 1000; // "they're back" counts once a minute, however many people click it
+const KARMA = { bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20, blame: 5, omikuji: 2 };
+const CHORUS_BONUS = 3; // per person, when at least CHORUS_MIN people bow within CHORUS_WINDOW
+const CHORUS_MIN = 3;
+const CHORUS_WINDOW = 4000;
+const VIGIL_IDLE = 6 * 3600 * 1000; // a vigil nobody has touched for six hours is over, whatever anyone says
+const MAX_HISTORY = 12;
+export const FORTUNES = ['great', 'good', 'small', 'bad', 'terrible']; // omikuji levels, see src/omikuji.js
+const META_MAX = { title: 60, subtitle: 140, eta: 40 };
 
-// since: the first action; prayed: every prayer ever (the list keeps the last few); resolvedAt: the last "they're back"
-const EMPTY = { incense: 0, karma: 0, litAt: 0, offerings: [], prayers: [], since: 0, prayed: 0, resolved: 0, resolvedAt: 0 };
+/**
+ * A vigil is one incident: it begins when the incense is lit in a room with no
+ * vigil, and ends when someone says the servers are back (or when it is
+ * forgotten for six hours). The room keeps the last few, and counts the ones
+ * it survived.
+ */
+const EMPTY = {
+  incense: 0, karma: 0, litAt: 0, offerings: [], prayers: [],
+  since: 0, prayed: 0, resolved: 0, resolvedAt: 0,
+  meta: { title: '', subtitle: '', eta: '' }, // what's down and when it's back, shared by the whole room
+  vigil: null, history: [], survived: 0, longest: 0,
+};
 
 function clean(text, max) {
   return String(text ?? '')
@@ -36,11 +52,13 @@ export class Shrine extends DurableObject {
     this.state = { ...EMPTY };
     this.buckets = new WeakMap(); // per-socket rate limit; resets after hibernation, which is fine
     this.stored = false; // nothing is written until the first action, so drive-by connects leave no trace
+    this.bows = new Map(); // person → when they last bowed, for the chorus
+    this.chorusAt = 0;
     ctx.blockConcurrencyWhile(async () => {
       const saved = await ctx.storage.get('altar');
       this.stored = saved !== undefined;
       this.alarmAt = (await ctx.storage.getAlarm()) ?? 0;
-      this.state = { ...EMPTY, ...saved };
+      this.state = { ...EMPTY, ...saved, meta: { ...EMPTY.meta, ...saved?.meta } };
     });
   }
 
@@ -55,12 +73,14 @@ export class Shrine extends DurableObject {
       name: clean(url.searchParams.get('name'), 24) || 'Anonymous sysadmin',
       avatar: AVATARS.includes(url.searchParams.get('avatar')) ? url.searchParams.get('avatar') : '🧘',
     };
+    if (url.searchParams.get('watch') === '1') person.watcher = true; // a screen on the wall: sees everything, counts as nobody
 
     const { 0: client, 1: server } = new WebSocketPair();
     this.ctx.acceptWebSocket(server);
     server.serializeAttachment(person);
 
     this.settle();
+    if (this.forget()) await this.save();
     server.send(JSON.stringify({
       t: 'state',
       me: person.id,
@@ -70,8 +90,11 @@ export class Shrine extends DurableObject {
       ...this.counters(),
       offerings: this.state.offerings,
       prayers: this.state.prayers,
+      meta: this.state.meta,
+      history: this.state.history,
+      longest: this.state.longest,
     }));
-    this.broadcast({ t: 'join', person }, server);
+    if (!person.watcher) this.broadcast({ t: 'join', person }, server);
     if (this.stored) await this.touch();
 
     return new Response(null, { status: 101, webSocket: client });
@@ -82,6 +105,7 @@ export class Shrine extends DurableObject {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
     const by = ws.deserializeAttachment();
+    if (by.watcher) return;
     const s = this.state;
     const out = { t: 'act', kind: msg.t, by };
 
@@ -91,6 +115,8 @@ export class Shrine extends DurableObject {
         if (s.litAt) { ws.send(JSON.stringify({ t: 'sync', ...this.counters() })); return; } // someone beat you to it
         s.litAt = Date.now();
         s.incense += 1;
+        if (!s.vigil) s.vigil = { startedAt: s.litAt, lastAt: s.litAt, peak: 0, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0 };
+        s.vigil.lights += 1;
         break;
       case 'burnout':
         // Every client reports the burn-out; settle() only pays out once.
@@ -99,9 +125,41 @@ export class Shrine extends DurableObject {
       case 'bowl':
         out.note = [174, 196, 220, 261].includes(msg.note) ? msg.note : 196;
         break;
-      case 'bow':
+      case 'bow': {
+        // The chorus: enough different people bowing together earns the room a bonus.
+        const now = Date.now();
+        this.bows.set(by.id, now);
+        for (const [id, at] of this.bows) if (now - at > CHORUS_WINDOW) this.bows.delete(id);
+        if (this.bows.size >= CHORUS_MIN && now - this.chorusAt > CHORUS_WINDOW) {
+          this.chorusAt = now;
+          out.chorus = this.bows.size;
+          out.bonus = this.bows.size * CHORUS_BONUS;
+          s.karma += out.bonus;
+          this.bows.clear();
+        }
+        break;
+      }
       case 'puff':
         break;
+      case 'blame':
+        // A confession burned in the censer. The words never reach the server; only the act does.
+        if (s.vigil) s.vigil.blames += 1;
+        break;
+      case 'omikuji':
+        if (!FORTUNES.includes(msg.level)) return;
+        out.level = msg.level;
+        if (s.vigil) s.vigil.fortunes += 1;
+        break;
+      case 'meta': {
+        // What's down, and when it's back: one title for the whole room.
+        const meta = { ...s.meta };
+        for (const k of Object.keys(META_MAX)) if (k in msg) meta[k] = clean(msg[k], META_MAX[k]);
+        if (meta.eta && Number.isNaN(Date.parse(meta.eta))) meta.eta = '';
+        s.meta = meta;
+        this.broadcast({ t: 'meta', meta, by });
+        await this.save();
+        return;
+      }
       case 'offer':
         if (!OFFERING_KINDS.includes(msg.kind)) return;
         out.item = msg.kind;
@@ -113,15 +171,17 @@ export class Shrine extends DurableObject {
         out.text = text;
         s.prayers = [...s.prayers, { name: by.name, avatar: by.avatar, text, at: Date.now() }].slice(-MAX_PRAYERS);
         s.prayed += 1;
+        if (s.vigil) s.vigil.prayers += 1;
         break;
       }
       case 'resolve': {
-        // The servers are back: a celebration for the room, and the shrine remembers it.
+        // The servers are back: the vigil ends, the shrine remembers it, and the room celebrates.
+        if (!s.vigil) return;
         const now = Date.now();
-        if (now - s.resolvedAt < RESOLVE_COOLDOWN) return;
         s.resolvedAt = now;
         s.resolved += 1;
-        out.since = s.since;
+        s.vigil.karma += KARMA.resolve; // the record includes the karma for coming back
+        out.record = this.closeVigil(now, 'survived'); // counters() carries `vigil` (now null), so the record travels under its own name
         break;
       }
       case 'rename': {
@@ -139,6 +199,11 @@ export class Shrine extends DurableObject {
 
     if (!s.since) s.since = Date.now();
     s.karma += KARMA[msg.t] ?? 0;
+    if (s.vigil) {
+      s.vigil.lastAt = Date.now();
+      s.vigil.karma += (KARMA[msg.t] ?? 0) + (out.bonus ?? 0);
+      s.vigil.peak = Math.max(s.vigil.peak, this.people().length);
+    }
     this.broadcast({ ...out, ...this.counters() });
     const fresh = !this.stored;
     await this.save();
@@ -163,20 +228,54 @@ export class Shrine extends DurableObject {
 
   left(ws) {
     const person = ws.deserializeAttachment();
-    if (person) this.broadcast({ t: 'leave', id: person.id }, ws);
+    if (person && !person.watcher) this.broadcast({ t: 'leave', id: person.id }, ws);
   }
 
   people() {
-    return this.ctx.getWebSockets().map((ws) => ws.deserializeAttachment()).filter(Boolean);
+    return this.ctx.getWebSockets().map((ws) => ws.deserializeAttachment()).filter((p) => p && !p.watcher);
   }
 
   counters() {
-    return { incense: this.state.incense, karma: this.state.karma, litAt: this.state.litAt, since: this.state.since, prayed: this.state.prayed, resolvedAt: this.state.resolvedAt };
+    const s = this.state;
+    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived };
+  }
+
+  /** End the vigil and file it. Returns the record. */
+  closeVigil(endedAt, outcome) {
+    const s = this.state;
+    const v = s.vigil;
+    const record = {
+      startedAt: v.startedAt,
+      endedAt,
+      minutes: Math.max(1, Math.round((endedAt - v.startedAt) / 60000)),
+      peak: Math.max(v.peak, outcome === 'survived' ? this.people().length : 0),
+      prayers: v.prayers,
+      karma: v.karma,
+      blames: v.blames,
+      fortunes: v.fortunes,
+      outcome,
+    };
+    s.history = [record, ...s.history].slice(0, MAX_HISTORY);
+    if (outcome === 'survived') {
+      s.survived += 1;
+      s.longest = Math.max(s.longest, record.minutes);
+    }
+    s.vigil = null;
+    return record;
+  }
+
+  /** A vigil nobody has touched for hours is filed as forgotten. True when it was. */
+  forget() {
+    const v = this.state.vigil;
+    if (!v || Date.now() - v.lastAt < VIGIL_IDLE) return false;
+    this.closeVigil(v.lastAt, 'forgotten');
+    return true;
   }
 
   /** The room at a glance, for link previews and badges. Names stay in the room; only avatars leave. */
   status(room) {
     this.settle();
+    this.forget();
     const s = this.state;
     const people = this.people();
     const now = Date.now();
@@ -192,6 +291,9 @@ export class Shrine extends DurableObject {
       offerings: s.offerings.length,
       since: s.since,
       resolvedAt: s.resolvedAt,
+      downFor: s.vigil ? Math.round((now - s.vigil.startedAt) / 60000) : 0,
+      survived: s.survived,
+      title: s.meta.title,
       lastPrayer: s.prayers.at(-1)?.text ?? '',
       now,
     };

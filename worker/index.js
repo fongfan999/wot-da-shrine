@@ -36,7 +36,7 @@ const MANTRAS = [
 ];
 
 const ROOM_RE = /^[a-z0-9-]{3,48}$/;
-const PULSE_KINDS = ['light', 'prayer', 'bow', 'offer', 'resolve'];
+const PULSE_KINDS = ['light', 'prayer', 'bow', 'offer', 'resolve', 'blame', 'omikuji'];
 
 const ADJECTIVES = ['quiet', 'sleepy', 'humble', 'patient', 'serene', 'devout', 'stoic', 'mellow', 'eternal', 'golden', 'gentle', 'lucky'];
 const NOUNS = ['lotus', 'rack', 'kernel', 'daemon', 'uptime', 'pagoda', 'packet', 'monk', 'cache', 'socket', 'shrine', 'pod'];
@@ -66,6 +66,7 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 /** One line about the room, for link previews: "3 praying · incense burning · 48 karma". */
 function describe(st) {
   const bits = [];
+  if (st.downFor) bits.push(`down for ${st.downFor < 60 ? `${st.downFor} min` : `${Math.floor(st.downFor / 60)}h ${st.downFor % 60}m`}`);
   bits.push(st.people === 1 ? '1 praying' : `${st.people} praying`);
   bits.push(st.lit ? `incense burning, ${Math.ceil(st.burnLeft / 60)} min left` : 'incense is cold');
   if (st.karma) bits.push(`${st.karma} karma`);
@@ -105,7 +106,10 @@ async function roomPage(request, env, room) {
   if (!page.ok) return page;
   let st = null;
   try { st = await shrine(env, room).fetch(`${url.origin}/api/rooms/${room}/status`).then((r) => r.json()); } catch { /* the page still works without it */ }
-  const title = st?.resolvedAt && Date.now() - st.resolvedAt < 3600 * 1000 ? `The servers are back · ${room}` : `Pray for the servers · ${room}`;
+  const back = st?.resolvedAt && Date.now() - st.resolvedAt < 3600 * 1000;
+  const title = st?.title
+    ? `${st.title} · ${st.downFor ? 'pray at' : back ? 'back online ·' : ''} ${room}`.replace(/\s+/g, ' ')
+    : st?.downFor ? `The servers are down · pray at ${room}` : back ? `The servers are back · ${room}` : `Pray for the servers · ${room}`;
   const description = st ? describe(st) : 'Your team is praying for the servers. Light incense, ring the bowl and send a prayer to the rack.';
   const pageUrl = `${url.origin}/r/${room}`;
   const rewriter = new HTMLRewriter()
@@ -177,7 +181,7 @@ export default {
       let body;
       try { body = await request.json(); } catch { return json({ error: 'bad json' }, { status: 400 }); }
       if (!PULSE_KINDS.includes(body?.kind)) return json({ error: 'bad kind' }, { status: 400 });
-      ctx.waitUntil(Promise.resolve(world(env).pulse({ room: '', kind: body.kind, text: String(body.text ?? '').slice(0, 60), karma: { light: 0, prayer: 3, bow: 2, offer: 3, resolve: 20 }[body.kind] })).catch(() => {}));
+      ctx.waitUntil(Promise.resolve(world(env).pulse({ room: '', kind: body.kind, text: String(body.text ?? '').slice(0, 60), karma: { light: 0, prayer: 3, bow: 2, offer: 3, resolve: 20, blame: 5, omikuji: 2 }[body.kind] })).catch(() => {}));
       return json({ ok: true });
     }
 

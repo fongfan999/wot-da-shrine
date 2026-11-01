@@ -88,6 +88,12 @@
         <p class="eyebrow" id="eyebrow" data-i18n="eyebrow">Scheduled maintenance</p>
         <h1 class="title" id="title" data-i18n="title">The servers are meditating</h1>
         <p class="subtitle" id="subtitle" data-i18n="subtitle">The ops team is already praying. Light some incense, make an offering, and the rack will hum again shortly.</p>
+        <p class="vigil" id="vigil" hidden>
+          <span class="vigil__dot" aria-hidden="true"></span>
+          <span class="vigil__label" id="vigil-label" data-i18n="vigilDown">Down for</span>
+          <b class="vigil__time" id="vigil-time">00:00</b>
+          <span class="vigil__meta" id="vigil-meta"></span>
+        </p>
         <p class="mantra" aria-live="polite"><span class="mantra__dot" aria-hidden="true"></span><span id="mantra">Clearing cache and karma…</span></p>
       </div>
 
@@ -95,10 +101,18 @@
         <div class="altar__glow"></div>
         <div class="altar__floor" id="floor"></div>
         <div class="ema" id="ema" aria-hidden="true"><span class="ema__rail"></span></div>
+        <div class="plantern-row" id="planterns" aria-hidden="true" hidden><span class="plantern-row__string"></span></div>
         <div class="burner" id="burner">
           <div class="burner__art" id="burner-art" role="img" aria-label="A bronze incense burner on an altar table, with candles and two kneeling engineers"></div>
         </div>
         <div class="congregation" id="congregation" aria-hidden="true"></div>
+      </div>
+      <div class="tv-join" id="tv-join" hidden>
+        <div class="tv-join__qr" id="tv-qr"></div>
+        <div class="tv-join__text">
+          <p class="tv-join__hint" data-i18n="tvJoin">Scan to kneel at this altar</p>
+          <p class="tv-join__url" id="tv-url"></p>
+        </div>
       </div>
     </section>
 
@@ -114,7 +128,7 @@
         </div>
         <div class="burn">
           <div class="burn__row">
-            <span class="burn__state" id="burn-state" data-i18n="cold">Incense is cold</span>
+            <span class="burn__state" id="burn-state">Incense is cold</span>
             <span class="burn__time" id="burning-time"></span>
           </div>
           <div class="meter"><div class="meter__bar" id="burn-bar"></div></div>
@@ -153,6 +167,18 @@
           <ul class="people" id="people"></ul>
         </section>
 
+        <section class="card card--records" id="records-card">
+          <h2 class="label"><span data-i18n="recordsLabel">Shrine records</span> <span class="label__count" id="records-level"></span></h2>
+          <dl class="stats stats--records">
+            <div class="stat"><dt data-i18n="recSurvived">Survived</dt><dd id="rec-survived">0</dd></div>
+            <div class="stat"><dt data-i18n="recLongest">Longest</dt><dd id="rec-longest">–</dd></div>
+            <div class="stat"><dt data-i18n="recPrayers">Prayers</dt><dd id="rec-prayers">0</dd></div>
+          </dl>
+          <p class="records__level" id="records-next"></p>
+          <ol class="records" id="records"></ol>
+          <p class="records__empty" id="records-empty" data-i18n="recEmpty">No vigil survived yet. Light the incense, and when they’re back, say so.</p>
+        </section>
+
         <section class="card card--solo" id="solo-card">
           <h2 class="label" data-i18n="soloLabel">Praying alone</h2>
           <p class="card__text" data-i18n="soloText">Open a shared shrine and send the link to your team. Everyone's incense, offerings and prayers land on the same altar, live.</p>
@@ -183,7 +209,18 @@
 
   <!-- Bottom: the action dock -->
   <footer class="dock">
-    <div class="quick" id="quick" aria-label="Quick prayers"></div>
+    <div class="quick" id="quick" aria-label="Quick prayers">
+      <button class="quick__chip quick__chip--ritual" id="btn-blame" type="button" title="Burn a blame: write it, burn it, forget it">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-4 0-6.5-2.6-6.5-6 0-3 2-4.6 2.6-7.2.3 1.2.9 2 1.9 2.6C10.3 7.5 11.2 5 13.6 3c-.4 2.6.9 4.2 2.4 5.8 1.4 1.5 2.5 3 2.5 6.2 0 3.4-2.5 6-6.5 6z"/><path d="M12 21c-1.8 0-3-1.3-3-3 0-1.6 1.1-2.4 1.6-3.6.6.8 1.4 1.2 2 1.2.4-1 .9-1.8 1.8-2.6.2 1.3.6 2.1 1.1 2.8.4.6.5 1.3.5 2.2 0 1.7-1.2 3-4 3z"/></svg>
+        <span data-i18n="blame">Burn a blame</span>
+      </button>
+      <button class="quick__chip quick__chip--ritual" id="btn-fortune" type="button" title="Draw a fortune: one omikuji per vigil">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l-1 18H9z"/><path d="M10 8h4M10 11.5h4M10 15h3"/></svg>
+        <span data-i18n="fortune">Draw a fortune</span>
+      </button>
+      <span class="quick__sep" aria-hidden="true"></span>
+      <span class="quick__deal" id="quick-deal"></span>
+    </div>
     <form class="pray" id="wish-form" autocomplete="off">
       <label class="sr-only" for="wish-input" data-i18n="wishLabel">Say a prayer to the servers</label>
       <span class="pray__icon" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M10 3h4M12 3v2"/><path d="M8 7.5C8 6 9.5 5 12 5s4 1 4 2.5v7c0 1.5-1.5 2.5-4 2.5s-4-1-4-2.5z"/><path d="M8 11h8"/><path d="M11 17v2h2v-2M12 19v2"/></svg></span>
@@ -240,6 +277,58 @@
         <span data-i18n="joinBtn">Kneel at the altar</span>
       </button>
     </form>
+  </div>
+
+  <!-- Burn a blame -->
+  <div class="sheet sheet--ritual" id="blame" hidden role="dialog" aria-modal="true" aria-labelledby="blame-title">
+    <form class="sheet__card slip-card" id="blame-form" autocomplete="off">
+      <div class="sheet__head">
+        <h2 class="sheet__title" id="blame-title"><span data-i18n="blameTitle">Burn the</span> <em data-i18n="blameTitleAccent">blame</em></h2>
+        <button class="icon-btn" type="button" data-close="blame" aria-label="Close">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="sheet__body">
+        <p class="sheet__hint" data-i18n="blameHint">Write what happened. It is burned in the censer, never sent anywhere, and never spoken of again.</p>
+        <div class="slip" id="blame-slip">
+          <label class="sr-only" for="blame-text">Your confession</label>
+          <textarea class="slip__text" id="blame-text" rows="4" maxlength="240" placeholder="I ran the migration on prod at 5pm on a Friday…" data-i18n-placeholder="blamePlaceholder"></textarea>
+        </div>
+        <div class="sheet__row">
+          <button class="btn btn--ember" type="submit">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-4 0-6.5-2.6-6.5-6 0-3 2-4.6 2.6-7.2.3 1.2.9 2 1.9 2.6C10.3 7.5 11.2 5 13.6 3c-.4 2.6.9 4.2 2.4 5.8 1.4 1.5 2.5 3 2.5 6.2 0 3.4-2.5 6-6.5 6z"/></svg>
+            <span data-i18n="blameBtn">Burn it</span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Draw a fortune -->
+  <div class="sheet sheet--ritual" id="fortune" hidden role="dialog" aria-modal="true" aria-labelledby="fortune-title">
+    <div class="sheet__card">
+      <div class="sheet__head">
+        <h2 class="sheet__title" id="fortune-title"><span data-i18n="fortuneTitle">Your</span> <em data-i18n="fortuneTitleAccent">fortune</em></h2>
+        <button class="icon-btn" type="button" data-close="fortune" aria-label="Close">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="sheet__body">
+        <p class="sheet__hint" data-i18n="fortuneHint">One slip per vigil. The box is shaken, the stick is drawn, the paper is read.</p>
+        <div class="omikuji" id="omikuji">
+          <div class="omikuji__slip" id="omikuji-slip">
+            <span class="omikuji__kanji" id="omikuji-kanji">吉</span>
+            <b class="omikuji__level" id="omikuji-level">Blessing</b>
+            <ul class="omikuji__lines" id="omikuji-lines"></ul>
+            <p class="omikuji__advice" id="omikuji-advice"></p>
+          </div>
+        </div>
+        <div class="sheet__row">
+          <button class="btn btn--accent btn--sm" type="button" id="btn-fortune-tie" data-i18n="fortuneTie">Tie it to the rail</button>
+          <button class="btn btn--glass btn--sm" type="button" id="btn-fortune-copy" data-i18n="fortuneCopy">Copy</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Invite + share sheet -->
@@ -323,6 +412,7 @@
         <span data-i18n="fEta">Back at</span>
         <input type="datetime-local" name="eta" />
       </label>
+      <p class="field__note" id="meta-note" data-i18n="metaShared" hidden>Title, subtitle and “back at” are shared with everyone in this shrine.</p>
       <div class="field">
         <span data-i18n="fTheme">Theme</span>
         <div class="seg" id="theme-seg" role="radiogroup" aria-label="Theme">
