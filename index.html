@@ -600,9 +600,23 @@
     <footer class="foot">
       <div class="foot__inner">
         <div class="foot__brand">
-          <a class="foot__logo" href="/" aria-label="Wot Da Shrine home"><img src="/logo.svg" alt="" width="28" height="28" /><b>Wot Da Shrine</b></a>
+          <a class="foot__logo" href="/" aria-label="Wot Da Shrine home">
+            <svg class="brand__mark foot__mark" viewBox="8 2 48 54" aria-hidden="true">
+              <path class="brand__smoke" pathLength="1" d="M24 17c-3.5-3.5 1.5-6.5-1.5-10" />
+              <path class="brand__smoke" pathLength="1" d="M32 15c-3.5-4 3-7 0-11" />
+              <path class="brand__smoke" pathLength="1" d="M40 17c-3.5-3.5 1.5-6.5-1.5-10" />
+              <path class="brand__sticks" d="M24 36V21M32 36V19M40 36V21" />
+              <path class="brand__bowl" d="M11 36h42l-3.4 12.6A7 7 0 0 1 42.8 54H21.2a7 7 0 0 1-6.8-5.4Z" />
+              <g class="brand__embers"><circle cx="24" cy="21" r="2" /><circle cx="32" cy="19" r="2" /><circle cx="40" cy="21" r="2" /></g>
+            </svg>
+            <b>Wot Da Shrine</b>
+          </a>
           <p class="foot__tag" data-i18n="tagline">Pray for uptime, together.</p>
           <p class="foot__live"><span class="foot__live-dot" aria-hidden="true"></span><span id="foot-live" data-i18n="landFootLive">Open on any screen, any time.</span></p>
+          <button class="foot__top" id="foot-top" type="button">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+            <span data-i18n="landFootTop">Back to the altar</span>
+          </button>
         </div>
         <nav class="foot__col" aria-label="The shrine">
           <p class="foot__head" data-i18n="landFootShrine">Shrine</p>
@@ -622,6 +636,8 @@
         <a href="https://wotdafong.dev/" target="_blank" rel="noopener"><img class="credit__mark credit__mark--ink" src="/wotdafong-ink.svg" alt="" width="16" height="16" /><img class="credit__mark credit__mark--paper" src="/wotdafong-paper.svg" alt="" width="16" height="16" /><span data-i18n="madeBy">Made by</span> Wot Da Fong ↗</a>
         <span data-i18n="landFootNote">No servers were harmed. Some were prayed for.</span>
       </div>
+      <!-- the hand-drawn wordmark, cloned from the header, signed huge across the bottom -->
+      <div class="foot__sign" id="foot-sign" aria-hidden="true"></div>
     </footer>
   </div>
 

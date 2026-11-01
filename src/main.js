@@ -1557,6 +1557,7 @@ function setupLanding() {
   setupSteps();
   setupRituals();
   setupShowcase();
+  setupFooter();
   // Sections reveal as they scroll in.
   const seen = new IntersectionObserver((entries) => {
     for (const en of entries) if (en.isIntersecting) { en.target.classList.add('is-in'); seen.unobserve(en.target); }
@@ -1568,6 +1569,19 @@ function setupLanding() {
     if (!b) return;
     sound.unlock();
     $(b.dataset.try === 'blame' ? '#btn-blame' : '#btn-fortune').click();
+  });
+}
+
+/** The footer: the header's wordmark signed huge across the bottom, and a way back up to the altar. */
+function setupFooter() {
+  const foot = $('.foot');
+  $('#foot-sign').append($('.brand__word').cloneNode(true));
+  new IntersectionObserver(([en], obs) => { if (en.isIntersecting) { foot.classList.add('is-in'); obs.disconnect(); } }, { threshold: 0.2 }).observe(foot);
+  $('#foot-top').addEventListener('click', () => {
+    sound.unlock();
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    // a fresh stick for whoever made it all the way down and back
+    setTimeout(() => { if (!lit) ignite(Date.now()); else smoke.puff(1.4); }, reduceMotion ? 0 : 700);
   });
 }
 

@@ -208,6 +208,7 @@ export const STRINGS = {
   landFootMp: 'Maintenance page',
   landFootMore: 'More',
   landFootNote: 'No servers were harmed. Some were prayed for.',
+  landFootTop: 'Back to the altar',
   landParams: 'URL parameters ↗',
   landStory: 'Read the story ↗',
   panelHintPrefs: 'Saved in this browser. To make this page a maintenance page, use the builder further down.',
