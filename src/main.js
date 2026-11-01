@@ -1929,6 +1929,8 @@ function renderLandingWorld(w) {
   if (w.prayers) proof.push(fmt('heroProofPrayers', { n: n(w.prayers) }));
   $('#hero-proof-text').textContent = proof.join(' · ');
   $('#hero-proof').hidden = !proof.length;
+  // The footer's live line: the same proof, quieter.
+  if (proof.length) $('#foot-live').textContent = proof.join(' · ');
 
   pulseLast = w;
   if (!pulseSeen) return; // counted up when the section scrolls in
