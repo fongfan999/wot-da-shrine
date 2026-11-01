@@ -27,8 +27,9 @@ shrine.
   live world count.
 - Give `/` a `title`, `subtitle` or `eta` in the URL and it becomes your
   maintenance page: the full solo shrine, with the landing sections gone.
-  The landing page has a builder for that link; `?solo=1` does the same
-  without a title. On the home page Customize is preferences only.
+  `?solo=1` does the same without a title. For planned downtime the landing
+  page's builder makes a shrine of its own instead: `/r/<slug>?title=…&eta=…`,
+  whose first visit gives the room that title and time. On the home page Customize is preferences only.
 - `/r/demo` is the public demo shrine, streamed onto the landing page in TV
   mode. Names there come from a list, only the ready-made prayers are
   accepted and the title is fixed, so it stays fit for a wall.

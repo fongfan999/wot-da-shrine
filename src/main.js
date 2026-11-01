@@ -1750,7 +1750,6 @@ function setupShowcase() {
 
   $('#unfurl-link').textContent = `${location.host}/r/${ROOM}`;
   $('#land-badge').src = `/api/rooms/${ROOM}/badge.svg`;
-  $('#mp-host').textContent = 'status.yourco.com';
   const md = `[![shrine](${location.origin}/api/rooms/${ROOM}/badge.svg)](${location.origin}/r/${ROOM})`;
   $('#badge-md').textContent = md;
   $('#badge-copy').addEventListener('click', () => copyText(md, t('landBadgeCopied')));
@@ -1838,29 +1837,51 @@ function setupShowcase() {
   show(0);
 }
 
-/** The maintenance-page builder: a title and a time become a link. */
+/** The maintenance-page builder: what is down and when it is back become a shrine of its own, /r/<slug>. */
 function setupBuilder() {
   const titleEl = $('#mp-title');
   const etaEl = $('#mp-eta');
-  const urlEl = $('#mp-url');
-  const preview = $('#mp-preview');
+  const slugEl = $('#mp-slug');
+  const open = $('#mp-preview');
+  const slugify = (text) => text.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  // The slug follows the title (its first five words) until the visitor writes their own.
+  const fromTitle = (title) => slugify(title).split('-').slice(0, 5).join('-').slice(0, 48);
+  let ownSlug = false;
+  let url = '';
+
+  // A real example to start from: a checkout outage, back two hours from now on the hour.
+  const back = new Date(Date.now() + 2 * 3600 * 1000);
+  back.setMinutes(0, 0, 0);
+  titleEl.value = t('mpTitleExample');
+  etaEl.value = toLocalInput(back.toISOString());
+  slugEl.value = fromTitle(titleEl.value);
+
   const build = () => {
+    const room = slugify(slugEl.value).slice(0, 48) || fromTitle(titleEl.value) || 'maintenance';
     const q = new URLSearchParams();
     if (titleEl.value.trim()) q.set('title', titleEl.value.trim());
     if (etaEl.value) q.set('eta', new Date(etaEl.value).toISOString());
-    if (![...q].length) q.set('solo', '1');
-    const url = `${location.origin}/?${q}`;
-    urlEl.value = url;
-    preview.href = url;
-    // the little browser above the fields shows the page as it will look
-    $('#mp-show-title').textContent = titleEl.value.trim() || titleEl.placeholder;
+    url = `${location.origin}/r/${room.length >= 3 ? room : `${room}-shrine`}${[...q].length ? `?${q}` : ''}`;
+    open.href = url;
+    const shown = $('#mp-show-slug');
+    if (shown.textContent !== room) {
+      shown.textContent = room;
+      shown.classList.remove('is-tick');
+      void shown.offsetWidth;
+      shown.classList.add('is-tick');
+    }
+    $('#mp-show-title').textContent = titleEl.value.trim() || t('title');
     $('#mp-show-eta').textContent = etaEl.value
       ? `Back at ${new Date(etaEl.value).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' })} · the ops team is praying`
       : 'Back soon · the ops team is praying';
   };
+  $('#mp-host').textContent = location.host;
+  titleEl.addEventListener('input', () => { if (!ownSlug) slugEl.value = fromTitle(titleEl.value); });
+  slugEl.addEventListener('input', () => { ownSlug = slugEl.value.trim() !== ''; });
+  slugEl.addEventListener('change', () => { slugEl.value = slugify(slugEl.value).slice(0, 48); build(); });
   build();
   $('#mp-form').addEventListener('input', build);
-  $('#mp-form').addEventListener('submit', (e) => { e.preventDefault(); copyText(urlEl.value, t('mpCopied')); });
+  $('#mp-form').addEventListener('submit', (e) => { e.preventDefault(); build(); copyText(url, t('mpCopied')); });
 }
 
 /** The war-room TV: the demo shrine, streamed in once it scrolls near, on screens wide enough to carry a second page. */
