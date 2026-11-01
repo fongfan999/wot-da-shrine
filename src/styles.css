@@ -1395,6 +1395,68 @@ body[data-resolved="1"] #btn-resolve { background: var(--live); color: var(--pap
 .land__foot a { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
 .land__foot a:hover { color: var(--accent); }
 
+/* ---------- The hero on /: one headline, one sentence, one button, and the altar, lit ---------- */
+body[data-landing="1"] :is(.dock, .side, .mantra) { display: none; }
+body[data-landing="1"] .app { min-height: 0; }
+body[data-landing="1"] .stage { display: block; padding: 0 var(--gutter); }
+body[data-landing="1"] .center {
+  position: static;
+  height: auto;
+  min-height: calc(100dvh - var(--bar-h, 70px));
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 0 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 64px);
+}
+body[data-landing="1"] .heading { max-width: 580px; gap: 14px; }
+body[data-landing="1"] .title { font-size: clamp(2.7rem, 5.6vw, 5.2rem); }
+body[data-landing="1"] .subtitle { font-size: 19px; max-width: 40ch; }
+body[data-landing="1"] .altar { position: relative; flex: none; height: min(66vh, 580px); pointer-events: auto; }
+body[data-landing="1"] .altar::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: 78%;
+  aspect-ratio: 2 / 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--ember-soft), transparent 72%);
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+body[data-landing="1"][data-state="lit"] .altar::before { opacity: .9; }
+body[data-landing="1"] .burner { height: min(100%, 520px); cursor: pointer; }
+.hero-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; width: 100%; margin-top: 8px; }
+.hero-cta__field { flex: 1 1 220px; min-height: 52px; }
+.btn--lg { min-height: 52px; padding: 12px 26px; font-size: 16px; }
+.hero-cta__fine { flex-basis: 100%; margin: 2px 0 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; color: var(--muted); }
+.hero-cta__fine a { color: var(--accent); text-decoration: none; }
+.hero-cta__fine a:hover { text-decoration: underline; }
+.hero-hint {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  z-index: 3;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--paper-raised);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+  animation: hint-bob 2.2s ease-in-out infinite;
+}
+@keyframes hint-bob { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -6px); } }
+
 /* The home page is a demo with one action: the altar and its sounds stay, the product surface goes.
    Rituals, vigils, records, the feed and sharing belong to a shrine with a team (or a maintenance page). */
 body[data-landing="1"] :is(.card--records, .card--feed, .rank, .enlight, .eta, #btn-resolve, .vigil, .plantern-row, .quick__chip--ritual, .quick__sep, #btn-share, .stats .stat:nth-child(3)) { display: none; }
@@ -1434,6 +1496,15 @@ body[data-fx="lite"] .stick__halo, body[data-fx="lite"] .kneeler__halo { display
   .ema__plaque { width: 90px; }
   .act { min-width: 84px; padding-inline: 10px; }
   .act--primary { min-width: 140px; }
+}
+
+@media (max-width: 899px) {
+  body[data-landing="1"] .center { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 8px; padding: 16px 0 32px; min-height: 0; }
+  /* sized by width here: a height-based aspect ratio would make the altar wider than the phone */
+  body[data-landing="1"] .altar { height: auto; min-width: 0; }
+  body[data-landing="1"] .burner { width: min(100%, 400px); height: auto; margin: 0 auto; }
+  body[data-landing="1"] .title { font-size: clamp(2.3rem, 11vw, 3rem); }
+  body[data-landing="1"] .subtitle { font-size: 17px; }
 }
 
 @media (max-width: 1099px) {

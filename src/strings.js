@@ -137,7 +137,11 @@ export const STRINGS = {
   // Landing page (the home page, below and around the solo shrine)
   landEyebrow: 'When the servers are down',
   landTitle: 'Pray for uptime, together',
-  landSubtitle: 'Open a shrine, send the link, and the whole team lights incense, rings the bowl and prays to the rack on one altar, live. Try it here, or open yours.',
+  landSubtitle: 'A shared altar for the incident channel. Open one, drop the link in Slack, and the whole team prays to the rack, live.',
+  heroCta: 'Open a shrine',
+  heroFine: 'Free, no account, ready in one click.',
+  heroHow: 'See how it works ↓',
+  heroHint: 'Tap the altar',
   landDocTitle: 'Pray for uptime, together',
   landHowEyebrow: 'How a vigil works',
   landHowTitle: 'Three steps, then',

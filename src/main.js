@@ -1506,7 +1506,7 @@ $('#btn-invite').addEventListener('click', () => { sound.unlock(); openShare(tru
 $('#btn-share').addEventListener('click', () => { sound.unlock(); openShare(true); });
 
 /* ---------- Name your shrine: /r/prod-is-down, or a generated name when the field is empty ---------- */
-for (const form of document.querySelectorAll('#name-form, #name-form-2')) {
+for (const form of document.querySelectorAll('#name-form, #name-form-2, #hero-form')) {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     sound.unlock();
@@ -1522,11 +1522,11 @@ function setupLanding() {
   body.dataset.landing = '1';
   const landingEl = $('#landing');
   landingEl.hidden = false;
-  for (const [sel, key] of [['#solo-card .label', 'demoLabel'], ['#solo-card .card__text', 'demoText']]) {
-    const el = $(sel);
-    el.removeAttribute('data-i18n'); // or applyStrings() puts the maintenance-page words back
-    el.textContent = t(key);
-  }
+  $('#hero-form').hidden = false;
+  // The altar is alive when you arrive: lit after the intro, with a hint that it can be touched.
+  const hint = $('#hero-hint');
+  setTimeout(() => { if (!lit) ignite(Date.now()); hint.hidden = false; }, reduceMotion ? 300 : 2200);
+  burner.addEventListener('pointerdown', () => { hint.hidden = true; }, { once: true });
   $('#land-badge').src = `/api/rooms/serene-rack-42/badge.svg`;
   $('#unfurl-link').textContent = `${location.host}/r/serene-rack-42`;
   // Sections reveal as they scroll in.
