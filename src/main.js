@@ -1538,6 +1538,7 @@ function setupLanding() {
   const hint = $('#hero-hint');
   setTimeout(() => { if (!lit) ignite(Date.now()); hint.hidden = false; }, reduceMotion ? 300 : 2200);
   burner.addEventListener('pointerdown', () => { hint.hidden = true; }, { once: true });
+  setupRibbon();
   $('#land-badge').src = `/api/rooms/serene-rack-42/badge.svg`;
   $('#unfurl-link').textContent = `${location.host}/r/serene-rack-42`;
   // Sections reveal as they scroll in.
@@ -1562,6 +1563,34 @@ function setupLanding() {
       }
     }, reduceMotion ? 0 : 500);
   });
+}
+
+/** A slow ribbon of ready-made prayers under the hero: tap one and it rises from the altar as a lantern. */
+function setupRibbon() {
+  const rail = $('#hero-ribbon-rail');
+  const prayers = gsap.utils.shuffle([...STRINGS.quickPrayers]);
+  // Two identical halves, so the loop at -50% is seamless.
+  for (let pass = 0; pass < 2; pass++) {
+    for (const text of prayers) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'hero-ribbon__item';
+      b.textContent = text;
+      if (pass) { b.tabIndex = -1; b.setAttribute('aria-hidden', 'true'); }
+      rail.appendChild(b);
+    }
+  }
+  rail.addEventListener('click', (e) => {
+    const b = e.target.closest('.hero-ribbon__item');
+    if (!b) return;
+    sound.unlock();
+    $('#hero-hint').hidden = true;
+    sendPrayer(b.textContent);
+    b.classList.remove('is-sent');
+    void b.offsetWidth;
+    b.classList.add('is-sent');
+  });
+  $('#hero-ribbon').hidden = false;
 }
 
 /** The maintenance-page builder: a title and a time become a link. */
@@ -1604,6 +1633,12 @@ function renderLandingWorld(w) {
   $('#lw-shrines').textContent = n(w.shrines);
   $('#lw-burning').textContent = n(w.burningNow);
   $('#lw-resolved').textContent = n(w.resolved);
+  // Under the hero button: proof that other teams are kneeling right now.
+  const proof = [];
+  if (w.burningNow) proof.push(fmt('heroProofBurning', { n: n(w.burningNow) }));
+  if (w.prayers) proof.push(fmt('heroProofPrayers', { n: n(w.prayers) }));
+  $('#hero-proof-text').textContent = proof.join(' · ');
+  $('#hero-proof').hidden = !proof.length;
   const ticker = $('#lw-ticker');
   ticker.innerHTML = '';
   const last = (w.recent ?? []).find((r) => WORLD_KINDS[r.kind]);

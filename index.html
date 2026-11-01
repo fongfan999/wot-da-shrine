@@ -97,13 +97,19 @@
         </p>
         <p class="mantra" aria-live="polite"><span class="mantra__dot" aria-hidden="true"></span><span id="mantra">Clearing cache and karma…</span></p>
         <form class="hero-cta" id="hero-form" hidden autocomplete="off">
-          <label class="name-form__field hero-cta__field">
-            <span class="name-form__prefix" aria-hidden="true">/r/</span>
-            <span class="sr-only" data-i18n="nameLabel">Name your shrine</span>
-            <input class="name-form__input" type="text" maxlength="48" placeholder="prod-is-down" data-i18n-placeholder="namePlaceholder" spellcheck="false" />
-          </label>
-          <button class="btn btn--accent btn--lg" type="submit"><span data-i18n="heroCta">Open a shrine</span></button>
+          <div class="hero-cta__bar">
+            <label class="name-form__field hero-cta__field">
+              <span class="name-form__prefix" aria-hidden="true">/r/</span>
+              <span class="sr-only" data-i18n="nameLabel">Name your shrine</span>
+              <input class="name-form__input" type="text" maxlength="48" placeholder="prod-is-down" data-i18n-placeholder="namePlaceholder" spellcheck="false" />
+            </label>
+            <button class="btn btn--accent btn--lg hero-cta__btn" type="submit">
+              <span data-i18n="heroCta">Open a shrine</span>
+              <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
           <p class="hero-cta__fine"><span data-i18n="heroFine">Free, no account, ready in one click.</span> <a href="#live" data-i18n="heroHow">See it live ↓</a></p>
+          <p class="hero-proof" id="hero-proof" hidden><span class="hero-proof__dot" aria-hidden="true"></span><span id="hero-proof-text"></span></p>
         </form>
       </div>
 
@@ -117,6 +123,10 @@
         </div>
         <div class="congregation" id="congregation" aria-hidden="true"></div>
         <span class="hero-hint" id="hero-hint" hidden data-i18n="heroHint">Tap the altar</span>
+      </div>
+      <div class="hero-ribbon" id="hero-ribbon" hidden>
+        <span class="hero-ribbon__label" data-i18n="heroRibbon">Send one up</span>
+        <div class="hero-ribbon__track"><div class="hero-ribbon__rail" id="hero-ribbon-rail"></div></div>
       </div>
       <div class="tv-join" id="tv-join" hidden>
         <div class="tv-join__qr" id="tv-qr"></div>
