@@ -42,7 +42,7 @@ export function splitTitle(replay = false) {
 }
 
 export function intro() {
-  if (reduceMotion) return;
+  if (reduceMotion) { reveal(); return; }
   const dock = ['.quick', '.pray', '.actions', '.credit'];
   gsap.set('.title .ch', { y: 40, opacity: 0, rotateX: -70, transformOrigin: '50% 100%' });
   gsap.set(['.eyebrow', '.subtitle', '.mantra'], { y: 14, opacity: 0 });
@@ -51,6 +51,7 @@ export function intro() {
   gsap.set(dock, { y: 24, opacity: 0 });
   gsap.set('.burner', { y: 60, opacity: 0, scale: 0.92 });
   gsap.set('.plantern-row', { opacity: 0 });
+  reveal(); // same frame as the sets above: nothing shows before the intro brings it in
 
   // Camera pushes down the server corridor.
   gsap.fromTo('.layer--bg', { scale: 1.35, opacity: 0 }, { scale: 1, opacity: 1, duration: 3.6, ease: 'power2.out' });
@@ -67,6 +68,11 @@ export function intro() {
 
   // Idle float on the burner
   gsap.to('.burner', { y: -6, duration: 3.2, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 2 });
+}
+
+/** The page's own heading is in place: let the intro's pieces be seen (see .booting in index.html). */
+function reveal() {
+  document.documentElement.classList.remove('booting');
 }
 
 /* ---------- Parallax ---------- */

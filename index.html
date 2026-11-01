@@ -19,7 +19,9 @@
   <meta name="twitter:title" content="Wot Da Shrine: pray for uptime, together" />
   <meta name="twitter:description" content="The servers are down. Open a shrine, invite the team, and pray to the rack together in real time." />
   <meta name="twitter:image" content="https://shrine.wotdafong.dev/og.png" />
-  <title>Wot Da Shrine</title>
+  <title>Wot Da Shrine: Pray for uptime, together</title>
+  <!-- Until the script has set the heading for this page and started the intro, what the intro reveals stays hidden (never longer than 4s). -->
+  <script>document.documentElement.classList.add('booting'); setTimeout(() => document.documentElement.classList.remove('booting'), 4000);</script>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/src/styles.css" />
 </head>
@@ -86,9 +88,9 @@
     <!-- Center: heading + altar -->
     <section class="center">
       <div class="heading">
-        <p class="eyebrow" id="eyebrow" data-i18n="eyebrow">Scheduled maintenance</p>
-        <h1 class="title" id="title" data-i18n="title">The servers are meditating</h1>
-        <p class="subtitle" id="subtitle" data-i18n="subtitle">The ops team is already praying. Light some incense, make an offering, and the rack will hum again shortly.</p>
+        <p class="eyebrow" id="eyebrow" data-i18n="eyebrow">When the servers are down</p>
+        <h1 class="title" id="title" data-i18n="title">Pray for uptime, together</h1>
+        <p class="subtitle" id="subtitle" data-i18n="subtitle">A shared altar for the incident channel. Open one, drop the link in Slack, and the whole team prays to the rack, live.</p>
         <p class="vigil" id="vigil" hidden>
           <span class="vigil__dot" aria-hidden="true"></span>
           <span class="vigil__label" id="vigil-label" data-i18n="vigilDown">Down for</span>
