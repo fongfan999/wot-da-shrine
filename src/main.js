@@ -1554,8 +1554,7 @@ function setupLanding() {
   setupRibbon();
   setupSteps();
   setupRituals();
-  $('#land-badge').src = `/api/rooms/serene-rack-42/badge.svg`;
-  $('#unfurl-link').textContent = `${location.host}/r/serene-rack-42`;
+  setupShowcase();
   // Sections reveal as they scroll in.
   const seen = new IntersectionObserver((entries) => {
     for (const en of entries) if (en.isIntersecting) { en.target.classList.add('is-in'); seen.unobserve(en.target); }
@@ -1735,6 +1734,88 @@ function setupRituals() {
   }).observe($('#remember'));
 }
 
+/** The link does the inviting: three panes that play in turn until the visitor picks one. */
+function setupShowcase() {
+  const ROOM = 'serene-rack-42';
+  const el = $('#showcase');
+  const tabs = [...el.querySelectorAll('.showcase__tab')];
+  const panes = [...el.querySelectorAll('.showcase__pane')];
+  const caption = $('#sc-caption');
+  const EVERY = 7000;
+  let current = 0;
+  let auto = !reduceMotion; // the first click, key or keystroke in the panes ends the tour for good
+  let onScreen = false;
+  let timer = 0;
+
+  $('#unfurl-link').textContent = `${location.host}/r/${ROOM}`;
+  $('#land-badge').src = `/api/rooms/${ROOM}/badge.svg`;
+  $('#mp-host').textContent = 'status.yourco.com';
+  const md = `[![shrine](${location.origin}/api/rooms/${ROOM}/badge.svg)](${location.origin}/r/${ROOM})`;
+  $('#badge-md').textContent = md;
+  $('#badge-copy').addEventListener('click', () => copyText(md, t('landBadgeCopied')));
+
+  const schedule = () => {
+    clearTimeout(timer);
+    el.classList.toggle('is-playing', auto);
+    el.classList.toggle('is-paused', !onScreen);
+    if (auto && onScreen) timer = setTimeout(() => show((current + 1) % tabs.length), EVERY);
+  };
+  function show(i, focus = false) {
+    current = i;
+    tabs.forEach((tab, k) => {
+      const on = k === i;
+      tab.setAttribute('aria-selected', String(on));
+      tab.tabIndex = on ? 0 : -1;
+      panes[k].hidden = !on;
+    });
+    caption.textContent = tabs[i].querySelector('.showcase__copy span').textContent;
+    if (focus) tabs[i].focus();
+    // restart the progress bar on the newly selected tab
+    const bar = tabs[i].querySelector('.showcase__bar');
+    bar.style.animation = 'none';
+    void bar.offsetWidth;
+    bar.style.animation = '';
+    schedule();
+  }
+  const stopTour = () => { if (auto) { auto = false; schedule(); } };
+  el.style.setProperty('--sc-every', `${EVERY}ms`);
+  tabs.forEach((tab, i) => tab.addEventListener('click', () => { stopTour(); show(i); }));
+  el.querySelector('.showcase__tabs').addEventListener('keydown', (e) => {
+    const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    stopTour();
+    show((current + step + tabs.length) % tabs.length, true);
+  });
+  el.querySelector('.showcase__stage').addEventListener('pointerdown', stopTour);
+  el.querySelector('.showcase__stage').addEventListener('focusin', stopTour);
+
+  // The unfurl is alive: the minutes, the people and the 🙏 keep counting while it is on screen.
+  const live = { min: 23, praying: 4, karma: 212, pray: 4, last: 0 };
+  const bump = (id, value) => {
+    const b = $(id);
+    b.textContent = value;
+    b.classList.remove('is-tick');
+    void b.offsetWidth;
+    b.classList.add('is-tick');
+  };
+  setInterval(() => {
+    if (!onScreen || current !== 0 || reduceMotion) return;
+    const roll = Math.random();
+    if (roll < 0.3) bump('#uf-min', ++live.min);
+    else if (roll < 0.5 && live.praying < 9) bump('#uf-praying', ++live.praying);
+    else if (roll < 0.75) { bump('#uf-pray', ++live.pray); bump('#uf-karma', live.karma += 3); }
+    else {
+      live.last = (live.last + 1) % STRINGS.quickPrayers.length;
+      $('#uf-last').textContent = STRINGS.quickPrayers[live.last];
+      bump('#uf-karma', live.karma += 5);
+    }
+  }, 1600);
+
+  new IntersectionObserver(([en]) => { onScreen = en.isIntersecting; schedule(); }, { threshold: 0.35 }).observe(el);
+  show(0);
+}
+
 /** The maintenance-page builder: a title and a time become a link. */
 function setupBuilder() {
   const titleEl = $('#mp-title');
@@ -1749,6 +1830,11 @@ function setupBuilder() {
     const url = `${location.origin}/?${q}`;
     urlEl.value = url;
     preview.href = url;
+    // the little browser above the fields shows the page as it will look
+    $('#mp-show-title').textContent = titleEl.value.trim() || titleEl.placeholder;
+    $('#mp-show-eta').textContent = etaEl.value
+      ? `Back at ${new Date(etaEl.value).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' })} · the ops team is praying`
+      : 'Back soon · the ops team is praying';
   };
   build();
   $('#mp-form').addEventListener('input', build);
