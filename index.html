@@ -481,7 +481,7 @@
               </div>
               <div class="mp__fields">
                 <label class="mp__field mp__field--wide"><span data-i18n="mpTitle">What’s down</span><input type="text" id="mp-title" maxlength="60" /></label>
-                <label class="mp__field"><span data-i18n="mpEta">Back at</span><input type="datetime-local" id="mp-eta" /></label>
+                <div class="mp__field mp__field--eta"><span id="mp-eta-label" data-i18n="mpEta">Back at</span><button class="eta-trigger" id="mp-eta" type="button" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="mp-eta-label mp-eta-text mp-eta-sub" data-value=""><span class="eta-trigger__val"><span class="eta-trigger__text" id="mp-eta-text">Any moment now</span><span class="eta-trigger__sub" id="mp-eta-sub">no ETA</span></span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg></button></div>
                 <label class="mp__field mp__field--slug"><span data-i18n="mpSlug">Its link</span><span class="mp__slug"><span aria-hidden="true">/r/</span><input type="text" id="mp-slug" maxlength="48" spellcheck="false" /></span></label>
               </div>
               <div class="mp__actions">

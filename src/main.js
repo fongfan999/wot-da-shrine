@@ -19,6 +19,7 @@ import { cardSvg, cardPng, shareFile, download, copyImage, canCopyImage, canShar
 import { draw as drawFortune, LEVELS as FORTUNE_LEVELS, asText as fortuneText } from './omikuji.js';
 import qrcode from 'qrcode-generator';
 import { describe as describeRoom, previewTitle } from '../shared/preview.js';
+import { etaPicker } from './etaPicker.js';
 
 const $ = (sel) => document.querySelector(sel);
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1840,7 +1841,7 @@ function setupShowcase() {
 /** The maintenance-page builder: what is down and when it is back become a shrine of its own, /r/<slug>. */
 function setupBuilder() {
   const titleEl = $('#mp-title');
-  const etaEl = $('#mp-eta');
+  const eta = etaPicker($('#mp-eta'));
   const slugEl = $('#mp-slug');
   const open = $('#mp-preview');
   const slugify = (text) => text.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -1853,14 +1854,14 @@ function setupBuilder() {
   const back = new Date(Date.now() + 2 * 3600 * 1000);
   back.setMinutes(0, 0, 0);
   titleEl.value = t('mpTitleExample');
-  etaEl.value = toLocalInput(back.toISOString());
+  eta.set(back);
   slugEl.value = fromTitle(titleEl.value);
 
   const build = () => {
     const room = slugify(slugEl.value).slice(0, 48) || fromTitle(titleEl.value) || 'maintenance';
     const q = new URLSearchParams();
     if (titleEl.value.trim()) q.set('title', titleEl.value.trim());
-    if (etaEl.value) q.set('eta', new Date(etaEl.value).toISOString());
+    if (eta.value()) q.set('eta', eta.value().toISOString());
     url = `${location.origin}/r/${room.length >= 3 ? room : `${room}-shrine`}${[...q].length ? `?${q}` : ''}`;
     open.href = url;
     const shown = $('#mp-show-slug');
@@ -1871,8 +1872,8 @@ function setupBuilder() {
       shown.classList.add('is-tick');
     }
     $('#mp-show-title').textContent = titleEl.value.trim() || t('title');
-    $('#mp-show-eta').textContent = etaEl.value
-      ? `Back at ${new Date(etaEl.value).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' })} · the ops team is praying`
+    $('#mp-show-eta').textContent = eta.value()
+      ? `Back at ${eta.value().toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' })} · the ops team is praying`
       : 'Back soon · the ops team is praying';
   };
   $('#mp-host').textContent = location.host;
