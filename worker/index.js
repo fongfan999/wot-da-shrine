@@ -16,6 +16,7 @@
 import { Shrine } from './shrine.js';
 import { World } from './world.js';
 import { describe, previewTitle } from '../shared/preview.js';
+import { roomName } from '../shared/names.js';
 
 export { Shrine, World };
 
@@ -38,14 +39,6 @@ const MANTRAS = [
 
 const ROOM_RE = /^[a-z0-9-]{3,48}$/;
 const PULSE_KINDS = ['light', 'prayer', 'bow', 'offer', 'resolve', 'blame', 'omikuji'];
-
-const ADJECTIVES = ['quiet', 'sleepy', 'humble', 'patient', 'serene', 'devout', 'stoic', 'mellow', 'eternal', 'golden', 'gentle', 'lucky'];
-const NOUNS = ['lotus', 'rack', 'kernel', 'daemon', 'uptime', 'pagoda', 'packet', 'monk', 'cache', 'socket', 'shrine', 'pod'];
-
-function roomName() {
-  const pick = (a) => a[Math.floor(Math.random() * a.length)];
-  return `${pick(ADJECTIVES)}-${pick(NOUNS)}-${Math.floor(Math.random() * 90 + 10)}`;
-}
 
 /** "Prod is DOWN!!" → "prod-is-down". Too short to be a room, and you get a generated name. */
 function slug(text) {

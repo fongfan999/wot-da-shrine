@@ -20,6 +20,7 @@ import { draw as drawFortune, LEVELS as FORTUNE_LEVELS, asText as fortuneText } 
 import qrcode from 'qrcode-generator';
 import { describe as describeRoom, previewTitle } from '../shared/preview.js';
 import { etaPicker } from './etaPicker.js';
+import { roomName as suggestName } from '../shared/names.js';
 
 const $ = (sel) => document.querySelector(sel);
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1007,7 +1008,7 @@ quick.addEventListener('click', (e) => {
 
 /* ---------- Rituals ---------- */
 /** A small dialog: `#blame`, `#fortune`. */
-const ritualOpen = { blame: false, fortune: false };
+const ritualOpen = { blame: false, fortune: false, 'open-shrine': false };
 function openRitual(id, open) {
   if (ritualOpen[id] === open) return;
   ritualOpen[id] = open;
@@ -1020,8 +1021,19 @@ function openRitual(id, open) {
   sound.tick(660, 0.06);
 }
 document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => openRitual(b.dataset.close, false)));
-for (const id of ['blame', 'fortune']) $(`#${id}`).addEventListener('click', (e) => { if (e.target.id === id) openRitual(id, false); });
-const anySheetOpen = () => shareOpen || ritualOpen.blame || ritualOpen.fortune;
+for (const id of ['blame', 'fortune', 'open-shrine']) $(`#${id}`).addEventListener('click', (e) => { if (e.target.id === id) openRitual(id, false); });
+const anySheetOpen = () => shareOpen || ritualOpen.blame || ritualOpen.fortune || ritualOpen['open-shrine'];
+
+/* Open a shrine: the buttons with no name field of their own open the same name, in a sheet */
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('[data-open-shrine]');
+  if (!link || e.metaKey || e.ctrlKey || e.shiftKey) return; // a new tab still goes straight to /new
+  e.preventDefault();
+  sound.unlock();
+  openRitual('open-shrine', true);
+  const input = $('#name-form-3 input');
+  setTimeout(() => { input.focus(); input.select(); }, 120);
+});
 
 /* Burn a blame: the words go into the censer and nowhere else */
 const blameText = $('#blame-text');
@@ -1177,7 +1189,7 @@ function openPanel(open) {
 $('#btn-settings').addEventListener('click', () => { sound.unlock(); openPanel(!panelOpen); });
 $('#btn-close-panel').addEventListener('click', () => openPanel(false));
 backdrop.addEventListener('click', () => openPanel(false));
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (panelOpen) openPanel(false); if (shareOpen) openShare(false); openRitual('blame', false); openRitual('fortune', false); openTray(false); } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (panelOpen) openPanel(false); if (shareOpen) openShare(false); openRitual('blame', false); openRitual('fortune', false); openRitual('open-shrine', false); openTray(false); } });
 
 let metaTimer = 0;
 panel.addEventListener('input', (e) => {
@@ -1527,12 +1539,18 @@ $('#btn-rename').addEventListener('click', () => { openPanel(false); openJoin();
 $('#btn-invite').addEventListener('click', () => { sound.unlock(); openShare(true); });
 $('#btn-share').addEventListener('click', () => { sound.unlock(); openShare(true); });
 
-/* ---------- Name your shrine: /r/prod-is-down, or a generated name when the field is empty ---------- */
-for (const form of document.querySelectorAll('#name-form, #name-form-2, #hero-form')) {
+/* ---------- Name your shrine: every field shows the name you will get, and you never have to type one ---------- */
+// One suggestion per visit, in every field and in the sheet, so the name doesn't change between them.
+const suggested = suggestName();
+for (const form of document.querySelectorAll('#name-form, #name-form-2, #name-form-3, #hero-form')) {
+  const input = form.querySelector('input');
+  input.value = suggested;
+  input.placeholder = suggested; // cleared, it still opens the name it shows
+  input.addEventListener('focus', () => input.select()); // typing replaces the suggestion
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     sound.unlock();
-    const raw = form.querySelector('input').value.trim();
+    const raw = input.value.trim() || input.placeholder;
     const slug = raw.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48).replace(/-+$/, '');
     location.href = slug.length >= 3 ? `/r/${slug}` : raw ? `/new?name=${encodeURIComponent(raw)}` : '/new';
   });

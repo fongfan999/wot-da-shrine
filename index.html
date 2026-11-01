@@ -57,7 +57,7 @@
 
     <div class="bar__right">
       <button class="presence" id="presence" type="button" hidden aria-label="People in the shrine"></button>
-      <a class="btn btn--accent btn--sm" id="btn-together" href="/new">
+      <a class="btn btn--accent btn--sm" id="btn-together" href="/new" data-open-shrine>
         <span class="hide-sm" data-i18n="together">Pray with your team</span>
         <span class="show-sm" data-i18n="togetherShort">Team</span>
       </a>
@@ -101,7 +101,7 @@
             <label class="name-form__field hero-cta__field">
               <span class="name-form__prefix" aria-hidden="true">/r/</span>
               <span class="sr-only" data-i18n="nameLabel">Name your shrine</span>
-              <input class="name-form__input" type="text" maxlength="48" placeholder="prod-is-down" data-i18n-placeholder="namePlaceholder" spellcheck="false" />
+              <input class="name-form__input" type="text" maxlength="48" spellcheck="false" />
             </label>
             <button class="btn btn--accent btn--lg hero-cta__btn" type="submit">
               <span data-i18n="heroCta">Open a shrine</span>
@@ -207,7 +207,7 @@
             <label class="name-form__field">
               <span class="name-form__prefix" aria-hidden="true">/r/</span>
               <span class="sr-only" data-i18n="nameLabel">Name your shrine</span>
-              <input class="name-form__input" id="name-input" type="text" maxlength="48" placeholder="prod-is-down" data-i18n-placeholder="namePlaceholder" spellcheck="false" />
+              <input class="name-form__input" id="name-input" type="text" maxlength="48" spellcheck="false" />
             </label>
             <button class="btn btn--accent btn--block" type="submit">
               <span data-i18n="soloCta">Open a team shrine</span>
@@ -377,7 +377,7 @@
             <div class="ritual__body">
               <h3 data-i18n="landChorus">Bow in chorus</h3>
               <p data-i18n="landChorusText">Three or more people bowing within four seconds earn the room a peal of bells and bonus karma. The shrine counts it, so nobody can fake it alone.</p>
-              <a class="btn btn--glass btn--sm" href="/new" data-i18n="landNeedsTeam">Bow with your team →</a>
+              <a class="btn btn--glass btn--sm" href="/new" data-open-shrine data-i18n="landNeedsTeam">Bow with your team →</a>
             </div>
           </article>
           <article class="ritual ritual--remember">
@@ -580,7 +580,7 @@
             <label class="name-form__field hero-cta__field">
               <span class="name-form__prefix" aria-hidden="true">/r/</span>
               <span class="sr-only" data-i18n="nameLabel">Name your shrine</span>
-              <input class="name-form__input" type="text" maxlength="48" placeholder="prod-is-down" data-i18n-placeholder="namePlaceholder" spellcheck="false" />
+              <input class="name-form__input" type="text" maxlength="48" spellcheck="false" />
             </label>
             <button class="btn btn--accent btn--lg hero-cta__btn" type="submit">
               <span data-i18n="heroCta">Open a shrine</span>
@@ -620,7 +620,7 @@
         </div>
         <nav class="foot__col" aria-label="The shrine">
           <p class="foot__head" data-i18n="landFootShrine">Shrine</p>
-          <a href="/new" data-i18n="soloCta">Open a team shrine</a>
+          <a href="/new" data-open-shrine data-i18n="soloCta">Open a team shrine</a>
           <a href="/r/demo" data-i18n="landFootDemo">The demo shrine</a>
           <a href="/r/demo?tv=1" target="_blank" rel="noopener" data-i18n="landFootTv">TV mode ↗</a>
           <a href="#channel" data-i18n="landFootMp">Maintenance page</a>
@@ -660,6 +660,32 @@
       <button class="btn btn--accent btn--block" type="submit">
         <span data-i18n="joinBtn">Kneel at the altar</span>
       </button>
+    </form>
+  </div>
+
+  <!-- Open a shrine: every "open" button that has no name field of its own comes here -->
+  <div class="sheet" id="open-shrine" hidden role="dialog" aria-modal="true" aria-labelledby="open-title">
+    <form class="sheet__card open-form" id="name-form-3" autocomplete="off">
+      <div class="sheet__head">
+        <h2 class="sheet__title" id="open-title"><span data-i18n="openTitle">Open a</span> <em data-i18n="openTitleAccent">shrine</em></h2>
+        <button class="icon-btn" type="button" data-close="open-shrine" aria-label="Close">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="sheet__body">
+        <p class="sheet__hint" data-i18n="openHint">This is the link your team will click. Keep the name we picked, or call it after what is down.</p>
+        <label class="name-form__field open-form__field">
+          <span class="name-form__prefix" aria-hidden="true">/r/</span>
+          <span class="sr-only" data-i18n="nameLabel">Name your shrine</span>
+          <input class="name-form__input" type="text" maxlength="48" spellcheck="false" />
+        </label>
+        <div class="sheet__row">
+          <button class="btn btn--accent" type="submit">
+            <span data-i18n="openGo">Open it</span>
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
     </form>
   </div>
 

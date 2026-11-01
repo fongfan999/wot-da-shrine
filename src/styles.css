@@ -1142,6 +1142,8 @@ body[data-state="lit"] .act__label--lit { display: inline; }
 .name-form__prefix { font-family: var(--font-mono); font-size: 14px; color: var(--muted); }
 .name-form__input { flex: 1; width: 0; min-width: 0; padding: 8px 10px 8px 2px; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-family: var(--font-mono); font-size: 15px; }
 .name-form__input::placeholder { color: var(--line-strong); }
+.open-form__field { min-height: 50px; margin: 2px 0 4px; }
+.open-form__field .name-form__input { font-size: 16px; }
 
 /* The world: what every shrine is doing, on the landing page */
 .world { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--sheet-line); display: flex; flex-direction: column; gap: 6px; }
