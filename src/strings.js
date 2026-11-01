@@ -159,7 +159,7 @@ export const STRINGS = {
   landRitualsTitle: 'Things to do while',
   landRitualsAccent: 'waiting.',
   landTry: 'Try it',
-  landNeedsTeam: 'Needs a team',
+  landNeedsTeam: 'Bow with your team →',
   landSeeRecords: 'See the demo shrine’s records',
   landBlame: 'Burn a blame',
   landBlameText: 'Write what happened and burn it in the censer. The words never leave your browser; the room only learns that a confession was burned. Blameless, with a flame.',
