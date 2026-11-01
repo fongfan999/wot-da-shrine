@@ -1523,6 +1523,11 @@ body[data-resolved="1"] #btn-resolve { background: var(--live); color: var(--pap
 .burnslip__glow { position: absolute; left: 50%; bottom: -40px; width: 70%; height: 90px; translate: -50% 0; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--flame) 55%, transparent), transparent); opacity: 0; animation: burn-edge 8s ease-in infinite; }
 @keyframes burn { 0%, 32% { --burn: -12%; opacity: 1; } 72% { --burn: 104%; opacity: 1; } 80% { --burn: 104%; opacity: 0; } 81% { --burn: -12%; opacity: 0; transform: translateY(10px); } 92%, 100% { --burn: -12%; opacity: 1; transform: none; } }
 @keyframes burn-edge { 0%, 33% { opacity: 0; } 38%, 68% { opacity: 1; } 74%, 100% { opacity: 0; } }
+/* The visitor's own slip: it lands, catches, and burns once */
+.is-yours .burnslip { animation: burn-now 3.6s ease-in forwards; }
+.is-yours :is(.burnslip__edge, .burnslip__glow) { animation: burn-edge-now 3.6s ease-in forwards; }
+@keyframes burn-now { 0% { --burn: -12%; opacity: 0; transform: translateY(-24px) rotate(4deg); } 14%, 26% { --burn: -12%; opacity: 1; transform: none; } 88% { --burn: 104%; opacity: 1; } 100% { --burn: 104%; opacity: 0; } }
+@keyframes burn-edge-now { 0%, 24% { opacity: 0; } 30%, 84% { opacity: 1; } 94%, 100% { opacity: 0; } }
 
 /* Draw a fortune: tap the slip, shake the box, read your luck */
 .fortune-mini { cursor: pointer; perspective: 600px; }
@@ -1955,7 +1960,7 @@ body[data-fx="lite"] .stick__halo, body[data-fx="lite"] .kneeler__halo { display
   .hero-ribbon__track { overflow-x: auto; }
   body[data-landing="1"] .title .word--accent::after { animation: none; clip-path: none; }
   .mini-bar__caret, .mini-vigil__dot { animation: none; }
-  .burnslip, .burnslip__edge, .burnslip__glow, .chorus__bow i, .chorus__badge, .chorus::before { animation: none; }
+  .burnslip, .burnslip__edge, .burnslip__glow, .is-yours .burnslip, .is-yours :is(.burnslip__edge, .burnslip__glow), .chorus__bow i, .chorus__badge, .chorus::before { animation: none; }
   .chorus__badge { opacity: 1; }
 }
 

@@ -1030,7 +1030,9 @@ $('#blame-form').addEventListener('submit', (e) => {
   if (!text) { toast(t('blameEmpty')); return; }
   blameText.value = '';
   openRitual('blame', false);
-  blameFx(text, $('#blame-slip'));
+  // On the home page the visitor is down in the Rituals section: their words burn on the slip there.
+  if (landing) burnInTile(text);
+  else blameFx(text, $('#blame-slip'));
   addKarma(5);
   vigilTouch(0, 'blames');
   logMine('blame', t('fBlame'), { toastText: t('blameBurned') });
@@ -1559,22 +1561,12 @@ function setupLanding() {
     for (const en of entries) if (en.isIntersecting) { en.target.classList.add('is-in'); seen.unobserve(en.target); }
   }, { rootMargin: '0px 0px -12% 0px' });
   landingEl.querySelectorAll('.land').forEach((el) => seen.observe(el));
-  // "Try it": back up to the shrine, then the ritual.
+  // "Try it": the ritual opens right here, over the section; nothing scrolls.
   landingEl.addEventListener('click', (e) => {
     const b = e.target.closest('[data-try]');
     if (!b) return;
     sound.unlock();
-    const what = b.dataset.try;
-    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
-    setTimeout(() => {
-      if (what === 'blame') $('#btn-blame').click();
-      else if (what === 'fortune') $('#btn-fortune').click();
-      else if (what === 'records') {
-        const card = $('#records-card');
-        card.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
-        gsap.fromTo(card, { boxShadow: '0 0 0 3px var(--accent)' }, { boxShadow: 'var(--shadow-sheet)', duration: 1.6, ease: 'power2.out', delay: 0.4 });
-      }
-    }, reduceMotion ? 0 : 500);
+    $(b.dataset.try === 'blame' ? '#btn-blame' : '#btn-fortune').click();
   });
 }
 
@@ -1666,6 +1658,18 @@ function setupSteps() {
   }).observe($('#steps'));
 }
 
+/** The home page's Burn a blame: the visitor's own words take the slip in the Rituals tile and burn there. */
+function burnInTile(text) {
+  const stage = $('#burnslip').parentElement;
+  $('#burnslip-text').textContent = text;
+  $('#burnslip .burnslip__sig').textContent = '— you, blamelessly';
+  stage.classList.remove('is-yours');
+  void stage.offsetWidth;
+  stage.classList.add('is-yours');
+  sound.whoosh();
+  gsap.delayedCall(reduceMotion ? 0 : 0.6, () => sound.lighter());
+}
+
 /** Rituals: a new confession after every burn, a preview fortune per tap, and karma that climbs while on screen. */
 function setupRituals() {
   const BLAMES = [
@@ -1681,6 +1685,13 @@ function setupRituals() {
     if (e.animationName !== 'burn') return;
     blame = (blame + 1) % BLAMES.length;
     $('#burnslip-text').textContent = BLAMES[blame];
+  });
+  // After the visitor's own slip has burned, the examples come back.
+  $('#burnslip').addEventListener('animationend', (e) => {
+    if (e.animationName !== 'burn-now') return;
+    $('#burnslip').parentElement.classList.remove('is-yours');
+    $('#burnslip-text').textContent = BLAMES[blame];
+    $('#burnslip .burnslip__sig').textContent = '— anonymous, blamelessly';
   });
 
   const mini = $('#fortune-mini');
