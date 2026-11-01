@@ -188,7 +188,24 @@ It deploys to https://shrine.wotdafong.dev as a Workers custom domain (the
 
 ```
 index.html          page shell
-src/main.js         wiring, intro, actions, activity feed, shared-shrine client
+src/main.js         entry: loads the modules, keyboard shortcuts, starts the show
+src/app/context.js  where we are (solo, room, TV, home page), settings, shared state
+src/app/engines.js  builds the drawing engines (room, burner, smoke, fog, petals…)
+src/app/stage.js    layout, split title, intro, parallax, mantras
+src/app/fx.js       lite/full effects, frame budget, TV sleep
+src/app/settings.js applying settings, the settings panel, sound toggle
+src/app/ui.js       toasts, activity feed, shockwaves, copy
+src/app/stats.js    counters, rank, enlightenment, vigil strip, records, ETA
+src/app/vigil.js    the solo page's vigils and records
+src/app/altar.js    light, burn out, bowl + combos, bow, puff, breathing
+src/app/offerings.js, prayers.js, rituals.js   the offering tray, prayers, blame + fortune sheets
+src/app/shrine.js   shared-shrine client: join, connection, remote actions
+src/app/people.js   people card and presence stack
+src/app/resolve.js  "they're back"
+src/app/shareSheet.js  invite + share card sheet
+src/app/world.js    the world line (every shrine)
+src/app/openShrine.js  name fields and the Open sheet
+src/landing/        the home page's sections (pulse, showcase, steps, builder, TV…)
 src/room.js         room URL, saved name, reconnecting WebSocket
 src/share.js        the share card: live altar + stats as SVG, rasterised to PNG
 src/omikuji.js      the fortunes: five levels, three lines each
