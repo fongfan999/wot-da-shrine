@@ -18,11 +18,16 @@ shrine.
 
 ## How it works
 
-- `/` is the landing page: the solo shrine as the first screen (it is the
-  demo), then how a vigil works, the rituals, how the link travels through
-  Slack, and the live world count. Give it a `title`, `subtitle` or `eta`
-  (in the URL or in Customize) and the landing sections disappear: it is your
-  maintenance page. `?solo=1` does the same without a title.
+- `/` is the landing page. The altar on the first screen is a demo: light
+  it, ring the bowl, say a prayer, and after a few actions it points you at
+  the one thing to do here, open a shrine for your team. Rituals, vigils,
+  records and sharing only exist in a shrine (or a maintenance page), and
+  nothing done on the demo is counted in the world totals. Below it: how a
+  vigil works, the rituals, how the link travels through Slack, and the
+  live world count.
+- Give `/` a `title`, `subtitle` or `eta` (in the URL or in Customize) and
+  it becomes your maintenance page: the full solo shrine, with the landing
+  sections gone. `?solo=1` does the same without a title.
 - `/new` redirects to a freshly named shared shrine, e.g. `/r/serene-rack-42`.
   `/new?name=Prod is down` names it `/r/prod-is-down` instead, and the landing
   page has a field for exactly that.

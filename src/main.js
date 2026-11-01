@@ -439,6 +439,19 @@ function logEvent({ key, avatar = '🪔', who = '', what, quote = '', quiet = fa
 /** Our own action, as it should read in the feed. */
 function logMine(kind, what, extra = {}) {
   logEvent({ key: `me:${kind}`, avatar: me?.avatar ?? '🧘', who: t('you'), what, ...extra });
+  demoAction();
+}
+
+/* ---------- The home page is a demo: after a few actions, point at the door ---------- */
+let demoActions = 0;
+function demoAction() {
+  if (!landing) return;
+  demoActions += 1;
+  if (demoActions !== 3) return;
+  toast(t('demoNudge'));
+  const card = $('#solo-card');
+  card.classList.add('is-nudged');
+  card.addEventListener('animationend', () => card.classList.remove('is-nudged'), { once: true });
 }
 
 /* ---------- Stats + progress ---------- */
@@ -658,7 +671,7 @@ function light() {
   if (myId) congregation.bow(myId, 3);
   logMine('light', t('fLight'), { toastText: t('litToast') });
   pulse('light');
-  if (!roomName) {
+  if (!roomName && !landing) {
     if (!vigil) { vigil = { startedAt: Date.now(), lastAt: Date.now(), peak: 1, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0 }; if (body.dataset.resolved) clearResolved(); renderResolve(); }
     vigilTouch(0, 'lights');
     tickVigil();
@@ -952,7 +965,7 @@ function remember(text, name) {
 
 /** The solo page tells the world what happened (rooms report through their own shrine). Best effort. */
 function pulse(kind, text = '') {
-  if (roomName) return;
+  if (roomName || landing) return; // rooms report through their shrine; the home page is a demo
   try {
     fetch('/api/pulse', { method: 'POST', body: JSON.stringify({ kind, text }), keepalive: true, headers: { 'Content-Type': 'application/json' } }).catch(() => {});
   } catch { /* offline, or a maintenance page served from somewhere else */ }
@@ -1166,6 +1179,11 @@ panel.addEventListener('input', (e) => {
   } else {
     settings[el.name] = value;
     persist();
+    // A title on the home page makes it a maintenance page: reload into that mode once typing stops.
+    if (landing && ['title', 'subtitle', 'eta'].includes(el.name) && value) {
+      clearTimeout(metaTimer);
+      metaTimer = setTimeout(() => location.reload(), 900);
+    }
   }
   applySettings();
   if (el.type === 'checkbox') sound.tick(el.checked ? 880 : 440, 0.06);
@@ -1504,6 +1522,11 @@ function setupLanding() {
   body.dataset.landing = '1';
   const landingEl = $('#landing');
   landingEl.hidden = false;
+  for (const [sel, key] of [['#solo-card .label', 'demoLabel'], ['#solo-card .card__text', 'demoText']]) {
+    const el = $(sel);
+    el.removeAttribute('data-i18n'); // or applyStrings() puts the maintenance-page words back
+    el.textContent = t(key);
+  }
   $('#land-badge').src = `/api/rooms/serene-rack-42/badge.svg`;
   $('#unfurl-link').textContent = `${location.host}/r/serene-rack-42`;
   // Sections reveal as they scroll in.

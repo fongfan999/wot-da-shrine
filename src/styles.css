@@ -1395,9 +1395,16 @@ body[data-resolved="1"] #btn-resolve { background: var(--live); color: var(--pap
 .land__foot a { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
 .land__foot a:hover { color: var(--accent); }
 
-/* On the landing page the hero speaks for the product, not for a maintenance window */
-body[data-landing="1"] .card--solo .label { display: none; }
-body[data-landing="1"] .card--solo .card__text { display: none; }
+/* The home page is a demo with one action: the altar and its sounds stay, the product surface goes.
+   Rituals, vigils, records, the feed and sharing belong to a shrine with a team (or a maintenance page). */
+body[data-landing="1"] :is(.card--records, .card--feed, .rank, .enlight, .eta, #btn-resolve, .vigil, .plantern-row, .quick__chip--ritual, .quick__sep, #btn-share, .stats .stat:nth-child(3)) { display: none; }
+body[data-landing="1"] .stats { grid-template-columns: repeat(2, 1fr); }
+body[data-landing="1"] .side .card--status { order: 2; }
+body[data-landing="1"] .side--left { order: 1; }
+body[data-landing="1"] .card--solo { border-color: var(--accent); }
+body[data-landing="1"] .card--solo .label { color: var(--accent); }
+body[data-landing="1"] .card--solo.is-nudged { animation: nudge 1.2s var(--ease) 2; }
+@keyframes nudge { 0%, 100% { transform: none; box-shadow: var(--shadow-sheet); } 40% { transform: translateY(-4px); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-sheet); } }
 
 /* ---------- Mode switches ---------- */
 body[data-mode="room"] .card--solo { display: none; }
