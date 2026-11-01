@@ -303,6 +303,9 @@ a { color: inherit; }
 .btn--accent:hover { background: var(--accent-strong); }
 .btn--glass { background: var(--paper-raised); color: var(--ink); border-color: var(--field-line); }
 .btn--glass:hover { background: var(--paper-sunk); }
+.btn--live { background: var(--live-soft); color: var(--live); border-color: var(--live); }
+.btn--live:hover { background: var(--live); color: var(--paper); }
+.btn--live:disabled { opacity: .6; pointer-events: none; }
 
 .icon-btn {
   width: 36px;
@@ -1109,6 +1112,76 @@ body[data-state="lit"] .act__label--lit { display: inline; }
 .panel__actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .panel__hint { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
 
+/* ---------- Name your shrine (solo card) ---------- */
+.name-form { display: flex; flex-direction: column; gap: 10px; }
+.name-form__field {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px 0 14px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  transition: border-color 160ms, box-shadow 160ms;
+}
+.name-form__field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.name-form__prefix { font-family: var(--font-mono); font-size: 14px; color: var(--muted); }
+.name-form__input { flex: 1; min-width: 0; padding: 8px 10px 8px 2px; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-family: var(--font-mono); font-size: 15px; }
+.name-form__input::placeholder { color: var(--line-strong); }
+
+/* The world: what every shrine is doing, on the landing page */
+.world { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--sheet-line); display: flex; flex-direction: column; gap: 6px; }
+.world__line { display: flex; align-items: center; gap: 8px; margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.world__dot { width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 0 var(--ember); animation: world-beat 2.4s ease-out infinite; }
+@keyframes world-beat { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ember) 45%, transparent); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.world__ticker { margin: 0; min-height: 1.4em; font-size: 13px; color: var(--muted); font-style: italic; font-family: var(--font-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.world__ticker b { font-weight: 500; color: var(--ink); }
+
+/* ---------- "They're back" ---------- */
+#btn-resolve { margin-top: -2px; }
+body[data-resolved="1"] .eyebrow::before { background: var(--live); }
+body[data-resolved="1"] #btn-resolve { background: var(--live); color: var(--paper); }
+
+/* ---------- Share sheet ---------- */
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--backdrop);
+  overflow-y: auto;
+}
+.sheet__card {
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-float);
+  overflow: hidden;
+}
+.sheet__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 22px 10px; }
+.sheet__title { margin: 0; font-weight: 500; font-size: 30px; line-height: 1.1; letter-spacing: -.04em; }
+.sheet__body { display: flex; flex-direction: column; gap: 22px; padding: 6px 22px 24px; overflow-y: auto; }
+.sheet__section { display: flex; flex-direction: column; gap: 10px; }
+.sheet__section .label { margin: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--sheet-label); }
+.sheet__hint { margin: -4px 0 0; font-size: 14px; color: var(--muted); }
+.sheet__row { display: flex; flex-wrap: wrap; gap: 8px; }
+.linkbox { display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 14px; border: 1px solid var(--field-line); border-radius: var(--radius-pill); background: var(--paper); }
+.linkbox__input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font-family: var(--font-mono); font-size: 14px; }
+.linkbox--badge { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; border-radius: var(--radius-md); }
+.linkbox__code { flex: 1 1 100%; min-width: 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; line-height: 1.4; }
+.badge-preview { display: block; height: 20px; }
+.sharecard { position: relative; margin: 0; aspect-ratio: 1200 / 630; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--paper-sunk); overflow: hidden; }
+.sharecard__img { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 300ms; }
+.sharecard__img[src] { opacity: 1; }
+.sharecard__loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.sharecard__img[src] + .sharecard__loading { display: none; }
+
 /* ---------- Mode switches ---------- */
 body[data-mode="room"] .card--solo { display: none; }
 
@@ -1179,6 +1252,9 @@ body[data-fx="lite"] .stick__halo, body[data-fx="lite"] .kneeler__halo { display
   .act__label { font-size: 11px; }
   .act__label--lit [data-i18n] { display: none; }
   .toast { top: 62px; font-size: 13px; }
+  .sheet { padding: 0; align-items: end; }
+  .sheet__card { max-height: 100dvh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border-bottom: 0; }
+  .sheet__title { font-size: 26px; }
   .credit { font-size: 11px; }
 }
 

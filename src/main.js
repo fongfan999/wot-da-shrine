@@ -15,6 +15,7 @@ import { Vitals } from './vitals.js';
 import { WishBoard } from './ema.js';
 import { syncPalette } from './palette.js';
 import { icon } from './icons.js';
+import { cardSvg, cardPng, shareFile, download, copyImage, canCopyImage, canShareFiles } from './share.js';
 
 const $ = (sel) => document.querySelector(sel);
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -38,6 +39,11 @@ let clockSkew = 0;       // server clock minus ours
 let pendingLightAt = 0;  // we lit it and are waiting for the shrine to confirm
 let greeted = false;     // the first state message restores the altar
 const people = new Map();
+const sessionStart = Date.now(); // the solo vigil starts when the page opens
+let roomSince = 0;       // a shared shrine's first action (the shrine tells us)
+let roomPrayed = 0;      // every prayer ever said in the room
+let resolvedAt = 0;      // the last "they're back"
+const recentPrayers = []; // the last few prayers, with names, for the share card
 
 /* ---------- Elements ---------- */
 const body = document.body;
@@ -166,9 +172,10 @@ $('#fx-seg').addEventListener('click', (e) => {
 function applySettings(animate = false) {
   applyTheme();
   applyFx();
-  applyStrings({ title: settings.title, subtitle: settings.subtitle });
-  document.title = `${settings.title || t('title')} · ${BRAND}`;
-  if (roomName) $('#eyebrow').textContent = fmt('roomEyebrow', { room: roomName });
+  if (body.dataset.resolved) applyStrings({ eyebrow: t('resolvedEyebrow'), title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
+  else applyStrings({ title: settings.title, subtitle: settings.subtitle });
+  document.title = `${body.dataset.resolved ? t('resolvedTitle') : settings.title || t('title')} · ${BRAND}`;
+  if (roomName) $('#eyebrow').textContent = body.dataset.resolved ? `${t('resolvedEyebrow')} / ${roomName}` : fmt('roomEyebrow', { room: roomName });
   if (animate || !title.querySelector('.word')) splitTitle(animate);
 
   fog.setEnabled(settings.fog && !lite);
@@ -495,6 +502,7 @@ function light() {
   ignite(Date.now());
   if (myId) congregation.bow(myId, 3);
   logMine('light', t('fLight'), { toastText: t('litToast') });
+  pulse('light');
 }
 
 /** Set the altar burning, `at` being when it was lit (earlier than now for late joiners). */
@@ -636,6 +644,7 @@ function bow() {
   addKarma(2);
   logMine('bow', t('fBow'), { toastText: t('bowed') });
   shrine?.send('bow');
+  pulse('bow');
 }
 
 /** Someone bows: their figure if they kneel in the room, otherwise the ops team. */
@@ -658,6 +667,7 @@ function offer(kind = null) {
   addKarma(3);
   logMine(`offer:${kind}`, fmt('fOffer', { item: label }), { toastText: fmt('offered', { item: label }) });
   shrine?.send('offer', { kind });
+  pulse('offer');
 }
 
 function offerFx(kind) {
@@ -767,9 +777,25 @@ $('#wish-form').addEventListener('submit', (e) => {
 function sendPrayer(text) {
   prayerFx(text, roomName ? `${me?.avatar ?? ''} ${t('you')}` : '', false, congregation.element(myId));
   wishes.hang(text, roomName ? me?.name ?? '' : '');
+  remember(text, roomName ? me?.name ?? '' : '');
   addKarma(3);
   logMine('prayer', t('fPrayer'), { quote: text, toastText: t('wishSent') });
   shrine?.send('prayer', { text });
+  pulse('prayer', text);
+}
+
+function remember(text, name) {
+  recentPrayers.push({ text, name });
+  if (recentPrayers.length > 6) recentPrayers.shift();
+  if (!roomName) roomPrayed += 1;
+}
+
+/** The solo page tells the world what happened (rooms report through their own shrine). Best effort. */
+function pulse(kind, text = '') {
+  if (roomName) return;
+  try {
+    fetch('/api/pulse', { method: 'POST', body: JSON.stringify({ kind, text }), keepalive: true, headers: { 'Content-Type': 'application/json' } }).catch(() => {});
+  } catch { /* offline, or a maintenance page served from somewhere else */ }
 }
 
 /* ---------- Quick prayers: three ready-made ones, reshuffled every time ---------- */
@@ -841,7 +867,7 @@ function openPanel(open) {
 $('#btn-settings').addEventListener('click', () => { sound.unlock(); openPanel(!panelOpen); });
 $('#btn-close-panel').addEventListener('click', () => openPanel(false));
 backdrop.addEventListener('click', () => openPanel(false));
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (panelOpen) openPanel(false); openTray(false); } });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (panelOpen) openPanel(false); if (shareOpen) openShare(false); openTray(false); } });
 
 panel.addEventListener('input', (e) => {
   const el = e.target;
@@ -940,6 +966,7 @@ $('#join-form').addEventListener('submit', (e) => {
   const avatar = joinAvatars.querySelector('[aria-checked="true"]')?.textContent ?? AVATARS[0];
   me = { name, avatar };
   saveMe(me);
+  joinName.blur(); // so the shortcuts work right away
   gsap.to(joinEl, { opacity: 0, duration: 0.3, onComplete: () => { joinEl.hidden = true; } });
   sound.bowl(220);
   if (shrine) shrine.rename(me);
@@ -973,6 +1000,8 @@ function onShrineMessage(msg) {
         // Restore what is already on the altar, and the prayers said before we arrived.
         msg.offerings.forEach((kind, i) => gsap.delayedCall(1.6 + i * 0.25, () => art.offer(kind)));
         for (const p of msg.prayers) logEvent({ avatar: p.avatar, who: p.name, what: t('fPrayer'), quote: p.text, at: p.at });
+        for (const p of msg.prayers.slice(-6)) recentPrayers.push({ text: p.text, name: p.name });
+        if (msg.resolvedAt && msg.now - msg.resolvedAt < RESOLVED_FOR) showResolved(msg.resolvedAt - clockSkew, true);
         msg.prayers.slice(-6).forEach((p, i) => gsap.delayedCall(1.2 + i * 0.12, () => wishes.hang(p.text, p.name, false)));
         msg.prayers.slice(-3).forEach((p, i) => gsap.delayedCall(2.4 + i * 1.8, () => prayerFx(p.text, `${p.avatar} ${p.name}`, true)));
       } else {
@@ -1017,14 +1046,17 @@ function remoteAct({ kind, by, note, item, text }) {
   else if (kind === 'bowl') { bowlFx(note); log(t('fBowl')); }
   else if (kind === 'bow') { bowFx(by.id); log(t('fBow')); }
   else if (kind === 'offer') { const label = offerFx(item); if (label) log(fmt('fOffer', { item: label })); }
-  else if (kind === 'prayer') { prayerFx(text, `${by.avatar} ${by.name}`, false, congregation.element(by.id)); wishes.hang(text, by.name); log(t('fPrayer'), { quote: text, toastText: `${by.name}: “${text}”` }); }
+  else if (kind === 'prayer') { prayerFx(text, `${by.avatar} ${by.name}`, false, congregation.element(by.id)); wishes.hang(text, by.name); remember(text, by.name); log(t('fPrayer'), { quote: text, toastText: `${by.name}: “${text}”` }); }
   else if (kind === 'puff') puffFx();
+  else if (kind === 'resolve') { resolveFx(); showResolved(Date.now()); log(t('fResolve'), { toastText: fmt('resolvedToast', { name: by.name }) }); }
 }
 
 /** The shrine is the source of truth for the room's counters. */
-function syncCounters({ incense, karma }) {
+function syncCounters({ incense, karma, since, prayed }) {
   if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); bump(statIncense); }
   if (karma !== undefined && karma !== counters.karma) { counters.karma = karma; updateStats(!greeted); bump(statKarma); }
+  if (since) roomSince = since - clockSkew;
+  if (prayed !== undefined) roomPrayed = prayed;
 }
 
 /** Match our altar to the shrine's: lit since `serverLitAt`, or out (0). */
@@ -1115,17 +1147,222 @@ presence.addEventListener('click', () => {
 
 $('#btn-rename').addEventListener('click', () => { openPanel(false); openJoin(); });
 
-$('#btn-invite').addEventListener('click', async () => {
+$('#btn-invite').addEventListener('click', () => { sound.unlock(); openShare(true); });
+$('#btn-share').addEventListener('click', () => { sound.unlock(); openShare(true); });
+
+/* ---------- Name your shrine: /r/prod-is-down, or a generated name when the field is empty ---------- */
+$('#name-form').addEventListener('submit', (e) => {
+  e.preventDefault();
   sound.unlock();
-  const url = `${location.origin}/r/${roomName}`;
-  try { await navigator.clipboard.writeText(url); } catch { prompt('Copy this link:', url); }
-  toast(t('inviteCopied'));
-  sound.tick(990, 0.08);
+  const raw = $('#name-input').value.trim();
+  const slug = raw.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48).replace(/-+$/, '');
+  location.href = slug.length >= 3 ? `/r/${slug}` : raw ? `/new?name=${encodeURIComponent(raw)}` : '/new';
 });
+
+/* ---------- The world: what every shrine is doing, on the landing page ---------- */
+const worldEl = $('#world');
+const WORLD_EVERY = 45000;
+const WORLD_KINDS = { light: 'worldLight', prayer: 'worldPrayer', bow: 'worldBow', offer: 'worldOffer', resolve: 'worldResolve' };
+let worldTimer = 0;
+function agoShort(s) {
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.round(s / 60)}m`;
+  if (s < 86400) return `${Math.round(s / 3600)}h`;
+  return `${Math.round(s / 86400)}d`;
+}
+async function loadWorld() {
+  clearTimeout(worldTimer);
+  if (roomName || document.visibilityState !== 'visible') return;
+  try {
+    const w = await fetch('/api/world', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null));
+    if (!w) return;
+    const n = (x) => Number(x || 0).toLocaleString();
+    const plural = (count, word) => `${n(count)} ${word}${count === 1 ? '' : 's'}`;
+    const bits = [];
+    if (w.prayers) bits.push(fmt('worldPrayers', { n: plural(w.prayers, 'prayer') }));
+    if (w.shrines) bits.push(plural(w.shrines, 'shrine'));
+    if (w.burningNow) bits.push(fmt('worldBurning', { n: n(w.burningNow) }));
+    $('#world-stats').textContent = bits.length ? bits.join(' · ') : t('worldFirst');
+    const ticker = $('#world-ticker');
+    ticker.innerHTML = '';
+    const last = (w.recent ?? []).find((r) => WORLD_KINDS[r.kind]);
+    if (last) {
+      const what = last.text ? `“${last.text}”` : t(WORLD_KINDS[last.kind]);
+      const b = document.createElement('b');
+      b.textContent = what;
+      ticker.append(b, document.createTextNode(` · ${fmt('worldAgo', { t: agoShort(last.ago) })}`));
+    }
+    worldEl.hidden = false;
+  } catch { /* no world today */ }
+  worldTimer = setTimeout(loadWorld, WORLD_EVERY);
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') loadWorld(); });
+
+/* ---------- They're back: the moment worth sharing ---------- */
+const RESOLVED_FOR = 10 * 60 * 1000; // the heading celebrates for ten minutes, then the shrine is a shrine again
+const resolveBtn = $('#btn-resolve');
+let resolvedTimer = 0;
+/** Minutes of prayer so far: the room's first action, or this vigil's start. */
+const minutesPrayed = () => Math.max(0, Math.round((Date.now() - (roomName ? roomSince || Date.now() : sessionStart)) / 60000));
+
+function resolve() {
+  sound.unlock();
+  if (Date.now() - resolvedAt < 60000) return;
+  resolveFx();
+  showResolved(Date.now());
+  addKarma(20);
+  logMine('resolve', t('fResolve'), { toastText: t('resolvedMine') });
+  shrine?.send('resolve');
+  pulse('resolve');
+  setTimeout(() => openShare(true, true), 1600); // a plain timer: GSAP's ticker sleeps in background tabs
+}
+
+function resolveFx() {
+  activity();
+  [261, 329, 392, 523].forEach((n, i) => gsap.delayedCall(i * 0.22, () => sound.bowl(n)));
+  petals.burst(70);
+  shockwave();
+  gsap.delayedCall(0.4, shockwave);
+  room.pulse();
+  gsap.delayedCall(0.8, () => room.pulse());
+  kick(40, 1.6);
+  if (!reduceMotion) {
+    gsap.delayedCall(0.3, () => art.tips().forEach((tip) => motes.burst(tip.x, tip.y, 40, 1.6)));
+    gsap.fromTo('.burner', { scale: 1.05 }, { scale: 1, duration: 1.2, ease: 'elastic.out(1, 0.4)' });
+    art.bow(2);
+  }
+}
+
+/** Swap the heading to the good news for a while. `quiet` restores it without the fanfare (a late joiner). */
+function showResolved(at, quiet = false) {
+  resolvedAt = at;
+  body.dataset.resolved = '1';
+  const mins = minutesPrayed();
+  applyStrings({
+    eyebrow: t('resolvedEyebrow'),
+    title: t('resolvedTitle'),
+    subtitle: mins >= 1 ? fmt('resolvedSubtitle', { minutes: mins, karma: counters.karma }) : t('resolvedSubtitleShort'),
+    resolve: t('resolved'),
+  });
+  resolveBtn.disabled = true;
+  if (roomName) $('#eyebrow').textContent = `${t('resolvedEyebrow')} / ${roomName}`;
+  splitTitle(!quiet);
+  clearTimeout(resolvedTimer);
+  resolvedTimer = setTimeout(() => {
+    delete body.dataset.resolved;
+    resolveBtn.disabled = false;
+    applySettings(true);
+  }, Math.max(1000, RESOLVED_FOR - (Date.now() - at)));
+}
+resolveBtn.addEventListener('click', resolve);
+
+/* ---------- Share sheet: invite the team, and a picture of the shrine to post ---------- */
+const shareEl = $('#share');
+const shareImg = $('#share-img');
+let shareOpen = false;
+let cardBlob = null;
+let cardSeq = 0;
+const roomUrl = () => `${location.origin}${roomName ? `/r/${roomName}` : '/'}`;
+const cardName = () => `wot-da-shrine-${roomName || 'solo'}.png`;
+
+/** What the card says when it goes out with text. */
+function cardText() {
+  const url = roomUrl();
+  const mins = minutesPrayed();
+  if (body.dataset.resolved) return fmt('cardTextResolved', { minutes: Math.max(1, mins), url });
+  const facts = [];
+  if (roomName && people.size > 1) facts.push(`${people.size} devotees`);
+  if (mins >= 1) facts.push(`${mins} min of incense`);
+  if (counters.karma) facts.push(`${counters.karma} karma`);
+  if (roomPrayed) facts.push(`${roomPrayed} prayer${roomPrayed === 1 ? '' : 's'}`);
+  return fmt('cardText', { facts: facts.join(', ') || 'the incense is lit', url });
+}
+
+async function drawCard() {
+  const seq = ++cardSeq;
+  cardBlob = null;
+  shareImg.removeAttribute('src');
+  const list = [...people.values()].sort((a, b) => (a.id === myId) - (b.id === myId));
+  const svg = cardSvg({
+    room: roomName,
+    resolved: Boolean(body.dataset.resolved),
+    people: roomName ? people.size : 0,
+    avatars: roomName ? list.map((p) => p.avatar) : [],
+    minutes: minutesPrayed(),
+    karma: counters.karma,
+    prayers: roomPrayed,
+    incense: counters.incense,
+    quotes: recentPrayers,
+    url: roomUrl().replace(/^https?:\/\//, ''),
+  });
+  try {
+    const blob = await cardPng(svg);
+    if (seq !== cardSeq) return;
+    cardBlob = blob;
+    shareImg.src = URL.createObjectURL(blob);
+  } catch (err) {
+    console.error(err);
+    if (seq === cardSeq) toast(t('cardFailed'));
+  }
+}
+
+function openShare(open, celebrate = false) {
+  if (open === shareOpen) return;
+  shareOpen = open;
+  if (!open) {
+    gsap.to(shareEl, { opacity: 0, duration: 0.25, onComplete: () => { shareEl.hidden = true; } });
+    return;
+  }
+  openTray(false);
+  openPanel(false);
+  $('#share-invite').hidden = !roomName;
+  $('#share-badge').hidden = !roomName;
+  $('#btn-share-native').hidden = typeof navigator.share !== 'function';
+  $('#btn-card-copy').hidden = !canCopyImage();
+  $('#btn-card-share').hidden = !canShareFiles();
+  $('#card-label').textContent = celebrate || body.dataset.resolved ? t('resolvedTitle') : t('cardLabel');
+  if (roomName) {
+    $('#share-url').value = roomUrl();
+    $('#btn-share-x').href = `https://x.com/intent/post?${new URLSearchParams({ text: fmt('slackMessage', { url: roomUrl() }) })}`;
+    const badge = `${location.origin}/api/rooms/${roomName}/badge.svg`;
+    $('#badge-img').src = `${badge}?t=${Date.now()}`;
+    $('#badge-md').textContent = `[![Wot Da Shrine](${badge})](${roomUrl()})`;
+  }
+  shareEl.hidden = false;
+  gsap.fromTo(shareEl, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+  gsap.fromTo('.sheet__card', { y: 24, opacity: 0, scale: 0.98 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' });
+  sound.tick(660, 0.06);
+  drawCard();
+}
+
+async function copyText(text, done) {
+  try { await navigator.clipboard.writeText(text); } catch { prompt('Copy this:', text); }
+  toast(done);
+  sound.tick(990, 0.08);
+}
+
+$('#btn-close-share').addEventListener('click', () => openShare(false));
+shareEl.addEventListener('click', (e) => { if (e.target === shareEl) openShare(false); });
+$('#btn-share-copy').addEventListener('click', () => copyText(roomUrl(), t('inviteCopied')));
+$('#btn-share-slack').addEventListener('click', () => copyText(fmt('slackMessage', { url: roomUrl() }), t('slackCopied')));
+$('#btn-share-native').addEventListener('click', async () => {
+  try { await navigator.share({ title: BRAND, text: fmt('slackMessage', { url: roomUrl() }), url: roomUrl() }); } catch { /* cancelled */ }
+});
+$('#btn-badge-copy').addEventListener('click', () => copyText($('#badge-md').textContent, t('badgeCopied')));
+$('#btn-card-share').addEventListener('click', async () => {
+  if (!cardBlob) return;
+  const shared = await shareFile(cardBlob, cardName(), { title: BRAND, text: cardText(), url: roomUrl() });
+  if (!shared) { download(cardBlob, cardName()); copyText(cardText(), t('cardSaved')); }
+});
+$('#btn-card-copy').addEventListener('click', async () => {
+  if (!cardBlob) return;
+  if (await copyImage(cardBlob)) { toast(t('cardCopied')); sound.tick(990, 0.08); } else download(cardBlob, cardName());
+});
+$('#btn-card-download').addEventListener('click', () => { if (cardBlob) { download(cardBlob, cardName()); toast(t('cardSaved')); } });
 
 /* ---------- Keyboard shortcuts ---------- */
 document.addEventListener('keydown', (e) => {
-  if (e.target.matches('input, textarea') || !joinEl.hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target.matches('input, textarea') || !joinEl.hidden || shareOpen || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key === 'l') light();
   if (e.key === 'b') ringBowl();
   if (e.key === 'p') bow();
@@ -1157,3 +1394,4 @@ startMantras();
 petals.rate = 0.35; // a few stray petals before the incense is lit
 petals.start();
 if (roomName) enterRoom();
+else loadWorld();

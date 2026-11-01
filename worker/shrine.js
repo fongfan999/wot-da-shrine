@@ -16,9 +16,11 @@ const OFFERING_KINDS = ['energy', 'noodles', 'duck', 'coffee', 'keyboard', 'usb'
 const AVATARS = ['🧘', '🙇', '🙏', '🧑‍💻', '👩‍💻', '👨‍💻', '🐒', '🤖', '🦆', '🐱'];
 
 // What each action is worth.
-const KARMA = { bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10 };
+const KARMA = { bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20 };
+const RESOLVE_COOLDOWN = 60 * 1000; // "they're back" counts once a minute, however many people click it
 
-const EMPTY = { incense: 0, karma: 0, litAt: 0, offerings: [], prayers: [] };
+// since: the first action; prayed: every prayer ever (the list keeps the last few); resolvedAt: the last "they're back"
+const EMPTY = { incense: 0, karma: 0, litAt: 0, offerings: [], prayers: [], since: 0, prayed: 0, resolved: 0, resolvedAt: 0 };
 
 function clean(text, max) {
   return String(text ?? '')
@@ -43,10 +45,11 @@ export class Shrine extends DurableObject {
   }
 
   async fetch(request) {
+    const url = new URL(request.url);
     if (request.headers.get('Upgrade') !== 'websocket') {
+      if (url.pathname.endsWith('/status')) return Response.json(this.status(url.pathname.split('/')[3] ?? ''));
       return new Response('Expected a WebSocket', { status: 426 });
     }
-    const url = new URL(request.url);
     const person = {
       id: crypto.randomUUID().slice(0, 8),
       name: clean(url.searchParams.get('name'), 24) || 'Anonymous sysadmin',
@@ -91,7 +94,7 @@ export class Shrine extends DurableObject {
         break;
       case 'burnout':
         // Every client reports the burn-out; settle() only pays out once.
-        if (this.settle()) { this.broadcast({ t: 'sync', ...this.counters() }); await this.save(); }
+        if (this.settle()) { this.broadcast({ t: 'sync', ...this.counters() }); await this.save(); this.report('burnout', { karma: KARMA.burnout }); }
         return;
       case 'bowl':
         out.note = [174, 196, 220, 261].includes(msg.note) ? msg.note : 196;
@@ -109,6 +112,16 @@ export class Shrine extends DurableObject {
         if (!text) return;
         out.text = text;
         s.prayers = [...s.prayers, { name: by.name, avatar: by.avatar, text, at: Date.now() }].slice(-MAX_PRAYERS);
+        s.prayed += 1;
+        break;
+      }
+      case 'resolve': {
+        // The servers are back: a celebration for the room, and the shrine remembers it.
+        const now = Date.now();
+        if (now - s.resolvedAt < RESOLVE_COOLDOWN) return;
+        s.resolvedAt = now;
+        s.resolved += 1;
+        out.since = s.since;
         break;
       }
       case 'rename': {
@@ -124,9 +137,12 @@ export class Shrine extends DurableObject {
         return;
     }
 
+    if (!s.since) s.since = Date.now();
     s.karma += KARMA[msg.t] ?? 0;
     this.broadcast({ ...out, ...this.counters() });
+    const fresh = !this.stored;
     await this.save();
+    this.report(msg.t, { text: out.text, karma: KARMA[msg.t] ?? 0, fresh });
   }
 
   async webSocketClose(ws) {
@@ -155,7 +171,39 @@ export class Shrine extends DurableObject {
   }
 
   counters() {
-    return { incense: this.state.incense, karma: this.state.karma, litAt: this.state.litAt };
+    return { incense: this.state.incense, karma: this.state.karma, litAt: this.state.litAt, since: this.state.since, prayed: this.state.prayed, resolvedAt: this.state.resolvedAt };
+  }
+
+  /** The room at a glance, for link previews and badges. Names stay in the room; only avatars leave. */
+  status(room) {
+    this.settle();
+    const s = this.state;
+    const people = this.people();
+    const now = Date.now();
+    return {
+      room,
+      people: people.length,
+      avatars: people.slice(0, 6).map((p) => p.avatar),
+      lit: Boolean(s.litAt),
+      burnLeft: s.litAt ? Math.max(0, Math.round((s.litAt + BURN_SECONDS * 1000 - now) / 1000)) : 0,
+      incense: s.incense,
+      karma: s.karma,
+      prayers: s.prayed,
+      offerings: s.offerings.length,
+      since: s.since,
+      resolvedAt: s.resolvedAt,
+      lastPrayer: s.prayers.at(-1)?.text ?? '',
+      now,
+    };
+  }
+
+  /** Tell the world. Fire-and-forget: the room never waits on the counter, and a missing binding (tests) is fine. */
+  report(kind, { text = '', karma = 0, fresh = false } = {}) {
+    const world = this.env.WORLD;
+    if (!world) return;
+    const room = this.ctx.id.name ?? this.ctx.id.toString();
+    const p = world.get(world.idFromName('world')).pulse({ room, kind, text, karma, fresh, litAt: this.state.litAt });
+    this.ctx.waitUntil(Promise.resolve(p).catch(() => {}));
   }
 
   /** If the incense has burned all the way down, pay out and clear it. Returns true when it did. */

@@ -7,9 +7,18 @@
   <meta name="theme-color" content="#151713" media="(prefers-color-scheme: dark)" />
   <meta name="description" content="Wot Da Shrine: when the servers are down, the team prays together. Open a shrine, share the link, light incense, ring the bowl and send prayers to the rack in real time." />
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Wot Da Shrine" />
+  <meta property="og:url" content="https://shrine.wotdafong.dev/" />
   <meta property="og:title" content="Wot Da Shrine: pray for uptime, together" />
   <meta property="og:description" content="The servers are down. Open a shrine, invite the team, and pray to the rack together in real time." />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:image" content="https://shrine.wotdafong.dev/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="An ink drawing of an incense burner on an altar, with the words: pray for uptime, together." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Wot Da Shrine: pray for uptime, together" />
+  <meta name="twitter:description" content="The servers are down. Open a shrine, invite the team, and pray to the rack together in real time." />
+  <meta name="twitter:image" content="https://shrine.wotdafong.dev/og.png" />
   <title>Wot Da Shrine</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/src/styles.css" />
@@ -55,6 +64,9 @@
       <button class="btn btn--glass btn--sm" id="btn-invite" type="button" hidden>
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
         <span class="hide-sm" data-i18n="invite">Invite</span>
+      </button>
+      <button class="icon-btn" id="btn-share" type="button" aria-label="Share the shrine" title="Share the shrine">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M5 13v6h14v-6"/></svg>
       </button>
       <button class="icon-btn" id="btn-sound" type="button" aria-label="Sound" aria-pressed="true" title="Sound (M)">
         <svg class="ico ico--on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7"/><path class="wave" d="M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
@@ -130,6 +142,10 @@
           </div>
         </div>
         <p class="eta"><span class="status-dot" data-status="open" aria-hidden="true"></span><span id="eta-text"></span></p>
+        <button class="btn btn--live btn--block" id="btn-resolve" type="button" title="Tell the shrine the servers are back">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4L19 6"/></svg>
+          <span data-i18n="resolve">They’re back!</span>
+        </button>
       </section>
       <div class="side--left" aria-label="Shrine activity">
         <section class="card" id="people-card" hidden>
@@ -140,9 +156,20 @@
         <section class="card card--solo" id="solo-card">
           <h2 class="label" data-i18n="soloLabel">Praying alone</h2>
           <p class="card__text" data-i18n="soloText">Open a shared shrine and send the link to your team. Everyone's incense, offerings and prayers land on the same altar, live.</p>
-          <a class="btn btn--accent btn--block" href="/new">
-            <span data-i18n="soloCta">Open a team shrine</span>
-          </a>
+          <form class="name-form" id="name-form" autocomplete="off">
+            <label class="name-form__field">
+              <span class="name-form__prefix" aria-hidden="true">/r/</span>
+              <span class="sr-only" data-i18n="nameLabel">Name your shrine</span>
+              <input class="name-form__input" id="name-input" type="text" maxlength="48" placeholder="prod-is-down" data-i18n-placeholder="namePlaceholder" spellcheck="false" />
+            </label>
+            <button class="btn btn--accent btn--block" type="submit">
+              <span data-i18n="soloCta">Open a team shrine</span>
+            </button>
+          </form>
+          <div class="world" id="world" hidden>
+            <p class="world__line"><span class="world__dot" aria-hidden="true"></span><span id="world-stats"></span></p>
+            <p class="world__ticker" id="world-ticker" aria-live="off"></p>
+          </div>
         </section>
 
         <section class="card card--feed">
@@ -213,6 +240,62 @@
         <span data-i18n="joinBtn">Kneel at the altar</span>
       </button>
     </form>
+  </div>
+
+  <!-- Invite + share sheet -->
+  <div class="sheet" id="share" hidden role="dialog" aria-modal="true" aria-labelledby="share-title">
+    <div class="sheet__card">
+      <div class="sheet__head">
+        <h2 class="sheet__title" id="share-title" data-i18n="shareTitle">Share the shrine</h2>
+        <button class="icon-btn" id="btn-close-share" type="button" aria-label="Close">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="sheet__body">
+        <section class="sheet__section" id="share-invite" hidden>
+          <h3 class="label" data-i18n="inviteLabel">Invite the team</h3>
+          <p class="sheet__hint" data-i18n="inviteHint">Drop the link in the incident channel. Anyone who opens it kneels at this altar.</p>
+          <div class="linkbox">
+            <input class="linkbox__input" id="share-url" type="text" readonly aria-label="Shrine link" />
+            <button class="btn btn--accent btn--sm" id="btn-share-copy" type="button" data-i18n="copy">Copy</button>
+          </div>
+          <div class="sheet__row">
+            <button class="btn btn--glass btn--sm" id="btn-share-slack" type="button">
+              <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>
+              <span data-i18n="copySlack">Copy a Slack message</span>
+            </button>
+            <a class="btn btn--glass btn--sm" id="btn-share-x" href="#" target="_blank" rel="noopener">
+              <span data-i18n="postX">Post on X</span>
+            </a>
+            <button class="btn btn--glass btn--sm" id="btn-share-native" type="button" hidden>
+              <span data-i18n="shareNative">Share…</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="sheet__section">
+          <h3 class="label" id="card-label" data-i18n="cardLabel">Show them what happened</h3>
+          <figure class="sharecard">
+            <img class="sharecard__img" id="share-img" alt="A picture of this shrine: the altar, the team and what they prayed for" />
+            <div class="sharecard__loading" id="share-loading" data-i18n="cardLoading">Drawing the altar…</div>
+          </figure>
+          <div class="sheet__row">
+            <button class="btn btn--accent btn--sm" id="btn-card-share" type="button" data-i18n="cardShare">Share image</button>
+            <button class="btn btn--glass btn--sm" id="btn-card-copy" type="button" data-i18n="cardCopy">Copy image</button>
+            <button class="btn btn--glass btn--sm" id="btn-card-download" type="button" data-i18n="cardDownload">Download PNG</button>
+          </div>
+        </section>
+
+        <section class="sheet__section" id="share-badge" hidden>
+          <h3 class="label" data-i18n="badgeLabel">Badge for your README or status page</h3>
+          <div class="linkbox linkbox--badge">
+            <img class="badge-preview" id="badge-img" alt="" height="20" />
+            <code class="linkbox__code" id="badge-md"></code>
+            <button class="btn btn--glass btn--sm" id="btn-badge-copy" type="button" data-i18n="copyMd">Copy Markdown</button>
+          </div>
+        </section>
+      </div>
+    </div>
   </div>
 
   <!-- Toast -->

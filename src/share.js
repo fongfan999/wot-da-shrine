@@ -1,0 +1,189 @@
+/**
+ * The share card: a picture of this shrine as it is right now, for Slack,
+ * X, WhatsApp, or the incident retro. Built as SVG from the page itself (the
+ * live altar, with every offering on the table, and the brand lettering),
+ * then rasterised to PNG so every chat app can show it.
+ *
+ * Everything is same-origin and inline, so the canvas is never tainted.
+ */
+
+const W = 1200;
+const H = 630;
+const SCALE = 2; // retina PNG
+
+const TOKENS = ['paper', 'paper-raised', 'paper-sunk', 'ink', 'muted', 'line', 'line-strong', 'accent', 'accent-soft', 'note-ink', 'ember', 'ember-soft', 'ember-ink', 'flame', 'live', 'sheet-label'];
+const SANS = `ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`;
+const SERIF = `'Iowan Old Style', 'Palatino Linotype', Palatino, Charter, Georgia, 'Times New Roman', serif`;
+const MONO = `ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace`;
+
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/** The theme's colours, read off the page so the card matches light or dark. */
+function palette() {
+  const cs = getComputedStyle(document.body);
+  return Object.fromEntries(TOKENS.map((k) => [k, cs.getPropertyValue(`--${k}`).trim()]));
+}
+
+/** The drawing classes the altar uses, with the tokens resolved, so the SVG stands on its own. */
+function drawingCss(c) {
+  return `
+    .d-paper { fill: ${c.paper}; stroke: ${c.ink}; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .d-raised { fill: ${c['paper-raised']}; stroke: ${c.ink}; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .d-sunk { fill: ${c['paper-sunk']}; stroke: ${c.ink}; stroke-width: 2; stroke-linejoin: round; }
+    .d-line { fill: none; stroke: ${c.ink}; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .d-thin { fill: none; stroke: ${c.ink}; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+    .d-faint { fill: none; stroke: ${c['line-strong']}; stroke-width: 1.2; stroke-linecap: round; }
+    .d-ink { fill: ${c.ink}; stroke: none; }
+    .d-muted { fill: ${c.muted}; stroke: none; }
+    .d-shade { fill: ${c.ink}; stroke: none; opacity: .08; }
+    .d-flame { fill: ${c.flame}; stroke: none; }
+    .d-ember-soft { fill: ${c['ember-soft']}; stroke: none; }
+    .d-accent { fill: ${c.accent}; stroke: none; }
+    .d-tube-out { fill: none; stroke: ${c.ink}; stroke-linecap: round; }
+    .d-tube-in { fill: none; stroke: ${c.paper}; stroke-linecap: round; }
+    .d-ash { fill: ${c.line}; stroke: none; }
+    .stick__body { fill: ${c.muted}; }
+    .stick__ash { fill: ${c['line-strong']}; }
+    .stick__halo, .devotee__halo { fill: ${c['ember-soft']}; }
+    .stick__ember, .devotee__ember { fill: ${c.flame}; }
+    .burner__shine { display: none; }
+    .brand__wot { fill: ${c.ink}; }
+    .brand__shrine { color: ${c.accent}; }
+    .brand__bowl, .brand__sticks { stroke: ${c.ink}; }
+    .brand__smoke { stroke: ${c.accent}; }
+    .brand__embers circle { fill: ${c.flame}; stroke: none; }
+  `;
+}
+
+/** Word-wrap to roughly `max` characters per line, at most `lines` lines (the last one gets an ellipsis). */
+function wrap(text, max, lines = 2) {
+  const out = [];
+  let line = '';
+  for (const word of String(text).split(/\s+/)) {
+    if (line && (line + ' ' + word).length > max) { out.push(line); line = word; } else line = line ? `${line} ${word}` : word;
+  }
+  if (line) out.push(line);
+  if (out.length > lines) { out.length = lines; out[lines - 1] = out[lines - 1].replace(/[.,;:]?$/, '…'); }
+  return out;
+}
+
+/** Strip the live altar of anything that would not survive as a standalone SVG. */
+function altarMarkup(host) {
+  const svgs = [...host.querySelectorAll('svg.burner__svg')];
+  const inner = svgs.map((svg) => {
+    const copy = svg.cloneNode(true);
+    copy.querySelectorAll('[class*="halo"], .soft').forEach((el) => el.remove()); // blurred glows need filters we don't ship
+    return copy.innerHTML;
+  }).join('\n');
+  return `<svg viewBox="0 0 520 470" x="650" y="86" width="500" height="452" overflow="visible">${inner}</svg>`;
+}
+
+/**
+ * Build the card. `data`:
+ *   room, resolved, people (count), avatars (emoji), minutes, karma, prayers (count),
+ *   incense (count), quotes [{text, name}], url
+ */
+export function cardSvg(data) {
+  const c = palette();
+  const brandMark = document.querySelector('.brand__mark')?.outerHTML ?? '';
+  const brandWord = document.querySelector('.brand__word')?.outerHTML ?? '';
+  const altar = altarMarkup(document.querySelector('#burner-art'));
+
+  const eyebrow = data.room ? `SHARED SHRINE / ${data.room}` : 'A SOLO VIGIL';
+  const title = data.resolved ? ['The servers are', 'back.'] : ['We prayed for', 'the servers.'];
+  const facts = [];
+  if (data.people > 1) facts.push(`${data.people} devotees`);
+  else if (data.people === 1 && data.room) facts.push('1 devotee');
+  if (data.minutes >= 1) facts.push(`${data.minutes} min of prayer`);
+  if (data.incense) facts.push(`${data.incense} incense lit`);
+  if (data.karma) facts.push(`${data.karma} karma`);
+  if (data.prayers) facts.push(`${data.prayers} prayer${data.prayers === 1 ? '' : 's'}`);
+  const factsLine = facts.join(' · ') || 'The incense is lit. The rack is listening.';
+
+  const quotes = (data.quotes ?? []).slice(-3).reverse();
+  let y = 330;
+  const quoteSvg = quotes.map((q) => {
+    const lines = wrap(q.text, 44, 1);
+    const by = q.name ? `  — ${q.name}` : '';
+    const s = `<text x="72" y="${y}" font-family="${SERIF}" font-style="italic" font-size="26" fill="${c.ink}">“${esc(lines[0])}”<tspan font-family="${MONO}" font-style="normal" font-size="15" fill="${c.muted}">${esc(by)}</tspan></text>`;
+    y += 40;
+    return s;
+  }).join('');
+
+  const avatars = (data.avatars ?? []).slice(0, 6);
+  const avatarSvg = avatars.map((a, i) => `
+    <circle cx="${90 + i * 44}" cy="${H - 150}" r="21" fill="${c['paper-sunk']}" stroke="${c.paper}" stroke-width="3"/>
+    <text x="${90 + i * 44}" y="${H - 142}" text-anchor="middle" font-size="22" font-family="${SANS}">${esc(a)}</text>`).join('');
+  const more = data.people > avatars.length ? `<text x="${90 + avatars.length * 44 - 8}" y="${H - 142}" font-family="${MONO}" font-size="16" fill="${c.muted}">+${data.people - avatars.length}</text>` : '';
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+  <style>${drawingCss(c)}</style>
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="${c['line-strong']}" opacity=".6"/></pattern>
+  </defs>
+  <rect width="${W}" height="${H}" fill="${c.paper}"/>
+  <rect width="${W}" height="${H}" fill="url(#dots)"/>
+  <ellipse cx="900" cy="548" rx="330" ry="56" fill="${c['ember-soft']}" opacity=".55"/>
+  ${altar}
+
+  <circle cx="78" cy="78" r="5" fill="${c.accent}"/>
+  <text x="94" y="84" font-family="${MONO}" font-size="16" letter-spacing="2" fill="${c.muted}">${esc(eyebrow)}</text>
+
+  <text x="68" y="172" font-family="${SANS}" font-size="78" font-weight="500" letter-spacing="-3" fill="${c.ink}">${esc(title[0])}</text>
+  <text x="68" y="256" font-family="${SERIF}" font-style="italic" font-size="82" letter-spacing="-2" fill="${c.accent}">${esc(title[1])}</text>
+  <text x="72" y="296" font-family="${SANS}" font-size="22" fill="${c.muted}">${esc(factsLine)}</text>
+
+  ${quoteSvg}
+  ${avatarSvg}${more}
+
+  <g transform="translate(68 ${H - 92})">
+    <g transform="translate(0 -2) scale(1.55)" style="stroke-linecap:round;stroke-linejoin:round;stroke-width:4.2;fill:none">${brandMark.replace(/<svg[^>]*>/, '<svg viewBox="8 2 48 54" width="21" height="24">')}</g>
+    <g transform="translate(38 0)">${brandWord.replace(/<svg[^>]*>/, '<svg viewBox="-3.4 -69.4 466 78" width="226" height="38">')}</g>
+  </g>
+  <text x="${W - 72}" y="84" text-anchor="end" font-family="${MONO}" font-size="17" letter-spacing="1" fill="${c.muted}">${esc(data.url)}</text>
+</svg>`;
+}
+
+/** Rasterise the SVG to a PNG blob. */
+export async function cardPng(svg) {
+  const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+  try {
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = url;
+    await img.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = W * SCALE;
+    canvas.height = H * SCALE;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return await new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('no png'))), 'image/png'));
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+/** The system share sheet, if it can take an image. Returns false when it can't (or the user cancelled). */
+export async function shareFile(blob, name, { title, text, url } = {}) {
+  const file = new File([blob], name, { type: 'image/png' });
+  if (!navigator.canShare?.({ files: [file] })) return false;
+  try { await navigator.share({ files: [file], title, text, url }); return true; } catch { return false; }
+}
+
+export function download(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+export async function copyImage(blob) {
+  if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') return false;
+  try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); return true; } catch { return false; }
+}
+
+export const canCopyImage = () => Boolean(navigator.clipboard?.write && typeof ClipboardItem !== 'undefined');
+export const canShareFiles = () => typeof navigator.canShare === 'function';

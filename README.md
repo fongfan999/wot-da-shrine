@@ -21,12 +21,45 @@ shrine.
 - `/` is a solo shrine. It also works as a maintenance page (custom title,
   subtitle and "back at" time).
 - `/new` redirects to a freshly named shared shrine, e.g. `/r/serene-rack-42`.
+  `/new?name=Prod is down` names it `/r/prod-is-down` instead, and the landing
+  page has a field for exactly that.
 - `/r/:room` asks for a name and avatar, then joins that room's `Shrine`
   Durable Object over a WebSocket. The room keeps the shared state: who is
-  here, incense burn time, karma, the offerings on the table and the last 12
-  prayers. Late joiners see the incense mid-burn and the prayers they missed.
+  here, incense burn time, karma, the offerings on the table, the last 12
+  prayers and when the servers last came back. Late joiners see the incense
+  mid-burn and the prayers they missed.
+- Every shrine reports its actions to one `World` Durable Object, which keeps
+  the site-wide totals the landing page shows.
 - Durable Objects use the WebSocket Hibernation API, so idle shrines cost
   nothing. A shrine nobody visits for 30 days deletes itself.
+
+## Spreading the word
+
+The shrine is built to travel from one incident channel to the next:
+
+- **Links that explain themselves**: a room link unfurls in Slack, Teams,
+  Discord or X with a drawn preview card and a live line about the room
+  ("3 praying · incense burning, 7 min left · 48 karma · last prayer: …").
+  The Worker rewrites the room page's `<title>` and Open Graph tags on the
+  way out, so every paste shows what is happening right now.
+- **Invite**: the Invite button opens a sheet with the link, a ready-made
+  Slack message ("🪔 The servers are down. The shrine is open, come pray
+  with us: …"), a post for X, and the system share sheet on phones.
+- **The share card**: a PNG of this shrine as it is right now, drawn from the
+  live altar (every offering on the table), the team's avatars, how long
+  you prayed, the karma and the last prayers. Share it, copy it or download
+  it; it comes with a caption. Light or dark, to match the page.
+- **They're back!**: when the servers come back, press the button. Bells, a
+  shower of petals, +20 karma for the room, the heading becomes "The servers
+  are back", and the share card is offered at the one moment people want to
+  post it. Everyone in the room sees the celebration.
+- **The world**: the landing page shows what every shrine is doing: prayers
+  sent, shrines opened, how many are burning right now, and the last thing
+  that happened (only the ready-made prayers are ever echoed, never free
+  text, and no room name leaves the counter).
+- **A badge for the README or status page**:
+  `[![Wot Da Shrine](https://shrine.wotdafong.dev/api/rooms/serene-rack-42/badge.svg)](https://shrine.wotdafong.dev/r/serene-rack-42)`
+  shows "shrine | 3 praying · burning" and links to the altar.
 
 ## Features
 
@@ -70,7 +103,10 @@ shrine.
 - **Keyboard**: `L` light · `B` bowl · `P` bow · `O` offer · `Space` breathe ·
   `M` mute · `T` theme.
 - **Worker API**: `GET /api/status` (JSON), `GET /api/health` (`om`),
-  `GET /api/rooms/:room/ws` (WebSocket).
+  `GET /api/world` (totals across every shrine), `GET /api/rooms/:room/status`
+  (the room at a glance), `GET /api/rooms/:room/badge.svg`,
+  `GET /api/rooms/:room/ws` (WebSocket), `POST /api/pulse` (the solo page
+  reporting a light, prayer, bow, offering or recovery to the world counter).
 
 ## URL parameters
 
@@ -110,6 +146,7 @@ It deploys to https://shrine.wotdafong.dev as a Workers custom domain (the
 index.html          page shell
 src/main.js         wiring, intro, actions, activity feed, shared-shrine client
 src/room.js         room URL, saved name, reconnecting WebSocket
+src/share.js        the share card: live altar + stats as SVG, rasterised to PNG
 src/burner.js       inline-SVG incense burner (burn-down, embers, offerings)
 src/serverRoom.js   procedural SVG server room with blinking LEDs
 src/audio.js        Web Audio sound kit (one-shot effects)
@@ -127,8 +164,11 @@ src/styles.css      design tokens, light and dark themes, layout
 src/palette.js      theme colours for the canvas layers
 src/icons.js        line icons for the dock, tray and pings
 public/favicon.svg  the mark
+public/og.png       the link preview card (1200×630)
 public/wotdafong-*.svg  the Wot Da Fong P?! mark for the credit line
-worker/index.js     Cloudflare Worker: /new and the API (static files skip it; headers in public/_headers)
+shared/prayers.js   the ready-made prayers, used by the page and the Worker
+worker/index.js     Cloudflare Worker: /new, room pages (link previews), badges and the API
 worker/shrine.js    Shrine Durable Object: one per room
+worker/world.js     World Durable Object: totals across every shrine
 wrangler.jsonc      Worker + Durable Object config
 ```

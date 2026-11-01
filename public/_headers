@@ -12,3 +12,7 @@
 
 /*.svg
   Cache-Control: public, max-age=86400
+
+# The link preview card changes rarely; chat apps cache it anyway.
+/og.png
+  Cache-Control: public, max-age=86400
