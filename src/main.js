@@ -4,8 +4,8 @@
  * and the altar's buttons, and starts the show.
  */
 import gsap from 'gsap';
-import { sound } from './audio.js';
-import { THEMES } from './config.js';
+import { sound } from './audio/index.js';
+import { THEMES } from './lib/config.js';
 // Order matters: the layout is measured before the engines size themselves to it.
 import { $, persist, roomName, settings, tv } from './app/context.js';
 import { intro, introStarted, parallax, startMantras } from './app/stage.js';

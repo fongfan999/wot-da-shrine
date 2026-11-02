@@ -1,8 +1,8 @@
 /* Counters, rank, enlightenment, the vigil strip, shrine records and lanterns, the ETA. */
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { saveCounters } from '../config.js';
-import { STRINGS, t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { saveCounters } from '../lib/config.js';
+import { STRINGS, t } from '../lib/strings.js';
 import { $, body, BURN_SECONDS, counters, fmt, meta, people, reduceMotion, roomName, state } from './context.js';
 import { burner, petals } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';

@@ -1,0 +1,150 @@
+/* ---------- Responsive ---------- */
+/* Below 1100px: one column. The altar fills the first screen and every card follows it in a grid. */
+@media (max-width: 1099px) {
+  .stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; gap: var(--space-5); }
+  .center { position: static; grid-row: 1; }
+  .side {
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    align-items: start;
+    overflow: visible;
+    padding: 0 6px 6px 0;
+  }
+  .room-chip { max-width: 34vw; }
+}
+
+@media (max-width: 1099px) {
+  .ema { width: 180px; }
+  .ema__plaque { width: 90px; }
+  .act { min-width: 84px; padding-inline: 10px; }
+  .act--primary { min-width: 140px; }
+}
+
+@media (max-width: 899px) {
+  body[data-landing="1"] .center { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 8px; padding: 16px 0 32px; min-height: 0; }
+  /* sized by width here: a height-based aspect ratio would make the altar wider than the phone */
+  body[data-landing="1"] .altar { height: auto; min-width: 0; }
+  body[data-landing="1"] .burner { width: min(100%, 400px); height: auto; margin: 0 auto; }
+  body[data-landing="1"] .title { font-size: clamp(2.3rem, 11vw, 3rem); }
+  body[data-landing="1"] .subtitle { font-size: 17px; }
+  body[data-landing="1"] .center { grid-template-rows: none; }
+  body[data-landing="1"] .scene::after { background-image: var(--hero-veil-sm, radial-gradient(120% 80% at 50% 70%, transparent 40%, var(--paper) 100%)); }
+  .hero-ribbon { flex-direction: column; align-items: stretch; gap: 6px; }
+  .hero-ribbon__label { padding-left: 4px; }
+  .hero-cta__btn { padding-inline: 18px; }
+  .hero-cta__btn .ico { display: none; }
+}
+
+@media (max-width: 1099px) {
+  .steps { grid-template-columns: 1fr; max-width: 560px; padding-top: 16px; row-gap: 32px; }
+  .steps::before { display: none; }
+  .step__n { top: -16px; left: 22px; z-index: 1; width: 32px; height: 32px; font-size: 16px; transform: scale(.4); }
+  .land.is-in .step__n { transform: none; }
+  .rituals { grid-template-columns: 1fr 1fr; }
+  .showcase { grid-template-columns: minmax(0, 1fr); }
+  .showcase__tabs { flex-direction: row; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); }
+  .showcase__tab { flex: 0 0 auto; padding: 10px 14px 14px; grid-template-columns: auto auto; align-items: center; }
+  .showcase__ico { width: 30px; height: 30px; }
+  .showcase__copy b { font-size: 15px; white-space: nowrap; }
+  .showcase__tab[aria-selected="true"] .showcase__copy span { display: none; }
+  .showcase__bar { left: 14px; right: 14px; bottom: 5px; }
+  .showcase__stage { min-height: 0; }
+  .showcase__caption { display: block; margin: -6px 0 0 !important; font-size: 15px !important; }
+  .chat__card { grid-template-columns: minmax(0, 1fr); }
+  .chat__img { grid-column: 1; grid-row: auto; width: 100%; max-width: 280px; margin-top: 6px; }
+  .chat__body { padding: 14px; }
+  .showcase__stage { padding: 10px; }
+  .ritual--blame, .ritual--remember { grid-column: 1 / -1; }
+  .pulse { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .pulse__totals { grid-column: 1 / -1; grid-row: 2; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Narrow tablet and phone: the dock stacks */
+@media (max-width: 899px) {
+  .dock { grid-template-columns: minmax(0, 1fr); grid-template-areas: "quick" "pray" "actions" "credit"; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr 1.6fr 1fr 1fr; }
+  .act { min-width: 0; }
+  .tray { left: 50%; right: auto; transform: translateX(-50%); }
+}
+
+/* Phone */
+@media (max-width: 760px) {
+  .hide-sm { display: none; }
+  .show-sm { display: inline; }
+  .bar { padding: 8px 16px; gap: 8px; }
+  .brand__word { display: none; }
+  .brand__mark { width: 28px; height: 32px; translate: none; }
+  .presence__avatar:nth-child(n+4) { display: none; }
+  .room-chip__name { max-width: 28vw; }
+  .stage { padding: 12px 16px var(--space-4); }
+  .kneeler__name { display: none; }
+  .kneeler__tag { padding: 2px; }
+  .ema { display: none; }
+  .plantern-row { height: 56px; }
+  .plantern { width: 24px; height: 42px; }
+  .plantern-row__more { top: 48px; }
+  .quick__chip--ritual span { display: none; }
+  .vigil { font-size: 13px; }
+  .vigil__time { font-size: 16px; }
+  .tv-join { display: none; }
+  .rituals { grid-template-columns: 1fr; }
+  .mp__fields { grid-template-columns: minmax(0, 1fr); }
+  .pair-demo { grid-template-columns: minmax(0, 1fr); }
+  .pair-screen { position: static; width: auto; }
+  body[data-tv-home="1"] .stage { grid-template-columns: minmax(0, 1fr); }
+  body[data-tv-home="1"] .center { display: none; }
+  .foot__inner { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .foot__brand { grid-column: 1 / -1; }
+  .pulse { grid-template-columns: minmax(0, 1fr); }
+  .pulse__totals { grid-row: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pulse__now { min-height: 240px; }
+  .tv__bezel { padding: 6px 6px 0; border-radius: 9px; }
+  .tv__chin { height: 20px; }
+  .tv__brand { visibility: hidden; }
+  .tv__neck { height: 24px; width: 44px; }
+  .eta-pop { left: 0; right: auto; width: 100%; }
+  .eta-pop__grid { grid-template-columns: repeat(3, 1fr); }
+  .ritual--blame, .ritual--remember { flex-direction: column; }
+  .ritual--blame .ritual__stage, .ritual--remember .ritual__stage { flex: none; min-height: 220px; border-right: 0; border-bottom: 1px solid var(--sheet-line); }
+  .mp__fields { grid-template-columns: 1fr; }
+  .land__title { max-width: none; }
+  .tray { padding: 10px; }
+  .tray__item { padding: 8px 4px 7px; }
+  .tray__name { white-space: normal; font-size: 11px; line-height: 1.15; text-align: center; }
+  .combo__n { font-size: 1.6rem; }
+  .heading { gap: 4px; }
+  .title { font-size: clamp(2rem, 10vw, 2.6rem); }
+  .subtitle { font-size: 16px; }
+  .mantra { font-size: 12px; max-width: 92vw; }
+  #mantra { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 78vw; }
+  .dock { padding: 10px 12px max(8px, env(safe-area-inset-bottom)); row-gap: 8px; }
+  .pray { min-height: 50px; }
+  .pray__send { width: 40px; height: 40px; }
+  .actions { gap: 6px; }
+  .act { grid-template-columns: 1fr; justify-items: center; min-height: 54px; padding: 6px 2px; border-radius: 12px; }
+  .act__icon { grid-row: auto; }
+  .act kbd { display: none; }
+  .act__label { font-size: 11px; }
+  .act__label--lit [data-i18n] { display: none; }
+  .toast { top: 62px; font-size: 13px; }
+  .sheet { padding: 0; align-items: end; }
+  .sheet__card { max-height: 100dvh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border-bottom: 0; }
+  .sheet__title { font-size: 26px; }
+  .credit { font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0ms !important; }
+  .brand__smoke, .brand__embers circle { animation: none !important; }
+  .hero-ribbon__rail { animation: none; }
+  .hero-ribbon__track { overflow-x: auto; }
+  body[data-landing="1"] .title .word--accent::after { animation: none; clip-path: none; }
+  .mini-bar__caret, .mini-vigil__dot { animation: none; }
+  .pulse__ember span { animation: none; }
+  .cta-stick__stick, .cta-stick__ember, .cta-stick__smoke path { animation: none; }
+  .tv::before, .tv__poster-mark { animation: none; }
+  .readme__badges .facts__badge, .showcase__pane, .showcase__tab .showcase__copy span { animation: none !important; }
+  .burnslip, .burnslip__edge, .burnslip__glow, .is-yours .burnslip, .is-yours :is(.burnslip__edge, .burnslip__glow), .chorus__bow i, .chorus__badge, .chorus::before { animation: none; }
+  .chorus__badge { opacity: 1; }
+}

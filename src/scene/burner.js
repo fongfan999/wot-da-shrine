@@ -4,7 +4,7 @@
  * in front of it. Inline SVG so everything animates: the incense sticks burn
  * down, embers glow at the live tip, candle flames flicker, the devotees bow,
  * offerings pop onto the table. Colours come from the drawing classes in
- * styles.css, so the altar follows the theme.
+ * styles/base.css, so the altar follows the theme.
  */
 import gsap from 'gsap';
 

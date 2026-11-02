@@ -8,7 +8,7 @@
  * the ticker only repeats the ready-made prayers, never free text.
  */
 import { DurableObject } from 'cloudflare:workers';
-import { QUICK_PRAYERS } from '../shared/prayers.js';
+import { QUICK_PRAYERS } from '../../shared/prayers.js';
 
 export const BURN_SECONDS = 600; // keep in sync with shrine.js
 const ACTIVE_FOR = 10 * 60 * 1000; // a shrine counts as "praying now" for ten minutes after its last action

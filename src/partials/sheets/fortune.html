@@ -1,0 +1,26 @@
+<!-- Draw a fortune -->
+<div class="sheet sheet--ritual" id="fortune" hidden role="dialog" aria-modal="true" aria-labelledby="fortune-title">
+  <div class="sheet__card">
+    <div class="sheet__head">
+      <h2 class="sheet__title" id="fortune-title"><span data-i18n="fortuneTitle">Your</span> <em data-i18n="fortuneTitleAccent">fortune</em></h2>
+      <button class="icon-btn" type="button" data-close="fortune" aria-label="Close">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="sheet__body">
+      <p class="sheet__hint" data-i18n="fortuneHint">One slip per vigil. The box is shaken, the stick is drawn, the paper is read.</p>
+      <div class="omikuji" id="omikuji">
+        <div class="omikuji__slip" id="omikuji-slip">
+          <span class="omikuji__kanji" id="omikuji-kanji">吉</span>
+          <b class="omikuji__level" id="omikuji-level">Blessing</b>
+          <ul class="omikuji__lines" id="omikuji-lines"></ul>
+          <p class="omikuji__advice" id="omikuji-advice"></p>
+        </div>
+      </div>
+      <div class="sheet__row">
+        <button class="btn btn--accent btn--sm" type="button" id="btn-fortune-tie" data-i18n="fortuneTie">Tie it to the rail</button>
+        <button class="btn btn--glass btn--sm" type="button" id="btn-fortune-copy" data-i18n="fortuneCopy">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>

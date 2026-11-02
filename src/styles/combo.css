@@ -1,0 +1,16 @@
+/* ---------- Combo ---------- */
+.combo {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.combo__n { font-family: var(--font-serif); font-style: italic; font-size: 2rem; line-height: 1; color: var(--accent); }
+.combo__cap { padding: 2px 8px; border-radius: var(--radius-pill); background: var(--paper-raised); font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.combo[data-heat="1"] .combo__n { font-size: 2.3rem; }
+.combo[data-heat="2"] .combo__n { color: var(--ember); font-size: 2.6rem; }
+.combo[data-heat="3"] .combo__n, .combo[data-heat="4"] .combo__n { color: var(--ember); font-size: 3rem; }

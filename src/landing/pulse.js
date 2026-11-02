@@ -1,6 +1,6 @@
 import gsap from 'gsap';
-import { icon } from '../icons.js';
-import { t } from '../strings.js';
+import { icon } from '../lib/icons.js';
+import { t } from '../lib/strings.js';
 import { $, fmt, landing, reduceMotion } from '../app/context.js';
 import { agoShort, WORLD_KINDS } from '../app/world.js';
 

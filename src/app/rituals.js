@@ -1,8 +1,8 @@
 /* Rituals in a sheet: burn a blame, draw a fortune. */
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { LEVELS as FORTUNE_LEVELS, asText as fortuneText, draw as drawFortune } from '../omikuji.js';
-import { t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { LEVELS as FORTUNE_LEVELS, asText as fortuneText, draw as drawFortune } from '../lib/omikuji.js';
+import { t } from '../lib/strings.js';
 import { $, fmt, landing, reduceMotion, roomName, roomUrl, state } from './context.js';
 import { art, burner, kick, motes, petals, smoke, wishes } from './engines.js';
 import { openTray } from './offerings.js';

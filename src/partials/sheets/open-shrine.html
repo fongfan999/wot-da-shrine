@@ -1,0 +1,25 @@
+<!-- Open a shrine: every "open" button that has no name field of its own comes here -->
+<div class="sheet" id="open-shrine" hidden role="dialog" aria-modal="true" aria-labelledby="open-title">
+  <form class="sheet__card open-form" id="name-form-3" autocomplete="off">
+    <div class="sheet__head">
+      <h2 class="sheet__title" id="open-title"><span data-i18n="openTitle">Open a</span> <em data-i18n="openTitleAccent">shrine</em></h2>
+      <button class="icon-btn" type="button" data-close="open-shrine" aria-label="Close">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="sheet__body">
+      <p class="sheet__hint" data-i18n="openHint">This is the link your team will click. Keep the name we picked, or call it after what is down.</p>
+      <label class="name-form__field open-form__field">
+        <span class="name-form__prefix" aria-hidden="true">/r/</span>
+        <span class="sr-only" data-i18n="nameLabel">Name your shrine</span>
+        <input class="name-form__input" type="text" maxlength="48" spellcheck="false" />
+      </label>
+      <div class="sheet__row">
+        <button class="btn btn--accent" type="submit">
+          <span data-i18n="openGo">Open it</span>
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

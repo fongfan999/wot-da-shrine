@@ -1,0 +1,26 @@
+/* ---------- The landing page, below the shrine on / ---------- */
+.landing { position: relative; z-index: 3; background: var(--paper); border-top: 1px solid var(--line); }
+.land { padding: clamp(56px, 8vw, 104px) var(--gutter); }
+.land--alt { background: var(--paper-sunk); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.land__inner { max-width: 1080px; margin: 0 auto; }
+.land__inner--narrow { max-width: 720px; text-align: center; }
+.land .eyebrow { margin: 0 0 10px; }
+.land__title {
+  margin: 0 0 clamp(28px, 4vw, 44px);
+  max-width: 24ch;
+  font-weight: 500;
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
+  line-height: 1.04;
+  letter-spacing: -.04em;
+  text-wrap: balance;
+}
+.land__inner--narrow .land__title { margin-inline: auto; }
+.land__title em { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -.03em; color: var(--accent); }
+.land h3 { margin: 0 0 8px; font-size: 19px; font-weight: 650; letter-spacing: -.02em; }
+.land p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.55; text-wrap: pretty; }
+
+/* Reveal on scroll */
+.land__inner > *:not(.eyebrow) { opacity: 0; transform: translateY(16px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.land.is-in .land__inner > * { opacity: 1; transform: none; }
+.land.is-in .land__inner > *:nth-child(2) { transition-delay: .08s; }
+.land.is-in .land__inner > *:nth-child(3) { transition-delay: .16s; }

@@ -1,10 +1,10 @@
 /* The shared shrine at /r/:room: joining, the live connection, and what the others do. */
 import gsap from 'gsap';
 import qrcode from 'qrcode-generator';
-import { sound } from '../audio.js';
-import { LEVELS as FORTUNE_LEVELS } from '../omikuji.js';
-import { AVATARS, connectRoom, saveMe } from '../room.js';
-import { t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { LEVELS as FORTUNE_LEVELS } from '../lib/omikuji.js';
+import { AVATARS, connectRoom, saveMe } from '../lib/room.js';
+import { t } from '../lib/strings.js';
 import { bowFx, bowlFx, burnOut, chorusFx, ignite, puffFx, scheduleBurnOut } from './altar.js';
 import { $, body, counters, fmt, people, recentPrayers, roomName, roomUrl, settings, state, tv, urlParams } from './context.js';
 import { art, congregation, wishes } from './engines.js';

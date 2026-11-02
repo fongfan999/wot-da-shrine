@@ -1,0 +1,14 @@
+<!-- Join a room (shown on /r/:room until you have a name) -->
+<div class="join" id="join" hidden>
+  <form class="join__card" id="join-form" autocomplete="off">
+    <p class="eyebrow" id="join-room"></p>
+    <h2 class="join__title"><span data-i18n="joinTitle">Enter the</span> <em data-i18n="joinTitleAccent">shrine</em></h2>
+    <p class="join__hint" data-i18n="joinHint">Your team is praying for the servers. What should the rack call you?</p>
+    <label class="sr-only" for="join-name">Your name</label>
+    <input class="join__input" id="join-name" type="text" maxlength="24" required />
+    <div class="join__avatars" id="join-avatars" role="radiogroup" aria-label="Pick an avatar"></div>
+    <button class="btn btn--accent btn--block" type="submit">
+      <span data-i18n="joinBtn">Kneel at the altar</span>
+    </button>
+  </form>
+</div>

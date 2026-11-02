@@ -1,5 +1,5 @@
 import { describe as describeRoom, previewTitle } from '../../shared/preview.js';
-import { STRINGS, t } from '../strings.js';
+import { STRINGS, t } from '../lib/strings.js';
 import { $, reduceMotion } from '../app/context.js';
 import { copyText } from '../app/ui.js';
 

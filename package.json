@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "gsap": "^3.15.0",
+    "hono": "^4.13.16",
     "qrcode-generator": "^1.4.4"
   },
   "devDependencies": {

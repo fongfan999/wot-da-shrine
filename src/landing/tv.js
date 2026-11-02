@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import qrcode from 'qrcode-generator';
-import { sound } from '../audio.js';
+import { sound } from '../audio/index.js';
 import { $, fmt, reduceMotion } from '../app/context.js';
 
 /**

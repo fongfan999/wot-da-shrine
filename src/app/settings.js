@@ -1,9 +1,9 @@
 /* Settings: theme, effects, title and ETA, applied to the page; the settings panel and sound toggle. */
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { shareUrl } from '../config.js';
-import { syncPalette } from '../palette.js';
-import { BRAND, applyStrings, t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { shareUrl } from '../lib/config.js';
+import { syncPalette } from '../scene/palette.js';
+import { BRAND, applyStrings, t } from '../lib/strings.js';
 import { $, body, fmt, landing, meta, persist, resetSettings, roomName, settings, state, urlParams } from './context.js';
 import { fog, petals } from './engines.js';
 import { applyFx, lite } from './fx.js';

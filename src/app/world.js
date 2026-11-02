@@ -1,5 +1,5 @@
 /* The world: what every shrine is doing. */
-import { t } from '../strings.js';
+import { t } from '../lib/strings.js';
 import { $, fmt, landing, roomName } from './context.js';
 import { renderLandingWorld } from '../landing/pulse.js';
 

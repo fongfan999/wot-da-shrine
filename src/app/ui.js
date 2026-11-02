@@ -1,7 +1,7 @@
 /* Small shared pieces of UI: toasts, the activity feed, number bumps, shockwaves, copying. */
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { t } from '../lib/strings.js';
 import { $, body, landing, reduceMotion, state } from './context.js';
 
 const toastEl = $('#toast');

@@ -1,0 +1,29 @@
+/* The footer: the brand, where to go, and who made it */
+.foot { position: relative; z-index: 3; overflow: hidden; background: var(--paper-sunk); border-top: 1px solid var(--line); }
+.foot__inner { display: grid; grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); gap: 32px; max-width: 1080px; margin: 0 auto; padding: 48px var(--gutter) 36px; }
+.foot__brand { display: flex; flex-direction: column; gap: 8px; }
+.foot__logo { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-size: 17px; }
+.foot__mark { width: 24px; height: 28px; translate: none; }
+.foot__logo:is(:hover, :focus-visible) .brand__smoke { animation: brand-rise-again .9s var(--ease) both; }
+.foot__logo:is(:hover, :focus-visible) .brand__smoke:nth-child(2) { animation-delay: .12s; }
+.foot__logo:is(:hover, :focus-visible) .brand__smoke:nth-child(3) { animation-delay: .24s; }
+.foot__top { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 7px 14px 7px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--paper-raised); color: var(--ink); font-size: 13px; font-weight: 600; transition: border-color 160ms ease, transform 200ms var(--ease); }
+.foot__top .ico { width: 15px; height: 15px; color: var(--flame); transition: transform 200ms var(--ease); }
+.foot__top:hover { border-color: var(--flame); }
+.foot__top:hover .ico { transform: translateY(-2px); }
+/* the signature: the header's hand-drawn wordmark, huge and faint, cut off by the bottom of the page */
+.foot__sign { display: flex; justify-content: center; max-width: 1240px; margin: 0 auto -3.2vw; padding: 0 var(--gutter); pointer-events: none; }
+.foot__sign .brand__word { display: block; width: 100%; height: auto; opacity: .09; }
+.foot__sign .brand__wot { fill: var(--ink); }
+.foot__sign .brand__shrine { color: var(--ink); }
+.foot.is-in .foot__sign .brand__word { animation: sign-in 1.4s var(--ease) both; }
+@keyframes sign-in { from { opacity: 0; transform: translateY(24px); } }
+.foot__tag { margin: 0; font-family: var(--font-serif); font-style: italic; font-size: 18px; color: var(--muted); }
+.foot__live { display: inline-flex; align-items: center; gap: 8px; margin: 6px 0 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.foot__live-dot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--live); animation: world-beat 2.4s ease-out infinite; }
+.foot__col { display: flex; flex-direction: column; gap: 10px; }
+.foot__head { margin: 0 0 4px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.foot__col a { color: var(--ink); font-size: 14px; text-decoration: none; }
+.foot__col a:hover, .foot__base a:hover { color: var(--accent); }
+.foot__base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; max-width: 1080px; margin: 0 auto; padding: 18px var(--gutter) 28px; border-top: 1px dashed var(--line); font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.foot__base a { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-decoration: none; }

@@ -1,7 +1,7 @@
 /* How much the page draws: lite or full effects, the frame budget, and sleeping as the home page's TV. */
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { t } from '../lib/strings.js';
 import { $, body, persist, reduceMotion, settings, tv } from './context.js';
 import { art, congregation, motes, petals, room, smoke } from './engines.js';
 import { applySettings } from './settings.js';

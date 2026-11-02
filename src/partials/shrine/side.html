@@ -1,0 +1,89 @@
+<!-- Right: the altar's state, then who is here and what they did -->
+<aside class="side" aria-label="Altar status and activity">
+  <section class="card card--status">
+    <div class="vitals">
+      <div class="burn__row">
+        <h2 class="label" data-i18n="vitalsLabel">Rack 42 vitals</h2>
+        <span class="vitals__read"><span class="vitals__bpm" id="vitals-bpm">flatlining</span></span>
+      </div>
+      <canvas class="vitals__ekg" id="ekg" aria-hidden="true"></canvas>
+    </div>
+    <div class="burn">
+      <div class="burn__row">
+        <span class="burn__state" id="burn-state">Incense is cold</span>
+        <span class="burn__time" id="burning-time"></span>
+      </div>
+      <div class="meter"><div class="meter__bar" id="burn-bar"></div></div>
+    </div>
+    <dl class="stats">
+      <div class="stat"><dt data-i18n="statIncense">Incense lit</dt><dd id="stat-incense">0</dd></div>
+      <div class="stat"><dt data-i18n="statKarma">Karma</dt><dd id="stat-karma">0</dd></div>
+      <div class="stat"><dt data-i18n="statTime">In meditation</dt><dd id="stat-time">00:00</dd></div>
+    </dl>
+    <div class="rank">
+      <span class="rank__badge" id="rank-badge" aria-hidden="true">1</span>
+      <div class="rank__text">
+        <b class="rank__name" id="rank-name">Lurker in #incidents</b>
+        <span class="rank__next" id="rank-next"></span>
+        <div class="meter meter--thin"><div class="meter__bar" id="rank-bar"></div></div>
+      </div>
+    </div>
+    <div class="enlight">
+      <div class="burn__row">
+        <span data-i18n="progressLabel">Enlightenment</span>
+        <span class="burn__time" id="progress-pct">0%</span>
+      </div>
+      <div class="meter" role="progressbar" aria-label="Enlightenment" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress">
+        <div class="meter__bar" id="progress-bar"></div>
+      </div>
+    </div>
+    <p class="eta"><span class="status-dot" data-status="open" aria-hidden="true"></span><span id="eta-text"></span></p>
+    <button class="btn btn--live btn--block" id="btn-resolve" type="button" title="Tell the shrine the servers are back">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4L19 6"/></svg>
+      <span data-i18n="resolve">They’re back!</span>
+    </button>
+  </section>
+  <div class="side--left" aria-label="Shrine activity">
+    <section class="card" id="people-card" hidden>
+      <h2 class="label"><span data-i18n="inShrine">In the shrine</span> <span class="label__count" id="people-count">1</span></h2>
+      <ul class="people" id="people"></ul>
+    </section>
+
+    <section class="card card--records" id="records-card">
+      <h2 class="label"><span data-i18n="recordsLabel">Shrine records</span> <span class="label__count" id="records-level"></span></h2>
+      <dl class="stats stats--records">
+        <div class="stat"><dt data-i18n="recSurvived">Survived</dt><dd id="rec-survived">0</dd></div>
+        <div class="stat"><dt data-i18n="recLongest">Longest</dt><dd id="rec-longest">–</dd></div>
+        <div class="stat"><dt data-i18n="recPrayers">Prayers</dt><dd id="rec-prayers">0</dd></div>
+      </dl>
+      <p class="records__level" id="records-next"></p>
+      <ol class="records" id="records"></ol>
+      <p class="records__empty" id="records-empty" data-i18n="recEmpty">No vigil survived yet. Light the incense, and when they’re back, say so.</p>
+    </section>
+
+    <section class="card card--solo" id="solo-card">
+      <h2 class="label" data-i18n="soloLabel">Praying alone</h2>
+      <p class="card__text" data-i18n="soloText">Open a shared shrine and send the link to your team. Everyone's incense, offerings and prayers land on the same altar, live.</p>
+      <form class="name-form" id="name-form" autocomplete="off">
+        <label class="name-form__field">
+          <span class="name-form__prefix" aria-hidden="true">/r/</span>
+          <span class="sr-only" data-i18n="nameLabel">Name your shrine</span>
+          <input class="name-form__input" id="name-input" type="text" maxlength="48" spellcheck="false" />
+        </label>
+        <button class="btn btn--accent btn--block" type="submit">
+          <span data-i18n="soloCta">Open a team shrine</span>
+        </button>
+      </form>
+      <div class="world" id="world" hidden>
+        <p class="world__line"><span class="world__dot" aria-hidden="true"></span><span id="world-stats"></span></p>
+        <p class="world__ticker" id="world-ticker" aria-live="off"></p>
+      </div>
+    </section>
+
+    <section class="card card--feed">
+      <h2 class="label" data-i18n="feedLabel">Activity</h2>
+      <ol class="feed" id="feed" aria-live="polite"></ol>
+      <p class="feed__empty" id="feed-empty" data-i18n="feedEmpty">Quiet so far. Light the incense to begin.</p>
+    </section>
+  </div>
+</aside>

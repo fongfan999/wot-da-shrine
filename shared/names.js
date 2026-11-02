@@ -3,6 +3,9 @@
  * a name) and the page (which prefills every name field with one, so what you
  * see is what you open).
  */
+/** What a room may be called: the slug in /r/<room>. */
+export const ROOM_RE = /^[a-z0-9-]{3,48}$/;
+
 const ADJECTIVES = ['quiet', 'sleepy', 'humble', 'patient', 'serene', 'devout', 'stoic', 'mellow', 'eternal', 'golden', 'gentle', 'lucky'];
 const NOUNS = ['lotus', 'rack', 'kernel', 'daemon', 'uptime', 'pagoda', 'packet', 'monk', 'cache', 'socket', 'shrine', 'pod'];
 

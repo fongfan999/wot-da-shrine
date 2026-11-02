@@ -6,14 +6,14 @@
  * WebSockets. Uses the hibernation API, so an idle room costs nothing.
  */
 import { DurableObject } from 'cloudflare:workers';
-import { QUICK_PRAYERS } from '../shared/prayers.js';
+import { QUICK_PRAYERS } from '../../shared/prayers.js';
 
-export const BURN_SECONDS = 600; // keep in sync with src/main.js
+export const BURN_SECONDS = 600; // keep in sync with src/app/context.js
 const MAX_PRAYERS = 12;
 const MAX_OFFERINGS = 4; // the altar table has four slots
 const FORGET_AFTER = 30 * 24 * 3600 * 1000; // rooms nobody visits for 30 days are swept
 const TOUCH_EVERY = 24 * 3600 * 1000; // pushing the sweep back once a day is plenty, and saves a write per action
-const OFFERING_KINDS = ['energy', 'noodles', 'duck', 'coffee', 'keyboard', 'usb', 'laptop']; // keys of OFFERINGS in src/burner.js
+const OFFERING_KINDS = ['energy', 'noodles', 'duck', 'coffee', 'keyboard', 'usb', 'laptop']; // keys of OFFERINGS in src/scene/burner.js
 const AVATARS = ['🧘', '🙇', '🙏', '🧑‍💻', '👩‍💻', '👨‍💻', '🐒', '🤖', '🦆', '🐱'];
 
 // What each action is worth.
@@ -23,7 +23,7 @@ const CHORUS_MIN = 3;
 const CHORUS_WINDOW = 4000;
 const VIGIL_IDLE = 6 * 3600 * 1000; // a vigil nobody has touched for six hours is over, whatever anyone says
 const MAX_HISTORY = 12;
-export const FORTUNES = ['great', 'good', 'small', 'bad', 'terrible']; // omikuji levels, see src/omikuji.js
+export const FORTUNES = ['great', 'good', 'small', 'bad', 'terrible']; // omikuji levels, see src/lib/omikuji.js
 const META_MAX = { title: 60, subtitle: 140, eta: 40 };
 
 /**
@@ -76,10 +76,7 @@ export class Shrine extends DurableObject {
 
   async fetch(request) {
     const url = new URL(request.url);
-    if (request.headers.get('Upgrade') !== 'websocket') {
-      if (url.pathname.endsWith('/status')) return Response.json(this.status(url.pathname.split('/')[3] ?? ''));
-      return new Response('Expected a WebSocket', { status: 426 });
-    }
+    if (request.headers.get('Upgrade') !== 'websocket') return new Response('Expected a WebSocket', { status: 426 });
     const person = {
       id: crypto.randomUUID().slice(0, 8),
       name: clean(url.searchParams.get('name'), 24) || 'Anonymous sysadmin',

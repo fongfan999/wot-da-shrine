@@ -1,6 +1,6 @@
 /* Opening a shrine of your own, from any of the page's name fields or the Open sheet. */
 import { roomName as suggestName } from '../../shared/names.js';
-import { sound } from '../audio.js';
+import { sound } from '../audio/index.js';
 import { $ } from './context.js';
 import { openRitual } from './rituals.js';
 

@@ -1,0 +1,166 @@
+/* ---------- Dock: one paper bar with the prayer field and the action keys ---------- */
+.dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "quick quick" "pray actions" "credit credit";
+  align-items: center;
+  column-gap: var(--space-4);
+  row-gap: 10px;
+  padding: 12px max(var(--gutter), calc((100% - 1180px) / 2)) max(10px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--paper-raised);
+}
+.quick { grid-area: quick; display: flex; gap: var(--space-2); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 2px; min-height: 36px; } /* holds its row before the prayers are dealt, so the dock's height is stable */
+.quick::-webkit-scrollbar { display: none; }
+.quick__chip {
+  flex-shrink: 0;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  font-size: 14px;
+  color: var(--ink);
+  white-space: nowrap;
+  transition: background-color 160ms, border-color 160ms, color 160ms;
+}
+.quick__chip:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--note-ink); }
+.quick__chip:active { transform: translateY(1px); }
+
+.pray {
+  grid-area: pray;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 56px;
+  padding: 5px 5px 5px 18px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--muted);
+  transition: border-color 160ms, box-shadow 160ms;
+}
+.pray:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.pray__icon { display: grid; place-items: center; }
+.pray__icon .ico { width: 20px; height: 20px; }
+.pray__input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}
+.pray__input::placeholder { color: var(--muted); }
+.pray__send {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  transition: background-color 160ms;
+}
+.pray__send:hover { background: var(--accent-strong); }
+
+.actions { grid-area: actions; display: flex; gap: var(--space-2); }
+.act {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  justify-content: center;
+  gap: 2px var(--space-2);
+  min-width: 96px;
+  min-height: 56px;
+  padding: 8px 12px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow-key);
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+.act:hover { background: var(--paper-sunk); }
+.act:active, .act[aria-pressed="true"], .act[aria-expanded="true"] { transform: translateY(2px); box-shadow: none; background: var(--paper-sunk); }
+.act__icon { grid-row: span 2; display: grid; place-items: center; }
+.act__icon .ico { width: 22px; height: 22px; }
+.act__label { font-size: 14px; font-weight: 500; white-space: nowrap; line-height: 1.2; }
+.act kbd {
+  justify-self: start;
+  padding: 1px 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  background: var(--paper-sunk);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--muted);
+}
+.act--primary { min-width: 168px; background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.act--primary:hover { background: var(--accent-strong); }
+.act--primary kbd { background: transparent; border-color: currentColor; color: inherit; }
+.act__label--lit { display: none; font-variant-numeric: tabular-nums; }
+.act__label--lit #dock-time { font-family: var(--font-mono); }
+body[data-state="lit"] .act--primary { background: var(--ember); border-color: var(--ember); color: var(--on-ember); }
+body[data-state="lit"] .act__label--unlit { display: none; }
+body[data-state="lit"] .act__label--lit { display: inline; }
+
+.tray {
+  position: absolute;
+  right: max(var(--gutter), calc((100% - 1180px) / 2));
+  bottom: calc(100% - 4px);
+  z-index: 3;
+  width: min(440px, calc(100vw - 32px));
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--ink);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-float);
+}
+.tray__title { margin: 2px 4px 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.tray__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.tray__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  transition: border-color 160ms, background-color 160ms;
+}
+.tray__item:hover { border-color: var(--accent); background: var(--accent-soft); }
+.tray__item:active { transform: translateY(1px); }
+.tray__item--random { border-style: dashed; }
+.tray__emoji { display: grid; place-items: center; height: 36px; }
+.tray__emoji svg { width: 44px; height: 36px; overflow: visible; }
+.tray__emoji .ico { width: 24px; height: 24px; }
+.tray__name { font-size: 12px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+.credit {
+  grid-area: credit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+.credit { flex-wrap: wrap; row-gap: 2px; }
+.credit a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; text-decoration: none; transition: color 160ms; }
+.credit a:hover { color: var(--accent); }
+.credit__mark { width: 16px; height: 16px; border-radius: 22%; }

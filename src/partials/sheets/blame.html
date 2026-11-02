@@ -1,0 +1,24 @@
+<!-- Burn a blame -->
+<div class="sheet sheet--ritual" id="blame" hidden role="dialog" aria-modal="true" aria-labelledby="blame-title">
+  <form class="sheet__card slip-card" id="blame-form" autocomplete="off">
+    <div class="sheet__head">
+      <h2 class="sheet__title" id="blame-title"><span data-i18n="blameTitle">Burn the</span> <em data-i18n="blameTitleAccent">blame</em></h2>
+      <button class="icon-btn" type="button" data-close="blame" aria-label="Close">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="sheet__body">
+      <p class="sheet__hint" data-i18n="blameHint">Write what happened. It is burned in the censer, never sent anywhere, and never spoken of again.</p>
+      <div class="slip" id="blame-slip">
+        <label class="sr-only" for="blame-text">Your confession</label>
+        <textarea class="slip__text" id="blame-text" rows="4" maxlength="240" placeholder="I ran the migration on prod at 5pm on a Friday…" data-i18n-placeholder="blamePlaceholder"></textarea>
+      </div>
+      <div class="sheet__row">
+        <button class="btn btn--ember" type="submit">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-4 0-6.5-2.6-6.5-6 0-3 2-4.6 2.6-7.2.3 1.2.9 2 1.9 2.6C10.3 7.5 11.2 5 13.6 3c-.4 2.6.9 4.2 2.4 5.8 1.4 1.5 2.5 3 2.5 6.2 0 3.4-2.5 6-6.5 6z"/></svg>
+          <span data-i18n="blameBtn">Burn it</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

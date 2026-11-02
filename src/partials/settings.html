@@ -1,0 +1,70 @@
+<!-- Settings panel -->
+<aside class="panel" id="panel" aria-hidden="true" aria-label="Customize">
+  <div class="panel__head">
+    <h2 data-i18n="panelTitle">Customize</h2>
+    <button class="icon-btn" id="btn-close-panel" type="button" aria-label="Close">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="panel__body">
+    <label class="field field--page">
+      <span data-i18n="fTitle">Title</span>
+      <input type="text" name="title" maxlength="60" />
+    </label>
+    <label class="field field--page">
+      <span data-i18n="fSubtitle">Subtitle</span>
+      <input type="text" name="subtitle" maxlength="140" />
+    </label>
+    <label class="field field--page">
+      <span data-i18n="fEta">Back at</span>
+      <input type="datetime-local" name="eta" />
+    </label>
+    <p class="field__note" id="meta-note" data-i18n="metaShared" hidden>Title, subtitle and “back at” are shared with everyone in this shrine.</p>
+    <div class="field">
+      <span data-i18n="fTheme">Theme</span>
+      <div class="seg" id="theme-seg" role="radiogroup" aria-label="Theme">
+        <button type="button" role="radio" data-theme="auto" aria-checked="false" data-i18n="themeAuto">Auto</button>
+        <button type="button" role="radio" data-theme="light" aria-checked="false" data-i18n="themeLight">Light</button>
+        <button type="button" role="radio" data-theme="dark" aria-checked="true" data-i18n="themeDark">Dark</button>
+      </div>
+    </div>
+    <div class="field">
+      <span data-i18n="fFx">Effects</span>
+      <div class="seg" id="fx-seg" role="radiogroup" aria-label="Effects">
+        <button type="button" role="radio" data-fx="auto" aria-checked="true" data-i18n="fxAuto">Auto</button>
+        <button type="button" role="radio" data-fx="full" aria-checked="false" data-i18n="fxFull">Full</button>
+        <button type="button" role="radio" data-fx="lite" aria-checked="false" data-i18n="fxLite">Lite</button>
+      </div>
+      <p class="field__note" id="fx-note"></p>
+    </div>
+    <label class="field field--row">
+      <span data-i18n="fMusic">Background music</span>
+      <input type="checkbox" name="music" checked />
+    </label>
+    <label class="field field--row">
+      <span data-i18n="fSfx">Sound effects</span>
+      <input type="checkbox" name="sfx" checked />
+    </label>
+    <label class="field field--row">
+      <span data-i18n="fPetals">Falling petals</span>
+      <input type="checkbox" name="petals" checked />
+    </label>
+    <label class="field field--row">
+      <span data-i18n="fFog">Ambient fog</span>
+      <input type="checkbox" name="fog" checked />
+    </label>
+    <div class="panel__actions">
+      <button class="btn btn--glass btn--sm" type="button" id="btn-rename" hidden>
+        <span data-i18n="renameBtn">Change name</span>
+      </button>
+      <button class="btn btn--glass btn--sm field--page" type="button" id="btn-copy-link">
+        <span data-i18n="copyLink">Copy share link</span>
+      </button>
+      <button class="btn btn--glass btn--sm" type="button" id="btn-reset">
+        <span data-i18n="reset">Reset</span>
+      </button>
+    </div>
+    <p class="panel__hint" data-i18n="panelHint">Everything here is also a URL parameter, e.g. ?title=…&amp;theme=dark&amp;petals=0</p>
+  </div>
+</aside>
+<div class="panel-backdrop" id="panel-backdrop"></div>

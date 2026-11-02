@@ -5,8 +5,8 @@
  */
 import gsap from 'gsap';
 import qrcode from 'qrcode-generator';
-import { sound } from '../audio.js';
-import { t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { t } from '../lib/strings.js';
 import { ignite } from './altar.js';
 import { $, body, embedded, fmt, reduceMotion, roomName, roomUrl, state, tv, tvHome, urlParams } from './context.js';
 

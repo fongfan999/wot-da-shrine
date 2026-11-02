@@ -6,7 +6,7 @@
 
 const ME_KEY = 'incense:me:v1';
 
-export const AVATARS = ['🧘', '🙇', '🙏', '🧑‍💻', '👩‍💻', '👨‍💻', '🐒', '🤖', '🦆', '🐱']; // same list as worker/shrine.js
+export const AVATARS = ['🧘', '🙇', '🙏', '🧑‍💻', '👩‍💻', '👨‍💻', '🐒', '🤖', '🦆', '🐱']; // same list as worker/objects/shrine.js
 
 /** The room name from the URL, or null on the solo page. */
 export function roomFromPath(path = location.pathname) {

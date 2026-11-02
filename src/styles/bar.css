@@ -1,0 +1,85 @@
+/* ---------- Top bar ---------- */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 14px var(--gutter);
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+.brand { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; text-decoration: none; flex-shrink: 0; }
+/* Wot Da Shrine: "Wot Da" is the Wot Da Fong lettering in ink, the product name in cobalt */
+.brand__word { display: block; height: 26px; width: auto; aspect-ratio: 466 / 78; }
+.brand__wot { fill: var(--ink); }
+.brand__shrine { color: var(--accent); }
+/* The Censer leads, like OfflineMask's icon, its bowl on the wordmark's baseline */
+.brand__mark { width: 21px; height: 24px; translate: 0 -2px; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 4.2; }
+.brand__bowl, .brand__sticks { stroke: var(--ink); }
+.brand__smoke { stroke: var(--accent); stroke-dasharray: 1; transform-box: fill-box; }
+.brand__embers circle { fill: var(--flame); stroke: none; transform-box: fill-box; transform-origin: center; }
+
+/* The Censer lights once as the bar arrives, and again on hover or focus: smoke rises, the tips glow.
+   Hover swaps in a copy of each keyframe so the animation restarts. */
+.brand__smoke { animation: brand-rise .9s var(--ease) .7s both; }
+.brand__smoke:nth-child(2) { animation-delay: .82s; }
+.brand__smoke:nth-child(3) { animation-delay: .94s; }
+.brand__embers circle { animation: brand-glow .8s ease-out .6s both; }
+.brand:is(:hover, :focus-visible) .brand__smoke { animation-name: brand-rise-again; animation-delay: 0s; }
+.brand:is(:hover, :focus-visible) .brand__smoke:nth-child(2) { animation-delay: .12s; }
+.brand:is(:hover, :focus-visible) .brand__smoke:nth-child(3) { animation-delay: .24s; }
+.brand:is(:hover, :focus-visible) .brand__embers circle { animation-name: brand-glow-again; animation-delay: 0s; }
+@keyframes brand-rise { from { stroke-dashoffset: 1; opacity: .2; translate: 0 3px; } 60% { opacity: 1; } to { stroke-dashoffset: 0; opacity: 1; translate: none; } }
+@keyframes brand-rise-again { from { stroke-dashoffset: 1; opacity: .2; translate: 0 3px; } 60% { opacity: 1; } to { stroke-dashoffset: 0; opacity: 1; translate: none; } }
+@keyframes brand-glow { 0% { opacity: .3; scale: .6; } 45% { opacity: 1; scale: 1.35; } 70% { opacity: .75; scale: 1; } 100% { opacity: 1; scale: 1; } }
+@keyframes brand-glow-again { 0% { opacity: .3; scale: .6; } 45% { opacity: 1; scale: 1.35; } 70% { opacity: .75; scale: 1; } 100% { opacity: 1; scale: 1; } }
+
+.room-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: 32px;
+  padding: 4px 12px 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--paper-sunk);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.room-chip:has([data-status="open"]) { background: var(--live-soft); }
+.room-chip__name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.room-chip__state { color: var(--muted); white-space: nowrap; }
+.room-chip:has([data-status="open"]) .room-chip__state { color: var(--live); }
+.room-chip:has([data-status="closed"]) .room-chip__state { color: var(--error); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: transparent; border: 1.5px dashed var(--muted); }
+.status-dot[data-status="open"] { background: var(--live); border: 0; }
+.status-dot[data-status="closed"] { background: var(--error); border: 0; }
+
+.bar__right { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
+
+.presence {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 3px 12px 3px 3px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-pill);
+  background: var(--paper-raised);
+  transition: opacity 300ms;
+}
+body[data-conn="closed"] .presence { opacity: .45; }
+.presence__avatar {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  margin-right: -8px;
+  border-radius: 50%;
+  border: 2px solid var(--paper-raised);
+  background: var(--paper-sunk);
+  font-size: .9rem;
+}
+.presence__avatar--me { background: var(--accent-soft); }
+.presence__count { margin-left: 16px; white-space: nowrap; font-family: var(--font-mono); font-size: 13px; color: var(--muted); }

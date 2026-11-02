@@ -1,10 +1,10 @@
 /* The landing page below the shrine on the home page. */
-import { sound } from '../audio.js';
-import { t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { t } from '../lib/strings.js';
 import { ignite } from '../app/altar.js';
 import { $, body, landing, reduceMotion, state } from '../app/context.js';
 import { introStarted } from '../app/stage.js';
-import { onPalette } from '../palette.js';
+import { onPalette } from '../scene/palette.js';
 import { burner, fog, motes, placeSmoke, room, smoke, vitals } from '../app/engines.js';
 import { setupBuilder } from './builder.js';
 import { watchPulse } from './pulse.js';
@@ -105,7 +105,7 @@ function paintVeil(p) {
     }
     return `url(${c.toDataURL()})`;
   };
-  // the same two looks as the CSS fallbacks in styles.css: wide, and stacked under 900px
+  // the same two looks as the CSS fallbacks in styles/landing/hero.css: wide, and stacked under 900px
   body.style.setProperty('--hero-veil', draw([1.2, 0.95, 0.72, 0.55, 0.5], true));
   body.style.setProperty('--hero-veil-sm', draw([1.2, 0.8, 0.5, 0.7, 0.4], false));
 }

@@ -1,0 +1,7 @@
+/* ---------- Breathing guide ---------- */
+.breath { position: fixed; z-index: 5; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.breath__ring, .breath__core, .breath__label { grid-area: 1 / 1; }
+.breath__ring, .breath__core { border-radius: 50%; width: min(60vw, 320px); aspect-ratio: 1; }
+.breath__ring { border: 1.5px dashed var(--accent); }
+.breath__core { background: var(--accent-soft); border: 1.5px solid var(--accent); transform: scale(.4); }
+.breath__label { padding: 2px 12px; border-radius: var(--radius-pill); background: var(--paper-raised); font-family: var(--font-serif); font-size: 2rem; font-style: italic; color: var(--ink); }

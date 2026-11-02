@@ -1,7 +1,7 @@
 /* Who is kneeling: the people card, the presence stack in the top bar, pings. */
 import gsap from 'gsap';
-import { icon } from '../icons.js';
-import { t } from '../strings.js';
+import { icon } from '../lib/icons.js';
+import { t } from '../lib/strings.js';
 import { $, fmt, people, reduceMotion, roomName, state } from './context.js';
 import { congregation } from './engines.js';
 import { openPanel } from './settings.js';

@@ -1,6 +1,6 @@
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { LEVELS as FORTUNE_LEVELS, draw as drawFortune } from '../omikuji.js';
+import { sound } from '../audio/index.js';
+import { LEVELS as FORTUNE_LEVELS, draw as drawFortune } from '../lib/omikuji.js';
 import { $, reduceMotion } from '../app/context.js';
 
 /** The home page's Burn a blame: the visitor's own words take the slip in the Rituals tile and burn there. */

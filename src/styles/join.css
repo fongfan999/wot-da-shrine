@@ -1,0 +1,48 @@
+/* ---------- Join dialog ---------- */
+.join {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--backdrop);
+}
+.join__card {
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-float);
+}
+.join__title { margin: 0; font-weight: 500; font-size: 36px; line-height: 1.1; letter-spacing: -.04em; }
+.join__title em { font-family: var(--font-serif); font-weight: 400; letter-spacing: -.03em; }
+.join__hint { margin: -4px 0 4px; color: var(--muted); font-size: 15px; }
+.join__input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-pill);
+  outline: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}
+.join__input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.join__avatars { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 6px; }
+.join__avatar {
+  aspect-ratio: 1;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  font-size: 1.5rem;
+  transition: border-color 160ms, background-color 160ms;
+}
+.join__avatar:hover { border-color: var(--field-line); background: var(--paper-sunk); }
+.join__avatar[aria-checked="true"] { border: 2px solid var(--accent); background: var(--accent-soft); }

@@ -3,8 +3,8 @@
  * From inside a shrine it sends that shrine; from the home page (or a phone that scanned the TV)
  * it asks which one, then takes you there to kneel.
  */
-import { sound } from '../audio.js';
-import { t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { t } from '../lib/strings.js';
 import { $, fmt, roomName, state, tv, urlParams } from './context.js';
 import { suggested, toSlug } from './openShrine.js';
 import { openRitual } from './rituals.js';
@@ -13,7 +13,7 @@ import { openShare } from './shareSheet.js';
 import { toast } from './ui.js';
 
 const LAST_KEY = 'incense:cast:v1'; // { code, room }: the TV you last cast to, the shrine you were last in
-const ALPHABET = 'ACDEFHJKMNPQRTUVWXY34679'; // keep in sync with worker/pairing.js
+const ALPHABET = 'ACDEFHJKMNPQRTUVWXY34679'; // keep in sync with worker/objects/pairing.js
 
 const form = $('#cast-form');
 const codeInput = $('#cast-code');

@@ -1,7 +1,7 @@
 /* They're back: closing the vigil. */
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { applyStrings, t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { applyStrings, t } from '../lib/strings.js';
 import { $, body, counters, fmt, reduceMotion, roomName, state } from './context.js';
 import { art, kick, motes, petals, room } from './engines.js';
 import { activity } from './fx.js';

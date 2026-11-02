@@ -1,8 +1,8 @@
 /* The altar's own rituals: light the incense, ring the bowl, bow, puff, breathe. */
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { saveCounters } from '../config.js';
-import { STRINGS, t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { saveCounters } from '../lib/config.js';
+import { STRINGS, t } from '../lib/strings.js';
 import { $, body, BURN_SECONDS, counters, fmt, landing, roomName, state } from './context.js';
 import { art, burner, congregation, kick, motes, petals, room, smoke } from './engines.js';
 import { pulse } from './prayers.js';

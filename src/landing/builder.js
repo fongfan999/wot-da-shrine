@@ -1,5 +1,5 @@
-import { etaPicker } from '../etaPicker.js';
-import { t } from '../strings.js';
+import { etaPicker } from './etaPicker.js';
+import { t } from '../lib/strings.js';
 import { $ } from '../app/context.js';
 import { copyText } from '../app/ui.js';
 

@@ -1,9 +1,9 @@
 /* Offerings: what the servers get, chosen from the tray or left to fate. */
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { OFFERINGS } from '../burner.js';
-import { icon } from '../icons.js';
-import { t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { OFFERINGS } from '../scene/burner.js';
+import { icon } from '../lib/icons.js';
+import { t } from '../lib/strings.js';
 import { $, fmt, reduceMotion, state } from './context.js';
 import { art, kick, smoke } from './engines.js';
 import { pulse } from './prayers.js';

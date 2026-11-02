@@ -1,0 +1,69 @@
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-font-smoothing: antialiased;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* never wider than the screen, whatever a child's intrinsic width */
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 100dvh;
+}
+/* The shrine (stage + dock) fills the first screen; the dock sticks to its bottom only while the shrine is on screen */
+.app {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: calc(100dvh - var(--bar-h, 70px));
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+a { color: inherit; }
+::selection { background: var(--selection); color: var(--selection-ink); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: var(--radius-xs); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+[hidden] { display: none !important; }
+.show-sm { display: none; }
+
+.ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.ico--fill { fill: currentColor; stroke: none; }
+
+/* Mono uppercase labels, the Wot Da Fong house label */
+.label, .eyebrow {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- Drawing classes: every SVG in the scene is ink on paper ---------- */
+.d-paper { fill: var(--paper); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.d-raised { fill: var(--paper-raised); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.d-sunk { fill: var(--paper-sunk); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.d-line { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.d-thin { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.d-faint { fill: none; stroke: var(--line-strong); stroke-width: 1.2; stroke-linecap: round; }
+.d-ink { fill: var(--ink); stroke: none; }
+.d-muted { fill: var(--muted); stroke: none; }
+.d-shade { fill: var(--ink); stroke: none; opacity: .08; }
+.d-flame { fill: var(--flame); stroke: none; }
+.d-ember-soft { fill: var(--ember-soft); stroke: none; }
+.d-accent { fill: var(--accent); stroke: none; }
+.d-accent-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+.d-tube-out { fill: none; stroke: var(--ink); stroke-linecap: round; }
+.d-tube-in { fill: none; stroke: var(--paper); stroke-linecap: round; }
+.d-h2 { fill: none; stroke: var(--ink); stroke-width: .9; stroke-linecap: round; opacity: .45; } /* folds, grain, hatching by hand */
+.d-hl { stroke: var(--ink); stroke-width: .8; opacity: .5; } /* the hatch and lattice pattern lines */
+.d-st { fill: var(--ink); opacity: .55; } /* stipple dots in the ash */
+.d-cav { fill: var(--ink); stroke: none; opacity: .22; } /* the dark inside of the censer */
+.d-core { fill: var(--paper-raised); stroke: none; } /* the hot core of a candle flame */
+.d-strand { fill: none; stroke: var(--paper); stroke-width: 1.1; stroke-linecap: round; } /* hair strands over ink */
+.d-mat { fill: var(--paper-raised); stroke: var(--sheet-line); stroke-width: 1.2; }
+.d-mono { font-family: var(--font-mono); font-size: 8px; letter-spacing: .04em; fill: var(--ink); }

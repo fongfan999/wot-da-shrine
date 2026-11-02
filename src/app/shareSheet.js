@@ -1,8 +1,8 @@
 /* The share sheet: invite the team, and a picture of the shrine to post. */
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { canCopyImage, canShareFiles, cardPng, cardSvg, copyImage, download, shareFile } from '../share.js';
-import { BRAND, t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { canCopyImage, canShareFiles, cardPng, cardSvg, copyImage, download, shareFile } from '../lib/share.js';
+import { BRAND, t } from '../lib/strings.js';
 import { $, body, counters, fmt, people, recentPrayers, roomName, roomUrl, state } from './context.js';
 import { openTray } from './offerings.js';
 import { minutesPrayed } from './resolve.js';

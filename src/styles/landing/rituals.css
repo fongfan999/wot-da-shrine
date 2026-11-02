@@ -1,0 +1,136 @@
+/* Rituals: a bento of little scenes, each one playing its ritual */
+.rituals { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+.ritual--blame, .ritual--remember { grid-column: span 2; }
+.ritual {
+  --r-c: var(--ember);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--sheet-line);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-sheet);
+  overflow: hidden;
+  transition: transform 260ms var(--ease), border-color 260ms ease;
+}
+.ritual:hover { transform: translateY(-4px); border-color: var(--line-strong); }
+.ritual--blame, .ritual--remember { flex-direction: row; }
+.ritual--chorus { --r-c: var(--accent); }
+.ritual--remember { --r-c: var(--flame); }
+.ritual__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  height: 210px;
+  overflow: hidden;
+  border: 0;
+  border-bottom: 1px solid var(--sheet-line);
+  background:
+    radial-gradient(90% 80% at 50% 110%, color-mix(in srgb, var(--r-c) 20%, transparent), transparent 70%),
+    radial-gradient(circle at 1px 1px, var(--sheet-line) 1px, transparent 0) 0 0 / 14px 14px,
+    var(--paper);
+  color: inherit;
+  font: inherit;
+}
+.ritual--blame .ritual__stage, .ritual--remember .ritual__stage { flex: 1.15 1 0; height: auto; min-height: 240px; border-bottom: 0; border-right: 1px solid var(--sheet-line); }
+.ritual__body { display: flex; flex-direction: column; flex: 1 1 0; padding: 22px 22px 22px; }
+.ritual p { flex: 1; margin-bottom: 18px; font-size: 15px; }
+.ritual .btn { align-self: flex-start; }
+
+/* Burn a blame: the confession burns from the bottom up, ember edge first */
+@property --burn { syntax: "<percentage>"; inherits: true; initial-value: -12%; }
+.burnslip { --burn: -12%; position: relative; width: min(78%, 300px); rotate: -2.5deg; animation: burn 8s ease-in infinite; }
+.burnslip__paper {
+  padding: 18px 20px 16px;
+  border-radius: 3px;
+  background: #f3e9d2;
+  color: #3b2c1c;
+  box-shadow: 0 14px 30px -18px #000a;
+  -webkit-mask-image: linear-gradient(to top, transparent var(--burn), #000 calc(var(--burn) + 7%));
+  mask-image: linear-gradient(to top, transparent var(--burn), #000 calc(var(--burn) + 7%));
+}
+.burnslip__text { margin: 0 !important; color: inherit !important; font-family: var(--font-serif); font-style: italic; font-size: 18px !important; line-height: 1.35 !important; }
+.burnslip__sig { display: block; margin-top: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: #8a6f52; }
+.burnslip__edge {
+  position: absolute;
+  left: -3%;
+  right: -3%;
+  bottom: calc(var(--burn) + 2%);
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #ffd08a, #f07a35 45%, transparent);
+  filter: blur(1.5px);
+  opacity: 0;
+  animation: burn-edge 8s ease-in infinite;
+}
+.burnslip__glow { position: absolute; left: 50%; bottom: -40px; width: 70%; height: 90px; translate: -50% 0; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--flame) 55%, transparent), transparent); opacity: 0; animation: burn-edge 8s ease-in infinite; }
+@keyframes burn { 0%, 32% { --burn: -12%; opacity: 1; } 72% { --burn: 104%; opacity: 1; } 80% { --burn: 104%; opacity: 0; } 81% { --burn: -12%; opacity: 0; transform: translateY(10px); } 92%, 100% { --burn: -12%; opacity: 1; transform: none; } }
+@keyframes burn-edge { 0%, 33% { opacity: 0; } 38%, 68% { opacity: 1; } 74%, 100% { opacity: 0; } }
+/* The visitor's own slip: it lands, catches, and burns once */
+.is-yours .burnslip { animation: burn-now 3.6s ease-in forwards; }
+.is-yours :is(.burnslip__edge, .burnslip__glow) { animation: burn-edge-now 3.6s ease-in forwards; }
+@keyframes burn-now { 0% { --burn: -12%; opacity: 0; transform: translateY(-24px) rotate(4deg); } 14%, 26% { --burn: -12%; opacity: 1; transform: none; } 88% { --burn: 104%; opacity: 1; } 100% { --burn: 104%; opacity: 0; } }
+@keyframes burn-edge-now { 0%, 24% { opacity: 0; } 30%, 84% { opacity: 1; } 94%, 100% { opacity: 0; } }
+
+/* Draw a fortune: tap the slip, shake the box, read your luck */
+.fortune-mini { cursor: pointer; perspective: 600px; }
+.fortune-mini__slip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 150px;
+  padding: 14px 14px 16px;
+  border-radius: 3px;
+  background: #f6efe0;
+  color: #3b2c1c;
+  box-shadow: 0 14px 30px -18px #000a;
+  text-align: center;
+  transition: transform 200ms var(--ease);
+}
+.fortune-mini:hover .fortune-mini__slip { transform: translateY(-4px) rotate(1.5deg); }
+.fortune-mini.is-drawing .fortune-mini__slip { animation: slip-draw .7s var(--ease); }
+@keyframes slip-draw { 0% { transform: rotateY(0); } 45% { transform: rotateY(90deg) translateY(-6px); } 100% { transform: rotateY(0); } }
+.fortune-mini__kanji { display: grid; place-items: center; min-width: 46px; height: 46px; padding: 0 6px; border: 2px solid #b8402a; border-radius: 6px; color: #b8402a; font-size: 22px; font-weight: 700; line-height: 1; rotate: -4deg; }
+.fortune-mini[data-level="bad"] .fortune-mini__kanji, .fortune-mini[data-level="terrible"] .fortune-mini__kanji { border-color: #4a4a45; color: #4a4a45; }
+.fortune-mini__name { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #8a6f52; }
+.fortune-mini__line { font-family: var(--font-serif); font-style: italic; font-size: 13px; line-height: 1.3; }
+.fortune-mini__hint { position: absolute; bottom: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* Bow in chorus: three bows drift into one */
+.chorus { position: relative; display: flex; align-items: flex-end; gap: 22px; padding-bottom: 36px; }
+.chorus__bow { display: grid; justify-items: center; width: 34px; }
+.chorus__bow i { position: relative; display: block; width: 30px; height: 34px; margin-top: 22px; border: 2px solid var(--ink); border-radius: 15px 15px 6px 6px; background: var(--paper-raised); transform-origin: 50% 100%; }
+.chorus__bow i::before { content: ""; position: absolute; left: 50%; top: -22px; width: 18px; height: 18px; translate: -50% 0; border: 2px solid var(--ink); border-radius: 50%; background: var(--paper-raised); }
+.chorus__bow:nth-child(1) i { animation: bow-a 6s ease-in-out infinite; }
+.chorus__bow:nth-child(2) i { animation: bow-b 6s ease-in-out infinite; }
+.chorus__bow:nth-child(3) i { animation: bow-c 6s ease-in-out infinite; }
+@keyframes bow-a { 0%, 6%, 16%, 56%, 70%, 100% { transform: none; } 11%, 63% { transform: translateY(5px) scaleY(.78); } }
+@keyframes bow-b { 0%, 20%, 30%, 56%, 70%, 100% { transform: none; } 25%, 63% { transform: translateY(5px) scaleY(.78); } }
+@keyframes bow-c { 0%, 34%, 44%, 56%, 70%, 100% { transform: none; } 39%, 63% { transform: translateY(5px) scaleY(.78); } }
+.chorus__badge { position: absolute; left: 50%; bottom: 0; translate: -50% 0; padding: 4px 12px; border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--note-ink); font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; white-space: nowrap; opacity: 0; animation: chorus-badge 6s ease-out infinite; }
+@keyframes chorus-badge { 0%, 60% { opacity: 0; transform: translateY(6px) scale(.9); } 65%, 86% { opacity: 1; transform: none; } 94%, 100% { opacity: 0; transform: translateY(-4px); } }
+.chorus::before { content: ""; position: absolute; left: 50%; top: 40%; width: 60px; height: 60px; translate: -50% -50%; border: 2px solid var(--accent); border-radius: 50%; opacity: 0; animation: chorus-ring 6s ease-out infinite; }
+@keyframes chorus-ring { 0%, 62% { opacity: 0; transform: scale(.5); } 64% { opacity: .9; } 85%, 100% { opacity: 0; transform: scale(3.4); } }
+
+/* A shrine that remembers: lanterns light, karma climbs, the shrine grows */
+.remember { display: flex; flex-direction: column; align-items: center; gap: 12px; width: min(86%, 360px); }
+.remember__lanterns { position: relative; display: flex; justify-content: space-between; width: 100%; padding-top: 10px; }
+.remember__lanterns::before { content: ""; position: absolute; left: -4%; right: -4%; top: 0; height: 14px; border-top: 1px solid var(--line-strong); border-radius: 50% / 100% 100% 0 0; }
+.remember__lanterns span { position: relative; width: 18px; height: 24px; border-radius: 8px 8px 6px 6px; background: var(--paper-sunk); border: 1px solid var(--line-strong); transition: background-color 400ms ease, box-shadow 400ms ease, border-color 400ms ease; }
+.remember__lanterns span::before { content: ""; position: absolute; left: 50%; top: -9px; width: 1px; height: 9px; background: var(--line-strong); }
+.remember__lanterns span.is-lit { background: color-mix(in srgb, var(--flame) 75%, var(--paper)); border-color: var(--flame); box-shadow: 0 0 16px -2px color-mix(in srgb, var(--flame) 70%, transparent); }
+.remember__karma { margin: 0 !important; font-family: var(--font-mono); font-size: 12px !important; color: var(--muted); }
+.remember__karma b { font-size: 22px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+.remember__track { position: relative; width: 100%; height: 6px; margin: 34px 0 44px; border-radius: 3px; background: var(--paper-sunk); box-shadow: inset 0 0 0 1px var(--line); }
+.remember__fill { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--flame)); }
+.remember__mile { position: absolute; left: var(--at); top: 50%; display: grid; justify-items: center; translate: -50% -50%; font-family: var(--font-mono); font-size: 10px; line-height: 1.3; letter-spacing: .04em; text-align: center; color: var(--muted); white-space: nowrap; }
+.remember__mile:last-child { translate: -85% -50%; justify-items: end; text-align: right; }
+.remember__mile b { display: grid; place-items: center; width: 28px; height: 28px; margin-bottom: 30px; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--paper-raised); font-size: 14px; font-weight: 400; filter: grayscale(1); opacity: .55; transition: filter 300ms ease, opacity 300ms ease, transform 400ms cubic-bezier(.3, 1.6, .5, 1), border-color 300ms ease; }
+.remember__mile:last-child b { margin-right: 14px; }
+.remember__mile { padding-top: 0; }
+.remember__mile.is-on { color: var(--ink); }
+.remember__mile.is-on b { filter: none; opacity: 1; transform: scale(1.15); border-color: var(--flame); }
+
+.eyebrow--live::before { background: var(--ember); animation: world-beat 2.4s ease-out infinite; }

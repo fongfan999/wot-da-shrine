@@ -1,8 +1,8 @@
 /* Prayers: typed or ready-made, each one rises as a lantern. */
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { releaseLantern } from '../lanterns.js';
-import { STRINGS, t } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { releaseLantern } from '../scene/lanterns.js';
+import { STRINGS, t } from '../lib/strings.js';
 import { puff } from './altar.js';
 import { $, landing, recentPrayers, reduceMotion, roomName, state } from './context.js';
 import { congregation, kick, petals, wishes } from './engines.js';

@@ -1,0 +1,105 @@
+/* ---------- Scene layers ---------- */
+.scene { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.layer { position: absolute; inset: 0; }
+.layer--bg {
+  inset: -6%;
+  will-change: transform;
+  -webkit-mask-image: radial-gradient(60% 70% at 50% 62%, #000 25%, transparent 80%);
+  mask-image: radial-gradient(60% 70% at 50% 62%, #000 25%, transparent 80%);
+}
+.layer--bg .room { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: .5; }
+.layer--bg .room--leds { opacity: .8; }
+/* The notebook's dot grid under everything */
+.layer--grid {
+  background-image: radial-gradient(circle at 1px 1px, var(--sheet-line) 1px, transparent 0);
+  background-size: 20px 20px;
+  opacity: .7;
+}
+.layer--fog { width: 100%; height: 100%; opacity: .35; } /* drawn at 35% resolution, stretched to fill */
+.layer--petals { overflow: hidden; }
+.smoke-layer, .motes-layer {
+  /* only the column above the altar: smoke and motes never leave it, and a smaller canvas is a smaller upload every frame */
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: var(--altar-x, 50%); /* centered on the altar, wherever the layout puts it */
+  width: min(100%, max(64%, 640px));
+  height: 100%;
+  transform: translateX(-50%);
+  z-index: 4;
+  pointer-events: none;
+  /* feathered on every side, so smoke that drifts out of the column dissolves instead of being cut on a straight edge */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent), linear-gradient(transparent var(--bar-h, 70px), #000 calc(var(--bar-h, 70px) + 80px));
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent), linear-gradient(transparent var(--bar-h, 70px), #000 calc(var(--bar-h, 70px) + 80px));
+  mask-composite: intersect;
+}
+
+.lanterns { position: fixed; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; }
+
+.petal {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  width: 16px;
+  height: 12px;
+  border-radius: 100% 0 100% 0;
+  background: var(--ember-soft);
+  border: 1px solid var(--flame);
+  opacity: .9;
+  will-change: transform;
+}
+
+/* A prayer lantern: a paper card that floats up from the altar */
+.lantern {
+  position: absolute;
+  left: 50%;
+  bottom: 40%;
+  transform: translateX(-50%);
+  min-width: 140px;
+  max-width: min(70vw, 300px);
+  padding: 12px 18px 16px;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-lg) var(--radius-lg) 20px 20px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  line-height: 1.25;
+  font-style: italic;
+  text-align: center;
+  box-shadow: var(--shadow-float);
+  will-change: transform, opacity;
+}
+.lantern__by {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-style: normal;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.lantern::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 40%;
+  height: 8px;
+  transform: translateX(-50%);
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+  background: var(--ink);
+}
+.lantern::after {
+  content: "";
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  width: 12px;
+  height: 14px;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--flame);
+}

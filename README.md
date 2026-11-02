@@ -186,51 +186,84 @@ It deploys to https://shrine.wotdafong.dev as a Workers custom domain (the
 
 ## Project layout
 
+One folder per kind of thing, one file per part of the page, and nothing very long:
+
+- **Markup** lives in `src/partials/`. `index.html` is only the head and a list of
+  `<include src="…">` lines, which a small Vite plugin (in `vite.config.js`) replaces
+  with the partials at dev and build time.
+- **Styles** live in `src/styles/`, one file per part of the page. `src/styles/index.css`
+  imports them in cascade order, so a later file wins over an earlier one.
+- **Behaviour** lives in `src/app/` for the shrine and `src/landing/` for the home page.
+  Drawing engines are in `src/scene/`, sound in `src/audio/`, and plain helpers in `src/lib/`.
+- **The Worker** is a Hono app: a route file per area in `worker/routes/`, shared middleware
+  in `worker/middleware.js`, and the Durable Objects in `worker/objects/`.
+
+A new part of the page usually means a partial, a stylesheet and a module with the same name.
+
 ```
-index.html          page shell
-src/main.js         entry: loads the modules, keyboard shortcuts, starts the show
-src/app/context.js  where we are (solo, room, TV, home page), settings, shared state
-src/app/engines.js  builds the drawing engines (room, burner, smoke, fog, petals…)
-src/app/stage.js    layout, split title, intro, parallax, mantras
-src/app/fx.js       lite/full effects, frame budget, TV sleep
-src/app/settings.js applying settings, the settings panel, sound toggle
-src/app/ui.js       toasts, activity feed, shockwaves, copy
-src/app/stats.js    counters, rank, enlightenment, vigil strip, records, ETA
-src/app/vigil.js    the solo page's vigils and records
-src/app/altar.js    light, burn out, bowl + combos, bow, puff, breathing
-src/app/offerings.js, prayers.js, rituals.js   the offering tray, prayers, blame + fortune sheets
-src/app/shrine.js   shared-shrine client: join, connection, remote actions
-src/app/people.js   people card and presence stack
-src/app/resolve.js  "they're back"
-src/app/shareSheet.js  invite + share card sheet
-src/app/world.js    the world line (every shrine)
-src/app/openShrine.js  name fields and the Open sheet
-src/landing/        the home page's sections (pulse, showcase, steps, builder, TV…)
-src/room.js         room URL, saved name, reconnecting WebSocket
-src/share.js        the share card: live altar + stats as SVG, rasterised to PNG
-src/omikuji.js      the fortunes: five levels, three lines each
-src/burner.js       inline-SVG incense burner (burn-down, embers, offerings)
-src/serverRoom.js   procedural SVG server room with blinking LEDs
-src/audio.js        Web Audio sound kit (one-shot effects)
-src/music.js        generative ambient music
-src/smoke.js        incense smoke particles (runtime sprite)
-src/fog.js          ambient fog
-src/petals.js       falling petals (GSAP)
-src/lanterns.js     prayer lanterns (GSAP)
-src/congregation.js teammates kneeling at the altar
-src/motes.js        dust in the light, sparks
-src/vitals.js       rack 42 heart monitor
-src/config.js       settings: URL params > localStorage > defaults
-src/strings.js      brand name, copy and mantras
-src/styles.css      design tokens, light and dark themes, layout
-src/palette.js      theme colours for the canvas layers
-src/icons.js        line icons for the dock, tray and pings
-public/favicon.svg  the mark
-public/og.png       the link preview card (1200×630)
-public/wotdafong-*.svg  the Wot Da Fong P?! mark for the credit line
-shared/prayers.js   the ready-made prayers, used by the page and the Worker
-worker/index.js     Cloudflare Worker: /new, room pages (link previews), badges and the API
-worker/shrine.js    Shrine Durable Object: one per room
-worker/world.js     World Durable Object: totals across every shrine
-wrangler.jsonc      Worker + Durable Object config
+index.html               page shell: head + includes
+vite.config.js           Vite, the Cloudflare plugin and the partials plugin
+src/main.js              entry: loads the modules, keyboard shortcuts, starts the show
+src/partials/            the page's markup
+  scene.html, bar.html, breath.html, tv.html, settings.html
+  shrine/                the altar heading, the side cards, the dock
+  sheets/                join, open a shrine, cast, blame, fortune, share
+  landing/               the home page's sections, top to bottom, and the footer
+src/styles/              the page's styles: index.css imports the rest in cascade order
+  tokens.css             design tokens, light and dark themes
+  landing/               the home page's sections
+  modes.css, responsive.css   overrides by mode and by screen width
+src/app/                 the shrine
+  context.js             where we are (solo, room, TV, home page), settings, shared state
+  engines.js             builds the drawing engines (room, burner, smoke, fog, petals…)
+  stage.js               layout, split title, intro, parallax, mantras
+  fx.js                  lite/full effects, frame budget, TV sleep
+  settings.js            applying settings, the settings panel, sound toggle
+  ui.js                  toasts, activity feed, shockwaves, copy
+  stats.js               counters, rank, enlightenment, vigil strip, records, ETA
+  vigil.js               the solo page's vigils and records
+  altar.js               light, burn out, bowl + combos, bow, puff, breathing
+  offerings.js, prayers.js, rituals.js   the offering tray, prayers, blame + fortune sheets
+  shrine.js              shared-shrine client: join, connection, remote actions
+  people.js              people card and presence stack
+  resolve.js             "they're back"
+  shareSheet.js          invite + share card sheet
+  cast.js, screen.js     Cast to TV, and the TV's own screens
+  world.js               the world line (every shrine)
+  openShrine.js          name fields and the Open sheet
+src/landing/             the home page's sections (pulse, showcase, steps, builder, TV, the ETA picker…)
+src/scene/               what is drawn
+  burner.js              inline-SVG incense burner (burn-down, embers, offerings)
+  serverRoom.js          procedural SVG server room with blinking LEDs
+  smoke.js               incense smoke particles (runtime sprite)
+  fog.js, petals.js, motes.js   ambient fog, falling petals, dust and sparks
+  lanterns.js            prayer lanterns
+  ema.js                 prayers hung on the altar as plaques
+  congregation.js        teammates kneeling at the altar
+  vitals.js              rack 42 heart monitor
+  palette.js             theme colours for the canvas layers
+src/audio/
+  index.js               Web Audio sound kit (one-shot effects)
+  music.js               generative ambient music
+src/lib/
+  config.js              settings: URL params > localStorage > defaults
+  strings.js             brand name, copy and mantras
+  room.js                room URL, saved name, reconnecting WebSocket
+  share.js               the share card: live altar + stats as SVG, rasterised to PNG
+  omikuji.js             the fortunes: five levels, three lines each
+  icons.js               line icons for the dock, tray and pings
+public/favicon.svg       the mark
+public/og.png            the link preview card (1200×630)
+public/wotdafong-*.svg   the Wot Da Fong P?! mark for the credit line
+shared/                  used by the page and the Worker: ready-made prayers, room names, link previews
+worker/index.js          Cloudflare Worker: a Hono app that mounts the routes below
+worker/middleware.js     security headers, API headers, rate limits, socket-only
+worker/routes/api.js     /api/health, /api/status, /api/world, /api/pulse
+worker/routes/rooms.js   /new, /r/:room (link previews), a room's socket, status and badge
+worker/routes/tv.js      /api/tv/ws and casting to a paired TV
+worker/views/            the room page's link preview rewrite, the README badge SVG
+worker/objects/shrine.js   Shrine Durable Object: one per room
+worker/objects/world.js    World Durable Object: totals across every shrine
+worker/objects/pairing.js  Pairing Durable Object: one per TV code
+wrangler.jsonc           Worker + Durable Object config
 ```

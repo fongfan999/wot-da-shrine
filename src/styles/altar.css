@@ -1,0 +1,142 @@
+/* ---------- Center: heading and altar ---------- */
+/* The altar stays in view while the cards beside it scroll: it fills what the top
+   bar and the dock leave (their heights are measured in main.js) */
+.center {
+  position: sticky;
+  top: calc(var(--bar-h, 70px) + var(--space-5));
+  height: max(360px, calc(100dvh - var(--bar-h, 70px) - var(--dock-h, 160px) - 2 * var(--space-5)));
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* Before the script runs, the page doesn't yet know which heading it shows (home, shrine, maintenance): the intro's pieces wait. */
+.booting :is(.bar, .heading, .burner, .side .card, .quick, .pray, .actions, .credit, .plantern-row) { visibility: hidden; }
+.heading { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); max-width: 720px; }
+.eyebrow { display: inline-flex; align-items: center; }
+.eyebrow::before { content: ""; width: 8px; height: 8px; margin-right: 10px; border-radius: 50%; background: var(--accent); }
+.title {
+  margin: 4px 0 0;
+  font-weight: 500;
+  font-size: clamp(2.4rem, min(4.8vw, 8vh), 4.6rem);
+  line-height: 1.02;
+  letter-spacing: -.04em;
+  text-wrap: balance;
+}
+.title .word { display: inline-block; white-space: nowrap; }
+.title .word--accent { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -.03em; padding-right: .04em; }
+.title .ch { display: inline-block; } /* no will-change: GSAP promotes each letter only while it animates, so ~20 layers don't stay resident */
+.subtitle { margin: 0; max-width: 46ch; color: var(--muted); font-size: 18px; line-height: 1.55; text-wrap: pretty; }
+.mantra {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+.mantra__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+body[data-state="lit"] .mantra__dot { background: var(--flame); }
+#mantra { display: inline-block; }
+
+/* ---------- Altar ---------- */
+.altar {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+.altar__floor {
+  /* shockwaves, clipped to the column so nothing widens the page */
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 25%;
+  bottom: -12%;
+  overflow: hidden;
+}
+.shock {
+  position: absolute;
+  left: 50%;
+  bottom: 26%;
+  width: 260px;
+  height: 52px;
+  margin-left: -130px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  pointer-events: none;
+}
+
+.congregation { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.kneeler { position: absolute; left: 50%; bottom: 0; }
+.kneeler__svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.kneeler__halo { fill: var(--ember-soft); }
+.kneeler__ember { fill: var(--flame); }
+.kneeler__tag {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 2px + var(--lift, 0px));
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 140px;
+  padding: 3px 10px 3px 3px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-pill);
+  background: var(--paper-raised);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.kneeler__tag::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: calc(6px + var(--lift, 0px));
+  background: var(--line-strong);
+}
+.kneeler--me .kneeler__tag { border-color: var(--accent); background: var(--accent-soft); color: var(--note-ink); }
+.kneeler__avatar { width: 20px; height: 20px; display: grid; place-items: center; flex-shrink: 0; border-radius: 50%; background: var(--paper-sunk); font-size: .78rem; }
+.kneeler__name { overflow: hidden; text-overflow: ellipsis; }
+.kneeler-more {
+  position: absolute;
+  right: 0;
+  bottom: 6px;
+  padding: 3px 8px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-pill);
+  background: var(--paper-raised);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.burner {
+  position: relative;
+  z-index: 1;
+  height: min(100%, 420px);
+  min-height: 150px;
+  aspect-ratio: 520 / 470;
+  max-width: 100%;
+  transform-origin: 50% 100%;
+}
+.burner__art { position: relative; width: 100%; height: 100%; user-select: none; }
+.burner__svg { display: block; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.burner__svg--live { position: absolute; inset: 0; }
+.burner__svg--live, .burner__svg--live * { pointer-events: none !important; cursor: default; }
+/* only painted shapes catch clicks, never the transparent box around them */
+.burner__svg .altar-table, .burner__svg .candle, .burner__svg .offerings, .burner__svg .devotee,
+.burner__svg > path, .burner__svg > ellipse, .burner__svg > g { pointer-events: visiblePainted; cursor: pointer; }
+.burner__svg defs { pointer-events: none; }
+.burner__shine { display: none; }
+.stick__body { fill: var(--muted); }
+.stick__ash { fill: var(--line-strong); }
+.stick__halo { fill: var(--ember-soft); }
+.stick__ember, .devotee__ember { fill: var(--flame); }

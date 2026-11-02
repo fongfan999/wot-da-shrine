@@ -1,0 +1,167 @@
+/* ---------- The hero on /: one headline, one sentence, one button, and the altar, lit ---------- */
+body[data-landing="1"] :is(.dock, .side, .mantra) { display: none; }
+body[data-landing="1"] .app { min-height: 0; }
+body[data-landing="1"] .stage { display: block; padding: 0 var(--gutter); }
+body[data-landing="1"] .center {
+  position: static;
+  height: auto;
+  min-height: calc(100dvh - var(--bar-h, 70px));
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 0 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 64px);
+}
+body[data-landing="1"] .heading { max-width: 580px; gap: 14px; }
+body[data-landing="1"] .title { font-size: clamp(2.7rem, 5.6vw, 5.2rem); }
+body[data-landing="1"] .subtitle { font-size: 19px; max-width: 40ch; }
+body[data-landing="1"] .altar { position: relative; flex: none; height: min(66vh, 580px); pointer-events: auto; }
+body[data-landing="1"] .altar::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: 78%;
+  aspect-ratio: 2 / 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--ember-soft), transparent 72%);
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+body[data-landing="1"][data-state="lit"] .altar::before { opacity: .9; }
+body[data-landing="1"] .burner { height: min(100%, 520px); cursor: pointer; }
+.hero-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; width: 100%; margin-top: 8px; }
+.hero-cta__field { flex: 1 1 220px; min-height: 52px; }
+.btn--lg { min-height: 52px; padding: 12px 26px; font-size: 16px; }
+.hero-cta__fine { flex-basis: 100%; margin: 2px 0 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; color: var(--muted); }
+.hero-cta__fine a { color: var(--accent); text-decoration: none; }
+.hero-cta__fine a:hover { text-decoration: underline; }
+.hero-hint {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  z-index: 3;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--paper-raised);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+  animation: hint-bob 2.2s ease-in-out infinite;
+}
+@keyframes hint-bob { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -6px); } }
+
+/* The hero, lit: the corridor recedes behind the words, the altar glows, and "together" is brushed in ember */
+body { --hero-glow: transparent; }
+@media (prefers-color-scheme: dark) { body:not([data-theme="light"]) { --hero-glow: #e48d5d59; } }
+body[data-theme="dark"] { --hero-glow: #e48d5d59; }
+body[data-landing="1"] .scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* painted to an image per theme in landing/index.js (--hero-veil); these live gradients are the fallback */
+  background-image: var(--hero-veil,
+    linear-gradient(90deg, var(--paper) 0%, color-mix(in srgb, var(--paper) 72%, transparent) 30%, transparent 58%),
+    radial-gradient(120% 95% at 72% 55%, transparent 50%, var(--paper) 100%));
+  background-size: 100% 100%;
+}
+body[data-landing="1"] .center { grid-template-rows: minmax(0, 1fr) auto; }
+body[data-landing="1"] .altar::before {
+  bottom: -2%;
+  width: 118%;
+  aspect-ratio: 1.25 / 1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--flame) 24%, transparent), color-mix(in srgb, var(--flame) 7%, transparent) 55%, transparent 78%);
+  transform: translateX(-50%) scale(.85);
+  transition: opacity 2.4s ease, transform 2.4s var(--ease);
+}
+body[data-landing="1"][data-state="lit"] .altar::before { opacity: 1; transform: translateX(-50%) scale(1); animation: halo-breathe 6s ease-in-out 2.4s infinite; }
+@keyframes halo-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .72; } }
+body[data-landing="1"] .title { line-height: .98; }
+body[data-landing="1"] .title .word--accent { position: relative; color: var(--ember-ink); }
+body[data-landing="1"] .title .word--accent .ch { text-shadow: 0 0 .45em var(--hero-glow); }
+body[data-landing="1"] .title .word--accent::after {
+  content: "";
+  position: absolute;
+  left: 3%;
+  right: 5%;
+  bottom: -.04em;
+  height: .14em;
+  background: var(--flame);
+  opacity: .85;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath d='M1 8.5C40 4 110 1.5 199 4.5L198 7C120 5.5 60 8 5 11.5Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath d='M1 8.5C40 4 110 1.5 199 4.5L198 7C120 5.5 60 8 5 11.5Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  clip-path: inset(0 100% 0 0);
+  animation: brush-in 1s cubic-bezier(.6, 0, .2, 1) 1.6s forwards;
+}
+@keyframes brush-in { to { clip-path: inset(0 0 0 0); } }
+body[data-landing="1"] .subtitle { color: color-mix(in srgb, var(--ink) 76%, transparent); }
+
+/* One command bar: name it, open it */
+.hero-cta__bar {
+  flex: 1 1 100%;
+  min-width: 0;
+  max-width: 560px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--paper-raised) 94%, transparent);
+  box-shadow: 0 24px 48px -28px #0008;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+.hero-cta__bar:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent), 0 24px 48px -28px #0008; }
+.hero-cta__bar .hero-cta__field { flex: 1 1 auto; min-width: 0; min-height: 48px; border: 0; background: transparent; box-shadow: none; }
+.hero-cta__btn { min-height: 48px; padding-inline: 22px 18px; }
+.hero-cta__btn .ico { transition: transform 200ms var(--ease); }
+.hero-cta__btn:hover .ico { transform: translateX(3px); }
+.hero-cta__fine { padding-left: 20px; }
+.hero-proof { flex-basis: 100%; display: inline-flex; align-items: center; gap: 9px; margin: 2px 0 0; padding-left: 20px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; color: var(--ink); font-variant-numeric: tabular-nums; animation: rise-in .8s var(--ease) both; }
+.hero-proof__dot { width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: var(--flame); animation: world-beat 2.4s ease-out infinite; }
+@keyframes rise-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* The prayer ribbon: ready-made prayers drift by; tap one and it rises from the altar */
+.hero-ribbon { grid-column: 1 / -1; display: flex; align-items: center; gap: 18px; min-width: 0; padding-top: 8px; animation: rise-in 1s var(--ease) 2.6s both; }
+.hero-ribbon__label { flex: none; font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.hero-ribbon__label::after { content: " →"; color: var(--flame); }
+.hero-ribbon__track {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 6px 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.hero-ribbon__rail { display: flex; gap: 10px; width: max-content; animation: ribbon-run 70s linear infinite; }
+.hero-ribbon__track:is(:hover, :focus-within) .hero-ribbon__rail { animation-play-state: paused; }
+/* two identical halves: one half plus one gap is exactly a loop */
+@keyframes ribbon-run { to { transform: translateX(calc(-50% - 5px)); } }
+.hero-ribbon__item {
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--paper-raised) 70%, transparent);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.2;
+  color: var(--muted);
+  white-space: nowrap;
+  transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease;
+}
+.hero-ribbon__item:hover { color: var(--ink); border-color: var(--flame); background: var(--ember-soft); }
+.hero-ribbon__item.is-sent { animation: ribbon-sent .9s var(--ease); }
+@keyframes ribbon-sent { 0% { border-color: var(--flame); box-shadow: 0 0 0 0 color-mix(in srgb, var(--flame) 50%, transparent); } 100% { box-shadow: 0 0 0 12px transparent; } }
+
+/* On the home page Customize is preferences only: the maintenance-page fields live in the builder below */
+body[data-landing="1"] .panel .field--page { display: none; }

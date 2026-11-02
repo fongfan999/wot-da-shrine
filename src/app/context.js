@@ -2,9 +2,9 @@
  * What every part of the page shares: where we are (solo, a room, the TV, the home page),
  * the visitor's settings and counters, and the little state that more than one part changes.
  */
-import { loadSettings, saveSettings, clearSettings, loadCounters, DEFAULTS } from '../config.js';
-import { t } from '../strings.js';
-import { roomFromPath, loadMe } from '../room.js';
+import { loadSettings, saveSettings, clearSettings, loadCounters, DEFAULTS } from '../lib/config.js';
+import { t } from '../lib/strings.js';
+import { roomFromPath, loadMe } from '../lib/room.js';
 
 export const $ = (sel) => document.querySelector(sel);
 export const body = document.body;
@@ -12,7 +12,7 @@ export const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').match
 /** t() with {placeholders} filled in. */
 export const fmt = (key, vars = {}) => Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), t(key));
 
-export const BURN_SECONDS = 600; // keep in sync with worker/shrine.js
+export const BURN_SECONDS = 600; // keep in sync with worker/objects/shrine.js
 
 /* ---------- Settings + counters ---------- */
 export const settings = loadSettings();

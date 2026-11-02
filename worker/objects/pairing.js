@@ -12,12 +12,12 @@
  * screen's key and the shrine it was last sent to.
  */
 import { DurableObject } from 'cloudflare:workers';
+import { ROOM_RE } from '../../shared/names.js';
 
 // No letters or digits that read alike from across a room (0/O, 1/I/L, 2/Z, 5/S, 8/B, G/6).
 export const CODE_ALPHABET = 'ACDEFHJKMNPQRTUVWXY34679';
 export const CODE_RE = /^[ACDEFHJKMNPQRTUVWXY34679]{6}$/;
 const KEY_RE = /^[a-f0-9]{32}$/;
-const ROOM_RE = /^[a-z0-9-]{3,48}$/;
 const FORGET_AFTER = 7 * 24 * 3600 * 1000;
 const TAKEN = 4009; // close code: another screen holds this code, ask for a new one
 

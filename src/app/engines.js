@@ -1,14 +1,14 @@
 /* The engines that draw the shrine: the server room, the burner, smoke, fog, petals, motes, the congregation. */
-import { buildBurner } from '../burner.js';
-import { Congregation } from '../congregation.js';
-import { WishBoard } from '../ema.js';
-import { Fog } from '../fog.js';
-import { Motes } from '../motes.js';
-import { syncPalette } from '../palette.js';
-import { Petals } from '../petals.js';
-import { buildServerRoom } from '../serverRoom.js';
-import { IncenseSmoke } from '../smoke.js';
-import { Vitals } from '../vitals.js';
+import { buildBurner } from '../scene/burner.js';
+import { Congregation } from '../scene/congregation.js';
+import { WishBoard } from '../scene/ema.js';
+import { Fog } from '../scene/fog.js';
+import { Motes } from '../scene/motes.js';
+import { syncPalette } from '../scene/palette.js';
+import { Petals } from '../scene/petals.js';
+import { buildServerRoom } from '../scene/serverRoom.js';
+import { IncenseSmoke } from '../scene/smoke.js';
+import { Vitals } from '../scene/vitals.js';
 import { $, body, people, state } from './context.js';
 
 /* ---------- Engines ---------- */

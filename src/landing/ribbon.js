@@ -1,6 +1,6 @@
 import gsap from 'gsap';
-import { sound } from '../audio.js';
-import { STRINGS } from '../strings.js';
+import { sound } from '../audio/index.js';
+import { STRINGS } from '../lib/strings.js';
 import { $ } from '../app/context.js';
 import { sendPrayer } from '../app/prayers.js';
 

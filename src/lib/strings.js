@@ -1,4 +1,4 @@
-import { QUICK_PRAYERS } from '../shared/prayers.js';
+import { QUICK_PRAYERS } from '../../shared/prayers.js';
 
 export const BRAND = 'Wot Da Shrine';
 

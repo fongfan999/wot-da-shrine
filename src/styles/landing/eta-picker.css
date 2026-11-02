@@ -1,0 +1,53 @@
+/* Back at: a trigger that looks like the other fields, and a picker in the house style */
+.mp__field--eta { position: relative; }
+#channel { position: relative; z-index: 2; } /* the picker can hang over the next section */
+.eta-trigger { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 42px; padding: 8px 12px; border: 1px solid var(--field-line); border-radius: var(--radius-md); background: var(--paper); color: var(--ink); font-family: var(--font-sans); font-size: 15px; letter-spacing: 0; text-transform: none; text-align: left; transition: border-color 160ms ease, box-shadow 160ms ease; }
+.eta-trigger:hover { border-color: var(--line-strong); }
+.eta-trigger[aria-expanded="true"], .eta-trigger:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); outline: 0; }
+.eta-trigger { padding-block: 4px; }
+.eta-trigger__val { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.eta-trigger__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+.eta-trigger__sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em; color: var(--flame); }
+.eta-trigger .ico { color: var(--muted); }
+.eta-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(340px, calc(100vw - 2 * var(--gutter)));
+  padding: 16px;
+  border: 1px solid var(--sheet-line);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-sheet), 0 30px 60px -30px #000c;
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+  animation: pane-in .25s var(--ease) both;
+}
+.eta-pop:focus { outline: 0; }
+.eta-pop__section { display: flex; flex-direction: column; gap: 8px; }
+.eta-pop__label { margin: 0 !important; font-family: var(--font-mono); font-size: 10px !important; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.eta-pop__row { display: flex; flex-wrap: wrap; gap: 6px; }
+.eta-pop__row--days { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
+.eta-chip, .eta-day, .eta-slot { padding: 6px 11px; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--paper); color: var(--ink); font-size: 13px; line-height: 1.2; white-space: nowrap; transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease; }
+.eta-chip:hover, .eta-day:hover, .eta-slot:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); color: var(--note-ink); }
+.eta-chip { border-style: dashed; }
+.eta-day[aria-pressed="true"], .eta-slot[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.eta-pop__grid { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-height: 168px; overflow-y: auto; padding: 2px; scrollbar-width: thin; }
+.eta-slot { padding: 7px 0; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 12px; text-align: center; font-variant-numeric: tabular-nums; }
+.eta-slot:disabled { opacity: .3; cursor: default; }
+.eta-pop__foot { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--line); }
+.eta-pop__clear { padding: 6px 4px; border: 0; background: none; color: var(--muted); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+.eta-pop__clear:hover { color: var(--ink); }
+.mp__slug { display: flex; align-items: center; min-height: 42px; padding-left: 12px; border: 1px solid var(--field-line); border-radius: var(--radius-md); background: var(--paper); font-family: var(--font-mono); font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--muted); }
+.mp__slug:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.mp__slug input { flex: 1; min-width: 0; min-height: 40px; padding: 8px 12px 8px 1px; border: 0 !important; box-shadow: none !important; background: transparent; font-family: var(--font-mono); font-size: 14px; color: var(--ink); }
+.mp__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.mp__note { flex: 1 1 180px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .02em; color: var(--muted); }
+.mp__addr { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mp__addr b { font-weight: 600; color: var(--accent); display: inline-block; }
+.mp__addr b.is-tick { animation: tick .45s var(--ease); }

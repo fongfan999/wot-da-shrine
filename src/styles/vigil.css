@@ -1,0 +1,94 @@
+/* ---------- The vigil: how long the servers have been down ---------- */
+.vigil {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 6px 0 0;
+  padding: 6px 14px 6px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--paper-raised);
+  font-size: 14px;
+  color: var(--muted);
+}
+.vigil__dot { align-self: center; width: 8px; height: 8px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 0 color-mix(in srgb, var(--ember) 45%, transparent); animation: world-beat 2s ease-out infinite; }
+.vigil__time { font-family: var(--font-mono); font-size: 18px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.vigil__meta { font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; }
+.vigil__meta:empty { display: none; }
+body[data-resolved="1"] .vigil { border-color: var(--live); background: var(--live-soft); }
+body[data-resolved="1"] .vigil__dot { background: var(--live); animation: none; }
+body[data-resolved="1"] .vigil__time { color: var(--live); }
+
+/* Shrine records */
+.stats--records { margin-bottom: 10px; }
+.records__level { margin: 0 0 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em; color: var(--muted); }
+.records { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.records:empty { display: none; }
+.records li { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.records__mins { font-family: var(--font-mono); font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.records__facts { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.records__when { font-family: var(--font-mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
+.records li[data-outcome="forgotten"] .records__mins { color: var(--muted); text-decoration: line-through; }
+.records__empty { margin: 0; font-size: 13px; color: var(--muted); }
+.records:not(:empty) + .records__empty { display: none; }
+
+/* Paper lanterns above the altar: one per vigil survived */
+.plantern-row { position: absolute; right: 2%; top: 1%; z-index: 1; height: 90px; width: min(62%, 520px); pointer-events: none; }
+.plantern-row__string { position: absolute; left: 0; right: 0; top: 8px; height: 0; border-top: 1.5px solid var(--ink); opacity: .5; transform: rotate(-1.2deg); transform-origin: 0 0; }
+.plantern { position: absolute; top: 4px; width: 34px; height: 60px; transform-origin: 50% 0; }
+.plantern svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.plantern__body { fill: var(--paper-raised); stroke: var(--ink); stroke-width: 1.6; }
+.plantern__rib { fill: none; stroke: var(--ink); stroke-width: 1; opacity: .5; }
+.plantern__cap { fill: var(--ink); }
+.plantern__glow { fill: var(--ember-soft); opacity: 0; transition: opacity 1.2s; }
+.plantern__core { fill: var(--flame); opacity: 0; transition: opacity 1.2s; }
+body[data-state="lit"] .plantern__glow { opacity: .9; }
+body[data-state="lit"] .plantern__core { opacity: .9; }
+.plantern-row__more { position: absolute; right: 0; top: 70px; padding: 1px 7px; border-radius: var(--radius-pill); background: var(--paper-raised); border: 1px solid var(--line-strong); font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+/* The altar grows with the room's karma */
+.burner__svg .torii, .burner__svg .cat { display: none; }
+.burner[data-level="1"] .torii, .burner[data-level="2"] .torii, .burner[data-level="3"] .torii { display: block; }
+.burner[data-level="2"] .cat, .burner[data-level="3"] .cat { display: block; }
+.burner[data-level="3"] .censer-body { fill: var(--ember-soft); }
+.burner[data-level="3"] .censer-rim { fill: var(--ember-soft); }
+
+/* Quick row: rituals first, then the dealt prayers */
+.quick__chip--ritual { display: inline-flex; align-items: center; gap: 6px; border-style: dashed; color: var(--ember-ink); border-color: var(--ember); }
+.quick__chip--ritual .ico { width: 16px; height: 16px; }
+.quick__chip--ritual:hover { background: var(--ember-soft); border-color: var(--ember); color: var(--ember-ink); }
+.quick__sep { width: 1px; align-self: stretch; margin: 4px 2px; background: var(--line-strong); flex-shrink: 0; }
+.quick__deal { display: contents; }
+
+/* Rituals: the blame slip and the fortune */
+.sheet--ritual .sheet__card { width: min(460px, 100%); }
+.sheet__title em { font-family: var(--font-serif); font-weight: 400; letter-spacing: -.03em; }
+.slip { position: relative; padding: 18px 18px 14px; border: 1px solid var(--ink); background: var(--paper); box-shadow: var(--shadow-sheet); transform: rotate(-.6deg); }
+.slip::before { content: ""; position: absolute; left: 14px; right: 14px; top: 0; height: 1px; background: repeating-linear-gradient(90deg, var(--line-strong) 0 6px, transparent 6px 10px); }
+.slip__text { width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: var(--ink); font-family: var(--font-serif); font-style: italic; font-size: 18px; line-height: 1.5; }
+.slip__text::placeholder { color: var(--line-strong); }
+.slip--flying { position: fixed; z-index: 60; width: 280px; pointer-events: none; margin: 0; overflow: hidden; }
+.slip--flying .slip__text { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 120px; overflow: hidden; }
+.slip--burning { background: linear-gradient(0deg, var(--ember) 0%, var(--flame) 30%, var(--paper) 60%); color: transparent; border-color: var(--ember); }
+.omikuji { display: grid; place-items: center; padding: 6px 0 2px; }
+.omikuji__slip {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 16px 18px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  box-shadow: var(--shadow-sheet);
+  text-align: center;
+  transform-style: preserve-3d;
+}
+.omikuji__slip::before { content: ""; width: 100%; height: 3px; margin-top: -14px; background: repeating-linear-gradient(90deg, var(--ember) 0 10px, transparent 10px 14px); }
+.omikuji__kanji { font-family: var(--font-serif); font-size: 40px; line-height: 1; color: var(--ember-ink); }
+.omikuji__level { font-size: 18px; font-weight: 650; letter-spacing: -.01em; }
+.omikuji__lines { list-style: none; margin: 4px 0 0; padding: 10px 0 0; border-top: 1px dashed var(--line-strong); display: flex; flex-direction: column; gap: 8px; font-family: var(--font-serif); font-style: italic; font-size: 14px; line-height: 1.35; color: var(--ink); }
+.omikuji__advice { margin: 6px 0 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.omikuji__slip[data-level="great"] .omikuji__kanji, .omikuji__slip[data-level="good"] .omikuji__kanji { color: var(--accent); }
+.omikuji__slip[data-level="bad"] .omikuji__kanji, .omikuji__slip[data-level="terrible"] .omikuji__kanji { color: var(--error); }

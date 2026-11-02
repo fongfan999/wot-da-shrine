@@ -1,6 +1,6 @@
 /* The stage around the altar: layout, the split title and intro, parallax, mantras. */
 import gsap from 'gsap';
-import { STRINGS } from '../strings.js';
+import { STRINGS } from '../lib/strings.js';
 import { $, body, reduceMotion } from './context.js';
 
 export const title = $('#title');
