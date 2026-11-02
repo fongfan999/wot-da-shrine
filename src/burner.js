@@ -17,7 +17,7 @@ const STICKS = [
   { x: CX, top: 16, lean: 0 },
   { x: CX + 22, top: 36, lean: 2.2 },
 ];
-const CANDLES = [{ x: 96 }, { x: 424 }];
+const CANDLES = [{ x: 72 }, { x: 448 }];
 const TABLE_Y = 398;
 const SLOTS = [148, 186, 334, 372]; // x positions for offerings on the table
 
@@ -60,20 +60,39 @@ export const OFFERINGS = {
   },
 };
 
-/** A devotee seen from behind, kneeling, incense raised: drawn with its knees at (0, 0). */
+/**
+ * A devotee seen from behind, kneeling on a cushion, incense raised: drawn with
+ * its knees at (0, 0) inside the box x −44…44, y −196…8. Robe folds, a sash,
+ * sleeves hanging from the raised arms, hair in a bun, soles peeking out under the hem.
+ */
 export const FIGURE = (cls) => `
-    <ellipse class="d-shade" cx="0" cy="-2" rx="34" ry="6"/>
-    <path class="d-paper" d="M -30 0 Q -32 -24 -12 -30 L 14 -30 Q 32 -24 30 0 Z"/>
+    <ellipse class="d-shade" cx="0" cy="4" rx="44" ry="4"/>
+    <path class="d-sunk" d="M -40 -4 Q 0 -14 40 -4 L 40 0 Q 0 8 -40 0 Z"/>
+    <path class="d-thin" d="M -40 -4 Q 0 6 40 -4"/>
+    <path class="d-paper" d="M -30 0 Q -33 -24 -14 -32 L 14 -32 Q 33 -24 30 0 Q 0 4 -30 0 Z"/>
+    <path class="d-h2" d="M -17 -26 Q -21 -14 -18 -2 M -6 -30 Q -8 -16 -5 0 M 6 -30 Q 8 -16 5 0 M 17 -26 Q 21 -14 18 -2"/>
+    <ellipse class="d-paper" cx="-13" cy="1" rx="8" ry="4"/>
+    <ellipse class="d-paper" cx="13" cy="1" rx="8" ry="4"/>
+    <path class="d-thin" d="M -19 0 h 3 M -17 -2 h 3 M 16 0 h 3 M 14 -2 h 3"/>
     <g class="${cls}__upper" style="transform-origin: 0px -30px">
-      <path class="d-paper" d="M -22 -30 L -24 -92 Q 0 -104 24 -92 L 22 -30 Z"/>
-      <path class="d-thin" d="M 0 -97 L 0 -44" opacity="0.45"/>
-      <path class="d-tube-out" stroke-width="13" d="M -20 -86 Q -30 -118 -8 -140 L 0 -146"/>
-      <path class="d-tube-out" stroke-width="13" d="M 20 -86 Q 30 -118 8 -140 L 0 -146"/>
-      <path class="d-tube-in" stroke-width="9" d="M -20 -86 Q -30 -118 -8 -140 L 0 -146"/>
-      <path class="d-tube-in" stroke-width="9" d="M 20 -86 Q 30 -118 8 -140 L 0 -146"/>
-      <circle class="d-paper" cx="0" cy="-110" r="15"/>
-      <path class="d-thin" d="M -12 -117 Q 0 -128 12 -117"/>
-      <rect class="d-muted" x="-1.2" y="-182" width="2.4" height="36"/>
+      <path class="d-paper" d="M -18 -30 L -22 -80 Q 0 -96 22 -80 L 18 -30 Z"/>
+      <path class="d-h2" d="M 0 -78 V -38"/>
+      <path class="d-thin" d="M -19 -40 Q 0 -35 19 -40 M -19 -35 Q 0 -30 19 -35"/>
+      <path class="d-paper" d="M -22 -80 L -33 -48 Q -25 -41 -13 -49 L -9 -78 Z"/>
+      <path class="d-paper" d="M 22 -80 L 33 -48 Q 25 -41 13 -49 L 9 -78 Z"/>
+      <path class="d-tube-out" stroke-width="11" d="M -18 -78 Q -26 -106 -8 -118 L 0 -122"/>
+      <path class="d-tube-out" stroke-width="11" d="M 18 -78 Q 26 -106 8 -118 L 0 -122"/>
+      <path class="d-tube-in" stroke-width="7.5" d="M -18 -78 Q -26 -106 -8 -118 L 0 -122"/>
+      <path class="d-tube-in" stroke-width="7.5" d="M 18 -78 Q 26 -106 8 -118 L 0 -122"/>
+      <rect class="d-paper" x="-5" y="-102" width="10" height="14" rx="2.5"/>
+      <circle class="d-paper" cx="0" cy="-108" r="15"/>
+      <path class="d-ink" d="M -15 -108 Q -13 -127 0 -127 Q 13 -127 15 -108 Q 9 -116 0 -115 Q -9 -116 -15 -108 Z"/>
+      <circle class="d-ink" cx="0" cy="-126" r="4.5"/>
+      <path class="d-strand" d="M -10 -118 Q -5 -122 0 -122 M 5 -122 Q 9 -121 12 -116"/>
+      <path class="d-thin" d="M -15 -106 q -2 2 0 4 M 15 -106 q 2 2 0 4"/>
+      <circle class="d-paper" cx="-3.5" cy="-123" r="4"/>
+      <circle class="d-paper" cx="3.5" cy="-123" r="4"/>
+      <rect class="d-muted" x="-1.2" y="-182" width="2.4" height="58"/>
       <circle class="${cls}__halo" cx="0" cy="-182" r="7" opacity="0"/>
       <circle class="${cls}__ember" cx="0" cy="-182" r="2.6" opacity="0"/>
     </g>`;
@@ -85,8 +104,17 @@ export function buildBurner(host) {
     <pattern id="bFret" width="16" height="12" patternUnits="userSpaceOnUse">
       <path class="d-thin" d="M0 10 V2 H10 V6 H5 V4 M12 2 H16"/>
     </pattern>
+    <pattern id="bHatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line class="d-hl" x1="0" y1="0" x2="0" y2="4"/>
+    </pattern>
+    <pattern id="bLattice" width="6" height="6" patternUnits="userSpaceOnUse">
+      <path class="d-hl" d="M0 0 L6 6 M6 0 L0 6"/>
+    </pattern>
+    <pattern id="bStipple" width="5" height="5" patternUnits="userSpaceOnUse">
+      <circle class="d-st" cx="1.5" cy="1.5" r=".7"/><circle class="d-st" cx="4" cy="4" r=".5"/>
+    </pattern>
     <clipPath id="bBodyClip">
-      <path d="M 150 ${RIM_Y + 4} C 112 322, 168 380, 260 380 C 352 380, 408 322, 370 ${RIM_Y + 4} Z"/>
+      <path d="M 142 ${RIM_Y} C 96 270, 100 340, 192 376 H 328 C 420 340, 424 270, 378 ${RIM_Y} Z"/>
     </clipPath>
   </defs>
 
@@ -100,31 +128,83 @@ export function buildBurner(host) {
     <path class="d-thin" d="M 72 104 L 72 400 M 448 104 L 448 400" opacity="0.35"/>
   </g>
 
-  <!-- table -->
+  <!-- the altar table: a woven mat, scroll-footed legs, a carved apron and a top seen a little from above -->
   <g class="altar-table">
-    <ellipse class="d-shade" cx="260" cy="452" rx="250" ry="8"/>
-    <rect class="d-paper" x="40" y="414" width="18" height="36" rx="3"/>
-    <rect class="d-paper" x="462" y="414" width="18" height="36" rx="3"/>
-    <rect class="d-paper" x="30" y="412" width="460" height="7" rx="2"/>
-    <rect class="d-paper" x="22" y="${TABLE_Y}" width="476" height="18" rx="4"/>
-    <path class="d-raised" d="M 150 ${TABLE_Y} L 370 ${TABLE_Y} L 384 428 Q 260 444 136 428 Z"/>
-    <path class="d-thin" d="M 158 406 L 362 406" opacity="0.5"/>
-    <path class="d-thin" d="M 170 ${TABLE_Y} L 162 432 M 350 ${TABLE_Y} L 358 432" opacity="0.35"/>
+    <polygon class="d-mat" points="70,452 450,452 500,470 20,470"/>
+    <path class="d-h2" d="M 56 458 H 464 M 38 464 H 482" stroke-dasharray="5 3"/>
+    <ellipse class="d-shade" cx="260" cy="458" rx="250" ry="6"/>
+    <path class="d-raised" d="M 40 416 V 434 Q 40 450 30 456 H 64 Q 58 450 58 434 V 416 Z"/>
+    <path class="d-raised" d="M 480 416 V 434 Q 480 450 490 456 H 456 Q 462 450 462 434 V 416 Z"/>
+    <path class="d-h2" d="M 49 420 V 440 M 471 420 V 440"/>
+    <rect class="d-raised" x="58" y="438" width="404" height="6" rx="1.5"/>
+    <polygon class="d-raised" points="40,384 480,384 498,398 22,398"/>
+    <path class="d-h2" d="M 60 389 Q 260 386 460 389 M 36 395 Q 260 392 484 395"/>
+    <rect class="d-paper" x="22" y="398" width="476" height="8" rx="1"/>
+    <path class="d-raised" d="M 30 406 H 490 V 420 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 q -11.5 7 -23 0 Z"/>
+    <rect x="36" y="409" width="448" height="9" fill="url(#bLattice)" opacity=".5"/>
+    <path class="d-thin" d="M 36 409 H 484 M 36 418 H 484" opacity=".6"/>
   </g>
 
-  <!-- candles -->
+  <!-- the runner the censer stands on, hanging over the front edge -->
+  <g class="altar-table">
+    <polygon class="d-raised" points="158,384 362,384 370,398 150,398"/>
+    <path class="d-raised" d="M 150 398 H 370 V 428 Q 260 440 150 428 Z"/>
+    <path class="d-h2" d="M 168 400 Q 166 414 170 428 M 352 400 Q 354 414 350 428"/>
+    <path class="d-thin" d="M 150 418 Q 260 430 370 418 M 150 423 Q 260 435 370 423" opacity=".7"/>
+    <path class="d-thin" d="M 164 431 v 6 M 188 435 v 6 M 212 438 v 6 M 236 439 v 6 M 260 440 v 6 M 284 439 v 6 M 308 438 v 6 M 332 435 v 6 M 356 431 v 6"/>
+  </g>
+
+  <!-- the tablet: who we are praying for -->
+  <g class="tablet">
+    <rect class="d-raised" x="98" y="390" width="52" height="8" rx="1"/>
+    <path class="d-raised" d="M 104 392 V 170 Q 104 152 124 148 Q 144 152 144 170 V 392 Z"/>
+    <path class="d-thin" d="M 109 386 V 172 Q 109 158 124 154 Q 139 158 139 172 V 386" opacity=".6"/>
+    <text class="d-mono" x="124" y="183" text-anchor="middle">RACK-01</text>
+    <path class="d-thin" d="M 115 190 H 133" opacity=".6"/>
+    <text class="d-mono" x="124" y="203" text-anchor="middle">03:14</text>
+  </g>
+
+  <!-- chrysanthemums -->
+  <g class="vase">
+    <ellipse class="d-shade" cx="424" cy="399" rx="14" ry="3"/>
+    <path class="d-paper" d="M 410 398 C 402 380, 410 366, 416 358 V 350 H 424 V 358 C 430 366, 438 380, 430 398 Z"/>
+    <path class="d-h2" d="M 428 368 q 3 11 -1 25"/>
+    <ellipse class="d-paper" cx="420" cy="350" rx="5" ry="1.8"/>
+    <path class="d-thin" d="M 420 350 L 414 330 M 420 350 L 426 326 M 420 349 L 420 318"/>
+    <path class="d-paper" d="M 416 340 q -7 -4 -6 -11 q 6 2 6 11 Z"/>
+    <path class="d-paper" d="M 424 337 q 7 -5 5 -12 q -6 3 -5 12 Z"/>
+    <circle class="d-paper" cx="413" cy="328" r="7"/>
+    <path class="d-thin" d="M 413 321 V 335 M 406 328 H 420 M 408 323 L 418 333 M 418 323 L 408 333"/>
+    <circle class="d-ink" cx="413" cy="328" r="1.4"/>
+    <circle class="d-paper" cx="428" cy="324" r="7"/>
+    <path class="d-thin" d="M 428 317 V 331 M 421 324 H 435 M 423 319 L 433 329 M 433 319 L 423 329"/>
+    <circle class="d-ink" cx="428" cy="324" r="1.4"/>
+    <circle class="d-paper" cx="420" cy="312" r="7"/>
+    <path class="d-thin" d="M 420 305 V 319 M 413 312 H 427 M 415 307 L 425 317 M 425 307 L 415 317"/>
+    <circle class="d-ink" cx="420" cy="312" r="1.4"/>
+  </g>
+
+  <!-- candles: brass candlesticks with a plinth, knop and drip pan; the flames live in the moving layer -->
   ${CANDLES.map((c, i) => `
   <g class="candle" data-i="${i}">
-    <ellipse class="d-shade" cx="${c.x + 6}" cy="${TABLE_Y}" rx="20" ry="4"/>
-    <ellipse class="d-paper" cx="${c.x}" cy="396" rx="20" ry="6"/>
-    <rect class="d-paper" x="${c.x - 11}" y="322" width="22" height="74" rx="3"/>
-    <path class="d-thin" d="M ${c.x - 11} 352 h22 M ${c.x - 11} 368 h22" opacity="0.6"/>
-    <ellipse class="d-sunk" cx="${c.x}" cy="322" rx="11" ry="3.5"/>
-    <rect class="d-ink" x="${c.x - 1}" y="310" width="2" height="12"/>
+    <ellipse class="d-shade" cx="${c.x + 6}" cy="399" rx="22" ry="4"/>
+    <ellipse class="d-paper" cx="${c.x}" cy="396" rx="16" ry="4.5"/>
+    <path class="d-paper" d="M ${c.x - 11} 390 V 395 Q ${c.x} 400 ${c.x + 11} 395 V 390 Z"/>
+    <ellipse class="d-paper" cx="${c.x}" cy="390" rx="11" ry="3.2"/>
+    <rect class="d-paper" x="${c.x - 3}" y="356" width="6" height="34" rx="1.5"/>
+    <ellipse class="d-paper" cx="${c.x}" cy="372" rx="6" ry="4"/>
+    <ellipse class="d-paper" cx="${c.x}" cy="355" rx="16" ry="4.5"/>
+    <ellipse class="d-sunk" cx="${c.x}" cy="354.5" rx="11.5" ry="2.5"/>
+    <path class="d-raised" d="M ${c.x - 9} 318 V 350 Q ${c.x} 354 ${c.x + 9} 350 V 318 Z"/>
+    <path class="d-h2" d="M ${c.x + 5} 322 V 348 M ${c.x + 6.5} 326 V 344"/>
+    <ellipse class="d-raised" cx="${c.x}" cy="318" rx="9" ry="3"/>
+    <path class="d-raised" d="M ${c.x - 8} 320 q -2 10 1 18 q 3 1 2 -5 q -2 -6 -1 -13 Z"/>
+    <path class="d-raised" d="M ${c.x + 8} 321 q 2 7 1 12 q -2 1 -2 -4 Z"/>
+    <rect class="d-ink" x="${c.x - 0.8}" y="310" width="1.6" height="9"/>
   </g>`).join('')}
 
   <!-- a lucky cat, waving at the rack: the shrine has grown into a temple -->
-  <g class="cat" transform="translate(56 ${TABLE_Y}) scale(1.1)">
+  <g class="cat" transform="translate(40 ${TABLE_Y}) scale(1.1)">
     <ellipse class="d-shade" cx="2" cy="0" rx="18" ry="3.5"/>
     <path class="d-paper" d="M -14 0 Q -18 -24 -4 -30 L 10 -30 Q 20 -22 14 0 Z"/>
     <circle class="d-paper" cx="2" cy="-38" r="12"/>
@@ -139,53 +219,45 @@ export function buildBurner(host) {
   <!-- offerings land here -->
   <g class="offerings"></g>
 
-  <!-- censer shadow on the runner -->
-  <ellipse class="d-shade" cx="268" cy="404" rx="110" ry="8"/>
+  <!-- censer shadow on the runner, then the back leg (hidden behind the belly) -->
+  <ellipse class="d-shade" cx="262" cy="401" rx="112" ry="6"/>
+  <path class="d-paper" d="M 254 362 L 252 392 Q 252 400 260 400 Q 268 400 268 392 L 266 362 Z"/>
 
-  <!-- legs -->
-  <g class="d-tube-out" stroke-width="17">
-    <path d="M 186 358 C 164 374, 162 390, 176 400"/>
-    <path d="M 334 358 C 356 374, 358 390, 344 400"/>
-    <path d="M 260 374 C 258 386, 258 394, 260 402"/>
-  </g>
-  <g class="d-tube-in" stroke-width="13">
-    <path d="M 186 358 C 164 374, 162 390, 176 400"/>
-    <path d="M 334 358 C 356 374, 358 390, 344 400"/>
-    <path d="M 260 374 C 258 386, 258 394, 260 402"/>
-  </g>
-  <ellipse class="d-paper" cx="176" cy="402" rx="12" ry="5"/>
-  <ellipse class="d-paper" cx="344" cy="402" rx="12" ry="5"/>
-  <ellipse class="d-paper" cx="260" cy="404" rx="12" ry="5"/>
-
-  <!-- belly -->
-  <path class="d-paper censer-body" d="M 150 ${RIM_Y + 4} C 112 322, 168 380, 260 380 C 352 380, 408 322, 370 ${RIM_Y + 4} Z"/>
+  <!-- belly: a bronze ding with a meander band, cloud scrolls and hatched shade on its dark side -->
+  <path class="d-paper censer-body" d="M 142 ${RIM_Y} C 96 270, 100 340, 192 376 H 328 C 420 340, 424 270, 378 ${RIM_Y} Z"/>
   <g clip-path="url(#bBodyClip)">
-    <path d="M 118 290 Q 260 334 402 290 L 402 306 Q 260 350 118 306 Z" fill="url(#bFret)" opacity="0.7"/>
-    <path class="d-thin" d="M 118 290 Q 260 334 402 290"/>
-    <path class="d-thin" d="M 118 306 Q 260 350 402 306"/>
+    <path fill="url(#bHatch)" d="M 366 242 C 426 278, 424 338, 328 376 C 386 342, 390 288, 366 242 Z"/>
+    <path fill="url(#bHatch)" d="M 148 248 Q 260 282 372 248 Q 260 266 148 248 Z"/>
+    <path fill="url(#bHatch)" d="M 180 366 Q 260 382 340 366 L 328 376 H 192 Z"/>
+    <path d="M 100 274 Q 260 300 420 274 L 420 296 Q 260 322 100 296 Z" fill="url(#bFret)" opacity="0.75"/>
+    <path class="d-thin" d="M 100 274 Q 260 300 420 274"/>
+    <path class="d-thin" d="M 100 296 Q 260 322 420 296"/>
     <g class="d-thin" opacity="0.7">
       <path d="M 208 326 c 6 -10 18 -10 22 0 c 8 -8 20 -2 18 8 c 8 2 8 12 0 14 h -40 c -10 0 -10 -14 0 -22 z"/>
       <path d="M 276 326 c 6 -10 18 -10 22 0 c 8 -8 20 -2 18 8 c 8 2 8 12 0 14 h -40 c -10 0 -10 -14 0 -22 z"/>
     </g>
-    <path class="d-thin" d="M 168 262 Q 160 300 178 334" opacity="0.4"/>
     <rect class="burner__shine" x="-140" y="220" width="90" height="190"/>
   </g>
-  <path class="d-line" d="M 150 ${RIM_Y + 4} C 112 322, 168 380, 260 380 C 352 380, 408 322, 370 ${RIM_Y + 4}"/>
+  <path class="d-line" d="M 142 ${RIM_Y} C 96 270, 100 340, 192 376 H 328 C 420 340, 424 270, 378 ${RIM_Y}"/>
 
-  <!-- rim -->
-  <ellipse class="d-paper censer-rim" cx="260" cy="${RIM_Y}" rx="124" ry="29"/>
-  <ellipse class="d-sunk" cx="260" cy="${RIM_Y - 1}" rx="102" ry="20"/>
-  <ellipse class="d-ash" cx="260" cy="${RIM_Y + 2}" rx="88" ry="12"/>
+  <!-- front legs, with paws -->
+  <path class="d-paper" d="M 212 360 C 196 372, 186 390, 192 402 Q 196 406 206 406 H 224 Q 230 402 224 394 C 216 384, 218 374, 230 366 Z"/>
+  <path class="d-paper" d="M 308 360 C 324 372, 334 390, 328 402 Q 324 406 314 406 H 296 Q 290 402 296 394 C 304 384, 302 374, 290 366 Z"/>
+  <path class="d-thin" d="M 200 403 v 3 M 207 403 v 3 M 320 403 v 3 M 313 403 v 3"/>
 
-  <!-- ears -->
-  <g class="d-tube-out" stroke-width="13">
-    <path d="M 150 ${RIM_Y - 4} C 138 200, 176 194, 180 ${RIM_Y - 8}"/>
-    <path d="M 370 ${RIM_Y - 4} C 382 200, 344 194, 340 ${RIM_Y - 8}"/>
+  <!-- ears, then the rim over their roots, the dark inside and the ash the sticks stand in -->
+  <g class="d-tube-out" stroke-width="14">
+    <path d="M 156 ${RIM_Y - 14} C 132 190, 178 178, 190 ${RIM_Y - 22}"/>
+    <path d="M 364 ${RIM_Y - 14} C 388 190, 342 178, 330 ${RIM_Y - 22}"/>
   </g>
-  <g class="d-tube-in" stroke-width="9">
-    <path d="M 150 ${RIM_Y - 4} C 138 200, 176 194, 180 ${RIM_Y - 8}"/>
-    <path d="M 370 ${RIM_Y - 4} C 382 200, 344 194, 340 ${RIM_Y - 8}"/>
+  <g class="d-tube-in" stroke-width="9.5">
+    <path d="M 156 ${RIM_Y - 14} C 132 190, 178 178, 190 ${RIM_Y - 22}"/>
+    <path d="M 364 ${RIM_Y - 14} C 388 190, 342 178, 330 ${RIM_Y - 22}"/>
   </g>
+  <ellipse class="d-paper censer-rim" cx="260" cy="${RIM_Y}" rx="124" ry="26"/>
+  <ellipse class="d-cav" cx="260" cy="${RIM_Y}" rx="108" ry="18"/>
+  <ellipse class="d-ash" cx="260" cy="${RIM_Y + 3}" rx="98" ry="12"/>
+  <ellipse fill="url(#bStipple)" cx="260" cy="${RIM_Y + 3}" rx="98" ry="12"/>
 </svg>
 
 <!-- Everything that moves lives here, so the censer above is painted once. Same viewBox, same box. -->
@@ -195,6 +267,7 @@ export function buildBurner(host) {
   <g class="flame" style="transform-origin: ${c.x}px 320px" opacity="0">
     <ellipse class="soft d-ember-soft" cx="${c.x}" cy="304" rx="13" ry="20"/>
     <path class="d-flame" d="M ${c.x} 288 C ${c.x + 7} 298, ${c.x + 8} 310, ${c.x} 318 C ${c.x - 8} 310, ${c.x - 7} 298, ${c.x} 288 Z"/>
+    <path class="d-core" d="M ${c.x} 303 C ${c.x + 3} 309, ${c.x + 3} 314, ${c.x} 317.5 C ${c.x - 3} 314, ${c.x - 3} 309, ${c.x} 303 Z"/>
   </g>`).join('')}
 
   <!-- sticks -->

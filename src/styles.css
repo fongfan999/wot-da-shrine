@@ -184,6 +184,14 @@ a { color: inherit; }
 .d-accent-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
 .d-tube-out { fill: none; stroke: var(--ink); stroke-linecap: round; }
 .d-tube-in { fill: none; stroke: var(--paper); stroke-linecap: round; }
+.d-h2 { fill: none; stroke: var(--ink); stroke-width: .9; stroke-linecap: round; opacity: .45; } /* folds, grain, hatching by hand */
+.d-hl { stroke: var(--ink); stroke-width: .8; opacity: .5; } /* the hatch and lattice pattern lines */
+.d-st { fill: var(--ink); opacity: .55; } /* stipple dots in the ash */
+.d-cav { fill: var(--ink); stroke: none; opacity: .22; } /* the dark inside of the censer */
+.d-core { fill: var(--paper-raised); stroke: none; } /* the hot core of a candle flame */
+.d-strand { fill: none; stroke: var(--paper); stroke-width: 1.1; stroke-linecap: round; } /* hair strands over ink */
+.d-mat { fill: var(--paper-raised); stroke: var(--sheet-line); stroke-width: 1.2; }
+.d-mono { font-family: var(--font-mono); font-size: 8px; letter-spacing: .04em; fill: var(--ink); }
 
 /* ---------- Scene layers ---------- */
 .scene { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
