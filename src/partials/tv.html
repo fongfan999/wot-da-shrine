@@ -1,9 +1,12 @@
 <!-- /tv: a screen waiting for a shrine -->
 <section class="pair-screen" id="pair-screen" hidden aria-labelledby="pair-title">
   <div class="pair-screen__card">
-    <p class="pair-screen__eyebrow"><span class="pair-screen__dot" aria-hidden="true"></span><span id="pair-status">TV pairing · waiting for a shrine</span></p>
+    <p class="pair-screen__eyebrow"><span class="pair-screen__dot" aria-hidden="true"></span><span id="pair-status">TV pairing · getting a code</span></p>
     <h1 class="pair-screen__title" id="pair-title"><span data-i18n="pairTitle">Put a shrine on</span> <em data-i18n="pairTitleAccent">this screen.</em></h1>
-    <div class="pair-screen__code" id="pair-code" role="img" aria-label="Pairing code"></div>
+    <div class="pair-screen__code" id="pair-code" role="img" aria-label="Getting a pairing code">
+      <!-- the code's outline until the server hands one over, so nothing jumps when it lands -->
+      <span class="pair-screen__tile pair-screen__tile--skeleton"></span><span class="pair-screen__tile pair-screen__tile--skeleton"></span><span class="pair-screen__tile pair-screen__tile--skeleton"></span><span class="pair-screen__gap" aria-hidden="true"></span><span class="pair-screen__tile pair-screen__tile--skeleton"></span><span class="pair-screen__tile pair-screen__tile--skeleton"></span><span class="pair-screen__tile pair-screen__tile--skeleton"></span>
+    </div>
     <div class="pair-screen__how">
       <ol class="pair-screen__steps">
         <li><span class="pair-screen__n">1</span><span data-i18n="pairStep1">Open your shrine</span></li>
@@ -11,7 +14,9 @@
         <li><span class="pair-screen__n">3</span><span data-i18n="pairStep3">Type the code above</span></li>
       </ol>
       <div class="pair-screen__scan">
-        <div class="pair-screen__qr" id="pair-qr"></div>
+        <div class="pair-screen__qr" id="pair-qr">
+        <svg class="pair-screen__qr-skeleton" viewBox="0 0 29 29" aria-hidden="true"><g fill="none" stroke-width="2"><rect x="1" y="1" width="5" height="5"/><rect x="23" y="1" width="5" height="5"/><rect x="1" y="23" width="5" height="5"/></g><rect x="2.5" y="2.5" width="2" height="2"/><rect x="24.5" y="2.5" width="2" height="2"/><rect x="2.5" y="24.5" width="2" height="2"/><rect x="10" y="10" width="9" height="9" rx="1" opacity=".5"/></svg>
+      </div>
         <p data-i18n="pairScan">No laptop? Scan with your phone.</p>
       </div>
     </div>

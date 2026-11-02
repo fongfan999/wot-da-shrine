@@ -32,6 +32,13 @@ body[data-tv-home="1"] .center { grid-column: 2; }
 .pair-screen__title em { font-family: var(--font-serif); font-weight: 400; color: var(--accent); }
 .pair-screen__code { display: flex; align-items: center; gap: clamp(6px, .7vw, 12px); min-height: clamp(84px, 9vw, 150px); }
 .pair-screen__tile { display: grid; place-items: center; width: clamp(60px, 6.4vw, 112px); aspect-ratio: 4 / 5; border: 2px solid var(--ink); border-radius: var(--radius-md); background: var(--paper-raised); box-shadow: var(--shadow-float); font-family: var(--font-mono); font-size: clamp(40px, 4.6vw, 82px); font-weight: 600; line-height: 1; color: var(--ink); }
+.pair-screen__tile--skeleton { border-color: var(--line-strong); box-shadow: none; animation: pair-wait 1.4s ease-in-out infinite; }
+.pair-screen__tile--skeleton:nth-child(n+5) { animation-delay: .2s; }
+.pair-screen__qr-skeleton { animation: pair-wait 1.4s ease-in-out infinite; }
+.pair-screen__qr-skeleton rect { fill: #d6d7cf; }
+.pair-screen__qr-skeleton g rect { fill: none; stroke: #d6d7cf; }
+@keyframes pair-wait { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .pair-screen__tile--skeleton, .pair-screen__qr-skeleton { animation: none; } }
 .pair-screen__gap { width: clamp(10px, 1.4vw, 26px); height: 3px; border-radius: 2px; background: var(--line-strong); }
 .pair-screen__how { display: flex; align-items: center; gap: clamp(24px, 3.4vw, 56px); }
 .pair-screen__steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: clamp(16px, 1.35vw, 24px); }
