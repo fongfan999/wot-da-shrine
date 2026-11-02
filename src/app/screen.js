@@ -28,16 +28,22 @@ function saveScreen(s) {
   try { localStorage.setItem(SCREEN_KEY, JSON.stringify(s)); } catch { /* ignore */ }
 }
 
-/** Hold this screen's code over a socket; `onCode(code, room)` when it is ours, `onCast(msg)` when someone casts. */
-function pair({ onCode, onCast }) {
+/**
+ * Hold this screen's code over a socket; `onCode(code, room)` when it is ours, `onCast(msg)` when someone
+ * casts, `onLost()` when the socket drops and casts can't reach us until it is back.
+ */
+function pair({ onCode, onCast, onLost }) {
   const screen = loadScreen();
   let retry = 0;
   let pinger = 0;
+  let timer = 0;
+  let ws = null;
   const open = () => {
+    clearTimeout(timer);
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     const q = new URLSearchParams({ key: screen.key });
     if (screen.code) q.set('code', screen.code);
-    const ws = new WebSocket(`${proto}//${location.host}/api/tv/ws?${q}`);
+    ws = new WebSocket(`${proto}//${location.host}/api/tv/ws?${q}`);
     ws.addEventListener('open', () => { pinger = setInterval(() => ws.readyState === WebSocket.OPEN && ws.send('ping'), 30000); });
     ws.addEventListener('message', (e) => {
       let msg;
@@ -52,10 +58,56 @@ function pair({ onCode, onCast }) {
     ws.addEventListener('close', (e) => {
       clearInterval(pinger);
       if (e.code === TAKEN) { delete screen.code; saveScreen(screen); open(); return; }
-      setTimeout(open, Math.min(15000, 500 * 2 ** retry++) * (0.75 + Math.random() * 0.5));
+      onLost();
+      timer = setTimeout(open, Math.min(15000, 500 * 2 ** retry++) * (0.75 + Math.random() * 0.5));
     });
   };
+  // Back on the network, or woken up: don't wait out the backoff with a code nobody can cast to.
+  const now = () => { if (ws?.readyState === WebSocket.CLOSED) { retry = 0; open(); } };
+  addEventListener('online', now);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') now(); });
   open();
+}
+
+/* ---------- Living on a wall: awake, no cursor, full screen ---------- */
+
+/** Ask the screen not to dim or sleep while this page is showing; the lock lapses when the tab hides. */
+function keepAwake() {
+  if (!navigator.wakeLock) return;
+  const ask = () => { if (document.visibilityState === 'visible') navigator.wakeLock.request('screen').catch(() => {}); };
+  document.addEventListener('visibilitychange', ask);
+  ask();
+}
+
+/** A cursor parked in the middle of the altar for hours: hide it once the mouse has been still a while. */
+function hideIdleCursor() {
+  let timer = 0;
+  const wake = () => {
+    delete body.dataset.idle;
+    clearTimeout(timer);
+    timer = setTimeout(() => { body.dataset.idle = '1'; }, 3000);
+  };
+  addEventListener('pointermove', wake, { passive: true });
+  addEventListener('pointerdown', wake, { passive: true });
+  wake();
+}
+
+/** One click (or F) and the browser's chrome is gone; the button hides once it has done its job. */
+function offerFullscreen() {
+  const btn = $('#btn-fullscreen');
+  if (!document.documentElement.requestFullscreen) return;
+  const toggle = () => {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else document.documentElement.requestFullscreen().catch(() => {});
+  };
+  const sync = () => { btn.setAttribute('aria-pressed', String(Boolean(document.fullscreenElement))); };
+  btn.hidden = false;
+  btn.addEventListener('click', toggle);
+  document.addEventListener('fullscreenchange', sync);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'f' && !e.metaKey && !e.ctrlKey && !e.altKey && !e.target.matches('input, textarea')) toggle();
+  });
+  sync();
 }
 
 /** A shrine was cast here: say whose, then go there. An empty room is "back to the code". */
@@ -92,16 +144,27 @@ function showPairing(code) {
 }
 
 export function setupScreen() {
-  if (!tv || embedded) return; // the home page's TV is a picture of one; it never pairs
+  if (!tv) return;
+  body.dataset.tv = '1'; // from the first frame: TV pages are laid out for the wall and never scroll
+  if (embedded) return; // the home page's TV is a picture of one; it never pairs
   if (tvHome) {
     body.dataset.tvHome = '1';
-    body.dataset.tv = '1';
     $('#pair-screen').hidden = false;
-    $('#pair-url').textContent = `${location.host}/tv`;
+    // The altar is this screen's screensaver: a fresh stick whenever the last one burns down.
     setTimeout(() => { if (!state.lit) ignite(Date.now()); }, reduceMotion ? 0 : 1800);
+    setInterval(() => { if (!state.lit) ignite(Date.now()); }, 20000);
   }
+  keepAwake();
+  hideIdleCursor();
+  offerFullscreen();
   pair({
+    onLost() {
+      body.dataset.paired = 'lost';
+      if (tvHome) $('#pair-status').textContent = t('pairLost');
+    },
     onCode(code) {
+      body.dataset.paired = 'live';
+      if (tvHome) $('#pair-status').textContent = t('pairEyebrow');
       if (tvHome) showPairing(code);
       else {
         $('#tv-cast-code').textContent = spaced(code);

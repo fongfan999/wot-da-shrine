@@ -1,4 +1,7 @@
 /* ---------- TV mode: the war-room screen ---------- */
+/* a screen on a wall is never scrolled: exactly one viewport, no scrollbar, whatever falls below stays below */
+html:has(body[data-tv="1"]), body[data-tv="1"] { height: 100dvh; overflow: hidden; scrollbar-width: none; }
+html:has(body[data-tv="1"])::-webkit-scrollbar, body[data-tv="1"]::-webkit-scrollbar { display: none; }
 body[data-tv="1"] .dock, body[data-tv="1"] .side--left, body[data-tv="1"] #btn-share, body[data-tv="1"] #btn-invite, body[data-tv="1"] #btn-settings { display: none; }
 body[data-tv="1"] .stage { grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); }
 body[data-tv="1"] .center { height: calc(100dvh - var(--bar-h, 70px) - 2 * var(--space-5)); }
@@ -16,7 +19,9 @@ body[data-tv="1"] .side { grid-row: auto; }
 .tv-join__cast b { font-family: var(--font-mono); font-size: 17px; letter-spacing: .14em; color: var(--ink); }
 
 /* ---------- /tv: a screen waiting for a shrine. The code fills the left, the altar burns on the right. ---------- */
-body[data-tv-home="1"] .heading, body[data-tv-home="1"] .side, body[data-tv-home="1"] .tv-join, body[data-tv="1"] #btn-together { display: none; }
+body[data-tv-home="1"] .heading, body[data-tv-home="1"] .side, body[data-tv-home="1"] .tv-join, body[data-tv="1"] #btn-together, body[data-tv="1"] #btn-github { display: none; }
+/* on the wall nobody is pointing: the cursor goes after a few still seconds */
+body[data-tv="1"][data-idle="1"], body[data-tv="1"][data-idle="1"] * { cursor: none !important; }
 body[data-tv-home="1"] .stage { grid-template-columns: minmax(0, 52fr) minmax(0, 48fr); }
 body[data-tv-home="1"] .center { grid-column: 2; }
 .pair-screen { position: fixed; z-index: 5; top: var(--bar-h, 70px); bottom: 0; left: 0; width: 54%; display: grid; align-items: center; padding: var(--space-5) clamp(24px, 4vw, 72px); pointer-events: none; }
@@ -28,16 +33,21 @@ body[data-tv-home="1"] .center { grid-column: 2; }
 .pair-screen__code { display: flex; align-items: center; gap: clamp(6px, .7vw, 12px); min-height: clamp(84px, 9vw, 150px); }
 .pair-screen__tile { display: grid; place-items: center; width: clamp(60px, 6.4vw, 112px); aspect-ratio: 4 / 5; border: 2px solid var(--ink); border-radius: var(--radius-md); background: var(--paper-raised); box-shadow: var(--shadow-float); font-family: var(--font-mono); font-size: clamp(40px, 4.6vw, 82px); font-weight: 600; line-height: 1; color: var(--ink); }
 .pair-screen__gap { width: clamp(10px, 1.4vw, 26px); height: 3px; border-radius: 2px; background: var(--line-strong); }
-.pair-screen__how { display: flex; align-items: center; gap: clamp(20px, 3vw, 48px); }
+.pair-screen__how { display: flex; align-items: center; gap: clamp(24px, 3.4vw, 56px); }
 .pair-screen__steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: clamp(16px, 1.35vw, 24px); }
-.pair-screen__steps li { display: flex; align-items: center; gap: 14px; }
+.pair-screen__steps li { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
 .pair-screen__n { display: grid; place-items: center; flex: none; width: 1.6em; height: 1.6em; border: 1.5px solid var(--accent); border-radius: 50%; font-family: var(--font-serif); font-style: italic; font-size: .85em; color: var(--accent); }
-.pair-screen__scan { display: flex; align-items: center; gap: 14px; max-width: 300px; padding: 12px 14px 12px 12px; border: 1px solid var(--sheet-line); border-radius: var(--radius-md); background: var(--paper-raised); }
-.pair-screen__scan p { margin: 0; font-size: clamp(13px, 1vw, 16px); color: var(--muted); }
+.pair-screen__scan { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 12px 12px 10px; border: 1px solid var(--sheet-line); border-radius: var(--radius-md); background: var(--paper-raised); }
+.pair-screen__scan p { max-width: 12em; margin: 0; font-size: clamp(13px, 1vw, 16px); line-height: 1.3; text-align: center; color: var(--muted); }
 .pair-screen__qr { flex: none; padding: 6px; border-radius: var(--radius-xs); background: #fff; }
-.pair-screen__qr svg { display: block; width: clamp(84px, 7vw, 120px); height: auto; }
+.pair-screen__qr svg { display: block; width: clamp(110px, 9vw, 176px); height: auto; }
 .pair-screen__qr svg path, .tv-join__qr svg path { fill: #151713; }
-.pair-screen__url { display: block; margin-top: 4px; font-family: var(--font-mono); color: var(--accent); }
+/* the socket dropped: the code can't take a cast until it is back, so it says so instead of looking fine */
+body[data-paired="lost"] .pair-screen__eyebrow { color: var(--muted); }
+body[data-paired="lost"] .pair-screen__dot { animation: none; opacity: .5; }
+body[data-paired="lost"] .pair-screen__code, body[data-paired="lost"] .pair-screen__qr { opacity: .35; transition: opacity 400ms ease; }
+body[data-paired="lost"] .tv-join__cast { opacity: .4; }
+@media (max-height: 620px) { .pair-screen__fine { display: none; } }
 .pair-screen__fine { max-width: 54ch; margin: 0; font-size: clamp(13px, 1vw, 16px); color: var(--muted); }
 
 /* On the TV: casting, and someone arriving from their phone */
