@@ -1756,9 +1756,11 @@ body[data-landing="1"] .scene::after {
   content: "";
   position: absolute;
   inset: 0;
-  background:
+  /* painted to an image per theme in landing/index.js (--hero-veil); these live gradients are the fallback */
+  background-image: var(--hero-veil,
     linear-gradient(90deg, var(--paper) 0%, color-mix(in srgb, var(--paper) 72%, transparent) 30%, transparent 58%),
-    radial-gradient(120% 95% at 72% 55%, transparent 50%, var(--paper) 100%);
+    radial-gradient(120% 95% at 72% 55%, transparent 50%, var(--paper) 100%));
+  background-size: 100% 100%;
 }
 body[data-landing="1"] .center { grid-template-rows: minmax(0, 1fr) auto; }
 body[data-landing="1"] .altar::before {
@@ -2113,7 +2115,7 @@ body[data-fx="lite"] .stick__halo, body[data-fx="lite"] .kneeler__halo { display
   body[data-landing="1"] .title { font-size: clamp(2.3rem, 11vw, 3rem); }
   body[data-landing="1"] .subtitle { font-size: 17px; }
   body[data-landing="1"] .center { grid-template-rows: none; }
-  body[data-landing="1"] .scene::after { background: radial-gradient(120% 80% at 50% 70%, transparent 40%, var(--paper) 100%); }
+  body[data-landing="1"] .scene::after { background-image: var(--hero-veil-sm, radial-gradient(120% 80% at 50% 70%, transparent 40%, var(--paper) 100%)); }
   .hero-ribbon { flex-direction: column; align-items: stretch; gap: 6px; }
   .hero-ribbon__label { padding-left: 4px; }
   .hero-cta__btn { padding-inline: 18px; }

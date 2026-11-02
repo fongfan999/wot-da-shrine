@@ -41,8 +41,12 @@ export function splitTitle(replay = false) {
   }
 }
 
+/** Resolves when the intro starts playing: what's timed from the intro waits on this, not on page load. */
+let introStarts;
+export const introStarted = new Promise((resolve) => { introStarts = resolve; });
+
 export function intro() {
-  if (reduceMotion) { reveal(); return; }
+  if (reduceMotion) { reveal(); introStarts(); return; }
   const dock = ['.quick', '.pray', '.actions', '.credit'];
   gsap.set('.title .ch', { y: 40, opacity: 0, rotateX: -70, transformOrigin: '50% 100%' });
   gsap.set(['.eyebrow', '.subtitle', '.mantra'], { y: 14, opacity: 0 });
@@ -50,24 +54,57 @@ export function intro() {
   gsap.set('.side .card', { y: 20, opacity: 0 });
   gsap.set(dock, { y: 24, opacity: 0 });
   gsap.set('.burner', { y: 60, opacity: 0, scale: 0.92 });
-  gsap.set('.plantern-row', { opacity: 0 });
+  gsap.set('.layer--bg', { scale: 1.35, opacity: 0 });
+  // The letters get their layers now, while nothing moves, rather than in the intro's first frames.
+  gsap.set('.title .ch', { willChange: 'transform, opacity' });
   reveal(); // same frame as the sets above: nothing shows before the intro brings it in
 
-  // Camera pushes down the server corridor.
-  gsap.fromTo('.layer--bg', { scale: 1.35, opacity: 0 }, { scale: 1, opacity: 1, duration: 3.6, ease: 'power2.out' });
-
-  gsap.timeline({ defaults: { ease: 'power3.out' } })
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } })
+    // Camera pushes down the server corridor.
+    .to('.layer--bg', { scale: 1, opacity: 1, duration: 3.6, ease: 'power2.out' }, 0)
     .to('.bar', { y: 0, opacity: 1, duration: 0.8 }, 0.1)
     .to('.eyebrow', { y: 0, opacity: 1, duration: 0.7 }, 0.25)
-    .to('.title .ch', { y: 0, opacity: 1, rotateX: 0, duration: 1, stagger: 0.022 }, 0.35)
+    .to('.title .ch', { y: 0, opacity: 1, rotateX: 0, duration: 1, stagger: 0.022, onComplete: () => gsap.set('.title .ch', { clearProps: 'willChange' }) }, 0.35)
     .to(['.subtitle', '.mantra'], { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }, 0.8)
     .to('.burner', { y: 0, opacity: 1, scale: 1, duration: 1.3, ease: 'elastic.out(1, 0.7)' }, 0.5)
     .to('.plantern-row', { opacity: 1, duration: 1, ease: 'power2.out' }, 1.2)
     .to('.side .card', { y: 0, opacity: 1, duration: 0.8, stagger: 0.08 }, 0.9)
     .to(dock, { y: 0, opacity: 1, duration: 0.8, stagger: 0.08 }, 1.0);
 
-  // Idle float on the burner
-  gsap.to('.burner', { y: -6, duration: 3.2, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 2 });
+  whenSettled(() => {
+    tl.play();
+    introStarts();
+    // Idle float on the burner
+    gsap.to('.burner', { y: -6, duration: 3.2, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 2 });
+  });
+}
+
+/**
+ * Run `go` once the page has loaded and frames arrive on time. Browser extensions inject their
+ * scripts as the page finishes loading (in Dia, a password manager and a translator blocked the
+ * main thread for ~100ms each); an intro started then stutters through its first second.
+ * Never waits more than MAX_WAIT.
+ */
+const MAX_WAIT = 1200;
+const CALM_FRAMES = 6;
+function whenSettled(go) {
+  const started = performance.now();
+  let done = false;
+  const start = () => { if (!done) { done = true; go(); } };
+  setTimeout(start, MAX_WAIT);
+  const watch = () => {
+    let calm = 0;
+    let last = performance.now();
+    const frame = (now) => {
+      calm = now - last < 24 ? calm + 1 : 0;
+      last = now;
+      if (calm >= CALM_FRAMES || performance.now() - started > MAX_WAIT) start();
+      else if (!done) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  };
+  if (document.readyState === 'complete') watch();
+  else window.addEventListener('load', watch, { once: true });
 }
 
 /** The page's own heading is in place: let the intro's pieces be seen (see .booting in index.html). */

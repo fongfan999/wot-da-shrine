@@ -8,7 +8,7 @@ import { sound } from './audio.js';
 import { THEMES } from './config.js';
 // Order matters: the layout is measured before the engines size themselves to it.
 import { $, persist, roomName, settings, tv } from './app/context.js';
-import { intro, parallax, startMantras } from './app/stage.js';
+import { intro, introStarted, parallax, startMantras } from './app/stage.js';
 import { fog, petals, smoke } from './app/engines.js';
 import { watchFrameRate } from './app/fx.js';
 import { applySettings, openPanel, panelOpen, soundBtn } from './app/settings.js';
@@ -66,7 +66,7 @@ renderRecords();
 intro();
 watchFrameRate();
 parallax();
-startMantras();
+introStarted.then(startMantras);
 petals.rate = 0.35; // a few stray petals before the incense is lit
 petals.start();
 if (roomName) enterRoom();
