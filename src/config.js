@@ -14,7 +14,7 @@ export const DEFAULTS = {
   title: '',        // '' => use i18n default
   subtitle: '',     // '' => use i18n default
   eta: '',          // ISO date string or ''
-  theme: 'auto',
+  theme: 'dark',
   music: true,
   sfx: true,
   petals: true,

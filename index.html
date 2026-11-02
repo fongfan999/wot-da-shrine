@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#f7f5ee" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#151713" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#151713" />
   <meta name="description" content="Wot Da Shrine: when the servers are down, the team prays together. Open a shrine, share the link, light incense, ring the bowl and send prayers to the rack in real time." />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Wot Da Shrine" />
@@ -25,7 +24,7 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/src/styles.css" />
 </head>
-<body data-theme="auto" data-state="unlit" data-mode="solo" data-fx="full">
+<body data-theme="dark" data-state="unlit" data-mode="solo" data-fx="full">
   <!-- Layered scene -->
   <div class="scene" id="scene" aria-hidden="true">
     <div class="layer layer--bg" id="server-room"></div>
@@ -828,9 +827,9 @@
       <div class="field">
         <span data-i18n="fTheme">Theme</span>
         <div class="seg" id="theme-seg" role="radiogroup" aria-label="Theme">
-          <button type="button" role="radio" data-theme="auto" aria-checked="true" data-i18n="themeAuto">Auto</button>
+          <button type="button" role="radio" data-theme="auto" aria-checked="false" data-i18n="themeAuto">Auto</button>
           <button type="button" role="radio" data-theme="light" aria-checked="false" data-i18n="themeLight">Light</button>
-          <button type="button" role="radio" data-theme="dark" aria-checked="false" data-i18n="themeDark">Dark</button>
+          <button type="button" role="radio" data-theme="dark" aria-checked="true" data-i18n="themeDark">Dark</button>
         </div>
       </div>
       <div class="field">
