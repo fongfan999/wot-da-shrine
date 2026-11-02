@@ -29,8 +29,9 @@ export function saveMe(me) {
 /**
  * Connect to a room. `onMessage(msg)` receives every server message;
  * `onStatus('connecting' | 'open' | 'closed')` tracks the connection.
+ * `arrival` ({ via, hello }) goes with the first connection only, so a reconnect is not a second entrance.
  */
-export function connectRoom(room, me, { onMessage, onStatus, watch = false }) {
+export function connectRoom(room, me, { onMessage, onStatus, watch = false, arrival = null }) {
   let ws = null;
   let retry = 0;
   let timer = null;
@@ -41,8 +42,9 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false }) {
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     const q = new URLSearchParams({ name: me.name, avatar: me.avatar });
     if (watch) q.set('watch', '1');
+    for (const [k, v] of Object.entries(arrival ?? {})) if (v) q.set(k, v);
     ws = new WebSocket(`${proto}//${location.host}/api/rooms/${room}/ws?${q}`);
-    ws.addEventListener('open', () => { retry = 0; onStatus('open'); });
+    ws.addEventListener('open', () => { retry = 0; arrival = null; onStatus('open'); });
     ws.addEventListener('message', (e) => {
       try { onMessage(JSON.parse(e.data)); } catch (err) { console.error(err); }
     });

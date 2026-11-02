@@ -1272,6 +1272,64 @@ body[data-tv="1"] .side .card--feed { display: flex; }
 .tv-join__hint { margin: 0; font-size: 14px; font-weight: 600; }
 .tv-join__url { margin: 2px 0 0; font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
 body[data-tv="1"] .side { grid-row: auto; }
+.tv-join__cast { display: flex; align-items: baseline; gap: 8px; margin: 6px 0 0; padding-top: 6px; border-top: 1px dashed var(--line-strong); font-size: 13px; color: var(--muted); }
+.tv-join__cast b { font-family: var(--font-mono); font-size: 17px; letter-spacing: .14em; color: var(--ink); }
+
+/* ---------- /tv: a screen waiting for a shrine. The code fills the left, the altar burns on the right. ---------- */
+body[data-tv-home="1"] .heading, body[data-tv-home="1"] .side, body[data-tv-home="1"] .tv-join, body[data-tv="1"] #btn-together { display: none; }
+body[data-tv-home="1"] .stage { grid-template-columns: minmax(0, 52fr) minmax(0, 48fr); }
+body[data-tv-home="1"] .center { grid-column: 2; }
+.pair-screen { position: fixed; z-index: 5; top: var(--bar-h, 70px); bottom: 0; left: 0; width: 54%; display: grid; align-items: center; padding: var(--space-5) clamp(24px, 4vw, 72px); pointer-events: none; }
+.pair-screen__card { display: flex; flex-direction: column; gap: clamp(18px, 2.6vh, 30px); pointer-events: auto; }
+.pair-screen__eyebrow { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--font-mono); font-size: clamp(12px, 1vw, 16px); letter-spacing: .14em; text-transform: uppercase; color: var(--flame); }
+.pair-screen__dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; animation: world-beat 2.4s ease-out infinite; }
+.pair-screen__title { margin: 0; font-weight: 500; font-size: clamp(2.6rem, 4.6vw, 5.4rem); line-height: 1; letter-spacing: -.045em; }
+.pair-screen__title em { font-family: var(--font-serif); font-weight: 400; color: var(--accent); }
+.pair-screen__code { display: flex; align-items: center; gap: clamp(6px, .7vw, 12px); min-height: clamp(84px, 9vw, 150px); }
+.pair-screen__tile { display: grid; place-items: center; width: clamp(60px, 6.4vw, 112px); aspect-ratio: 4 / 5; border: 2px solid var(--ink); border-radius: var(--radius-md); background: var(--paper-raised); box-shadow: var(--shadow-float); font-family: var(--font-mono); font-size: clamp(40px, 4.6vw, 82px); font-weight: 600; line-height: 1; color: var(--ink); }
+.pair-screen__gap { width: clamp(10px, 1.4vw, 26px); height: 3px; border-radius: 2px; background: var(--line-strong); }
+.pair-screen__how { display: flex; align-items: center; gap: clamp(20px, 3vw, 48px); }
+.pair-screen__steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: clamp(16px, 1.35vw, 24px); }
+.pair-screen__steps li { display: flex; align-items: center; gap: 14px; }
+.pair-screen__n { display: grid; place-items: center; flex: none; width: 1.6em; height: 1.6em; border: 1.5px solid var(--accent); border-radius: 50%; font-family: var(--font-serif); font-style: italic; font-size: .85em; color: var(--accent); }
+.pair-screen__scan { display: flex; align-items: center; gap: 14px; max-width: 300px; padding: 12px 14px 12px 12px; border: 1px solid var(--sheet-line); border-radius: var(--radius-md); background: var(--paper-raised); }
+.pair-screen__scan p { margin: 0; font-size: clamp(13px, 1vw, 16px); color: var(--muted); }
+.pair-screen__qr { flex: none; padding: 6px; border-radius: var(--radius-xs); background: #fff; }
+.pair-screen__qr svg { display: block; width: clamp(84px, 7vw, 120px); height: auto; }
+.pair-screen__qr svg path, .tv-join__qr svg path { fill: #151713; }
+.pair-screen__url { display: block; margin-top: 4px; font-family: var(--font-mono); color: var(--accent); }
+.pair-screen__fine { max-width: 54ch; margin: 0; font-size: clamp(13px, 1vw, 16px); color: var(--muted); }
+
+/* On the TV: casting, and someone arriving from their phone */
+.tv-casting { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; background: var(--backdrop); }
+.tv-casting__card { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 36px 56px 40px; border: 1px solid var(--ink); border-radius: var(--radius-lg); background: var(--paper-raised); box-shadow: var(--shadow-float); text-align: center; }
+.tv-casting__icon { font-size: 64px; }
+.tv-casting__label { margin: 0; font-family: var(--font-mono); font-size: 14px; letter-spacing: .16em; text-transform: uppercase; color: var(--flame); }
+.tv-casting__room { margin: 0; font-family: var(--font-mono); font-size: clamp(28px, 3vw, 52px); font-weight: 600; letter-spacing: -.02em; color: var(--ink); }
+.tv-casting__by { margin: 0; font-size: 18px; color: var(--muted); }
+.tv-arrival { position: fixed; z-index: 55; top: calc(var(--bar-h, 70px) + 18px); left: 50%; translate: -50% 0; display: flex; align-items: center; gap: 18px; padding: 14px 26px 14px 18px; border: 1px solid var(--ink); border-radius: var(--radius-pill); background: var(--paper-raised); box-shadow: var(--shadow-float); font-size: 24px; white-space: nowrap; }
+.tv-arrival__path { display: inline-flex; align-items: center; gap: 6px; font-size: 30px; }
+.tv-arrival__beam { width: 46px; height: 3px; border-radius: 2px; background: repeating-linear-gradient(90deg, var(--live) 0 6px, transparent 6px 11px); animation: beam 0.6s linear infinite; }
+@keyframes beam { to { background-position: 11px 0; } }
+.tv-arrival__text b { font-weight: 600; }
+.on-tv { position: fixed; z-index: 55; top: calc(var(--bar-h, 70px) + 12px); left: 50%; translate: -50% 0; display: flex; align-items: center; gap: 12px; width: max-content; max-width: calc(100vw - 32px); padding: 10px 18px 10px 12px; border: 1px solid var(--live); border-radius: var(--radius-md); background: var(--paper-raised); box-shadow: var(--shadow-float); font-size: 15px; }
+.on-tv__icon { font-size: 26px; }
+.on-tv__text b { color: var(--live); }
+
+/* Cast to TV */
+.cast-form__how { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+.cast-form__how li { display: flex; align-items: center; gap: 10px; }
+.cast-form__n { display: grid; place-items: center; flex: none; width: 22px; height: 22px; border: 1.5px solid var(--accent); border-radius: 50%; font-family: var(--font-serif); font-style: italic; font-size: 12px; color: var(--accent); }
+.cast-form__url { font-family: var(--font-mono); font-weight: 500; color: var(--accent); overflow-wrap: anywhere; }
+.cast-form__code input { width: 100%; padding: 12px 16px; border: 1.5px solid var(--ink); border-radius: var(--radius-md); outline: 0; background: var(--paper); color: var(--ink); font-family: var(--font-mono); font-size: clamp(28px, 7vw, 40px); font-weight: 600; letter-spacing: .22em; text-align: center; text-transform: uppercase; }
+.cast-form__code input::placeholder { color: var(--line-strong); }
+.cast-form__code input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.cast-form__shrine { display: flex; flex-direction: column; gap: 6px; }
+.cast-form__shrine-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--sheet-label); }
+.cast-form__shrine .name-form__field { min-height: 46px; }
+.cast-form__status { min-height: 1.4em; margin: -6px 0 0; font-size: 14px; color: var(--muted); }
+.cast-form__status[data-kind="error"] { color: var(--flame); }
+.cast-form__status[data-kind="ok"] { color: var(--live); }
 
 /* ---------- "They're back" ---------- */
 #btn-resolve { margin-top: -2px; }
@@ -2053,19 +2111,56 @@ body[data-landing="1"] .panel .field--page { display: none; }
 .tv__neck { width: 64px; height: 38px; background: linear-gradient(90deg, #22251f, #5a5e55 48%, #22251f); clip-path: polygon(30% 0, 70% 0, 80% 100%, 20% 100%); }
 .tv__base { width: min(34%, 300px); height: 12px; border-radius: 7px 7px 50% 50% / 7px 7px 100% 100%; background: linear-gradient(180deg, #6a6e64 0%, #3a3d37 35%, #161815 100%); box-shadow: inset 0 1px 0 #ffffff40, 0 16px 22px -6px #000b; }
 /* under the TV: what it is and how to get one, then a try-it-now strip */
-.tv__foot { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px clamp(24px, 4vw, 56px); align-items: start; margin-top: 12px; }
-.tv__copy { display: flex; flex-direction: column; gap: 12px; }
-.tv__lead { margin: 0 !important; font-size: clamp(22px, 2.4vw, 28px) !important; font-weight: 600 !important; letter-spacing: -.03em !important; }
-.tv__text code { padding: 1px 6px; border-radius: var(--radius-xs); background: var(--paper-raised); box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font-mono); font-size: 14px; color: var(--ink); }
+/* TV pairing beside the set: the live pairing with this TV, and how to cast any shrine to any screen */
+.eyebrow:has(.new-pill)::before { display: none; }
+.new-pill { margin-right: 10px; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--flame); color: var(--paper); font-weight: 600; letter-spacing: .08em; }
+.live__lede { max-width: 62ch; margin: -6px 0 28px !important; font-size: clamp(16px, 1.4vw, 19px) !important; }
+.tv.is-paired .tv__bezel { box-shadow: 0 0 0 1px #3a3d37, inset 0 1px 0 #ffffff2e, inset 0 0 0 2px #000, 0 0 0 3px color-mix(in srgb, var(--live) 70%, transparent), 0 0 60px -6px color-mix(in srgb, var(--live) 55%, transparent), 0 50px 90px -40px #000e; transition: box-shadow 600ms ease; }
+.tv.is-paired .tv__led { background: #3ecf8e; box-shadow: 0 0 6px 1px #3ecf8eaa; }
+.tv__chin { position: relative; }
+.tv__paired { position: absolute; left: 20px; top: 50%; translate: 0 -50%; max-width: 38%; font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #8fd9b3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.pair-demo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-4); align-items: stretch; margin-top: 12px; }
+.pair-card { display: flex; flex-direction: column; gap: 14px; padding: 20px 22px 22px; border: 1px solid var(--sheet-line); border-radius: var(--radius-lg); background: var(--paper-raised); box-shadow: var(--shadow-sheet); }
+.pair-card__eyebrow { display: flex; align-items: center; gap: 8px; margin: 0 !important; font-family: var(--font-mono); font-size: 11px !important; letter-spacing: .1em; text-transform: uppercase; color: var(--flame) !important; }
+.pair-card__beat { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: world-beat 2.4s ease-out infinite; }
+.pair-card__title { margin: 0; font-size: clamp(20px, 2vw, 25px); font-weight: 600; line-height: 1.2; letter-spacing: -.03em; color: var(--ink); }
+.pair-card__body { display: flex; align-items: center; gap: 24px; margin: auto 0; }
+.pair-card__qr { flex: none; padding: 8px; border-radius: var(--radius-sm); background: #fff; box-shadow: 0 0 0 1px var(--sheet-line); }
+.pair-card__qr svg { display: block; width: 168px; height: 168px; }
+.pair-card__qr svg path { fill: #151713; }
+.pair-card__steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.pair-card__steps li { position: relative; display: flex; align-items: center; gap: 12px; padding: 7px 0; font-size: 15px; color: var(--ink); }
+.pair-card__steps li + li::before { content: ""; position: absolute; left: 12px; top: -7px; height: 14px; border-left: 1px dashed var(--line-strong); }
+.pair-card__n { display: grid; place-items: center; flex: none; width: 25px; height: 25px; border: 1.5px solid var(--accent); border-radius: 50%; background: var(--paper); font-family: var(--font-serif); font-style: italic; font-size: 13px; color: var(--accent); }
+.pair-card__n > * { grid-area: 1 / 1; }
+.pair-card__n .ico { width: 14px; height: 14px; stroke-width: 2.4; opacity: 0; }
+.pair-card--live[data-state="paired"] { border-color: var(--live); }
+.pair-card--live[data-state="paired"] .pair-card__n { border-color: var(--live); background: var(--live); color: var(--paper); }
+.pair-card--live[data-state="paired"] .pair-card__n span { opacity: 0; }
+.pair-card--live[data-state="paired"] .pair-card__n .ico { opacity: 1; }
+.pair-card--live[data-state="paired"] .pair-card__beat { background: var(--live); }
+.pair-card__done { margin: 0 !important; padding: 10px 14px; border-radius: var(--radius-md); background: color-mix(in srgb, var(--live) 14%, transparent); color: var(--ink) !important; font-size: 15px !important; }
+.pair-card__done b { color: var(--live); }
+.pair-card__phone { display: none; margin: 0 !important; font-size: 15px !important; }
+.pair-card__phone a { color: var(--accent); font-weight: 600; text-decoration: none; white-space: nowrap; }
+.pair-card--live[data-state="phone"] .pair-card__body { display: none; }
+.pair-card--live[data-state="phone"] .pair-card__phone { display: block; }
+.pair-card__url { font-family: var(--font-mono); font-weight: 500; color: var(--accent); }
+.pair-card__steps--plain .pair-card__n { border-color: var(--line-strong); color: var(--muted); }
+.pair-card__fine { margin: 2px 0 0 !important; font-size: 13px !important; }
+.pair-card__fine code { padding: 1px 6px; border-radius: var(--radius-xs); background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font-mono); font-size: 12px; color: var(--ink); }
+/* the picture: a TV showing its code, a beam, a laptop typing it */
+.pair-flow { display: flex; align-items: center; gap: 10px; padding: 14px; border-radius: var(--radius-md); background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); }
+.pair-flow__screen, .pair-flow__laptop { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pair-flow__tiles { display: flex; align-items: center; gap: 3px; padding: 9px 10px; border: 3px solid #1a1c19; border-radius: 6px; background: #151713; }
+.pair-flow__tiles i { display: grid; place-items: center; width: 17px; height: 22px; border-radius: 3px; background: #ebeae2; font-family: var(--font-mono); font-size: 13px; font-style: normal; font-weight: 600; color: #151713; }
+.pair-flow__tiles b { width: 6px; height: 2px; background: #6b6e66; }
+.pair-flow__beam { flex: 1; min-width: 24px; height: 2px; background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 11px); }
+.land.is-on .pair-flow__beam { animation: beam-back 0.8s linear infinite; }
+@keyframes beam-back { to { background-position: -11px 0; } }
+.pair-flow__field { padding: 8px 12px; border: 1.5px solid var(--accent); border-radius: 6px; background: var(--paper-raised); font-family: var(--font-mono); font-size: 14px; font-weight: 600; letter-spacing: .14em; color: var(--ink); }
+.pair-flow__cap { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
 .tv__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
-.tv__try { padding: 18px 20px; border: 1px solid var(--sheet-line); border-radius: var(--radius-lg); background: var(--paper-raised); box-shadow: var(--shadow-sheet); }
-.tv__try-title { display: flex; align-items: center; gap: 8px; margin: 0 0 12px !important; font-family: var(--font-mono); font-size: 11px !important; letter-spacing: .1em; text-transform: uppercase; color: var(--flame) !important; }
-.tv__try-title::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: world-beat 2.4s ease-out infinite; }
-.tv__steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
-.tv__steps li { position: relative; display: flex; align-items: center; gap: 12px; padding: 8px 0; font-size: 15px; color: var(--ink); }
-.tv__steps li + li::before { content: ""; position: absolute; left: 12px; top: -8px; height: 16px; border-left: 1px dashed var(--line-strong); }
-.tv__step-n { display: grid; place-items: center; flex: none; width: 25px; height: 25px; border: 1.5px solid var(--accent); border-radius: 50%; background: var(--paper); font-family: var(--font-serif); font-style: italic; font-size: 13px; color: var(--accent); }
-.tv__steps li:last-child .tv__step-n { border-color: var(--live); color: var(--live); }
 
 /* The home page is a demo with one action: the altar and its sounds stay, the product surface goes.
    Rituals, vigils, records, the feed and sharing belong to a shrine with a team (or a maintenance page). */
@@ -2184,7 +2279,10 @@ body[data-fx="lite"] .stick__halo, body[data-fx="lite"] .kneeler__halo { display
   .tv-join { display: none; }
   .rituals { grid-template-columns: 1fr; }
   .mp__fields { grid-template-columns: minmax(0, 1fr); }
-  .tv__foot { grid-template-columns: minmax(0, 1fr); }
+  .pair-demo { grid-template-columns: minmax(0, 1fr); }
+  .pair-screen { position: static; width: auto; }
+  body[data-tv-home="1"] .stage { grid-template-columns: minmax(0, 1fr); }
+  body[data-tv-home="1"] .center { display: none; }
   .foot__inner { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .foot__brand { grid-column: 1 / -1; }
   .pulse { grid-template-columns: minmax(0, 1fr); }

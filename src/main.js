@@ -21,6 +21,8 @@ import { renderRecords } from './app/stats.js';
 import { renderResolve } from './app/resolve.js';
 import { openShare, shareOpen } from './app/shareSheet.js';
 import { enterRoom, joinEl } from './app/shrine.js';
+import { setupScreen } from './app/screen.js';
+import { setupCast } from './app/cast.js';
 import { loadWorld } from './app/world.js';
 import { setupLanding } from './landing/index.js';
 
@@ -32,6 +34,7 @@ document.addEventListener('keydown', (e) => {
   openRitual('blame', false);
   openRitual('fortune', false);
   openRitual('open-shrine', false);
+  openRitual('cast', false);
   openTray(false);
 });
 document.addEventListener('keydown', (e) => {
@@ -60,6 +63,8 @@ if (import.meta.env.DEV) window.__incense = { gsap, sound, smoke, fog, petals, g
 buildTray();
 dealQuick();
 setupLanding();
+setupScreen();
+setupCast();
 applySettings();
 renderResolve();
 renderRecords();

@@ -30,7 +30,9 @@ export function resetSettings() {
 /* ---------- Where we are ---------- */
 export const roomName = roomFromPath(); // a shared shrine at /r/:room, or '' for the solo page
 export const urlParams = new URLSearchParams(location.search);
-export const tv = urlParams.get('tv') === '1'; // the war-room screen: watches, never kneels
+export const tvHome = /^\/tv\/?$/.test(location.pathname); // a screen waiting to be paired: shows its code
+export const tv = urlParams.get('tv') === '1' || tvHome; // the war-room screen: watches, never kneels
+export const embedded = window.parent !== window; // the home page's TV, inside its frame
 // The home page is the landing page, unless it is being used as a maintenance page (a title, subtitle or ETA
 // in the URL or saved in this browser) or asked to be the bare shrine.
 export const landing = !roomName && !tv && urlParams.get('landing') !== '0' && !urlParams.has('solo')

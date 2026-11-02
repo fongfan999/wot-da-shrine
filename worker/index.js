@@ -8,6 +8,8 @@
  * - /api/rooms/:room/ws        → WebSocket into that room's Shrine Durable Object
  * - /api/rooms/:room/status    → the room at a glance (JSON)
  * - /api/rooms/:room/badge.svg → a README badge: "shrine | 3 praying · burning"
+ * - /api/tv/ws               → WebSocket for a screen on the wall: it gets a pairing code and waits for a cast
+ * - /api/tv/:code/cast        → POST { room }: send the screen showing that code to a shrine ('' for the code screen)
  * - /r/:room     → the page, with its link preview rewritten to say what is happening in the room
  * Everything else (the page, bundles) is served by the asset store without
  * running this Worker; its headers live in public/_headers.
@@ -15,10 +17,11 @@
 
 import { Shrine } from './shrine.js';
 import { World } from './world.js';
+import { CODE_RE, newCode, Pairing } from './pairing.js';
 import { describe, previewTitle } from '../shared/preview.js';
 import { roomName } from '../shared/names.js';
 
-export { Shrine, World };
+export { Shrine, World, Pairing };
 
 let startedAt = 0; // set on first request: Workers freeze the clock until a request arrives
 
@@ -49,6 +52,11 @@ function slug(text) {
 /** The room's Shrine object. */
 function shrine(env, room) {
   return env.SHRINE.get(env.SHRINE.idFromName(room));
+}
+
+/** The screen paired under `code`. */
+function pairing(env, code) {
+  return env.PAIRING.get(env.PAIRING.idFromName(code));
 }
 
 function world(env) {
@@ -168,6 +176,24 @@ export default {
       const name = url.searchParams.get('name');
       url.searchParams.delete('name');
       return Response.redirect(`${url.origin}/r/${name ? slug(name) : roomName()}${url.search}`, 302);
+    }
+
+    if (url.pathname === '/api/tv/ws') {
+      if (request.headers.get('Upgrade') !== 'websocket') return json({ error: 'expected a WebSocket' }, { status: 426 });
+      if (!(await allowed(env.SOCKET_LIMIT, request))) return json({ error: 'too many connections' }, { status: 429 });
+      // A screen coming back asks for its old code; a new one (or one whose code was taken) gets a fresh one.
+      const asked = (url.searchParams.get('code') ?? '').toUpperCase();
+      return pairing(env, CODE_RE.test(asked) ? asked : newCode()).fetch(request);
+    }
+
+    const cast = url.pathname.match(/^\/api\/tv\/([^/]+)\/cast$/);
+    if (cast && request.method === 'POST') {
+      // Codes are short enough to guess at, so guessing is slow.
+      if (!(await allowed(env.PAIR_LIMIT, request))) return tooMany();
+      const code = decodeURIComponent(cast[1]).toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (!CODE_RE.test(code)) return json({ error: 'bad code' }, { status: 400 });
+      const res = await pairing(env, code).fetch(request);
+      return json(await res.json(), { status: res.status });
     }
 
     const page = url.pathname.match(/^\/r\/([^/]+)\/?$/);

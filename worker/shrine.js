@@ -86,6 +86,12 @@ export class Shrine extends DurableObject {
       avatar: AVATARS.includes(url.searchParams.get('avatar')) ? url.searchParams.get('avatar') : '🧘',
     };
     if (url.searchParams.get('watch') === '1') person.watcher = true; // a screen on the wall: sees everything, counts as nobody
+    // Scanned the code on a TV: the TV makes a fuss of them, and the home page's TV knows its own visitor by `hello`.
+    if (url.searchParams.get('via') === 'tv') {
+      person.via = 'tv';
+      const hello = url.searchParams.get('hello') ?? '';
+      if (/^[a-z0-9]{8,24}$/.test(hello)) person.hello = hello;
+    }
     if (this.demo) person.name = DEMO_NAMES[parseInt(person.id, 16) % DEMO_NAMES.length];
 
     const { 0: client, 1: server } = new WebSocketPair();

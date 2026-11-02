@@ -13,19 +13,22 @@
   "durable_objects": {
     "bindings": [
       { "name": "SHRINE", "class_name": "Shrine" },
-      { "name": "WORLD", "class_name": "World" }
+      { "name": "WORLD", "class_name": "World" },
+      { "name": "PAIRING", "class_name": "Pairing" }
     ]
   },
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["Shrine"] },
-    { "tag": "v2", "new_sqlite_classes": ["World"] }
+    { "tag": "v2", "new_sqlite_classes": ["World"] },
+    { "tag": "v3", "new_sqlite_classes": ["Pairing"] }
   ],
   // Per-IP limits, counted per Cloudflare location. Sockets get more room than /new because a whole
   // office behind one NAT may pile into the same shrine (and the client reconnects with backoff).
   "ratelimits": [
     { "name": "NEW_ROOM_LIMIT", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } },
     { "name": "SOCKET_LIMIT", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } },
-    { "name": "PULSE_LIMIT", "namespace_id": "1003", "simple": { "limit": 30, "period": 60 } }
+    { "name": "PULSE_LIMIT", "namespace_id": "1003", "simple": { "limit": 30, "period": 60 } },
+    { "name": "PAIR_LIMIT", "namespace_id": "1004", "simple": { "limit": 12, "period": 60 } }
   ],
   "observability": {
     "enabled": true

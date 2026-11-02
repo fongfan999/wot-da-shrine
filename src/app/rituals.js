@@ -15,7 +15,7 @@ import { burnInTile } from '../landing/rituals.js';
 
 /* ---------- Rituals ---------- */
 /** A small dialog: `#blame`, `#fortune`. */
-const ritualOpen = { blame: false, fortune: false, 'open-shrine': false };
+const ritualOpen = { blame: false, fortune: false, 'open-shrine': false, cast: false };
 export function openRitual(id, open) {
   if (ritualOpen[id] === open) return;
   ritualOpen[id] = open;
@@ -28,8 +28,8 @@ export function openRitual(id, open) {
   sound.tick(660, 0.06);
 }
 document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => openRitual(b.dataset.close, false)));
-for (const id of ['blame', 'fortune', 'open-shrine']) $(`#${id}`).addEventListener('click', (e) => { if (e.target.id === id) openRitual(id, false); });
-export const anySheetOpen = () => shareOpen || ritualOpen.blame || ritualOpen.fortune || ritualOpen['open-shrine'];
+for (const id of ['blame', 'fortune', 'open-shrine', 'cast']) $(`#${id}`).addEventListener('click', (e) => { if (e.target.id === id) openRitual(id, false); });
+export const anySheetOpen = () => shareOpen || ritualOpen.blame || ritualOpen.fortune || ritualOpen['open-shrine'] || ritualOpen.cast;
 
 /* Burn a blame: the words go into the censer and nowhere else */
 const blameText = $('#blame-text');

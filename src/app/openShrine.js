@@ -4,6 +4,12 @@ import { sound } from '../audio.js';
 import { $ } from './context.js';
 import { openRitual } from './rituals.js';
 
+/** "Prod is DOWN!!" → "prod-is-down"; '' when too little is left to be a room name. */
+export function toSlug(raw) {
+  const slug = raw.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48).replace(/-+$/, '');
+  return slug.length >= 3 ? slug : '';
+}
+
 /* Open a shrine: the buttons with no name field of their own open the same name, in a sheet */
 document.addEventListener('click', (e) => {
   const link = e.target.closest('[data-open-shrine]');
@@ -17,7 +23,7 @@ document.addEventListener('click', (e) => {
 
 /* ---------- Name your shrine: every field shows the name you will get, and you never have to type one ---------- */
 // One suggestion per visit, in every field and in the sheet, so the name doesn't change between them.
-const suggested = suggestName();
+export const suggested = suggestName();
 for (const form of document.querySelectorAll('#name-form, #name-form-2, #name-form-3, #hero-form')) {
   const input = form.querySelector('input');
   input.value = suggested;
@@ -27,7 +33,7 @@ for (const form of document.querySelectorAll('#name-form, #name-form-2, #name-fo
     e.preventDefault();
     sound.unlock();
     const raw = input.value.trim() || input.placeholder;
-    const slug = raw.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48).replace(/-+$/, '');
-    location.href = slug.length >= 3 ? `/r/${slug}` : raw ? `/new?name=${encodeURIComponent(raw)}` : '/new';
+    const slug = toSlug(raw);
+    location.href = slug ? `/r/${slug}` : raw ? `/new?name=${encodeURIComponent(raw)}` : '/new';
   });
 }

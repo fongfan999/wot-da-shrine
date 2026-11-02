@@ -14,6 +14,7 @@ import { pingPerson, presence, renderPeople } from './people.js';
 import { prayerFx, remember, wishInput } from './prayers.js';
 import { clearResolved, renderResolve, RESOLVED_FOR, resolveFx, showResolved } from './resolve.js';
 import { blameFx, fortuneFx } from './rituals.js';
+import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
 import { applySettings } from './settings.js';
 import { renderRecords, statIncense, statKarma, tickVigil, updateStats } from './stats.js';
 import { bump, logEvent, toast } from './ui.js';
@@ -56,7 +57,7 @@ function renderTv() {
   body.dataset.tv = '1';
   const url = roomUrl();
   const qr = qrcode(0, 'M');
-  qr.addData(url);
+  qr.addData(tvJoinUrl());
   qr.make();
   $('#tv-qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
   $('#tv-url').textContent = url.replace(/^https?:\/\//, '');
@@ -108,6 +109,7 @@ $('#join-form').addEventListener('submit', (e) => {
 function connect() {
   state.shrine = connectRoom(roomName, state.me, {
     watch: tv,
+    arrival: arrivedFromTv() ? { via: 'tv', hello: urlParams.get('hello') } : null,
     onMessage: onShrineMessage,
     onStatus(status) {
       body.dataset.conn = status;
@@ -144,6 +146,7 @@ function onShrineMessage(msg) {
         for (const k of ['title', 'subtitle', 'eta']) if (urlParams.has(k) && settings[k] && !state.roomMeta[k]) seed[k] = settings[k];
         if (Object.keys(seed).length) state.shrine.send('meta', seed);
         if (tv) renderTv();
+        if (arrivedFromTv()) greetFromTv(people.get(msg.me)?.name ?? state.me.name);
         renderRecords();
         msg.prayers.slice(-6).forEach((p, i) => gsap.delayedCall(1.2 + i * 0.12, () => wishes.hang(p.text, p.name, false)));
         msg.prayers.slice(-3).forEach((p, i) => gsap.delayedCall(2.4 + i * 1.8, () => prayerFx(p.text, `${p.avatar} ${p.name}`, true)));
@@ -161,6 +164,7 @@ function onShrineMessage(msg) {
     case 'join':
       people.set(msg.person.id, msg.person);
       renderPeople(msg.person.id);
+      if (tv && msg.person.via === 'tv') announceArrival(msg.person);
       logEvent({ avatar: msg.person.avatar, who: msg.person.name, what: t('fJoin'), quiet: true, toastText: `${msg.person.name} ${t('fJoin')}.` });
       sound.tick(660, 0.05);
       break;
