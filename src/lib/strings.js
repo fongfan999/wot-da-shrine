@@ -305,7 +305,9 @@ export const STRINGS = {
 
   // Vigils
   vigilDown: 'Down for',
-  vigilNone: 'Light the incense, bow or pray to begin the vigil',
+  vigilNone: 'Vigil not started',
+  lightCue: 'Click the censer to light the incense',
+  lightCueTap: 'Tap the censer to light the incense',
   vigilNo: 'vigil #{n}',
   vigilSurvived: 'Survived in {t}',
   vigilPraying: '{n} praying',

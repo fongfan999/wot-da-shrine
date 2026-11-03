@@ -127,6 +127,41 @@ body[data-state="lit"] .mantra__dot { background: var(--flame); }
   max-width: 100%;
   transform-origin: 50% 100%;
 }
+/* The first thing to do, hung over the middle stick's tip (3.4% down the drawing) like a name tag */
+.light-cue {
+  position: absolute;
+  left: 50%;
+  top: 3.4%;
+  z-index: 2;
+  transform: translate(-50%, calc(-100% - 12px));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 12px;
+  border: 1px solid var(--ember);
+  border-radius: var(--radius-pill);
+  background: var(--ember-soft);
+  color: var(--ember-ink);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: cue-breathe 2.4s ease-in-out infinite;
+  transition: background-color 160ms, color 160ms;
+}
+.light-cue::after { content: ""; position: absolute; left: 50%; top: 100%; width: 1px; height: 12px; background: var(--ember); }
+.light-cue__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--flame); }
+.light-cue:hover, .burner:has(.burner__svg > path:hover) .light-cue { background: var(--ember); color: var(--on-ember); }
+.light-cue__text--tap { display: none; }
+@media (hover: none) { .light-cue__text--click { display: none; } .light-cue__text--tap { display: inline; } }
+/* A phone has no room above the sticks: the cue sits on them instead */
+@media (max-width: 760px) {
+  .light-cue { top: 24%; transform: translate(-50%, -50%); padding: 5px 12px 5px 10px; font-size: 13px; }
+  .light-cue::after { display: none; }
+}
+@keyframes cue-breathe { 50% { translate: 0 -3px; } }
+@media (prefers-reduced-motion: reduce) { .light-cue { animation: none; } }
 .burner__art { position: relative; width: 100%; height: 100%; user-select: none; }
 .burner__svg { display: block; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .burner__svg--live { position: absolute; inset: 0; }

@@ -72,6 +72,7 @@ const vigilEl = $('#vigil');
 const vigilTime = $('#vigil-time');
 const vigilMeta = $('#vigil-meta');
 const vigilLabel = $('#vigil-label');
+const lightCue = $('#light-cue');
 const hhmmss = (ms) => {
   const s = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(s / 3600);
@@ -81,6 +82,9 @@ const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m
 export function tickVigil() {
   // The scene reads this: the down rack's lights go out while a vigil is open.
   if (state.vigil) body.dataset.vigil = '1'; else delete body.dataset.vigil;
+  // No vigil open: the altar says how to begin one. Not on a TV, which has no hands, and not while
+  // the incense still burns from the last vigil (touching the censer then only stirs the smoke).
+  lightCue.hidden = Boolean(state.vigil || body.dataset.resolved || tv || state.lit || !roomName);
   if (body.dataset.resolved && state.lastVigil) {
     delete vigilEl.dataset.idle;
     vigilLabel.textContent = '';
@@ -89,7 +93,7 @@ export function tickVigil() {
     return;
   }
   if (!state.vigil) {
-    // No vigil open: the strip says how to begin one, which is also why They're back is greyed out.
+    // No vigil open: the strip says so, and They're back waits.
     vigilEl.dataset.idle = '1';
     vigilLabel.textContent = '';
     vigilTime.textContent = '';

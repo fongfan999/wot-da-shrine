@@ -2,11 +2,13 @@
 .incident { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 6px; }
 .incident .vigil { margin: 0; }
 .incident__resolve, .incident__undo { min-height: 34px; padding-block: 4px; }
+/* They're back waits until there is a vigil to end */
+.incident__resolve:disabled { display: none; }
 .undo__left { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
 .share-undo { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 8px 8px 8px 14px; border: 1px dashed var(--line-strong); border-radius: var(--radius-md); font-size: 14px; color: var(--muted); }
 .records__title { color: var(--ink); font-weight: 600; }
-/* No vigil open: a quiet hint where the timer goes */
-.vigil[data-idle] { border-style: dashed; }
+/* No vigil open: plain status where the timer goes (the altar says how to begin) */
+.vigil[data-idle] { border-color: transparent; background: none; padding-inline: 0; }
 .vigil[data-idle] .vigil__dot { background: var(--muted); animation: none; }
 .vigil[data-idle] :is(.vigil__label, .vigil__time) { display: none; }
 .vigil[data-idle] .vigil__meta { font-family: var(--font-sans); font-size: 14px; letter-spacing: 0; }
@@ -37,8 +39,9 @@ body[data-meta-editable="1"]:not([data-resolved]) .title:hover .word, body[data-
 .heading { position: relative; z-index: 3; }
 .eta { position: relative; }
 .eta__btn { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: default; }
-body[data-meta-editable="1"] .eta__btn { cursor: pointer; border-bottom: 1px dashed transparent; transition: border-color 160ms, color 160ms; }
-body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+/* On a shrine the ETA is a pill anyone can set, so it reads as one */
+body[data-meta-editable="1"] .eta__btn { min-height: 34px; padding: 4px 14px 4px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--paper-raised); cursor: pointer; transition: border-color 160ms, color 160ms; }
+body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { color: var(--ink); border-color: var(--accent); }
 .eta .eta-pop { left: 0; right: auto; top: calc(100% + 10px); }
 
 /* ---------- The vigil: how long the servers have been down ---------- */
