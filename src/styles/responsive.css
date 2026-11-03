@@ -91,9 +91,8 @@
   .kneeler__name { display: none; }
   .kneeler__tag { padding: 2px; }
   .ema { display: none; }
-  .plantern-row { height: 56px; }
-  .plantern { width: 24px; height: 42px; }
-  .plantern-row__more { top: 48px; }
+  .plantern-row { gap: 6px; }
+  .plantern { margin-top: 14px; width: 24px; height: 42px; }
   /* The dock keeps three rows: quick prayers, the prayer field, four keys. Breathe joins the rituals in the Offer tray. */
   #btn-breathe { display: none; }
   .tray__item--ritual[data-ritual="btn-breathe"] { display: flex; }

@@ -82,19 +82,20 @@ body[data-resolved="1"] .vigil__time { font-size: 22px; letter-spacing: 0; color
 .records__empty { margin: 0; font-size: 13px; color: var(--muted); }
 .records:not(:empty) + .records__empty { display: none; }
 
-/* Paper lanterns above the altar: one per vigil survived */
-.plantern-row { position: absolute; right: 2%; top: 1%; z-index: 1; height: 90px; width: min(62%, 520px); pointer-events: none; }
-.plantern-row__string { position: absolute; left: 0; right: 0; top: 8px; height: 0; border-top: 1.5px solid var(--ink); opacity: .5; transform: rotate(-1.2deg); transform-origin: 0 0; }
-.plantern { position: absolute; top: 4px; width: 34px; height: 60px; transform-origin: 50% 0; }
+/* Paper lanterns above the altar: one per vigil survived, hung from a string only as long as they are */
+.plantern-row { position: absolute; right: 2%; top: 1%; z-index: 1; display: flex; align-items: flex-start; gap: 10px; padding: 0 6px 0 0; pointer-events: none; }
+.plantern-row::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; border-top: 1.5px solid var(--ink); opacity: .45; } /* the string */
+.plantern-row__tag { position: relative; margin: 3px 4px 0 0; padding: 1px 8px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--paper-raised); font-family: var(--font-mono); font-size: 11px; line-height: 14px; color: var(--muted); white-space: nowrap; pointer-events: auto; cursor: default; }
+.plantern { position: relative; flex: none; margin-top: 18px; width: 34px; height: 60px; transform-origin: 50% -8px; pointer-events: auto; cursor: default; }
 .plantern svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.plantern__body { fill: var(--paper-raised); stroke: var(--ink); stroke-width: 1.6; }
-.plantern__rib { fill: none; stroke: var(--ink); stroke-width: 1; opacity: .5; }
+.plantern__cord { fill: none; stroke: var(--ink); stroke-width: 1; opacity: .5; }
+.plantern__body { fill: color-mix(in srgb, var(--flame) 22%, var(--paper-raised)); fill-opacity: .6; stroke: var(--ink); stroke-width: 1.6; }
+.plantern__rib { fill: none; stroke: var(--ink); stroke-width: 1; opacity: .4; }
 .plantern__cap { fill: var(--ink); }
-.plantern__glow { fill: var(--ember-soft); opacity: 0; transition: opacity 1.2s; }
-.plantern__core { fill: var(--flame); opacity: 0; transition: opacity 1.2s; }
-body[data-state="lit"] .plantern__glow { opacity: .9; }
-body[data-state="lit"] .plantern__core { opacity: .9; }
-.plantern-row__more { position: absolute; right: 0; top: 70px; padding: 1px 7px; border-radius: var(--radius-pill); background: var(--paper-raised); border: 1px solid var(--line-strong); font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.plantern__glow { fill: var(--ember-soft); opacity: .6; transition: opacity 1.2s; }
+.plantern__core { fill: var(--flame); opacity: .4; transition: opacity 1.2s; }
+body[data-state="lit"] .plantern__glow { opacity: .95; }
+body[data-state="lit"] .plantern__core { opacity: .8; }
 
 /* The altar grows with the room's karma */
 .burner__svg .torii, .burner__svg .cat { display: none; }

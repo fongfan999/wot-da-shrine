@@ -186,34 +186,41 @@ export function renderRecords() {
   renderLanterns();
 }
 
-/** Paper lanterns above the altar: one for every vigil survived. */
+/** Paper lanterns above the altar: one for every vigil survived, hung from a string as long as they need. */
 const lanternRow = $('#planterns');
-const LANTERN_SVG = '<svg viewBox="0 0 34 60"><rect class="plantern__cap" x="11" y="0" width="12" height="4" rx="1"/><path class="plantern__glow" d="M17 8c12 0 15 10 15 22s-3 22-15 22S2 42 2 30 5 8 17 8z"/><ellipse class="plantern__core" cx="17" cy="30" rx="7" ry="12"/><path class="plantern__body" d="M17 6c11 0 15 11 15 24s-4 24-15 24S2 43 2 30 6 6 17 6z"/><path class="plantern__rib" d="M9 10v40M17 6v48M25 10v40M3 22h28M3 38h28"/><rect class="plantern__cap" x="11" y="52" width="12" height="4" rx="1"/><path class="plantern__rib" d="M17 56v4"/></svg>';
+const LANTERN_SVG = '<svg viewBox="0 0 34 60"><path class="plantern__cord" d="M17 -8V0"/><rect class="plantern__cap" x="11" y="0" width="12" height="4" rx="1"/><path class="plantern__glow" d="M17 8c12 0 15 10 15 22s-3 22-15 22S2 42 2 30 5 8 17 8z"/><path class="plantern__body" d="M17 6c11 0 15 11 15 24s-4 24-15 24S2 43 2 30 6 6 17 6z"/><ellipse class="plantern__core" cx="17" cy="30" rx="7" ry="12"/><path class="plantern__rib" d="M9 10v40M17 6v48M25 10v40M3 22h28M3 38h28"/><rect class="plantern__cap" x="11" y="52" width="12" height="4" rx="1"/><path class="plantern__rib" d="M17 56v4"/></svg>';
+const MAX_LANTERNS = 10;
+const lanternMinutes = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${Math.max(1, m)} min`);
+/** What one lantern stands for: the vigil it was lit for, as the shrine remembers it. */
+function lanternTip(r) {
+  if (!r) return t('lanternOlder');
+  const vars = { title: r.title, t: lanternMinutes(r.minutes ?? 0), date: new Date(r.endedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) };
+  return fmt(r.title ? 'lanternTipTitled' : 'lanternTip', vars);
+}
 let shownLanterns = -1;
 function renderLanterns() {
   const n = records.survived;
   lanternRow.hidden = n === 0;
-  const max = 10;
-  const show = Math.min(n, max);
-  const existing = lanternRow.querySelectorAll('.plantern').length;
-  for (let i = existing; i < show; i++) {
+  const show = Math.min(n, MAX_LANTERNS);
+  const survived = records.history.filter((r) => r.outcome === 'survived'); // newest first
+  // Oldest on the left, the newest at the end of the string.
+  const tips = Array.from({ length: show }, (_, i) => lanternTip(survived[show - 1 - i]));
+  const lanterns = [...lanternRow.querySelectorAll('.plantern')];
+  for (const el of lanterns.slice(show)) el.remove(); // a They're back taken back
+  for (let i = lanterns.length; i < show; i++) {
     const el = document.createElement('span');
     el.className = 'plantern';
     el.innerHTML = LANTERN_SVG;
-    el.style.left = `${(i / (max - 1)) * 100}%`;
-    el.style.marginLeft = '-17px';
     el.style.transform = `rotate(${gsap.utils.random(-4, 4)}deg)`;
     lanternRow.appendChild(el);
-    if (shownLanterns !== -1 && !reduceMotion) {
+    if (shownLanterns !== -1 && n > shownLanterns && !reduceMotion) {
       gsap.fromTo(el, { y: -80, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, ease: 'bounce.out' });
     }
   }
-  let more = lanternRow.querySelector('.plantern-row__more');
-  if (n > max) {
-    if (!more) { more = document.createElement('span'); more.className = 'plantern-row__more'; lanternRow.appendChild(more); }
-    more.textContent = `+${n - max}`;
-  } else more?.remove();
-  lanternRow.title = fmt('lanternsTitle', { n });
+  lanternRow.querySelectorAll('.plantern').forEach((el, i) => { el.title = tips[i]; });
+  lanternRow.querySelector('.plantern-row__tag').textContent = fmt('lanternsTag', { n });
+  lanternRow.title = fmt(n === 1 ? 'lanternsTitleOne' : 'lanternsTitle', { n });
+  lanternRow.setAttribute('aria-label', lanternRow.title);
   shownLanterns = n;
 }
 
