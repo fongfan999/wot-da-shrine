@@ -84,7 +84,7 @@ body[data-state="lit"] .mantra__dot { background: var(--flame); }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  max-width: 140px;
+  max-width: var(--tag-max, 140px); /* set from the space between kneelers */
   padding: 3px 10px 3px 3px;
   border: 1px solid var(--field-line);
   border-radius: var(--radius-pill);

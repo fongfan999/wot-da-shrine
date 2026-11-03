@@ -19,11 +19,11 @@ export function toast(msg) {
 /* ---------- Activity feed ---------- */
 const feedEl = $('#feed');
 const feedEmpty = $('#feed-empty');
-const sideLeft = $('.side--left');
+const liveCard = $('#live-card');
 const FEED_MAX = 50;
-/** The activity and people cards are on screen (on small screens they sit below the altar). */
+/** The live card is on screen (on small screens it sits below the altar). */
 export const feedVisible = () => {
-  const r = sideLeft.getBoundingClientRect();
+  const r = liveCard.getBoundingClientRect();
   return r.height > 0 && r.top < innerHeight && r.bottom > 0;
 };
 

@@ -49,7 +49,7 @@ export function intro() {
   if (reduceMotion) { reveal(); introStarts(); return; }
   const dock = ['.quick', '.pray', '.actions', '.credit'];
   gsap.set('.title .ch', { y: 40, opacity: 0, rotateX: -70, transformOrigin: '50% 100%' });
-  gsap.set(['.eyebrow', '.subtitle', '.mantra'], { y: 14, opacity: 0 });
+  gsap.set(['.eyebrow', '.subtitle', '.incident', '.mantra'], { y: 14, opacity: 0 });
   gsap.set('.bar', { y: -12, opacity: 0 });
   gsap.set('.side .card', { y: 20, opacity: 0 });
   gsap.set(dock, { y: 24, opacity: 0 });
@@ -65,7 +65,7 @@ export function intro() {
     .to('.bar', { y: 0, opacity: 1, duration: 0.8 }, 0.1)
     .to('.eyebrow', { y: 0, opacity: 1, duration: 0.7 }, 0.25)
     .to('.title .ch', { y: 0, opacity: 1, rotateX: 0, duration: 1, stagger: 0.022, onComplete: () => gsap.set('.title .ch', { clearProps: 'willChange' }) }, 0.35)
-    .to(['.subtitle', '.mantra'], { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }, 0.8)
+    .to(['.subtitle', '.incident', '.mantra'], { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }, 0.8)
     .to('.burner', { y: 0, opacity: 1, scale: 1, duration: 1.3, ease: 'elastic.out(1, 0.7)' }, 0.5)
     .to('.plantern-row', { opacity: 1, duration: 1, ease: 'power2.out' }, 1.2)
     .to('.side .card', { y: 0, opacity: 1, duration: 0.8, stagger: 0.08 }, 0.9)

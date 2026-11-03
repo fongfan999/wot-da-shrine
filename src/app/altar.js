@@ -7,7 +7,7 @@ import { $, body, BURN_SECONDS, counters, fmt, landing, roomName, state } from '
 import { art, burner, congregation, kick, motes, petals, room, smoke } from './engines.js';
 import { pulse } from './prayers.js';
 import { clearResolved, renderResolve } from './resolve.js';
-import { addKarma, burnBar, burnState, burnTime, statIncense, tickProgress, tickVigil, updateStats } from './stats.js';
+import { addKarma, burnBar, statIncense, tickProgress, tickVigil, updateStats } from './stats.js';
 import { bump, logEvent, logMine, shockwave, toast } from './ui.js';
 import { vigilTouch } from './vigil.js';
 
@@ -44,7 +44,6 @@ export function ignite(at) {
   state.litAt = at;
 
   body.dataset.state = 'lit';
-  burnState.textContent = t('lit');
   art.light(BURN_SECONDS);
   if (!fresh) art.syncBurn(elapsed);
   smoke.start();
@@ -84,8 +83,6 @@ export function burnOut() {
   clearTimeout(burnOutTimer);
   state.lit = false;
   body.dataset.state = 'unlit';
-  burnState.textContent = t('cold');
-  burnTime.textContent = '';
   burnBar.style.width = '0%';
   art.extinguish();
   smoke.stop();

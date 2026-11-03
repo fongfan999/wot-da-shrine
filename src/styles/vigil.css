@@ -1,3 +1,13 @@
+/* ---------- The incident: how long it has been down, when it is due back, and the button that ends it ---------- */
+.incident { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 6px; }
+.incident .vigil { margin: 0; }
+.incident__resolve { min-height: 34px; padding-block: 4px; }
+/* No vigil open: a quiet hint where the timer goes */
+.vigil[data-idle] { border-style: dashed; }
+.vigil[data-idle] .vigil__dot { background: var(--muted); animation: none; }
+.vigil[data-idle] :is(.vigil__label, .vigil__time) { display: none; }
+.vigil[data-idle] .vigil__meta { font-family: var(--font-sans); font-size: 14px; letter-spacing: 0; }
+
 /* ---------- The vigil: how long the servers have been down ---------- */
 .vigil {
   display: inline-flex;

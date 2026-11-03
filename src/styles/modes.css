@@ -1,9 +1,6 @@
 /* The home page is a demo with one action: the altar and its sounds stay, the product surface goes.
    Rituals, vigils, records, the feed and sharing belong to a shrine with a team (or a maintenance page). */
-body[data-landing="1"] :is(.card--records, .card--feed, .rank, .enlight, .eta, #btn-resolve, .vigil, .plantern-row, .quick__chip--ritual, .quick__sep, #btn-share, .stats .stat:nth-child(3)) { display: none; }
-body[data-landing="1"] .stats { grid-template-columns: repeat(2, 1fr); }
-body[data-landing="1"] .side .card--status { order: 2; }
-body[data-landing="1"] .side--left { order: 1; }
+body[data-landing="1"] :is(.incident, .plantern-row, .quick__chip--ritual, .quick__sep, #btn-share) { display: none; }
 body[data-landing="1"] .card--solo { border-color: var(--accent); }
 body[data-landing="1"] .card--solo .label { color: var(--accent); }
 body[data-landing="1"] .card--solo.is-nudged { animation: nudge 1.2s var(--ease) 2; }

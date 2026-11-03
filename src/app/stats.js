@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { saveCounters } from '../lib/config.js';
 import { STRINGS, t } from '../lib/strings.js';
-import { $, body, BURN_SECONDS, counters, fmt, meta, people, reduceMotion, roomName, state } from './context.js';
+import { $, body, BURN_SECONDS, counters, fmt, meta, people, reduceMotion, roomName, state, tv } from './context.js';
 import { burner, petals } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';
 import { records, vigilTouch } from './vigil.js';
@@ -11,18 +11,17 @@ import { records, vigilTouch } from './vigil.js';
 /* ---------- Stats + progress ---------- */
 export const statIncense = $('#stat-incense');
 export const statKarma = $('#stat-karma');
-const statTime = $('#stat-time');
 const progressBar = $('#progress-bar');
 const progressPct = $('#progress-pct');
 const progress = $('#progress');
-export const burnState = $('#burn-state');
-export const burnTime = $('#burning-time');
 export const burnBar = $('#burn-bar');
 const dockTime = $('#dock-time');
 
+const sumKarma = $('#sum-karma');
 export function updateStats(quiet = false) {
   statIncense.textContent = counters.incense;
   statKarma.textContent = counters.karma;
+  sumKarma.textContent = counters.karma;
   updateRank(quiet);
 }
 
@@ -75,10 +74,7 @@ export function tickProgress() {
 
   tickVigil();
   if (state.lit) {
-    const s = Math.floor(elapsed);
-    statTime.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-    const left = Math.max(0, BURN_SECONDS - s);
-    burnTime.textContent = `${mmss(left)} ${t('left')}`;
+    const left = Math.max(0, BURN_SECONDS - Math.floor(elapsed));
     dockTime.textContent = mmss(left);
     burnBar.style.width = `${(left / BURN_SECONDS) * 100}%`;
   }
@@ -98,14 +94,21 @@ const hhmmss = (ms) => {
 const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
 export function tickVigil() {
   if (body.dataset.resolved && state.lastVigil) {
-    vigilEl.hidden = false;
+    delete vigilEl.dataset.idle;
     vigilLabel.textContent = '';
     vigilTime.textContent = fmt('vigilSurvived', { t: minutesText(state.lastVigil.minutes) });
     vigilMeta.textContent = [fmt('vigilPraying', { n: state.lastVigil.peak }), fmt('vigilPrayers', { n: state.lastVigil.prayers }), fmt('vigilNo', { n: records.survived })].join(' · ');
     return;
   }
-  if (!state.vigil) { vigilEl.hidden = true; return; }
-  vigilEl.hidden = false;
+  if (!state.vigil) {
+    // No vigil open: the strip says how to begin one, which is also why They're back is greyed out.
+    vigilEl.dataset.idle = '1';
+    vigilLabel.textContent = '';
+    vigilTime.textContent = '';
+    vigilMeta.textContent = t('vigilNone');
+    return;
+  }
+  delete vigilEl.dataset.idle;
   vigilLabel.textContent = t('vigilDown');
   vigilTime.textContent = hhmmss(Date.now() - state.vigil.startedAt);
   const bits = [];
@@ -114,6 +117,15 @@ export function tickVigil() {
   bits.push(fmt('vigilNo', { n: records.survived + 1 }));
   vigilMeta.textContent = bits.join(' · ');
 }
+
+/* ---------- The shrine card: folded to one line until someone opens it; a TV on the wall shows it open ---------- */
+const shrineCard = $('#shrine-card');
+const SHRINE_OPEN_KEY = 'incense:shrine-card:v1';
+try { shrineCard.open = tv || localStorage.getItem(SHRINE_OPEN_KEY) === '1'; } catch { shrineCard.open = tv; }
+shrineCard.addEventListener('toggle', () => {
+  if (tv) return;
+  try { localStorage.setItem(SHRINE_OPEN_KEY, shrineCard.open ? '1' : '0'); } catch { /* ignore */ }
+});
 
 /* ---------- Shrine records: what this altar has survived, and how far it has grown ---------- */
 const recordsList = $('#records');

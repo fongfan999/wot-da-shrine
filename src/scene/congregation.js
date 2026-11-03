@@ -112,6 +112,10 @@ export class Congregation {
       }
     }
     const visible = Math.min(n, perSide * 2);
+    // Name tags as wide as the gap to the nearest tag at the same height allows: the pair kneeling
+    // either side of the altar, and (with more than four) every other slot on one side.
+    const room = Math.min(2 * inner, n > 4 ? 2 * gap : Infinity) * unit - 10;
+    this.host.style.setProperty('--tag-max', `${Math.round(Math.max(72, Math.min(220, room)))}px`);
 
     const w = 88 * unit * SCALE;
     const h = 204 * unit * SCALE;

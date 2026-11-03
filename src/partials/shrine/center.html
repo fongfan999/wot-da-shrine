@@ -4,12 +4,20 @@
     <p class="eyebrow" id="eyebrow" data-i18n="eyebrow">When the servers are down</p>
     <h1 class="title" id="title" data-i18n="title">Pray for uptime, together</h1>
     <p class="subtitle" id="subtitle" data-i18n="subtitle">A shared altar for the incident channel. Open one, drop the link in Slack, and the whole team prays to the rack, live.</p>
-    <p class="vigil" id="vigil" hidden>
-      <span class="vigil__dot" aria-hidden="true"></span>
-      <span class="vigil__label" id="vigil-label" data-i18n="vigilDown">Down for</span>
-      <b class="vigil__time" id="vigil-time">00:00</b>
-      <span class="vigil__meta" id="vigil-meta"></span>
-    </p>
+    <!-- The incident: how long it has been down, when it is due back, and the button that ends it -->
+    <div class="incident" id="incident">
+      <p class="vigil" id="vigil">
+        <span class="vigil__dot" aria-hidden="true"></span>
+        <span class="vigil__label" id="vigil-label" data-i18n="vigilDown">Down for</span>
+        <b class="vigil__time" id="vigil-time">00:00</b>
+        <span class="vigil__meta" id="vigil-meta"></span>
+      </p>
+      <p class="eta"><span class="status-dot" data-status="open" aria-hidden="true"></span><span id="eta-text"></span></p>
+      <button class="btn btn--live btn--sm incident__resolve" id="btn-resolve" type="button">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4L19 6"/></svg>
+        <span data-i18n="resolve">They’re back!</span>
+      </button>
+    </div>
     <p class="mantra" aria-live="polite"><span class="mantra__dot" aria-hidden="true"></span><span id="mantra">Clearing cache and karma…</span></p>
     <form class="hero-cta" id="hero-form" hidden autocomplete="off">
       <div class="hero-cta__bar">

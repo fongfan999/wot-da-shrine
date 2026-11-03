@@ -22,6 +22,7 @@ export function applySettings(animate = false) {
   if (body.dataset.resolved) applyStrings({ eyebrow: t('resolvedEyebrow'), title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
   else if (landing && !meta('title') && !meta('subtitle')) applyStrings({ eyebrow: t('landEyebrow'), title: t('landTitle'), subtitle: t('landSubtitle') });
   else applyStrings({ title: meta('title'), subtitle: meta('subtitle') });
+  body.dataset.subtitle = meta('subtitle') ? 'custom' : ''; // phones hide a shrine's stock subtitle, never one the room wrote
   document.title = body.dataset.resolved ? `${t('resolvedTitle')} · ${BRAND}` : meta('title') ? `${meta('title')} · ${BRAND}` : landing ? `${BRAND}: ${t('landDocTitle')}` : `${t('title')} · ${BRAND}`;
   if (roomName) $('#eyebrow').textContent = body.dataset.resolved ? `${t('resolvedEyebrow')} / ${roomName}` : fmt('roomEyebrow', { room: roomName });
   if (animate || !title.querySelector('.word')) splitTitle(animate);

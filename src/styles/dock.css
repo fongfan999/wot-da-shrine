@@ -5,7 +5,7 @@
   z-index: 6;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "quick quick" "pray actions" "credit credit";
+  grid-template-areas: "quick quick" "pray actions";
   align-items: center;
   column-gap: var(--space-4);
   row-gap: 10px;
@@ -114,6 +114,9 @@
 body[data-state="lit"] .act--primary { background: var(--ember); border-color: var(--ember); color: var(--on-ember); }
 body[data-state="lit"] .act__label--unlit { display: none; }
 body[data-state="lit"] .act__label--lit { display: inline; }
+.act__burn { position: absolute; left: 14px; right: 14px; bottom: 5px; height: 3px; border-radius: 2px; background: color-mix(in srgb, var(--on-ember) 25%, transparent); overflow: hidden; opacity: 0; transition: opacity 300ms; }
+.act__burn-bar { display: block; height: 100%; width: 0%; border-radius: inherit; background: var(--on-ember); }
+body[data-state="lit"] .act__burn { opacity: 1; }
 
 .tray {
   position: absolute;
@@ -146,10 +149,14 @@ body[data-state="lit"] .act__label--lit { display: inline; }
 .tray__emoji { display: grid; place-items: center; height: 36px; }
 .tray__emoji svg { width: 44px; height: 36px; overflow: visible; }
 .tray__emoji .ico { width: 24px; height: 24px; }
+.tray__rituals { display: none; margin-top: var(--space-3); }
+.tray__rituals .tray__grid { grid-template-columns: repeat(3, 1fr); }
+.tray__item--ritual { border-style: dashed; border-color: var(--ember); color: var(--ember-ink); }
+.tray__item--ritual:hover { border-color: var(--ember); background: var(--ember-soft); }
+.tray__item--ritual .tray__name { color: inherit; }
 .tray__name { font-size: 12px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
 .credit {
-  grid-area: credit;
   display: flex;
   justify-content: center;
   align-items: center;

@@ -12,6 +12,7 @@
     padding: 0 6px 6px 0;
   }
   .room-chip { max-width: 34vw; }
+  .side > .credit { grid-column: 1 / -1; justify-content: center; }
 }
 
 @media (max-width: 1099px) {
@@ -62,7 +63,7 @@
 
 /* Narrow tablet and phone: the dock stacks */
 @media (max-width: 899px) {
-  .dock { grid-template-columns: minmax(0, 1fr); grid-template-areas: "quick" "pray" "actions" "credit"; }
+  .dock { grid-template-columns: minmax(0, 1fr); grid-template-areas: "quick" "pray" "actions"; }
   .actions { display: grid; grid-template-columns: 1fr 1fr 1.6fr 1fr 1fr; }
   .act { min-width: 0; }
   .tray { left: 50%; right: auto; transform: translateX(-50%); }
@@ -84,7 +85,15 @@
   .plantern-row { height: 56px; }
   .plantern { width: 24px; height: 42px; }
   .plantern-row__more { top: 48px; }
-  .quick__chip--ritual span { display: none; }
+  /* The dock keeps three rows: quick prayers, the prayer field, four keys. Rituals and Breathe move into the Offer tray. */
+  .quick__chip--ritual, .quick__sep, #btn-breathe { display: none; }
+  .actions { grid-template-columns: 1fr 1fr 1.6fr 1fr; }
+  .tray__rituals { display: block; }
+  /* The first screen is the altar, not copy: a shrine's stock subtitle goes, one the room wrote is kept to two lines */
+  body[data-mode="room"] .subtitle { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  body[data-mode="room"]:not([data-subtitle="custom"]):not([data-resolved]) .subtitle { display: none; }
+  .incident { gap: 6px 10px; margin-top: 4px; }
+  .eta { font-size: 13px; }
   .vigil { font-size: 13px; }
   .vigil__time { font-size: 16px; }
   .tv-join { display: none; }

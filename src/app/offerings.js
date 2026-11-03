@@ -57,6 +57,27 @@ export function buildTray() {
   for (const [kind, def] of Object.entries(OFFERINGS)) item(kind, `<svg viewBox="-24 -38 48 42">${def.svg}</svg>`, def.short);
   item('', icon('dice'), t('surprise'));
   tray.append(title, grid);
+
+  // On phones the ritual chips and Breathe leave the dock and live here (CSS shows this row only there).
+  const rituals = document.createElement('div');
+  rituals.className = 'tray__rituals';
+  const rTitle = document.createElement('p');
+  rTitle.className = 'tray__title';
+  rTitle.textContent = t('ritualsLabel');
+  const rGrid = document.createElement('div');
+  rGrid.className = 'tray__grid';
+  for (const [id, key] of [['btn-blame', 'blame'], ['btn-fortune', 'fortune'], ['btn-breathe', 'breathe']]) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tray__item tray__item--ritual';
+    b.dataset.ritual = id;
+    b.innerHTML = '<span class="tray__emoji" aria-hidden="true"></span><span class="tray__name"></span>';
+    b.querySelector('.tray__emoji').innerHTML = $(`#${id}`).querySelector('svg').outerHTML;
+    b.querySelector('.tray__name').textContent = t(key);
+    rGrid.appendChild(b);
+  }
+  rituals.append(rTitle, rGrid);
+  tray.appendChild(rituals);
 }
 export function openTray(open) {
   if (open === trayOpen) return;
@@ -75,6 +96,7 @@ tray.addEventListener('click', (e) => {
   const b = e.target.closest('.tray__item');
   if (!b) return;
   openTray(false);
+  if (b.dataset.ritual) { $(`#${b.dataset.ritual}`).click(); return; }
   offer(b.dataset.kind || null);
 });
 document.addEventListener('pointerdown', (e) => { if (trayOpen && !e.target.closest('#tray, #btn-offer')) openTray(false); });
