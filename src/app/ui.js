@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { t } from '../lib/strings.js';
 import { $, body, landing, reduceMotion, state } from './context.js';
+import { every } from '../lib/clock.js';
 
 const toastEl = $('#toast');
 
@@ -34,7 +35,7 @@ export function ago(at) {
   if (s < 86400) return `${Math.round(s / 3600)}h`;
   return `${Math.round(s / 86400)}d`;
 }
-setInterval(() => feedEl.querySelectorAll('time').forEach((el) => { el.textContent = ago(+el.dataset.at); }), 30000);
+every(30000, () => feedEl.querySelectorAll('time').forEach((el) => { el.textContent = ago(+el.dataset.at); }));
 
 /**
  * Add a line to the activity feed. Repeats of the same action by the same

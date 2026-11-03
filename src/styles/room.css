@@ -1,0 +1,3 @@
+/* A shared shrine at /r/:room: the shrine and its overrides, none of the home page's sections. */
+@import './core.css';
+@import './overrides.css';

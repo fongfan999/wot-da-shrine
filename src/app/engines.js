@@ -10,6 +10,7 @@ import { buildServerRoom } from '../scene/serverRoom.js';
 import { IncenseSmoke } from '../scene/smoke.js';
 import { Vitals } from '../scene/vitals.js';
 import { $, body, people, state } from './context.js';
+import { every } from '../lib/clock.js';
 
 /* ---------- Engines ---------- */
 export const burner = $('#burner');
@@ -40,9 +41,9 @@ export function kick(amount, strength = 1) {
   devotion = Math.min(60, devotion + amount);
   vitals.kick(strength);
 }
-setInterval(() => {
+every(1000, () => {
   devotion *= 0.93;
   const crowd = Math.max(1, people.size);
   const bpm = state.lit ? Math.min(160, 58 + (crowd - 1) * 7 + devotion) : 0;
   vitals.setBpm(bpm);
-}, 1000);
+});

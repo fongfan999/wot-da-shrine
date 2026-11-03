@@ -1,6 +1,6 @@
 /* ---------- Center: heading and altar ---------- */
 /* The altar stays in view while the cards beside it scroll: it fills what the top
-   bar and the dock leave (their heights are measured in main.js) */
+   bar and the dock leave (their heights are measured in stage.js) */
 .center {
   position: sticky;
   top: calc(var(--bar-h, 70px) + var(--space-5));

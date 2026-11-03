@@ -30,6 +30,9 @@ rooms.get('/new', rateLimit('NEW_ROOM_LIMIT'), (c) => {
   return c.redirect(`/r/${name ? slug(name) : roomName()}${url.search}`);
 });
 
+// /r/ alone is the room page's file with no room in it: send the visitor to a room instead.
+rooms.get('/r', (c) => c.redirect('/new'));
+
 rooms.get('/r/:room', (c) => {
   const room = roomOf(c);
   return room ? roomPage(c, room) : c.redirect('/new');

@@ -189,31 +189,47 @@ It deploys to https://shrine.wotdafong.dev as a Workers custom domain (the
 
 One folder per kind of thing, one file per part of the page, and nothing very long:
 
-- **Markup** lives in `src/partials/`. `index.html` is only the head and a list of
-  `<include src="…">` lines, which a small Vite plugin (in `vite.config.js`) replaces
-  with the partials at dev and build time.
-- **Styles** live in `src/styles/`, one file per part of the page. `src/styles/index.css`
-  imports them in cascade order, so a later file wins over an earlier one.
+- **Two pages.** `index.html` is the home page: `/`, a maintenance page and the `/tv` code
+  screen. `r/index.html` is a shared shrine, which the Worker serves for every `/r/:room`.
+  Each is only its head and a list of `<include src="…">` lines, which a small Vite plugin
+  (in `vite.config.js`) replaces with the partials at dev and build time. The shrine's
+  pieces in `src/partials/shrine/` are shared; the home page adds its own from
+  `src/partials/landing/`, and a room never loads them.
+- **Styles** live in `src/styles/`, one file per part of the page. `core.css` is the shrine,
+  `landing.css` the home page's sections and `overrides.css` the modes and breakpoints;
+  `home.css` imports all three and `room.css` skips the landing, always in cascade order.
 - **Behaviour** lives in `src/app/` for the shrine and `src/landing/` for the home page.
+  `src/main.js` is what every page runs; `src/home.js` and `src/room.js` are the pages'
+  entries. Shared code never imports from `src/landing/`: the home page hooks itself in.
   Drawing engines are in `src/scene/`, sound in `src/audio/`, and plain helpers in `src/lib/`.
+- **Time.** Anything that changes with the clock (the vigil timer, the burn left, the ETA,
+  the feed's times, the polls) runs on `src/lib/clock.js`, never its own interval. Readings
+  are computed from `Date.now()`, so a background tab's late tick is never a wrong one, and a
+  moment that must not be missed is a `setTimeout`, never `gsap.delayedCall` (GSAP sleeps in
+  background tabs). The rules are written out at the top of that file.
 - **The Worker** is a Hono app: a route file per area in `worker/routes/`, shared middleware
   in `worker/middleware.js`, and the Durable Objects in `worker/objects/`.
 
 A new part of the page usually means a partial, a stylesheet and a module with the same name.
 
 ```
-index.html               page shell: head + includes
-vite.config.js           Vite, the Cloudflare plugin and the partials plugin
-src/main.js              entry: loads the modules, keyboard shortcuts, starts the show
-src/partials/            the page's markup
+index.html               the home page: head + includes (/, maintenance pages, /tv)
+r/index.html             a shared shrine: head + includes (/r/:room, served by the Worker)
+vite.config.js           Vite, the Cloudflare plugin, the partials plugin and the two pages
+src/main.js              what every page runs: loads the modules, keyboard shortcuts, start()
+src/home.js, src/room.js the pages' entries: the home page adds the landing and the world line
+src/partials/            the pages' markup
+  head.html              the head both pages share
   scene.html, bar.html, breath.html, tv.html, settings.html
-  shrine/                the altar heading, the side cards, the dock
+  shrine/                heading, altar, live card, shrine card, credit, TV join, the dock
   sheets/                join, open a shrine, cast, blame, fortune, share
-  landing/               the home page's sections, top to bottom, and the footer
-src/styles/              the page's styles: index.css imports the rest in cascade order
+  landing/               the home page's hero pieces, solo card and sections, and the footer
+src/styles/              the pages' styles, in cascade order
+  home.css, room.css     each page's stylesheet
+  core.css               the shrine's parts, from tokens.css on
+  landing.css, landing/  the home page's sections
+  overrides.css          modes.css, responsive.css, ink.css: overrides by mode and screen width
   tokens.css             design tokens, light and dark themes
-  landing/               the home page's sections
-  modes.css, responsive.css   overrides by mode and by screen width
 src/app/                 the shrine
   context.js             where we are (solo, room, TV, home page), settings, shared state
   engines.js             builds the drawing engines (room, burner, smoke, fog, petals…)
@@ -232,9 +248,9 @@ src/app/                 the shrine
   shareSheet.js          invite + share card sheet
   menus.js               the top bar's Share and More menus
   cast.js, screen.js     Cast to TV, and the TV's own screens
-  world.js               the world line (every shrine)
+  etaPicker.js           the Back at picker, in the heading and the builder
   openShrine.js          name fields and the Open sheet
-src/landing/             the home page's sections (pulse, showcase, steps, builder, TV, the ETA picker…)
+src/landing/             the home page's sections (pulse, showcase, steps, builder, TV…) and its world line
 src/scene/               what is drawn
   burner.js              inline-SVG incense burner (burn-down, embers, offerings)
   serverRoom.js          procedural SVG server room with blinking LEDs
@@ -249,6 +265,7 @@ src/audio/
   index.js               Web Audio sound kit (one-shot effects)
   music.js               generative ambient music
 src/lib/
+  clock.js               the page's one clock, and the rules for anything timed
   config.js              settings: URL params > localStorage > defaults
   strings.js             brand name, copy and mantras
   room.js                room URL, saved name, reconnecting WebSocket
@@ -264,7 +281,7 @@ worker/middleware.js     security headers, API headers, rate limits, socket-only
 worker/routes/api.js     /api/health, /api/status, /api/world, /api/pulse
 worker/routes/rooms.js   /new, /r/:room (link previews), a room's socket, status and badge
 worker/routes/tv.js      /api/tv/ws and casting to a paired TV
-worker/views/            the room page's link preview rewrite, the README badge SVG
+worker/views/            the room page (r/index.html) with its link preview rewritten, the README badge SVG
 worker/objects/shrine.js   Shrine Durable Object: one per room
 worker/objects/world.js    World Durable Object: totals across every shrine
 worker/objects/pairing.js  Pairing Durable Object: one per TV code

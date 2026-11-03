@@ -9,6 +9,7 @@ import { sound } from '../audio/index.js';
 import { t } from '../lib/strings.js';
 import { ignite } from './altar.js';
 import { $, body, embedded, fmt, reduceMotion, roomName, roomUrl, state, tv, tvHome, urlParams } from './context.js';
+import { every } from '../lib/clock.js';
 
 const SCREEN_KEY = 'incense:screen:v1'; // { key, code }: this screen's secret, and the code it holds
 const TAKEN = 4009; // the code went to another screen while this one was away
@@ -44,6 +45,7 @@ function pair({ onCode, onCast, onLost }) {
     const q = new URLSearchParams({ key: screen.key });
     if (screen.code) q.set('code', screen.code);
     ws = new WebSocket(`${proto}//${location.host}/api/tv/ws?${q}`);
+    // A keepalive, not a reading: it lives and dies with this socket, so it keeps its own interval rather than the clock.
     ws.addEventListener('open', () => { pinger = setInterval(() => ws.readyState === WebSocket.OPEN && ws.send('ping'), 30000); });
     ws.addEventListener('message', (e) => {
       let msg;
@@ -152,7 +154,7 @@ export function setupScreen() {
     $('#pair-screen').hidden = false;
     // The altar is this screen's screensaver: a fresh stick whenever the last one burns down.
     setTimeout(() => { if (!state.lit) ignite(Date.now()); }, reduceMotion ? 0 : 1800);
-    setInterval(() => { if (!state.lit) ignite(Date.now()); }, 20000);
+    every(20000, () => { if (!state.lit) ignite(Date.now()); });
   }
   keepAwake();
   hideIdleCursor();
@@ -166,7 +168,7 @@ export function setupScreen() {
       body.dataset.paired = 'live';
       if (tvHome) $('#pair-status').textContent = t('pairEyebrow');
       if (tvHome) showPairing(code);
-      else {
+      else if (roomName) { // a shrine on the wall says which screen it is, so it can be cast to again
         $('#tv-cast-code').textContent = spaced(code);
         $('#tv-cast').hidden = false;
       }

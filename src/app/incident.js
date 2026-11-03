@@ -1,5 +1,5 @@
 /* The incident, edited where it is read: the title is what is down, the ETA is when it is due back. */
-import { etaPicker } from '../landing/etaPicker.js';
+import { etaPicker } from './etaPicker.js';
 import { sound } from '../audio/index.js';
 import { t } from '../lib/strings.js';
 import { $, body, meta, roomName } from './context.js';

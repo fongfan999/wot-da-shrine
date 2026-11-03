@@ -1,7 +1,7 @@
 /* The world: what every shrine is doing. */
 import { t } from '../lib/strings.js';
-import { $, fmt, landing, roomName } from './context.js';
-import { renderLandingWorld } from '../landing/pulse.js';
+import { $, fmt, landing, roomName } from '../app/context.js';
+import { renderLandingWorld } from './pulse.js';
 
 /* ---------- The world: what every shrine is doing, on the landing page ---------- */
 const worldEl = $('#world');

@@ -2,6 +2,7 @@ import gsap from 'gsap';
 import qrcode from 'qrcode-generator';
 import { sound } from '../audio/index.js';
 import { $, fmt, reduceMotion } from '../app/context.js';
+import { every } from '../lib/clock.js';
 
 /**
  * The war-room TV: the demo shrine at 1920x1080, scaled onto the screen once it scrolls near, on screens
@@ -25,7 +26,7 @@ export function setupTv() {
       if (st) liveText.textContent = `Live · ${st.people} kneeling${st.lit ? ' · burning' : ''}`;
     } catch { /* the chip just says Live */ }
   };
-  setInterval(poll, 15000);
+  every(15000, poll);
   // The TV is a whole second shrine: it sleeps while it is scrolled out of sight.
   const tell = () => frame.contentWindow?.postMessage({ shrine: 'tv', awake: onScreen }, location.origin);
   frame.addEventListener('load', tell);

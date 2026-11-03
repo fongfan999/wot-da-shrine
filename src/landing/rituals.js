@@ -2,6 +2,7 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { LEVELS as FORTUNE_LEVELS, draw as drawFortune } from '../lib/omikuji.js';
 import { $, reduceMotion } from '../app/context.js';
+import { burnBlameOn } from '../app/rituals.js';
 
 /** The home page's Burn a blame: the visitor's own words take the slip in the Rituals tile and burn there. */
 export function burnInTile(text) {
@@ -17,6 +18,8 @@ export function burnInTile(text) {
 
 /** Rituals: a new confession after every burn, a preview fortune per tap, and karma that climbs while on screen. */
 export function setupRituals() {
+  // The visitor is down in the Rituals section: their words burn on the slip there, not in the censer.
+  burnBlameOn(burnInTile);
   const BLAMES = [
     'I ran the migration on prod at 5pm on a Friday.',
     'I said “it’s just a config change”.',

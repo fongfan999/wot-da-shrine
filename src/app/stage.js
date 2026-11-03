@@ -2,6 +2,7 @@
 import gsap from 'gsap';
 import { STRINGS } from '../lib/strings.js';
 import { $, body, reduceMotion } from './context.js';
+import { every } from '../lib/clock.js';
 
 export const title = $('#title');
 const mantra = $('#mantra');
@@ -139,5 +140,5 @@ export function startMantras() {
       .fromTo(mantra, { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power2.out' });
   };
   swap();
-  setInterval(swap, 4200);
+  every(4200, swap);
 }

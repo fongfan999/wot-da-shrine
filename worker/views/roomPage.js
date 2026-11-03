@@ -3,8 +3,9 @@ import { describe, previewTitle } from '../../shared/preview.js';
 
 export async function roomPage(c, room) {
   const { origin } = new URL(c.req.url);
-  // A plain request, not the browser's: a conditional one could come back 304 with nothing to rewrite.
-  const page = await c.env.ASSETS.fetch(new Request(`${origin}/`));
+  // The room page is r/index.html, served from the asset store at /r/. A plain request, not the
+  // browser's: a conditional one could come back 304 with nothing to rewrite.
+  const page = await c.env.ASSETS.fetch(new Request(`${origin}/r/`));
   if (!page.ok) return page;
   let st = null;
   try { st = await c.env.SHRINE.getByName(room).status(room); } catch { /* the page still works without it */ }

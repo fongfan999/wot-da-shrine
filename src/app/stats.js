@@ -7,6 +7,7 @@ import { $, body, BURN_SECONDS, counters, fmt, meta, people, reduceMotion, roomN
 import { burner, petals } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';
 import { records, vigilTouch } from './vigil.js';
+import { every } from '../lib/clock.js';
 
 /* ---------- Stats + progress ---------- */
 export const statKarma = $('#stat-karma');
@@ -66,7 +67,7 @@ export function tickProgress() {
     burnBar.style.width = `${(left / BURN_SECONDS) * 100}%`;
   }
 }
-setInterval(tickProgress, 250);
+every(250, tickProgress);
 
 /* ---------- The vigil strip: how long they have been down, who is praying ---------- */
 const vigilEl = $('#vigil');
@@ -211,4 +212,4 @@ export function updateEta() {
   const abs = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   etaText.textContent = `${t('backIn')} ${rel} · ${t('backAt')} ${abs}`;
 }
-setInterval(updateEta, 15000);
+every(15000, updateEta);

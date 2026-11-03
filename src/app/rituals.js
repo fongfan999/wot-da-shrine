@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { LEVELS as FORTUNE_LEVELS, asText as fortuneText, draw as drawFortune } from '../lib/omikuji.js';
 import { t } from '../lib/strings.js';
-import { $, fmt, landing, reduceMotion, roomName, roomUrl, state } from './context.js';
+import { $, fmt, reduceMotion, roomName, roomUrl, state } from './context.js';
 import { art, burner, kick, motes, petals, smoke, wishes } from './engines.js';
 import { openTray } from './offerings.js';
 import { pulse } from './prayers.js';
@@ -11,7 +11,6 @@ import { shareOpen } from './shareSheet.js';
 import { addKarma } from './stats.js';
 import { copyText, logMine, toast } from './ui.js';
 import { vigilTouch } from './vigil.js';
-import { burnInTile } from '../landing/rituals.js';
 
 /* ---------- Rituals ---------- */
 /** A small dialog: `#blame`, `#fortune`. */
@@ -33,6 +32,9 @@ export const anySheetOpen = () => shareOpen || ritualOpen.blame || ritualOpen.fo
 
 /* Burn a blame: the words go into the censer and nowhere else */
 const blameText = $('#blame-text');
+/** Where a burned blame is shown: in the censer, unless the page puts it somewhere of its own (the home page's Rituals tile). */
+let showBurn = (text) => blameFx(text, $('#blame-slip'));
+export function burnBlameOn(show) { showBurn = show; }
 $('#btn-blame').addEventListener('click', () => { sound.unlock(); openRitual('blame', true); setTimeout(() => blameText.focus(), 120); });
 $('#blame-form').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -40,9 +42,7 @@ $('#blame-form').addEventListener('submit', (e) => {
   if (!text) { toast(t('blameEmpty')); return; }
   blameText.value = '';
   openRitual('blame', false);
-  // On the home page the visitor is down in the Rituals section: their words burn on the slip there.
-  if (landing) burnInTile(text);
-  else blameFx(text, $('#blame-slip'));
+  showBurn(text);
   addKarma(5);
   vigilTouch(0, 'blames');
   logMine('blame', t('fBlame'), { toastText: t('blameBurned') });

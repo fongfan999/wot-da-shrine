@@ -1,28 +1,13 @@
 <!DOCTYPE html>
+<!--
+  The home page: /, a maintenance page (/?title=…), and the /tv code screen. A shared shrine at
+  /r/:room is r/index.html. Both pages are put together from src/partials: the shrine's pieces
+  are in shrine/, the home page's own in landing/.
+-->
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#151713" />
-  <meta name="description" content="Wot Da Shrine: when the servers are down, the team prays together. Open a shrine, share the link, light incense, ring the bowl and send prayers to the rack in real time." />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Wot Da Shrine" />
-  <meta property="og:url" content="https://shrine.wotdafong.dev/" />
-  <meta property="og:title" content="Wot Da Shrine: pray for uptime, together" />
-  <meta property="og:description" content="The servers are down. Open a shrine, invite the team, and pray to the rack together in real time." />
-  <meta property="og:image" content="https://shrine.wotdafong.dev/og.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="An ink drawing of an incense burner on an altar, with the words: pray for uptime, together." />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Wot Da Shrine: pray for uptime, together" />
-  <meta name="twitter:description" content="The servers are down. Open a shrine, invite the team, and pray to the rack together in real time." />
-  <meta name="twitter:image" content="https://shrine.wotdafong.dev/og.png" />
-  <title>Wot Da Shrine: Pray for uptime, together</title>
-  <!-- Until the script has set the heading for this page and started the intro, what the intro reveals stays hidden (never longer than 4s). -->
-  <script>document.documentElement.classList.add('booting'); setTimeout(() => document.documentElement.classList.remove('booting'), 4000);</script>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="/src/styles/index.css" />
+  <include src="src/partials/head.html">
+  <link rel="stylesheet" href="/src/styles/home.css" />
 </head>
 <body data-theme="dark" data-state="unlit" data-mode="solo" data-fx="full">
   <include src="src/partials/scene.html">
@@ -32,15 +17,36 @@
   <!-- The shrine: the altar and its cards, and the dock under them -->
   <div class="app" id="app">
     <main class="stage">
-      <include src="src/partials/shrine/center.html">
+      <!-- Center: heading + altar -->
+      <section class="center">
+        <div class="heading">
+          <include src="src/partials/shrine/heading.html">
+          <include src="src/partials/landing/hero-cta.html">
+        </div>
 
-      <include src="src/partials/shrine/side.html">
+        <div class="altar">
+          <include src="src/partials/shrine/altar.html">
+          <include src="src/partials/landing/hero-hint.html">
+        </div>
+        <include src="src/partials/landing/hero-ribbon.html">
+      </section>
+
+      <!-- Right: who is here and what they did, then the shrine's own numbers, folded away -->
+      <aside class="side" aria-label="Shrine activity">
+        <include src="src/partials/shrine/live-card.html">
+
+        <include src="src/partials/landing/solo-card.html">
+
+        <include src="src/partials/shrine/shrine-card.html">
+
+        <include src="src/partials/shrine/credit.html">
+      </aside>
     </main>
 
     <include src="src/partials/shrine/dock.html">
   </div>
 
-  <!-- The landing page: everything below the shrine on / (hidden on rooms and maintenance pages) -->
+  <!-- The landing page: everything below the shrine on / (hidden on maintenance pages and /tv) -->
   <div class="landing" id="landing" hidden>
     <include src="src/partials/landing/how.html">
 
@@ -79,6 +85,6 @@
 
   <include src="src/partials/settings.html">
 
-  <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/home.js"></script>
 </body>
 </html>

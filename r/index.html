@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--
+  A shared shrine, /r/:room. The Worker serves this page for every room and rewrites its link
+  preview (worker/views/roomPage.js). The same shrine pieces as the home page, from
+  src/partials/shrine, and none of the home page's sections.
+-->
+<html lang="en">
+<head>
+  <include src="src/partials/head.html">
+  <link rel="stylesheet" href="/src/styles/room.css" />
+</head>
+<body data-theme="dark" data-state="unlit" data-mode="room" data-fx="full">
+  <include src="src/partials/scene.html">
+
+  <include src="src/partials/bar.html">
+
+  <!-- The shrine: the altar and its cards, and the dock under them -->
+  <div class="app" id="app">
+    <main class="stage">
+      <!-- Center: heading + altar -->
+      <section class="center">
+        <div class="heading">
+          <include src="src/partials/shrine/heading.html">
+        </div>
+
+        <div class="altar">
+          <include src="src/partials/shrine/altar.html">
+        </div>
+        <include src="src/partials/shrine/tv-join.html">
+      </section>
+
+      <!-- Right: who is here and what they did, then the shrine's own numbers, folded away -->
+      <aside class="side" aria-label="Shrine activity">
+        <include src="src/partials/shrine/live-card.html">
+
+        <include src="src/partials/shrine/shrine-card.html">
+
+        <include src="src/partials/shrine/credit.html">
+      </aside>
+    </main>
+
+    <include src="src/partials/shrine/dock.html">
+  </div>
+
+  <include src="src/partials/breath.html">
+
+  <include src="src/partials/sheets/join.html">
+
+  <include src="src/partials/sheets/open-shrine.html">
+
+  <include src="src/partials/sheets/cast.html">
+
+  <include src="src/partials/sheets/blame.html">
+
+  <include src="src/partials/sheets/fortune.html">
+
+  <include src="src/partials/sheets/share.html">
+
+  <!-- Toast, and the combo counter over the altar -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="combo" id="combo" aria-hidden="true" hidden><b class="combo__n">×2</b><span class="combo__cap"></span></div>
+
+  <include src="src/partials/settings.html">
+
+  <script type="module" src="/src/room.js"></script>
+</body>
+</html>

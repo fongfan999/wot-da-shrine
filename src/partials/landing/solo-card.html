@@ -1,0 +1,19 @@
+<!-- Praying alone (the home page and maintenance pages): open a team shrine, and what the world is doing -->
+<section class="card card--solo" id="solo-card">
+  <h2 class="label" data-i18n="soloLabel">Praying alone</h2>
+  <p class="card__text" data-i18n="soloText">Open a shared shrine and send the link to your team. Everyone's incense, offerings and prayers land on the same altar, live.</p>
+  <form class="name-form" id="name-form" autocomplete="off">
+    <label class="name-form__field">
+      <span class="name-form__prefix" aria-hidden="true">/r/</span>
+      <span class="sr-only" data-i18n="nameLabel">Name your shrine</span>
+      <input class="name-form__input" id="name-input" type="text" maxlength="48" spellcheck="false" />
+    </label>
+    <button class="btn btn--accent btn--block" type="submit">
+      <span data-i18n="soloCta">Open a team shrine</span>
+    </button>
+  </form>
+  <div class="world" id="world" hidden>
+    <p class="world__line"><span class="world__dot" aria-hidden="true"></span><span id="world-stats"></span></p>
+    <p class="world__ticker" id="world-ticker" aria-live="off"></p>
+  </div>
+</section>

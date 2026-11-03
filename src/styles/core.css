@@ -1,0 +1,25 @@
+/*
+ * The shrine itself, on every page: tokens and base first, then each part of the
+ * shrine. home.css and room.css put this first; overrides.css always comes last.
+ */
+@import './tokens.css';
+@import './base.css';
+@import './scene.css';
+@import './buttons.css';
+@import './bar.css';
+@import './stage.css';
+@import './altar.css';
+@import './status.css';
+@import './dock.css';
+@import './combo.css';
+@import './ema.css';
+@import './breath.css';
+@import './join.css';
+@import './toast.css';
+@import './settings.css';
+@import './solo.css';
+@import './vigil.css';
+@import './tv.css';
+@import './resolve.css';
+@import './share.css';
+@import './eta-picker.css';

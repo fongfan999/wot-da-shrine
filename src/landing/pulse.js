@@ -2,7 +2,7 @@ import gsap from 'gsap';
 import { icon } from '../lib/icons.js';
 import { t } from '../lib/strings.js';
 import { $, fmt, landing, reduceMotion } from '../app/context.js';
-import { agoShort, WORLD_KINDS } from '../app/world.js';
+import { agoShort, WORLD_KINDS } from './world.js';
 
 /** Every shrine, one pulse: the landing page's live dashboard, from the world's snapshot. */
 const PULSE_STATS = { prayers: '#lw-prayers', shrines: '#lw-shrines', resolved: '#lw-resolved', incense: '#lw-incense', blames: '#lw-blames', fortunes: '#lw-fortunes', burningNow: '#lw-burning' };

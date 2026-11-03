@@ -1,7 +1,8 @@
 /**
- * Wot Da Shrine: the page's entry. Each part of the shrine lives in its own module under app/,
- * the home page's sections under landing/; this file loads them in order, binds the keyboard
- * and the altar's buttons, and starts the show.
+ * Wot Da Shrine: what every page runs. Each part of the shrine lives in its own module under app/;
+ * this file loads them in order, binds the keyboard and the altar's buttons, and start() begins the
+ * show. The pages' own entries call it: home.js (/, maintenance pages, /tv) with the landing
+ * sections and the world line, room.js (/r/:room) with neither.
  */
 import gsap from 'gsap';
 import { sound } from './audio/index.js';
@@ -25,8 +26,6 @@ import { enterRoom, joinOpen } from './app/shrine.js';
 import { menuOpen } from './app/menus.js';
 import { setupScreen } from './app/screen.js';
 import { setupCast } from './app/cast.js';
-import { loadWorld } from './app/world.js';
-import { setupLanding } from './landing/index.js';
 
 /* ---------- Keyboard shortcuts ---------- */
 document.addEventListener('keydown', (e) => {
@@ -62,19 +61,25 @@ document.addEventListener('pointerdown', () => sound.unlock(), { once: true });
 
 if (import.meta.env.DEV) window.__incense = { gsap, sound, smoke, fog, petals, get settings() { return settings; } };
 
-buildTray();
-dealQuick();
-setupLanding();
-setupScreen();
-setupCast();
-applySettings();
-renderResolve();
-renderRecords();
-intro();
-watchFrameRate();
-parallax();
-introStarted.then(startMantras);
-petals.rate = 0.35; // a few stray petals before the incense is lit
-petals.start();
-if (roomName) enterRoom();
-else loadWorld();
+/**
+ * Start the page. `setupLanding` lays out the home page's sections (it does nothing on a maintenance
+ * page or /tv); `loadWorld` shows what every shrine is doing. A room page passes neither.
+ */
+export function start({ setupLanding, loadWorld } = {}) {
+  buildTray();
+  dealQuick();
+  setupLanding?.();
+  setupScreen();
+  setupCast();
+  applySettings();
+  renderResolve();
+  renderRecords();
+  intro();
+  watchFrameRate();
+  parallax();
+  introStarted.then(startMantras);
+  petals.rate = 0.35; // a few stray petals before the incense is lit
+  petals.start();
+  if (roomName) enterRoom();
+  else loadWorld?.();
+}

@@ -2,6 +2,7 @@ import { describe as describeRoom, previewTitle } from '../../shared/preview.js'
 import { STRINGS, t } from '../lib/strings.js';
 import { $, reduceMotion } from '../app/context.js';
 import { copyText } from '../app/ui.js';
+import { every } from '../lib/clock.js';
 
 /** The link does the inviting: three panes that play in turn until the visitor picks one. */
 export function setupShowcase() {
@@ -77,7 +78,7 @@ export function setupShowcase() {
     $('#uf-title').textContent = isLive ? previewTitle(st, ROOM) : `The demo rack is down · pray at ${ROOM}`;
     if (isLive) liveEl.textContent = describeRoom(st);
   }
-  setInterval(() => { if (onScreen && current === 0 && document.visibilityState === 'visible' && Date.now() - polledAt > 10000) poll(); }, 1000);
+  every(1000, () => { if (onScreen && current === 0 && document.visibilityState === 'visible' && Date.now() - polledAt > 10000) poll(); });
 
   // The example is alive too: its minutes, people and 🙏 keep counting while it is on screen.
   const live = { min: 23, praying: 4, karma: 212, pray: 4, last: 0 };
@@ -88,7 +89,7 @@ export function setupShowcase() {
     void b.offsetWidth;
     b.classList.add('is-tick');
   };
-  setInterval(() => {
+  every(1600, () => {
     if (!onScreen || current !== 0 || reduceMotion || isLive) return;
     const roll = Math.random();
     if (roll < 0.3) bump('#uf-min', ++live.min);
@@ -99,7 +100,7 @@ export function setupShowcase() {
       $('#uf-last').textContent = STRINGS.quickPrayers[live.last];
       bump('#uf-karma', live.karma += 5);
     }
-  }, 1600);
+  });
 
   new IntersectionObserver(([en]) => { onScreen = en.isIntersecting; schedule(); }, { threshold: 0.35 }).observe(el);
   show(0);

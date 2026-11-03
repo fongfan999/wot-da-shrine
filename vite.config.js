@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import { cloudflare } from '@cloudflare/vite-plugin';
 
@@ -23,6 +24,12 @@ function partials() {
   };
 }
 
+/**
+ * Two pages: index.html is the home page (/, maintenance pages, /tv), r/index.html a shared shrine,
+ * which the Worker serves for every /r/:room. What they share is built into common chunks.
+ */
+const root = dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
   plugins: [partials(), cloudflare()],
   publicDir: 'public',
@@ -30,5 +37,9 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     assetsInlineLimit: 0,
+  },
+  environments: {
+    // the browser's build only: the Worker's has its own entry, worker/index.js
+    client: { build: { rollupOptions: { input: { home: resolve(root, 'index.html'), room: resolve(root, 'r/index.html') } } } },
   },
 });
