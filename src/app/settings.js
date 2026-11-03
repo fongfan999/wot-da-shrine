@@ -3,13 +3,21 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { shareUrl } from '../lib/config.js';
 import { syncPalette } from '../scene/palette.js';
-import { BRAND, applyStrings, t } from '../lib/strings.js';
+import { BRAND, STRINGS, applyStrings, t } from '../lib/strings.js';
 import { $, body, landing, meta, persist, resetSettings, roomName, settings, state, tv, urlParams } from './context.js';
 import { fog, petals } from './engines.js';
 import { applyFx, lite } from './fx.js';
 import { splitTitle, title } from './stage.js';
 import { updateEta, updateStats, updateVitalsLabel } from './stats.js';
 import { toast } from './ui.js';
+
+/** The stock headline a shrine gets until someone names what is down: picked from its name, so everyone in it reads the same one. */
+function headlineFor(room) {
+  let h = 0;
+  for (const ch of room) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return STRINGS.headlines[h % STRINGS.headlines.length];
+}
+if (roomName) [STRINGS.title, STRINGS.subtitle] = headlineFor(roomName);
 
 const panel = $('#panel');
 const backdrop = $('#panel-backdrop');
