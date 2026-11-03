@@ -29,9 +29,19 @@ export class WishBoard {
     this.host.appendChild(el);
     this.plaques.push(el);
 
+    let dropped = false;
     while (this.plaques.length > MAX) {
       const old = this.plaques.shift();
+      dropped = true;
       gsap.to(old, { opacity: 0, y: 24, rotation: 12, duration: 0.5, ease: 'power2.in', onComplete: () => old.remove() });
+    }
+    // When the oldest falls away the rest slide along the rail, so the newcomer takes the free end
+    // rather than hanging on top of the last one.
+    if (dropped) {
+      this.plaques.slice(0, -1).forEach((p, k) => {
+        if (animate && !this.reduceMotion) gsap.to(p, { x: k * STEP, duration: 0.5, ease: 'power2.out' });
+        else gsap.set(p, { x: k * STEP });
+      });
     }
 
     const tilt = gsap.utils.random(-6, 6);
