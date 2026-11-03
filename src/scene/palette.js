@@ -3,7 +3,7 @@
  * Canvas can't use var(), so each layer keeps "r,g,b" strings and asks to be
  * told when the theme changes (a setting, or the system's light/dark switch).
  */
-const NAMES = ['paper', 'ink', 'muted', 'line', 'accent', 'ember', 'flame', 'live', 'error'];
+const NAMES = ['paper', 'ink', 'muted', 'line', 'accent', 'ember', 'ember-soft', 'flame', 'live', 'error'];
 const listeners = new Set();
 
 export const palette = {};

@@ -2,9 +2,11 @@
  * Ambient fog: large soft blobs drifting slowly across the whole viewport.
  * One pre-rendered radial sprite, drawn scaled onto a low-res canvas
  * (upscaled by CSS), 20 times a second. Fog moves slowly; nobody can tell.
+ * With reduced motion it is drawn once where it lies and never drifts.
  */
 import gsap from 'gsap';
 import { onPalette } from './palette.js';
+import { onFrame, scene } from './ticker.js';
 
 const SCALE = 0.35;
 const FPS = 20;
@@ -30,11 +32,12 @@ export class Fog {
     this.enabled = true;
     this.opacity = 0;
     this.acc = 0;
-    onPalette((p) => { this.sprite = makeSprite(p.ink); });
+    onPalette((p) => { this.sprite = makeSprite(p.ink); this.drawn = false; });
     this.resize();
     window.addEventListener('resize', () => this.resize());
-    gsap.ticker.add((time, dt) => this.frame(dt));
-    gsap.to(this, { opacity: 1, duration: 4, ease: 'power1.inOut', delay: 0.5 });
+    onFrame((time, dt) => this.frame(dt));
+    if (scene.still) this.opacity = 1;
+    else gsap.to(this, { opacity: 1, duration: 4, ease: 'power1.inOut', delay: 0.5 });
   }
 
   resize() {
@@ -45,6 +48,7 @@ export class Fog {
     this.blobs = [];
     const count = Math.max(6, Math.round((innerWidth * innerHeight) / 160000));
     for (let i = 0; i < count; i++) this.blobs.push(this.makeBlob(true));
+    this.drawn = false;
   }
 
   makeBlob(anywhere = false) {
@@ -61,20 +65,22 @@ export class Fog {
 
   setEnabled(on) {
     this.enabled = on;
+    if (scene.still) { gsap.killTweensOf(this); this.opacity = on ? 1 : 0; this.drawn = false; return; }
     gsap.to(this, { opacity: on ? 1 : 0, duration: 1.5, overwrite: true });
   }
 
   frame(dt) {
-    if (this.paused) return; // the scene is off screen: draw nothing
     if (this.opacity <= 0.001) {
       if (this.cleared) return;
       this.ctx.clearRect(0, 0, this.w, this.h);
       this.cleared = true;
       return;
     }
+    if (scene.still && this.drawn) return; // reduced motion: drawn once, where it lies
     this.acc += dt;
-    if (this.acc < 1000 / FPS) return;
-    const step = Math.min(this.acc, 200) * STEP;
+    if (this.acc < 1000 / FPS && !scene.still) return;
+    const step = scene.still ? 0 : Math.min(this.acc, 200) * STEP;
+    this.drawn = true;
     this.acc = 0;
     this.cleared = false;
     const ctx = this.ctx;

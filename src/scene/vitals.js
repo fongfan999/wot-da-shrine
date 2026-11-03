@@ -1,11 +1,17 @@
 /**
  * Rack 42's vital signs: a heart monitor that flatlines while the incense is
  * cold and picks up as the team prays. Every action kicks an extra beat.
+ *
+ * It sweeps 30 times a second, which a line moving 70px a second does not need more of, and draws
+ * nothing while nobody can see it (its card folded, or scrolled away). With reduced motion the
+ * strip holds still: a row of beats at the current rate, redrawn when the rate changes.
  */
 import gsap from 'gsap';
 import { onPalette } from './palette.js';
+import { onFrame, scene } from './ticker.js';
 
 const SPEED = 70; // px per second
+const FPS = 30;
 
 /** One heartbeat as a function of seconds since it started: P, QRS, T. */
 function wave(t) {
@@ -24,7 +30,7 @@ export class Vitals {
   constructor(canvas, readout) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    this.readout = readout;
+    this.readoutEl = readout;
     this.bpm = 0;
     this.shown = -1;
     this.beatAt = -10;
@@ -32,10 +38,14 @@ export class Vitals {
     this.amp = 1;
     this.ys = [];
     this.x = 0;
-    onPalette((p) => { this.colors = p; this.grid = null; });
+    this.acc = 0;
+    this.paused = true; // until it is seen
+    onPalette((p) => { this.colors = p; this.grid = null; this.stillKey = ''; });
     this.resize();
     new ResizeObserver(() => this.resize()).observe(canvas);
-    gsap.ticker.add((time, dt) => this.frame(time, dt / 1000));
+    // Seen only while its card is open and on screen: a folded <details> lays nothing out.
+    new IntersectionObserver(([e]) => { this.paused = !e.isIntersecting; }).observe(canvas);
+    onFrame((time, dt) => this.frame(time, dt / 1000));
   }
 
   resize() {
@@ -50,6 +60,7 @@ export class Vitals {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.ys = new Array(Math.ceil(this.w)).fill(0);
     this.x = 0;
+    this.stillKey = '';
   }
 
   /** The faint grid never moves, so it is stroked once into its own canvas and copied in every frame. */
@@ -80,10 +91,14 @@ export class Vitals {
   }
 
   frame(time, dt) {
-    if (this.paused) return; // hidden (the home page has no side panel): draw nothing
     this.time = time;
-    if (!this.w || !this.ys.length) return;
-    if (dt > 0.1) dt = 0.1;
+    this.readout();
+    if (this.paused || !this.w || !this.ys.length) return;
+    if (scene.still) { this.drawStill(); return; }
+    this.acc += dt;
+    if (this.acc < 1 / FPS) return;
+    dt = Math.min(this.acc, 0.1);
+    this.acc = 0;
 
     if (this.bpm > 0 && time >= this.nextBeat) {
       this.beatAt = time;
@@ -137,12 +152,39 @@ export class Vitals {
     ctx.fill();
     // erase just ahead of the head, like a real monitor sweep
     ctx.clearRect(this.x + 1, 0, 14, h);
+  }
 
+  /** The number beside the trace, kept current even while the trace is not drawn. */
+  readout() {
     const shown = Math.round(this.bpm);
-    if (shown !== this.shown) {
-      this.shown = shown;
-      this.readout.textContent = shown ? `${shown} bpm` : 'flatlining';
-      this.readout.dataset.flat = String(!shown);
+    if (shown === this.shown) return;
+    this.shown = shown;
+    this.readoutEl.textContent = shown ? `${shown} bpm` : 'flatlining';
+    this.readoutEl.dataset.flat = String(!shown);
+  }
+
+  /** Reduced motion: beats at the current rate across the whole strip, drawn once per rate. */
+  drawStill() {
+    const key = `${this.shown}:${this.w}`;
+    if (key === this.stillKey) return;
+    this.stillKey = key;
+    const { ctx, w, h } = this;
+    const mid = h * 0.62;
+    const scale = h * 0.5;
+    const period = this.shown ? 60 / this.shown : 0; // seconds per beat
+    const trace = this.shown ? this.colors.live : this.colors.error;
+    ctx.clearRect(0, 0, w, h);
+    this.grid ??= this.gridLayer();
+    ctx.drawImage(this.grid, 0, 0, w, h);
+    ctx.strokeStyle = `rgb(${trace})`;
+    ctx.lineWidth = 1.6;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    for (let px = 0; px < w; px++) {
+      const t = px / SPEED;
+      const py = mid - (period ? wave(t % period) : 0) * scale;
+      if (px) ctx.lineTo(px, py); else ctx.moveTo(px, py);
     }
+    ctx.stroke();
   }
 }

@@ -5,7 +5,8 @@ import { ignite } from '../app/altar.js';
 import { $, body, landing, reduceMotion, state } from '../app/context.js';
 import { introStarted } from '../app/stage.js';
 import { onPalette } from '../scene/palette.js';
-import { burner, fog, motes, placeSmoke, room, smoke, vitals } from '../app/engines.js';
+import { scene } from '../scene/ticker.js';
+import { burner, placeSmoke, smoke } from '../app/engines.js';
 import { setupBuilder } from './builder.js';
 import { watchPulse } from './pulse.js';
 import { setupRibbon } from './ribbon.js';
@@ -51,16 +52,14 @@ export function setupLanding() {
 }
 
 /**
- * The home page is long, and the shrine at its top is the expensive part: smoke, motes, fog and
- * blinking racks redraw every frame. While the hero is off screen they draw nothing, their full-screen
- * layers are hidden so the GPU stops compositing them, and the hero's CSS animations pause. The EKG
- * lives in the side panel, which the home page never shows, so it never draws here at all.
+ * The home page is long, and the shrine at its top is the expensive part: smoke, motes, fog, petals
+ * and blinking racks redraw every frame. While the hero is off screen the scene's loop draws nothing
+ * (scene/ticker.js), its full-screen layers are hidden so the GPU stops compositing them, and the
+ * hero's CSS animations pause. The EKG draws only while it is seen, which on the home page is never.
  */
 function setupScene() {
-  vitals.paused = true;
   const setAwake = (awake) => {
-    smoke.paused = motes.paused = fog.paused = !awake;
-    room.setPaused(!awake);
+    scene.paused = !awake;
     body.dataset.scene = awake ? 'on' : 'off';
   };
   new IntersectionObserver(([en]) => setAwake(en.isIntersecting)).observe($('.center'));

@@ -1,10 +1,11 @@
 /**
  * Dust in the air: specks of ink drifting above the altar, and sparks that
  * fly up when the incense catches or the bowl rings. Dots on one canvas;
- * a little denser while the altar burns.
+ * a little denser while the altar burns. None at all with reduced motion.
  */
 import gsap from 'gsap';
 import { onPalette } from './palette.js';
+import { onFrame, scene } from './ticker.js';
 
 const MOTES = 70;
 
@@ -20,7 +21,7 @@ export class Motes {
     this.acc = 0;
     this.resize();
     window.addEventListener('resize', () => this.resize());
-    gsap.ticker.add((time, dt) => this.frame(time, dt / 1000));
+    onFrame((time, dt) => this.frame(time, dt / 1000));
   }
 
   resize() {
@@ -62,6 +63,7 @@ export class Motes {
 
   /** Sparks burst up from a screen point. */
   burst(x, y, n = 30, spread = 1) {
+    if (scene.still) return;
     x -= this.left;
     y -= this.top;
     for (let i = 0; i < n; i++) {
@@ -79,8 +81,10 @@ export class Motes {
   }
 
   frame(time, dt) {
-    if (this.paused) return; // the scene is off screen: draw nothing
-    if (dt > 0.1) dt = 0.1;
+    if (scene.still) { // reduced motion: an empty canvas, cleared once
+      if (!this.cleared) { this.ctx.setTransform(1, 0, 0, 1, 0, 0); this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); this.cleared = true; }
+      return;
+    }
     if (this.lite) {
       this.acc += dt;
       if (this.acc < 1 / 32) return;

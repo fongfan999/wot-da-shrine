@@ -1,8 +1,10 @@
 /**
  * Wish lanterns: a glowing paper lantern carrying the user's wish floats
- * up from the altar and dissolves into the night.
+ * up from the altar and dissolves into the night. With reduced motion it appears where it was
+ * released, stays long enough to read, and fades.
  */
 import gsap from 'gsap';
+import { scene } from './ticker.js';
 
 export function releaseLantern(container, text, fromEl, author) {
   const el = document.createElement('div');
@@ -20,6 +22,13 @@ export function releaseLantern(container, text, fromEl, author) {
   if (from) el.style.left = `${from.left + from.width / 2}px`;
   const startY = from ? from.top - innerHeight * 0.6 : 0; // relative to its "bottom: 40%" origin
   const driftX = gsap.utils.random(-90, 90);
+
+  if (scene.still) {
+    gsap.set(el, { y: startY - 10, opacity: 0 });
+    return gsap.timeline({ onComplete: () => el.remove() })
+      .to(el, { opacity: 1, duration: 0.4 })
+      .to(el, { opacity: 0, duration: 0.8 }, '+=3.2');
+  }
 
   gsap.set(el, { y: startY + 40, scale: 0.6, opacity: 0, rotation: gsap.utils.random(-4, 4) });
 

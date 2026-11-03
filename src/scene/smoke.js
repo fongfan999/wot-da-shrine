@@ -2,9 +2,12 @@
  * Incense smoke, done properly: each ember tip emits a thin laminar ribbon
  * that rises, wobbles, turns turbulent and finally dissolves into soft puffs.
  * Tiny ember sparks drift up now and then. Everything is drawn on one canvas.
+ * With reduced motion the ribbons are simulated to their full height once and held still: the
+ * smoke says the incense is lit without moving, and is redrawn only when the sticks burn lower.
  */
 import gsap from 'gsap';
 import { onPalette } from './palette.js';
+import { onFrame, scene } from './ticker.js';
 
 const LIFE = 5200;         // sim-ms a ribbon point lives
 const EMIT_EVERY = 22;     // sim-ms between ribbon points
@@ -12,6 +15,7 @@ const STEP = 3;            // sim-ms per real ms: the look was tuned at 50 per 6
 const TIPS_EVERY = 100;    // real ms between re-reading the ember positions from the DOM
 const RISE = 0.075;        // px per ms
 const MAX_WIDTH = 9;       // px half-width at the end of life
+const SETTLE_STEPS = 120;  // frames simulated to grow a still wisp (reduced motion)
 
 function makePuffSprite(rgb, size = 72) {
   const c = document.createElement('canvas');
@@ -49,13 +53,14 @@ export class IncenseSmoke {
       this.strength = p.dark ? 1 : 0.5;
       this.spark = p.flame;
       this.sprite = makePuffSprite(p.ink);
+      this.stillTips = null; // redraw the still wisp in the new colours
     });
     this.lite = false;
     this.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     this.resize();
     window.addEventListener('resize', () => this.resize());
-    gsap.ticker.add((t, dt) => this.frame(dt));
-    gsap.to(this, { wind: 1, duration: 7, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+    onFrame((t, dt) => this.frame(dt));
+    if (!scene.still) gsap.to(this, { wind: 1, duration: 7, ease: 'sine.inOut', yoyo: true, repeat: -1 });
   }
 
   resize() {
@@ -66,6 +71,7 @@ export class IncenseSmoke {
     this.canvas.height = Math.round(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     this.tipsCache = null;
+    this.stillTips = null;
     this.cleared = false;
   }
 
@@ -88,15 +94,18 @@ export class IncenseSmoke {
 
   start() {
     this.running = true;
+    if (scene.still) { this.intensity = 1; this.stillTips = null; return; }
     gsap.to(this, { intensity: 1, duration: 4, ease: 'power2.out', overwrite: 'auto' });
   }
 
   stop() {
+    if (scene.still) { this.intensity = 0; this.running = false; this.ribbons = []; this.puffs = []; return; }
     gsap.to(this, { intensity: 0, duration: 2.5, ease: 'power2.in', overwrite: 'auto', onComplete: () => { this.running = false; } });
   }
 
   /** A disturbance: the ribbons swirl for a moment (tap on the burner, a breath). */
   puff(strength = 1) {
+    if (scene.still) return;
     gsap.fromTo(this, { gust: 1.6 * strength }, { gust: 0, duration: 2.2, ease: 'power2.out', overwrite: 'auto' });
     this.tipsCache = null;
     for (const e of this.tips()) {
@@ -115,9 +124,6 @@ export class IncenseSmoke {
   }
 
   frame(dt) {
-    if (this.paused) return; // the scene is off screen: draw nothing
-    const ms = Math.min(dt, 100) * STEP;
-    this.time += ms;
     const ctx = this.ctx;
     // A cold altar draws nothing, so don't even clear: a cleared canvas is still uploaded to the GPU.
     if (!this.running && this.puffs.length === 0 && this.sparks.length === 0) {
@@ -125,7 +131,28 @@ export class IncenseSmoke {
       return;
     }
     this.cleared = false;
-    ctx.clearRect(0, 0, this.w, this.h);
+    if (scene.still) { this.still(); return; }
+    this.advance(dt * STEP, true);
+  }
+
+  /** Reduced motion: grow the ribbons to full height once, and again only when the tips have moved. */
+  still() {
+    const tips = this.tips();
+    const moved = !this.stillTips || tips.some((t, i) => Math.hypot(t.x - this.stillTips[i].x, t.y - this.stillTips[i].y) > 1.5);
+    if (!moved) return;
+    this.stillTips = tips;
+    this.ribbons = [];
+    this.puffs = [];
+    this.sparks = [];
+    for (let i = 1; i <= SETTLE_STEPS; i++) this.advance(16 * STEP, i === SETTLE_STEPS);
+    this.sparks = [];
+  }
+
+  /** Move the smoke on by `ms` sim-ms, and paint it when `draw`. */
+  advance(ms, draw) {
+    this.time += ms;
+    const ctx = this.ctx;
+    if (draw) ctx.clearRect(0, 0, this.w, this.h);
 
     const tips = this.tips();
     while (this.ribbons.length < tips.length) {
@@ -150,7 +177,7 @@ export class IncenseSmoke {
       }
       // sparks
       rb.spark -= ms;
-      if (emitting && rb.spark <= 0) {
+      if (emitting && rb.spark <= 0 && !scene.still) {
         rb.spark = gsap.utils.random(500, 1600);
         this.sparks.push({ x: tip.x, y: tip.y, vx: gsap.utils.random(-0.02, 0.02), vy: gsap.utils.random(-0.09, -0.05), age: 0, life: gsap.utils.random(700, 1300) });
       }
@@ -190,7 +217,7 @@ export class IncenseSmoke {
       }
 
       // draw the ribbon as one tapered polygon with a vertical alpha gradient
-      if (pts.length > 2) {
+      if (draw && pts.length > 2) {
         const left = []; const right = [];
         for (let k = 0; k < pts.length; k++) {
           const p = pts[k];
@@ -231,6 +258,7 @@ export class IncenseSmoke {
       p.x += (p.vx + wind * 0.012 * a) * ms;
       p.y += p.vy * ms * (1 - a * 0.5);
       p.size += p.grow * ms;
+      if (!draw) continue;
       ctx.globalAlpha = p.alpha * Math.sin(Math.PI * a) * Math.max(this.intensity, 0.3) * this.strength;
       ctx.drawImage(this.sprite, p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
     }

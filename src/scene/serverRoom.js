@@ -5,6 +5,7 @@
  * are darker, like a sketch. A few hundred cobalt LEDs blink on their own.
  */
 import gsap from 'gsap';
+import { onFrame, scene } from './ticker.js';
 
 const VW = 1600;
 const VH = 900;
@@ -116,9 +117,8 @@ export function buildServerRoom(host) {
   const rack42 = [...host.querySelectorAll('.led--rack42')];
   let acc = 0;
   let lite = false;
-  let paused = false;
-  gsap.ticker.add((time, dt) => {
-    if (paused) return;
+  onFrame((time, dt) => {
+    if (scene.still) return; // reduced motion: the lights hold still
     acc += dt; // ms
     if (acc < (lite ? 300 : 150)) return;
     acc = 0;
@@ -137,16 +137,16 @@ export function buildServerRoom(host) {
   return {
     /** A ripple of activity across the room (e.g. when the bowl rings). */
     pulse() {
+      if (scene.still) return;
       gsap.fromTo(host.querySelector('.leds'), { opacity: 0.3 }, { opacity: 1, duration: 1.4, ease: 'power2.out' });
     },
     /** They're back: rack 42's lights come up one by one, top to bottom. */
     recover() {
       gsap.killTweensOf(rack42);
+      if (scene.still) { rack42.forEach((n) => n.setAttribute('opacity', '1')); return; }
       gsap.fromTo(rack42, { attr: { opacity: 0.05 } }, { attr: { opacity: 1 }, duration: 0.5, stagger: 0.05, ease: 'power2.out' });
     },
     /** Lite mode: the LEDs blink less often. */
     setLite(on) { lite = on; },
-    /** Off screen: no blinking at all. */
-    setPaused(on) { paused = on; },
   };
 }

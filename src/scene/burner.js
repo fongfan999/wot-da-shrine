@@ -17,6 +17,8 @@ const STICKS = [
   { x: CX, top: 16, lean: 0 },
   { x: CX + 22, top: 36, lean: 2.2 },
 ];
+const VB_W = 520; // the drawing's viewBox
+const VB_H = 470;
 const CANDLES = [{ x: 72 }, { x: 448 }];
 const TABLE_Y = 398;
 const SLOTS = [148, 186, 334, 372]; // x positions for offerings on the table
@@ -115,7 +117,7 @@ export function look(id) {
 
 export function buildBurner(host) {
   host.innerHTML = `
-<svg class="burner__svg" viewBox="0 0 520 470" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<svg class="burner__svg" viewBox="0 0 ${VB_W} ${VB_H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <defs>
     <pattern id="bFret" width="16" height="12" patternUnits="userSpaceOnUse">
       <path class="d-thin" d="M0 10 V2 H10 V6 H5 V4 M12 2 H16"/>
@@ -278,7 +280,7 @@ export function buildBurner(host) {
 </svg>
 
 <!-- Everything that moves lives here, so the censer above is painted once. Same viewBox, same box. -->
-<svg class="burner__svg burner__svg--live" viewBox="0 0 520 470" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<svg class="burner__svg burner__svg--live" viewBox="0 0 ${VB_W} ${VB_H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <!-- candle flames -->
   ${CANDLES.map((c) => `
   <g class="flame" style="transform-origin: ${c.x}px 320px" opacity="0">
@@ -378,11 +380,22 @@ export function buildBurner(host) {
 
   return {
     svg,
-    /** Screen-space centres of the live ember tips (for the smoke emitters). */
+    /**
+     * Screen-space centres of the live ember tips (for the smoke emitters). Worked out from the
+     * altar's box and where each ember sits in the drawing, so it costs one measurement, not one
+     * per stick: the drawing scales into its box like any SVG (meet, centred), and each stick
+     * leans about its foot.
+     */
     tips() {
-      return sticks.map((s) => {
-        const r = s.ember.getBoundingClientRect();
-        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      const r = svg.getBoundingClientRect();
+      const k = Math.min(r.width / VB_W, r.height / VB_H);
+      const ox = r.left + (r.width - VB_W * k) / 2;
+      const oy = r.top + (r.height - VB_H * k) / 2;
+      return sticks.map((s, i) => {
+        const { x, lean } = STICKS[i];
+        const up = +s.ember.getAttribute('cy') - STICK_BOTTOM; // from the foot, negative is up
+        const a = lean * (Math.PI / 180);
+        return { x: ox + (x - up * Math.sin(a)) * k, y: oy + (STICK_BOTTOM + up * Math.cos(a)) * k };
       });
     },
 
