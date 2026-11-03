@@ -143,7 +143,7 @@ body[data-landing="1"] .subtitle { color: color-mix(in srgb, var(--ink) 76%, tra
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
 .hero-ribbon__rail { display: flex; gap: 10px; width: max-content; animation: ribbon-run 70s linear infinite; }
-.hero-ribbon__track:is(:hover, :focus-within) .hero-ribbon__rail { animation-play-state: paused; }
+.hero-ribbon__track:is(:hover, :has(:focus-visible)) .hero-ribbon__rail { animation-play-state: paused; }
 /* two identical halves: one half plus one gap is exactly a loop */
 @keyframes ribbon-run { to { transform: translateX(calc(-50% - 5px)); } }
 .hero-ribbon__item {
