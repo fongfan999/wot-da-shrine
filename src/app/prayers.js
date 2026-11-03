@@ -50,6 +50,8 @@ export function dealQuick() {
   }
   if (!reduceMotion) gsap.fromTo(quickDeal.children, { y: 6, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: 'power3.out' });
 }
+// Beside the altar the quick prayers open above the field while it has focus: a press on one must not take that focus away first.
+quick.addEventListener('mousedown', (e) => { if (e.target.closest('.quick__chip')) e.preventDefault(); });
 quick.addEventListener('click', (e) => {
   const b = e.target.closest('.quick__chip:not(.quick__chip--ritual)');
   if (!b) return;

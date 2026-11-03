@@ -171,3 +171,44 @@ body[data-state="lit"] .act__burn { opacity: 1; }
 .credit a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; text-decoration: none; transition: color 160ms; }
 .credit a:hover { color: var(--accent); }
 .credit__mark { width: 16px; height: 16px; border-radius: 22%; }
+
+/* ---------- Beside the altar: one row, so the altar and the side column get the height ----------
+   The field and the keys share the row and the keys are shorter, the shortcut a small badge beside the
+   label. The quick prayers open above the field while it has focus; Burn a blame and Draw a fortune
+   live in the Offer tray, as on a phone. */
+@media (min-width: 1100px) {
+  .dock { grid-template-areas: "pray actions"; padding-block: 10px max(10px, env(safe-area-inset-bottom)); }
+  .pray { min-height: 46px; padding: 4px 4px 4px 16px; }
+  .pray__input { padding-block: 6px; font-size: 15px; }
+  .pray__send { width: 36px; height: 36px; }
+  .pray__send .ico { width: 18px; height: 18px; }
+
+  .quick {
+    position: absolute;
+    left: max(var(--gutter), calc((100% - 1180px) / 2));
+    bottom: calc(100% + 6px);
+    z-index: 2;
+    min-height: 0;
+    max-width: min(640px, calc(100% - 2 * var(--gutter)));
+    padding: 8px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg);
+    background: var(--paper-raised);
+    box-shadow: var(--shadow-float);
+    opacity: 0;
+    translate: 0 6px;
+    pointer-events: none;
+    transition: opacity 160ms, translate 160ms;
+  }
+  .dock:has(.pray:focus-within, .quick:focus-within) .quick { opacity: 1; translate: none; pointer-events: auto; }
+  .quick .quick__chip--ritual, .quick .quick__sep { display: none; }
+  .tray__rituals { display: block; }
+  .tray__item--ritual[data-ritual="btn-breathe"] { display: none; }
+
+  .act { grid-template-columns: auto auto auto; gap: 8px; min-width: 0; min-height: 46px; padding: 6px 12px; border-radius: var(--radius-md); }
+  .act__icon { grid-row: auto; }
+  .act__icon .ico { width: 20px; height: 20px; }
+  .act kbd { padding: 0 4px; font-size: 10px; }
+  .act--primary { min-width: 0; }
+  .act__burn { bottom: 4px; }
+}

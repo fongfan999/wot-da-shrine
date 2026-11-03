@@ -70,7 +70,7 @@ export function intro() {
     .to('.burner', { y: 0, opacity: 1, scale: 1, duration: 1.3, ease: 'elastic.out(1, 0.7)' }, 0.5)
     .to('.plantern-row', { opacity: 1, duration: 1, ease: 'power2.out' }, 1.2)
     .to('.side .card', { y: 0, opacity: 1, duration: 0.8, stagger: 0.08 }, 0.9)
-    .to(dock, { y: 0, opacity: 1, duration: 0.8, stagger: 0.08 }, 1.0);
+    .to(dock, { y: 0, opacity: 1, duration: 0.8, stagger: 0.08, clearProps: 'transform,translate,rotate,scale,opacity' }, 1.0); // the dock's own CSS takes over (beside the altar the quick prayers wait hidden)
 
   whenSettled(() => {
     tl.play();
