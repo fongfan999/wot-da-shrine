@@ -56,7 +56,6 @@ export const STRINGS = {
   left: 'left',
   statKarma: 'Karma',
   rankLabel: 'Your rank',
-  toNext: '{n} karma to {rank}',
   maxRank: 'Nothing left to attain',
   promoted: 'Promoted: {rank}',
   ranks: [

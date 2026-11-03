@@ -20,7 +20,9 @@ export function updateStats(quiet = false) {
   updateRank(quiet);
 }
 
-/* ---------- Ranks: karma turns a lurker into an enlightened SRE ---------- */
+/* ---------- Ranks: karma turns a lurker into an enlightened SRE ----------
+   The rank is a title; its bar tracks the one ladder that keeps going, the shrine's growth
+   (what the altar shows), so it is never full while there is still a temple to reach. */
 const rankName = $('#rank-name');
 const rankNext = $('#rank-next');
 const rankBadge = $('#rank-badge');
@@ -29,11 +31,14 @@ let shownRank = -1;
 function updateRank(quiet) {
   const ranks = STRINGS.ranks;
   const i = ranks.reduce((idx, [at], k) => (counters.karma >= at ? k : idx), 0);
-  const [at, name] = ranks[i];
-  const next = ranks[i + 1];
+  const [, name] = ranks[i];
   rankName.textContent = name;
   rankBadge.textContent = String(i + 1);
-  rankNext.textContent = next ? fmt('toNext', { n: next[0] - counters.karma, rank: next[1] }) : t('maxRank');
+  const levels = STRINGS.shrineLevels;
+  const lv = shrineLevel();
+  const [at] = levels[lv];
+  const next = levels[lv + 1];
+  rankNext.textContent = next ? fmt('shrineNext', { n: next[0] - counters.karma, name: next[1] }) : t('maxRank');
   rankBar.style.width = next ? `${((counters.karma - at) / (next[0] - at)) * 100}%` : '100%';
   const promoted = shownRank !== -1 && i > shownRank && !quiet;
   shownRank = i;
@@ -135,12 +140,11 @@ export function renderRecords() {
   $('#rec-prayers').textContent = state.roomPrayed;
   const longest = $('#rec-longest');
   longest.hidden = !records.longest;
-  longest.textContent = records.longest ? `${fmt('recLongest', { t: minutesText(records.longest) })} · ` : '';
+  longest.textContent = records.longest ? fmt('recLongest', { t: minutesText(records.longest) }) : '';
   const i = shrineLevel();
   const [, name] = STRINGS.shrineLevels[i];
-  const next = STRINGS.shrineLevels[i + 1];
   $('#records-level').textContent = name;
-  $('#records-next').textContent = next ? fmt('shrineNext', { n: next[0] - counters.karma, name: next[1] }) : '';
+  updateRank(true); // its bar tracks the shrine's next level
   burner.dataset.level = String(i);
   updateTablet();
   if (shownLevel !== -1 && i > shownLevel) {
