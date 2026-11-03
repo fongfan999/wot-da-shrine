@@ -76,8 +76,8 @@ export const STRINGS = {
     [20, 'enlightenment achieved'],
   ],
   etaLabel: 'ETA',
-  etaAny: 'Back any moment now',
-  etaIn: 'Back in {rel} · at {at}',
+  etaAny: 'any moment',
+  etaIn: '{rel} · {at}',
 
   // Rooms
   together: 'Pray with your team',

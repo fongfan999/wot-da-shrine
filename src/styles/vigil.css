@@ -1,6 +1,7 @@
 /* ---------- The incident, in the top bar: when it is due back and the button that ends it, one pill ---------- */
-.incident { position: relative; display: flex; align-items: center; gap: 4px; min-width: 0; padding: 2px; border: 1px solid var(--field-line); border-radius: var(--radius-pill); background: var(--paper-raised); }
-.incident__resolve, .incident__undo { min-height: 30px; padding: 4px 14px; font-size: 13px; }
+.incident { position: relative; display: flex; align-items: center; gap: 2px; min-width: 0; padding: 2px; border: 1px solid var(--field-line); border-radius: var(--radius-pill); background: var(--paper-raised); }
+.incident__resolve, .incident__undo { min-height: 28px; gap: 6px; padding: 4px 12px 4px 10px; font-size: 13px; }
+.incident__resolve .ico, .incident__undo .ico { width: 15px; height: 15px; }
 /* They're back waits until there is a vigil to end */
 .incident__resolve:disabled { display: none; }
 .undo__left { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
@@ -38,11 +39,11 @@ body[data-meta-editable="1"]:not([data-resolved]) .title:hover .word, body[data-
 .heading { position: relative; z-index: 3; }
 /* The ETA is the pill's first half: it opens the Back at picker under the bar */
 .eta { min-width: 0; }
-.eta__btn { display: inline-flex; align-items: center; gap: 8px; min-width: 0; min-height: 30px; padding: 4px 10px 4px 12px; border: 0; border-radius: var(--radius-pill); background: none; color: var(--muted); font: inherit; font-size: 13px; white-space: nowrap; cursor: default; transition: background-color 160ms, color 160ms; }
+.eta__btn { display: inline-flex; align-items: center; gap: 6px; min-width: 0; min-height: 28px; padding: 4px 8px 4px 12px; border: 0; border-radius: var(--radius-pill); background: none; color: var(--muted); font: inherit; font-size: 13px; white-space: nowrap; cursor: default; transition: background-color 160ms, color 160ms; }
 #eta-text { overflow: hidden; text-overflow: ellipsis; }
 /* Says what it is: when the servers are due back */
 .eta__label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; color: var(--ink); }
-.eta__edit { display: none; flex-shrink: 0; width: 14px; height: 14px; margin-left: -2px; opacity: .7; }
+.eta__edit { display: none; flex-shrink: 0; width: 13px; height: 13px; opacity: .6; }
 body[data-meta-editable="1"] .eta__edit { display: block; }
 body[data-meta-editable="1"] .eta__btn { cursor: pointer; }
 body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { background: var(--paper-sunk); color: var(--ink); }
