@@ -1,4 +1,9 @@
 /* ---------- Responsive ---------- */
+/* Narrower than 1280px: while the incident pill is in the bar, the room chip keeps its dot and state (the eyebrow names the room) */
+@media (max-width: 1279px) {
+  :is(body[data-vigil], body[data-resolved], body:has(#eta-btn:not([data-value=""]))) .room-chip__name { display: none; }
+}
+
 /* Below 1100px: one column. The altar fills the first screen and every card follows it in a grid. */
 @media (max-width: 1099px) {
   .stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; gap: var(--space-5); }
@@ -12,6 +17,11 @@
     padding: 0 6px 6px 0;
   }
   .room-chip { max-width: 34vw; }
+  /* No room for the incident pill beside the bar's buttons: it takes a row of its own under them */
+  .bar { flex-wrap: wrap; row-gap: 8px; }
+  .incident { order: 1; flex: 1 0 100%; justify-content: space-between; }
+  body[data-mode="room"] .eta { flex: 1; }
+  .eta .eta-pop { max-width: calc(100vw - 2 * var(--gutter)); }
   .side > .credit { grid-column: 1 / -1; justify-content: center; }
 }
 
@@ -92,10 +102,13 @@
   /* The first screen is the altar, not copy: a shrine's stock subtitle goes, one the room wrote is kept to two lines */
   body[data-mode="room"] .subtitle { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
   body[data-mode="room"]:not([data-subtitle="custom"]):not([data-resolved]) .subtitle { display: none; }
-  .incident { gap: 6px 10px; margin-top: 4px; }
-  .eta { font-size: 13px; }
-  .vigil { font-size: 13px; }
-  .vigil__time { font-size: 16px; }
+  /* The clock shrinks onto the eyebrow's line, which leaves it room */
+  .vigil { grid-template-columns: auto auto auto; gap: 6px; }
+  .vigil__label, .vigil__meta { display: none; }
+  .vigil__time { grid-column: auto; font-size: 18px; letter-spacing: 0; }
+  body:is([data-vigil], [data-resolved]) .eyebrow { display: block; max-width: calc(100% - 6.5rem); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  body:is([data-vigil], [data-resolved]) .eyebrow::before { display: inline-block; vertical-align: 1px; }
+  body:is([data-vigil], [data-resolved]) .title { max-width: none; }
   .tv-join { display: none; }
   .rituals { grid-template-columns: 1fr; }
   .mp__fields { grid-template-columns: minmax(0, 1fr); }

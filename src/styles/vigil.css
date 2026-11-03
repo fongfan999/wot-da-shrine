@@ -1,18 +1,16 @@
-/* ---------- The incident: how long it has been down, when it is due back, and the button that ends it ---------- */
-.incident { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 6px; }
-.incident .vigil { margin: 0; }
-.incident__resolve, .incident__undo { min-height: 34px; padding-block: 4px; }
+/* ---------- The incident, in the top bar: when it is due back and the button that ends it, one pill ---------- */
+.incident { position: relative; display: flex; align-items: center; gap: 4px; min-width: 0; padding: 2px; border: 1px solid var(--field-line); border-radius: var(--radius-pill); background: var(--paper-raised); }
+.incident__resolve, .incident__undo { min-height: 30px; padding: 4px 14px; font-size: 13px; }
 /* They're back waits until there is a vigil to end */
 .incident__resolve:disabled { display: none; }
 .undo__left { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
 .share-undo { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 8px 8px 8px 14px; border: 1px dashed var(--line-strong); border-radius: var(--radius-md); font-size: 14px; color: var(--muted); }
 .records__title { color: var(--ink); font-weight: 600; }
-/* No vigil open: the row waits for one (the altar says how to begin), unless the room already has an ETA */
+/* No vigil open: the clock and the pill wait for one (the altar says how to begin), unless the room already has an ETA */
 body:not([data-vigil]):not([data-resolved]) .incident:has(#eta-btn[data-value=""]) { display: none; }
+/* They're back: no more ETA, and the pill only stays while its Undo does */
+body[data-resolved] .incident .eta, body[data-resolved] .incident:has(#btn-unresolve[hidden]) { display: none; }
 .vigil[data-idle] { display: none; }
-.vigil[data-idle] .vigil__dot { background: var(--muted); animation: none; }
-.vigil[data-idle] :is(.vigil__label, .vigil__time) { display: none; }
-.vigil[data-idle] .vigil__meta { font-family: var(--font-sans); font-size: 14px; letter-spacing: 0; }
 
 /* The title is what is down: on a shrine it can be typed over in place */
 body[data-meta-editable="1"]:not([data-resolved]) .title { cursor: text; }
@@ -36,40 +34,45 @@ body[data-meta-editable="1"]:not([data-resolved]) .title:hover .word, body[data-
 .title-edit__input::placeholder { color: var(--line-strong); }
 .title-edit__hint { margin: 8px 0 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 .title-edit:not([hidden]) + .subtitle { display: none; }
-/* The ETA opens the Back at picker, which hangs over the altar (the parallax transform makes the heading its own layer) */
+/* The heading floats over the altar (the parallax transform makes it its own layer) */
 .heading { position: relative; z-index: 3; }
-.eta { position: relative; }
-.eta__btn { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: default; }
+/* The ETA is the pill's first half: it opens the Back at picker under the bar */
+.eta { min-width: 0; }
+.eta__btn { display: inline-flex; align-items: center; gap: 8px; min-width: 0; min-height: 30px; padding: 4px 10px 4px 12px; border: 0; border-radius: var(--radius-pill); background: none; color: var(--muted); font: inherit; font-size: 13px; white-space: nowrap; cursor: default; transition: background-color 160ms, color 160ms; }
+#eta-text { overflow: hidden; text-overflow: ellipsis; }
 /* Says what it is: when the servers are due back */
 .eta__label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; color: var(--ink); }
-.eta__edit { display: none; width: 14px; height: 14px; margin-left: -2px; opacity: .7; }
+.eta__edit { display: none; flex-shrink: 0; width: 14px; height: 14px; margin-left: -2px; opacity: .7; }
 body[data-meta-editable="1"] .eta__edit { display: block; }
-/* On a shrine the ETA is a pill anyone can set, so it reads as one */
-body[data-meta-editable="1"] .eta__btn { min-height: 34px; padding: 4px 14px 4px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--paper-raised); cursor: pointer; transition: border-color 160ms, color 160ms; }
-body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { color: var(--ink); border-color: var(--accent); }
+body[data-meta-editable="1"] .eta__btn { cursor: pointer; }
+body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { background: var(--paper-sunk); color: var(--ink); }
 .eta .eta-pop { left: 0; right: auto; top: calc(100% + 10px); }
 
-/* ---------- The vigil: how long the servers have been down ---------- */
+/* ---------- The vigil: how long the servers have been down, a clock in the heading's top right corner ---------- */
 .vigil {
-  display: inline-flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  margin: 6px 0 0;
-  padding: 6px 14px 6px 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-pill);
-  background: var(--paper-raised);
-  font-size: 14px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: end;
+  justify-items: end;
+  align-items: center;
+  gap: 2px 8px;
+  margin: 0;
+  text-align: right;
   color: var(--muted);
 }
-.vigil__dot { align-self: center; width: 8px; height: 8px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 0 color-mix(in srgb, var(--ember) 45%, transparent); animation: world-beat 2s ease-out infinite; }
-.vigil__time { font-family: var(--font-mono); font-size: 18px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
-.vigil__meta { font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; }
+.vigil__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 0 color-mix(in srgb, var(--ember) 45%, transparent); animation: world-beat 2s ease-out infinite; }
+.vigil__label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+.vigil__label:empty { display: none; }
+.vigil__time { grid-column: 1 / -1; font-family: var(--font-mono); font-size: clamp(2rem, 3.4vw, 3.2rem); font-weight: 600; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.vigil__meta { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; }
 .vigil__meta:empty { display: none; }
-body[data-resolved="1"] .vigil { border-color: var(--live); background: var(--live-soft); }
+/* The title leaves the corner to the clock */
+body:is([data-vigil], [data-resolved]) .title { max-width: calc(100% - 15rem); }
 body[data-resolved="1"] .vigil__dot { background: var(--live); animation: none; }
-body[data-resolved="1"] .vigil__time { color: var(--live); }
+body[data-resolved="1"] .vigil__time { font-size: 22px; letter-spacing: 0; color: var(--live); }
 
 /* Shrine records */
 .stats--records { margin-bottom: 10px; }

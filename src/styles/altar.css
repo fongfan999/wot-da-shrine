@@ -11,7 +11,7 @@
 }
 /* Before the script runs, the page doesn't yet know which heading it shows (home or shrine): the intro's pieces wait. */
 .booting :is(.bar, .heading, .burner, .side .card, .quick, .pray, .actions, .credit, .plantern-row) { visibility: hidden; }
-.heading { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); max-width: 920px; }
+.heading { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); }
 .eyebrow { display: inline-flex; align-items: center; }
 .eyebrow::before { content: ""; width: 8px; height: 8px; margin-right: 10px; border-radius: 50%; background: var(--accent); }
 .title {
@@ -20,6 +20,7 @@
   font-size: clamp(2.4rem, min(4.8vw, 8vh), 4.6rem);
   line-height: 1.02;
   letter-spacing: -.04em;
+  max-width: 920px;
   text-wrap: balance;
 }
 .title .word { display: inline-block; white-space: nowrap; }
