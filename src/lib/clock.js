@@ -1,7 +1,7 @@
 /**
  * The page's one clock. Everything that changes with the time rather than with an action reads it:
  * how long the servers have been down, the burn left on the stick, when they are due back, the
- * feed's "5m", Rack 42's heart rate, the mantras, and the polls that ask the server how things are.
+ * feed's "5m", prod's heart rate, the mantras, and the polls that ask the server how things are.
  *
  * Timing rules for the whole page:
  * - Readings are computed from Date.now() on every tick, never counted up tick by tick. Browsers

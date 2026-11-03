@@ -132,7 +132,7 @@ The shrine is built to travel from one incident channel to the next:
 - **The congregation**: everyone in the room kneels in front of the altar with
   their name above them, in rows when the team is big. They bow when they
   bow, and their prayer lanterns rise from where they kneel.
-- **Rack 42 vitals**: a heart monitor that flatlines while the incense is cold
+- **Prod vitals** (or whatever the shrine says is down): a heart monitor that flatlines while the incense is cold
   and beats faster with more people and more devotion, with a mood face to
   match.
 - **The offering tray**: pick what the servers get (energy drink, noodles,
@@ -279,7 +279,7 @@ src/scene/               what is drawn
   lanterns.js            prayer lanterns
   ema.js                 prayers hung on the altar as plaques
   congregation.js        teammates kneeling at the altar
-  vitals.js              rack 42 heart monitor
+  vitals.js              prod's heart monitor
   palette.js             theme colours for the canvas layers
 src/audio/
   index.js               Web Audio sound kit (one-shot effects)

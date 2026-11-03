@@ -35,7 +35,7 @@ export const congregation = new Congregation($('#congregation'), burner);
 export const vitals = new Vitals($('#ekg'), $('#vitals-bpm'));
 export const wishes = new WishBoard($('#ema'), $('#burner'));
 
-/* ---------- Rack 42's heart rate: flat while cold, faster with more people and more devotion ---------- */
+/* ---------- Prod's heart rate (or whatever the shrine says is down): flat while cold, faster with more people and more devotion ---------- */
 let devotion = 0;
 export function kick(amount, strength = 1) {
   devotion = Math.min(60, devotion + amount);

@@ -1,5 +1,5 @@
 /**
- * Rack 42's vital signs: a heart monitor that flatlines while the incense is
+ * The vital signs of what is down (prod, unless the shrine names it): a heart monitor that flatlines while the incense is
  * cold and picks up as the team prays. Every action kicks an extra beat.
  *
  * It sweeps 30 times a second, which a line moving 70px a second does not need more of, and draws
