@@ -24,6 +24,8 @@ import { records } from './vigil.js';
 const DEFAULT_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader'];
 const ACT_ICONS = { light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check' };
 export const joinEl = $('#join');
+/** The join sheet is up and waiting: not merely fading out after you joined. */
+export const joinOpen = () => !joinEl.hidden && !joinEl.inert;
 const joinName = $('#join-name');
 const joinAvatars = $('#join-avatars');
 const roomStatus = $('#room-status');
@@ -37,12 +39,14 @@ export function enterRoom() {
   $('#room-name').textContent = roomName;
   $('#people-card').hidden = false;
   $('#btn-rename').hidden = false;
+  $('#menu-rename').hidden = false;
   presence.hidden = false;
   $('#join-room').textContent = fmt('roomEyebrow', { room: roomName });
   if (tv) { state.me = { name: t('tvWatch'), avatar: '🤖' }; connect(); return; }
   if (roomName === 'demo') { // the public demo names you itself and takes only the ready-made prayers
     state.me = state.me ?? { name: gsap.utils.random(DEFAULT_NAMES), avatar: gsap.utils.random(AVATARS) };
     $('#btn-rename').hidden = true;
+    $('#menu-rename').hidden = true;
     wishInput.disabled = true;
     wishInput.placeholder = t('demoPrayers');
     connect();
@@ -78,6 +82,7 @@ export function openJoin() {
     joinAvatars.appendChild(b);
   }
   joinEl.hidden = false;
+  joinEl.inert = false;
   gsap.fromTo(joinEl, { opacity: 0 }, { opacity: 1, duration: 0.4 });
   gsap.fromTo('.join__card', { y: 24, opacity: 0, scale: 0.97 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out', delay: 0.1 });
   setTimeout(() => { joinName.focus(); joinName.select(); }, 50);
@@ -100,6 +105,7 @@ $('#join-form').addEventListener('submit', (e) => {
   state.me = { name, avatar };
   saveMe(state.me);
   joinName.blur(); // so the shortcuts work right away
+  joinEl.inert = true; // and the fading sheet neither takes clicks nor holds the shortcuts back
   gsap.to(joinEl, { opacity: 0, duration: 0.3, onComplete: () => { joinEl.hidden = true; } });
   sound.bowl(220);
   if (state.shrine) state.shrine.rename(state.me);

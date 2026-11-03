@@ -86,3 +86,4 @@ presence.addEventListener('click', () => {
 });
 
 $('#btn-rename').addEventListener('click', () => { openPanel(false); openJoin(); });
+$('#menu-rename').addEventListener('click', openJoin);

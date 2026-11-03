@@ -1,9 +1,10 @@
 /* The share sheet: invite the team, and a picture of the shrine to post. */
 import gsap from 'gsap';
 import { sound } from '../audio/index.js';
+import { shareUrl } from '../lib/config.js';
 import { canCopyImage, canShareFiles, cardPng, cardSvg, copyImage, download, shareFile } from '../lib/share.js';
 import { BRAND, t } from '../lib/strings.js';
-import { $, body, counters, fmt, people, recentPrayers, roomName, roomUrl, state } from './context.js';
+import { $, body, counters, fmt, people, recentPrayers, roomName, roomUrl, settings, state } from './context.js';
 import { openTray } from './offerings.js';
 import { minutesPrayed } from './resolve.js';
 import { openPanel } from './settings.js';
@@ -90,7 +91,13 @@ export function openShare(open, celebrate = false) {
 }
 
 $('#btn-invite').addEventListener('click', () => { sound.unlock(); openShare(true); });
-$('#btn-share').addEventListener('click', () => { sound.unlock(); openShare(true); });
+$('#menu-card').addEventListener('click', () => {
+  sound.unlock();
+  openShare(true);
+  $('#card-label').scrollIntoView({ block: 'start' }); // the picture, not the invite above it
+});
+// A shrine's link, or on a maintenance page the link that brings back its title and ETA.
+$('#menu-copy-link').addEventListener('click', () => copyText(roomName ? roomUrl() : shareUrl(settings), t(roomName ? 'inviteCopied' : 'linkCopied')));
 $('#btn-close-share').addEventListener('click', () => openShare(false));
 shareEl.addEventListener('click', (e) => { if (e.target === shareEl) openShare(false); });
 $('#btn-share-copy').addEventListener('click', () => copyText(roomUrl(), t('inviteCopied')));

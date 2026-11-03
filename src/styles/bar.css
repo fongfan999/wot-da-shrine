@@ -83,3 +83,59 @@ body[data-conn="closed"] .presence { opacity: .45; }
 }
 .presence__avatar--me { background: var(--accent-soft); }
 .presence__count { margin-left: 16px; white-space: nowrap; font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+
+/* ---------- Bar menus: Share, and More ---------- */
+.menu { position: relative; }
+.menu__btn[aria-expanded="true"] { background: var(--paper-sunk); }
+.menu__caret { width: 16px; height: 16px; margin: 0 -4px 0 -2px; transition: rotate 160ms var(--ease); }
+.menu__btn[aria-expanded="true"] .menu__caret { rotate: 180deg; }
+.menu__list {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  min-width: 288px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-float);
+}
+.menu__list[hidden] { display: none; }
+.menu__list--end { left: auto; right: 0; }
+.menu__item {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.menu__item[hidden] { display: none; }
+.menu__item:is(:hover, :focus-visible) { background: var(--accent-soft); color: var(--note-ink); outline: 0; }
+.menu__item .ico { width: 20px; height: 20px; }
+.menu__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.menu__text b { font-size: 14px; font-weight: 600; }
+.menu__text small { font-size: 12px; color: var(--muted); }
+.menu__item:is(:hover, :focus-visible) small { color: inherit; opacity: .8; }
+.menu__ext { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.menu__sep { height: 1px; margin: 4px 6px; background: var(--line); }
+@media (max-width: 760px) {
+  #btn-share { width: 36px; padding: 0; }
+  /* The chip keeps only its status dot: the room's name is in the eyebrow just below, and the state is still read out */
+  .room-chip { flex-shrink: 0; padding: 4px 10px; }
+  .room-chip__name { display: none; }
+  .room-chip__state { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  /* Both menus open from the right edge on a phone, so neither runs off the screen */
+  .menu__list { position: fixed; top: calc(var(--bar-h, 52px) + 4px); left: auto; right: 12px; min-width: 0; width: min(300px, calc(100vw - 24px)); }
+}

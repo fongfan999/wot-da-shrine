@@ -21,7 +21,8 @@ import './app/incident.js';
 import { renderRecords } from './app/stats.js';
 import { renderResolve } from './app/resolve.js';
 import { openShare, shareOpen } from './app/shareSheet.js';
-import { enterRoom, joinEl } from './app/shrine.js';
+import { enterRoom, joinOpen } from './app/shrine.js';
+import { menuOpen } from './app/menus.js';
 import { setupScreen } from './app/screen.js';
 import { setupCast } from './app/cast.js';
 import { loadWorld } from './app/world.js';
@@ -39,7 +40,7 @@ document.addEventListener('keydown', (e) => {
   openTray(false);
 });
 document.addEventListener('keydown', (e) => {
-  if (e.target.matches('input, textarea') || !joinEl.hidden || anySheetOpen() || tv || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target.matches('input, textarea') || joinOpen() || menuOpen() || anySheetOpen() || tv || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key === 'l') light();
   if (e.key === 'b') ringBowl();
   if (e.key === 'p') bow();

@@ -86,7 +86,7 @@ The shrine is built to travel from one incident channel to the next:
   ("3 praying · incense burning, 7 min left · 48 karma · last prayer: …").
   The Worker rewrites the room page's `<title>` and Open Graph tags on the
   way out, so every paste shows what is happening right now.
-- **Invite**: the Invite button opens a sheet with the link, a ready-made
+- **Share**: the Share menu copies the link, casts to the TV, or opens a sheet with the link, a ready-made
   Slack message ("🪔 The servers are down. The shrine is open, come pray
   with us: …"), a post for X, and the system share sheet on phones.
 - **The share card**: a PNG of this shrine as it is right now, drawn from the
@@ -230,6 +230,7 @@ src/app/                 the shrine
   people.js              people card and presence stack
   resolve.js             "they're back"
   shareSheet.js          invite + share card sheet
+  menus.js               the top bar's Share and More menus
   cast.js, screen.js     Cast to TV, and the TV's own screens
   world.js               the world line (every shrine)
   openShrine.js          name fields and the Open sheet
