@@ -5,7 +5,10 @@
  * then rasterised to PNG so every chat app can show it.
  *
  * Everything is same-origin and inline, so the canvas is never tainted.
+ * A picture can't be clicked, so it carries the shrine's link twice over:
+ * a QR code to scan and the address written out beside it.
  */
+import qrcode from 'qrcode-generator';
 
 const W = 1200;
 const H = 630;
@@ -118,7 +121,8 @@ const fit = (text, base, width, em) => Math.min(base, Math.floor(width / (Math.m
 /**
  * Build the card. `data`:
  *   room, title, resolved, open (a vigil is on), people (count), avatars (emoji), minutes, karma, prayers (count),
- *   incense (count), quotes [{text, name}], url; `eyebrow`, `headline` [line1, line2] and `facts` override
+ *   incense (count), quotes [{text, name}], url (as shown), link (the full address, drawn as a QR when given);
+ *   `eyebrow`, `headline` [line1, line2] and `facts` override
  *   what the state would say (the link preview images are drawn this way).
  */
 export function cardSvg(data) {
@@ -181,8 +185,29 @@ export function cardSvg(data) {
     <g transform="translate(0 -2) scale(1.55)" style="stroke-linecap:round;stroke-linejoin:round;stroke-width:4.2;fill:none">${brandMark.replace(/<svg[^>]*>/, '<svg viewBox="8 2 48 54" width="21" height="24">')}</g>
     <g transform="translate(38 0)">${brandWord.replace(/<svg[^>]*>/, '<svg viewBox="-3.4 -69.4 466 78" width="226" height="38">')}</g>
   </g>
-  <text x="${W - 72}" y="84" text-anchor="end" font-family="${MONO}" font-size="17" letter-spacing="1" fill="${c.muted}">${esc(data.url)}</text>
+  ${data.link ? linkSvg(data.link, data.url, c) : `<text x="${W - 72}" y="84" text-anchor="end" font-family="${MONO}" font-size="17" letter-spacing="1" fill="${c.muted}">${esc(data.url)}</text>`}
 </svg>`;
+}
+
+/** A QR code for the link on a paper tile, top right, and the address written out bottom right, so nobody has to type it. */
+function linkSvg(link, shown, c) {
+  const qr = qrcode(0, 'M');
+  qr.addData(link);
+  qr.make();
+  const n = qr.getModuleCount();
+  const SIZE = 104;
+  const PAD = 8;
+  const cell = SIZE / n;
+  let cells = '';
+  for (let r = 0; r < n; r++) for (let q = 0; q < n; q++) if (qr.isDark(r, q)) cells += `M${(q * cell).toFixed(2)} ${(r * cell).toFixed(2)}h${cell.toFixed(2)}v${cell.toFixed(2)}h-${cell.toFixed(2)}z`;
+  const x = W - 72 - SIZE - PAD * 2;
+  const y = 52;
+  return `<g transform="translate(${x} ${y})">
+    <rect width="${SIZE + PAD * 2}" height="${SIZE + PAD * 2}" rx="12" fill="#ffffff"/>
+    <path transform="translate(${PAD} ${PAD})" d="${cells}" fill="#111111"/>
+  </g>
+  <text x="${x + SIZE / 2 + PAD}" y="${y + SIZE + PAD * 2 + 24}" text-anchor="middle" font-family="${MONO}" font-size="13" letter-spacing="2" fill="${c.muted}">SCAN TO KNEEL</text>
+  <text x="${W - 72}" y="${H - 62}" text-anchor="end" font-family="${MONO}" font-size="20" fill="${c.ink}">${esc(shown)}</text>`;
 }
 
 /** Rasterise the SVG to a PNG blob. */
@@ -221,9 +246,16 @@ export function download(blob, name) {
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
 
-export async function copyImage(blob) {
+/** Copy the picture. With `link`, the address rides along as text and as a linked image, for apps that take more than a picture. */
+export async function copyImage(blob, link = '') {
   if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') return false;
-  try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); return true; } catch { return false; }
+  const image = { 'image/png': blob };
+  if (link) {
+    const src = await new Promise((resolve) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.readAsDataURL(blob); });
+    const rich = { ...image, 'text/plain': new Blob([link], { type: 'text/plain' }), 'text/html': new Blob([`<a href="${esc(link)}"><img src="${src}" alt="Wot Da Shrine"></a><br><a href="${esc(link)}">${esc(link)}</a>`], { type: 'text/html' }) };
+    try { await navigator.clipboard.write([new ClipboardItem(rich)]); return true; } catch { /* this browser takes only the picture */ }
+  }
+  try { await navigator.clipboard.write([new ClipboardItem(image)]); return true; } catch { return false; }
 }
 
 export const canCopyImage = () => Boolean(navigator.clipboard?.write && typeof ClipboardItem !== 'undefined');

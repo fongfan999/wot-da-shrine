@@ -305,7 +305,7 @@ export const STRINGS = {
   cardShare: 'Share image',
   cardCopy: 'Copy image',
   cardDownload: 'Download PNG',
-  cardCopied: 'Image copied. Paste it anywhere.',
+  cardCopied: 'Image copied. Its QR code and link lead back here.',
   cardSaved: 'Saved. Post it with pride.',
   cardFailed: 'The altar would not sit still for a picture. Try again.',
   cardText: '🪔 We prayed for the servers: {facts}. {url}',

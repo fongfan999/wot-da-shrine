@@ -49,6 +49,7 @@ async function drawCard() {
     incense: counters.incense,
     quotes: recentPrayers,
     url: roomUrl().replace(/^https?:\/\//, ''),
+    link: roomUrl(),
   });
   try {
     const blob = await cardPng(svg);
@@ -162,6 +163,6 @@ $('#btn-card-share').addEventListener('click', async () => {
 });
 $('#btn-card-copy').addEventListener('click', async () => {
   if (!cardBlob) return;
-  if (await copyImage(cardBlob)) { toast(t('cardCopied')); sound.tick(990, 0.08); } else download(cardBlob, cardName());
+  if (await copyImage(cardBlob, roomUrl())) { toast(t('cardCopied')); sound.tick(990, 0.08); } else download(cardBlob, cardName());
 });
 $('#btn-card-download').addEventListener('click', () => { if (cardBlob) { download(cardBlob, cardName()); toast(t('cardSaved')); } });
