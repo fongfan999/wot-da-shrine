@@ -19,6 +19,9 @@
   background: var(--paper-raised);
   box-shadow: var(--shadow-float);
 }
+.join__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+/* The same sheet enters the shrine on a first visit and changes your name after: each shows its own words */
+.join:not([data-mode="rename"]) .join--rename, .join[data-mode="rename"] .join--enter { display: none; }
 .join__title { margin: 0; font-weight: 500; font-size: 36px; line-height: 1.1; letter-spacing: -.04em; }
 .join__title em { font-family: var(--font-serif); font-weight: 400; letter-spacing: -.03em; }
 .join__hint { margin: -4px 0 4px; color: var(--muted); font-size: 15px; }

@@ -1,4 +1,4 @@
-<!-- Join a room (shown on /r/:room until you have a name) -->
+<!-- Join a room (shown on /r/:room until you have a name); opened again from More it changes your name, and can be closed -->
 <div class="join" id="join" hidden>
   <form class="join__card" id="join-form" autocomplete="off">
     <p class="eyebrow" id="join-room"></p>
@@ -8,13 +8,21 @@
       <p class="join__facts" id="join-facts"></p>
       <div class="join__who"><span class="join__faces" id="join-faces" aria-hidden="true"></span><span id="join-people"></span></div>
     </div>
-    <h2 class="join__title"><span data-i18n="joinTitle">Enter the</span> <em data-i18n="joinTitleAccent">shrine</em></h2>
-    <p class="join__hint" data-i18n="joinHint">Your team is praying for the servers. What should the rack call you?</p>
+    <div class="join__head">
+      <h2 class="join__title join--enter"><span data-i18n="joinTitle">Enter the</span> <em data-i18n="joinTitleAccent">shrine</em></h2>
+      <h2 class="join__title join--rename"><span data-i18n="renameTitle">Change your</span> <em data-i18n="renameTitleAccent">name</em></h2>
+      <button class="icon-btn join--rename" id="btn-close-join" type="button" aria-label="Close">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="join__hint join--enter" data-i18n="joinHint">Your team is praying for the servers. What should the rack call you?</p>
+    <p class="join__hint join--rename" data-i18n="renameHint">Everyone in the shrine sees the change at once.</p>
     <label class="sr-only" for="join-name">Your name</label>
     <input class="join__input" id="join-name" type="text" maxlength="24" required />
     <div class="join__avatars" id="join-avatars" role="radiogroup" aria-label="Pick an avatar"></div>
     <button class="btn btn--accent btn--block" type="submit">
-      <span data-i18n="joinBtn">Kneel at the altar</span>
+      <span class="join--enter" data-i18n="joinBtn">Kneel at the altar</span>
+      <span class="join--rename" data-i18n="renameSave">Save</span>
     </button>
   </form>
 </div>

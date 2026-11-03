@@ -99,7 +99,8 @@ function renderJoinState(st) {
 }
 
 export function openJoin() {
-  // Only a first visit is told about the room: renaming from the More menu is already inside.
+  // Only a first visit is told about the room: renaming from the More menu is already inside, and may change its mind.
+  joinEl.dataset.mode = state.shrine ? 'rename' : 'enter';
   joinState.hidden = true;
   if (!state.shrine) { if (joinStatus) renderJoinState(joinStatus); else loadJoinState(); }
   const current = state.me ?? { name: gsap.utils.random(DEFAULT_NAMES), avatar: gsap.utils.random(AVATARS) };
@@ -152,6 +153,17 @@ joinAvatars.addEventListener('keydown', (e) => {
   next.focus();
 });
 
+function closeJoin() {
+  joinName.blur(); // so the shortcuts work right away
+  joinEl.inert = true; // and the fading sheet neither takes clicks nor holds the shortcuts back
+  gsap.to(joinEl, { opacity: 0, duration: 0.3, onComplete: () => { joinEl.hidden = true; } });
+}
+// Renaming can be called off: the close button, Escape, or a click beside the card. A first visit has to choose.
+const renaming = () => joinOpen() && joinEl.dataset.mode === 'rename';
+$('#btn-close-join').addEventListener('click', closeJoin);
+joinEl.addEventListener('click', (e) => { if (e.target === joinEl && renaming()) closeJoin(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && renaming()) { e.preventDefault(); closeJoin(); } });
+
 $('#join-form').addEventListener('submit', (e) => {
   e.preventDefault();
   sound.unlock();
@@ -160,9 +172,7 @@ $('#join-form').addEventListener('submit', (e) => {
   const avatar = joinAvatars.querySelector('[aria-checked="true"]')?.textContent ?? AVATARS[0];
   state.me = { name, avatar };
   saveMe(state.me);
-  joinName.blur(); // so the shortcuts work right away
-  joinEl.inert = true; // and the fading sheet neither takes clicks nor holds the shortcuts back
-  gsap.to(joinEl, { opacity: 0, duration: 0.3, onComplete: () => { joinEl.hidden = true; } });
+  closeJoin();
   sound.bowl(220);
   if (state.shrine) state.shrine.rename(state.me);
   else connect();
