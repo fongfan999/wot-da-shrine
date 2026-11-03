@@ -83,6 +83,9 @@ const hhmmss = (ms) => {
   const h = Math.floor(s / 3600);
   return `${h ? `${h}:` : ''}${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 };
+/** 1st, 2nd, 3rd, 4th … 11th, 12th, 13th … 21st */
+const nth = (n) => `${n}${[11, 12, 13].includes(n % 100) ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
+const vigilHint = (n) => fmt('vigilNoHint', { n, nth: nth(n) });
 const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
 export function tickVigil() {
   // The scene reads this: the down rack's lights go out while a vigil is open.
@@ -95,6 +98,7 @@ export function tickVigil() {
     vigilLabel.textContent = '';
     vigilTime.textContent = fmt('vigilSurvived', { t: minutesText(state.lastVigil.minutes) });
     vigilMeta.textContent = [fmt('vigilPraying', { n: state.lastVigil.peak }), fmt('vigilPrayers', { n: state.lastVigil.prayers }), fmt('vigilNo', { n: records.survived })].join(' · ');
+    vigilEl.title = vigilHint(records.survived);
     return;
   }
   if (!state.vigil) {
@@ -113,6 +117,7 @@ export function tickVigil() {
   if (state.vigil.prayers) bits.push(fmt('vigilPrayers', { n: state.vigil.prayers }));
   bits.push(fmt('vigilNo', { n: records.survived + 1 }));
   vigilMeta.textContent = bits.join(' · ');
+  vigilEl.title = vigilHint(records.survived + 1);
 }
 
 /* ---------- The shrine card: folded to one line until someone opens it; a TV on the wall shows it open ---------- */

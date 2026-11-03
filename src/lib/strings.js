@@ -308,6 +308,7 @@ export const STRINGS = {
   lightCue: 'Click the censer to light the incense',
   lightCueTap: 'Tap the censer to light the incense',
   vigilNo: 'vigil #{n}',
+  vigilNoHint: 'Vigil #{n}: the {nth} outage this shrine has prayed through. Each shrine keeps its own count.',
   vigilSurvived: 'Survived in {t}',
   vigilPraying: '{n} praying',
   vigilPrayers: '{n} prayers',
