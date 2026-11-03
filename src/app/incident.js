@@ -34,7 +34,8 @@ if (metaEditable()) {
     editForm.hidden = true;
     title.hidden = false;
     if (save) {
-      const value = editInput.value.trim().slice(0, 60);
+      let value = editInput.value.trim().slice(0, 60);
+      if (!meta('title') && value === t('title')) value = ''; // left as the stock headline: still the stock one
       if (value !== (meta('title') || '')) { setSetting('title', value); toast(shared(t('titleSaved'))); }
     }
     title.focus({ preventScroll: true });

@@ -17,7 +17,9 @@ function headlineFor(room) {
   for (const ch of room) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   return STRINGS.headlines[h % STRINGS.headlines.length];
 }
+const plainSubtitle = STRINGS.subtitle; // under a title the team wrote, the stock subtitle would answer the wrong joke
 if (roomName) [STRINGS.title, STRINGS.subtitle] = headlineFor(roomName);
+const subtitleShown = () => meta('subtitle') || (meta('title') ? plainSubtitle : t('subtitle'));
 
 const panel = $('#panel');
 const backdrop = $('#panel-backdrop');
@@ -29,7 +31,7 @@ export function applySettings(animate = false) {
   applyFx();
   if (body.dataset.resolved) applyStrings({ title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
   else if (landing) applyStrings({ eyebrow: t('landEyebrow'), title: t('landTitle'), subtitle: t('landSubtitle') });
-  else applyStrings({ title: meta('title'), subtitle: meta('subtitle') });
+  else applyStrings({ title: meta('title'), subtitle: subtitleShown() });
   body.dataset.subtitle = meta('subtitle') ? 'custom' : ''; // phones hide a shrine's stock subtitle, never one the room wrote
   document.title = body.dataset.resolved ? `${t('resolvedTitle')} · ${BRAND}` : meta('title') ? `${meta('title')} · ${BRAND}` : landing ? `${BRAND}: ${t('landDocTitle')}` : `${t('title')} · ${BRAND}`;
   if (animate || !title.querySelector('.word')) splitTitle(animate);
@@ -40,8 +42,12 @@ export function applySettings(animate = false) {
   sound.setSfx(settings.sfx);
 
   // Panel reflects state
-  panel.querySelector('[name=title]').value = meta('title');
-  panel.querySelector('[name=subtitle]').value = meta('subtitle');
+  const titleField = panel.querySelector('[name=title]');
+  const subtitleField = panel.querySelector('[name=subtitle]');
+  titleField.value = meta('title');
+  subtitleField.value = meta('subtitle');
+  titleField.placeholder = roomName ? t('title') : '';
+  subtitleField.placeholder = roomName ? subtitleShown() : '';
   panel.querySelector('[name=eta]').value = meta('eta') ? toLocalInput(meta('eta')) : '';
   $('#meta-note').hidden = !roomName;
   for (const k of ['music', 'sfx', 'petals', 'fog']) panel.querySelector(`[name=${k}]`).checked = settings[k];
