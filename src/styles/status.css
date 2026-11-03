@@ -1,5 +1,7 @@
 /* ---------- Status card ---------- */
 .vitals .label { margin: 0 !important; padding: 0 !important; border: 0 !important; }
+.vitals__label { display: flex; gap: .4em; min-width: 0; white-space: nowrap; }
+.vitals__of { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .vitals__read { display: inline-flex; align-items: center; gap: 6px; }
 .vitals__bpm { font-family: var(--font-mono); font-size: 13px; color: var(--live); font-variant-numeric: tabular-nums; }
 .vitals__bpm[data-flat="true"] { color: var(--error); }
@@ -19,7 +21,6 @@
 .stat { display: flex; flex-direction: column-reverse; gap: 2px; }
 .stat dt { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--sheet-label); }
 .stat dd { margin: 0; font-family: var(--font-mono); font-weight: 500; font-size: 20px; line-height: 1.2; font-variant-numeric: tabular-nums; color: var(--ink); }
-.enlight .burn__row span:first-child { font-size: 14px; }
 .rank { display: flex; align-items: center; gap: var(--space-3); padding: 10px 12px; border-radius: var(--radius-sm); background: var(--paper-raised); border: 1px solid var(--sheet-line); }
 .rank__badge {
   width: 34px;

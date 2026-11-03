@@ -3,6 +3,12 @@
   <div class="heading">
     <p class="eyebrow" id="eyebrow" data-i18n="eyebrow">When the servers are down</p>
     <h1 class="title" id="title" data-i18n="title">Pray for uptime, together</h1>
+    <!-- In a shrine the title is what is down: click it and type over it -->
+    <form class="title-edit" id="title-edit" hidden autocomplete="off">
+      <label class="sr-only" for="title-input" data-i18n="fTitle">Title</label>
+      <input class="title-edit__input" id="title-input" type="text" maxlength="60" spellcheck="false" />
+      <p class="title-edit__hint" data-i18n="titleEditHint">What is down? Enter saves, Esc cancels.</p>
+    </form>
     <p class="subtitle" id="subtitle" data-i18n="subtitle">A shared altar for the incident channel. Open one, drop the link in Slack, and the whole team prays to the rack, live.</p>
     <!-- The incident: how long it has been down, when it is due back, and the button that ends it -->
     <div class="incident" id="incident">
@@ -12,7 +18,9 @@
         <b class="vigil__time" id="vigil-time">00:00</b>
         <span class="vigil__meta" id="vigil-meta"></span>
       </p>
-      <p class="eta"><span class="status-dot" data-status="open" aria-hidden="true"></span><span id="eta-text"></span></p>
+      <p class="eta">
+        <button class="eta__btn" id="eta-btn" type="button" aria-haspopup="dialog" aria-expanded="false" data-value=""><span class="status-dot" data-status="open" aria-hidden="true"></span><span id="eta-text"></span></button>
+      </p>
       <button class="btn btn--live btn--sm incident__resolve" id="btn-resolve" type="button">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4L19 6"/></svg>
         <span data-i18n="resolve">They’re back!</span>

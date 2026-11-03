@@ -123,7 +123,7 @@
   .tray__name { white-space: normal; font-size: 11px; line-height: 1.15; text-align: center; }
   .combo__n { font-size: 1.6rem; }
   .heading { gap: 4px; }
-  .title { font-size: clamp(2rem, 10vw, 2.6rem); }
+  .title, .title-edit__input { font-size: clamp(2rem, 10vw, 2.6rem); }
   .subtitle { font-size: 16px; }
   .mantra { font-size: 12px; max-width: 92vw; }
   #mantra { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 78vw; }

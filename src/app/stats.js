@@ -1,4 +1,4 @@
-/* Counters, rank, enlightenment, the vigil strip, shrine records and lanterns, the ETA. */
+/* Counters, rank, the vigil strip, shrine records and lanterns, the ETA. */
 import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { saveCounters } from '../lib/config.js';
@@ -9,17 +9,12 @@ import { ago, bump, shockwave, toast } from './ui.js';
 import { records, vigilTouch } from './vigil.js';
 
 /* ---------- Stats + progress ---------- */
-export const statIncense = $('#stat-incense');
 export const statKarma = $('#stat-karma');
-const progressBar = $('#progress-bar');
-const progressPct = $('#progress-pct');
-const progress = $('#progress');
 export const burnBar = $('#burn-bar');
 const dockTime = $('#dock-time');
 
 const sumKarma = $('#sum-karma');
 export function updateStats(quiet = false) {
-  statIncense.textContent = counters.incense;
   statKarma.textContent = counters.karma;
   sumKarma.textContent = counters.karma;
   updateRank(quiet);
@@ -61,19 +56,11 @@ export function addKarma(n = 1) {
 
 const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
-// Enlightenment is a very zen progress bar: it approaches 100% but never quite arrives.
-let enlightenment = 0;
+/** The burn timer on the Light key, and the vigil strip. */
 export function tickProgress() {
-  const elapsed = state.lit ? (Date.now() - state.litAt) / 1000 : 0;
-  const target = state.lit ? 100 * (1 - Math.exp(-elapsed / 240)) : 0;
-  enlightenment += (target - enlightenment) * 0.08;
-  const pct = Math.min(99, Math.floor(enlightenment));
-  progressBar.style.width = `${enlightenment}%`;
-  progressPct.textContent = `${pct}%`;
-  progress.setAttribute('aria-valuenow', pct);
-
   tickVigil();
   if (state.lit) {
+    const elapsed = (Date.now() - state.litAt) / 1000;
     const left = Math.max(0, BURN_SECONDS - Math.floor(elapsed));
     dockTime.textContent = mmss(left);
     burnBar.style.width = `${(left / BURN_SECONDS) * 100}%`;
@@ -135,8 +122,10 @@ function shrineLevel(karma = counters.karma) {
 }
 export function renderRecords() {
   $('#rec-survived').textContent = records.survived;
-  $('#rec-longest').textContent = records.longest ? minutesText(records.longest) : '–';
   $('#rec-prayers').textContent = state.roomPrayed;
+  const longest = $('#rec-longest');
+  longest.hidden = !records.longest;
+  longest.textContent = records.longest ? `${fmt('recLongest', { t: minutesText(records.longest) })} · ` : '';
   const i = shrineLevel();
   const [, name] = STRINGS.shrineLevels[i];
   const next = STRINGS.shrineLevels[i + 1];
@@ -201,9 +190,17 @@ function renderLanterns() {
   shownLanterns = n;
 }
 
+/* ---------- The vitals are this incident's: the room's title names them ---------- */
+const vitalsOf = $('#vitals-of');
+export function updateVitalsLabel() {
+  vitalsOf.textContent = meta('title') || t('vitalsLabel');
+}
+
 /* ---------- ETA ---------- */
 const etaText = $('#eta-text');
+const etaBtn = $('#eta-btn');
 export function updateEta() {
+  etaBtn.dataset.value = meta('eta') || ''; // the picker opens on the room's time, not a stale one
   if (!meta('eta')) { etaText.textContent = t('anyMoment'); return; }
   const d = new Date(meta('eta'));
   const diff = d - Date.now();

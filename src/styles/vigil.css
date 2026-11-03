@@ -8,6 +8,36 @@
 .vigil[data-idle] :is(.vigil__label, .vigil__time) { display: none; }
 .vigil[data-idle] .vigil__meta { font-family: var(--font-sans); font-size: 14px; letter-spacing: 0; }
 
+/* The title is what is down: on a shrine it can be typed over in place */
+body[data-meta-editable="1"]:not([data-resolved]) .title { cursor: text; }
+body[data-meta-editable="1"]:not([data-resolved]) .title:hover .word, body[data-meta-editable="1"]:not([data-resolved]) .title:focus-visible .word { text-decoration: underline dashed color-mix(in srgb, var(--accent) 55%, transparent); text-decoration-thickness: 1px; text-underline-offset: .12em; }
+.title-edit { width: 100%; max-width: 720px; margin: 4px 0 0; }
+.title-edit__input {
+  display: block;
+  width: 100%;
+  padding: 0 0 .06em;
+  border: 0;
+  border-bottom: 2px dashed var(--accent);
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+  font-size: clamp(2.4rem, min(4.8vw, 8vh), 4.6rem);
+  line-height: 1.02;
+  letter-spacing: -.04em;
+}
+.title-edit__input::placeholder { color: var(--line-strong); }
+.title-edit__hint { margin: 8px 0 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.title-edit:not([hidden]) + .subtitle { display: none; }
+/* The ETA opens the Back at picker, which hangs over the altar (the parallax transform makes the heading its own layer) */
+.heading { position: relative; z-index: 3; }
+.eta { position: relative; }
+.eta__btn { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: default; }
+body[data-meta-editable="1"] .eta__btn { cursor: pointer; border-bottom: 1px dashed transparent; transition: border-color 160ms, color 160ms; }
+body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.eta .eta-pop { left: 0; right: auto; top: calc(100% + 10px); }
+
 /* ---------- The vigil: how long the servers have been down ---------- */
 .vigil {
   display: inline-flex;

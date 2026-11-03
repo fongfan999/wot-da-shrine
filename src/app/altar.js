@@ -7,8 +7,8 @@ import { $, body, BURN_SECONDS, counters, fmt, landing, roomName, state } from '
 import { art, burner, congregation, kick, motes, petals, room, smoke } from './engines.js';
 import { pulse } from './prayers.js';
 import { clearResolved, renderResolve } from './resolve.js';
-import { addKarma, burnBar, statIncense, tickProgress, tickVigil, updateStats } from './stats.js';
-import { bump, logEvent, logMine, shockwave, toast } from './ui.js';
+import { addKarma, burnBar, tickProgress, tickVigil, updateStats } from './stats.js';
+import { logEvent, logMine, shockwave, toast } from './ui.js';
 import { vigilTouch } from './vigil.js';
 
 /* ---------- Light the incense ---------- */
@@ -22,7 +22,6 @@ export function light() {
     counters.incense += 1;
     saveCounters(counters);
     updateStats();
-    bump(statIncense);
   }
   ignite(Date.now());
   if (state.myId) congregation.bow(state.myId, 3);

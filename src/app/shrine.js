@@ -16,7 +16,7 @@ import { clearResolved, renderResolve, RESOLVED_FOR, resolveFx, showResolved } f
 import { blameFx, fortuneFx } from './rituals.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
 import { applySettings } from './settings.js';
-import { renderRecords, statIncense, statKarma, tickVigil, updateStats } from './stats.js';
+import { renderRecords, statKarma, tickVigil, updateStats } from './stats.js';
 import { bump, logEvent, toast } from './ui.js';
 import { records } from './vigil.js';
 
@@ -214,7 +214,7 @@ function remoteAct({ kind, by, note, item, text, level }) {
 
 /** The shrine is the source of truth for the room's counters. */
 function syncCounters({ incense, karma, since, prayed, vigil: v, survived }) {
-  if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); bump(statIncense); }
+  if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); }
   if (karma !== undefined && karma !== counters.karma) { counters.karma = karma; updateStats(!state.greeted); bump(statKarma); }
   if (since) state.roomSince = since - state.clockSkew;
   if (prayed !== undefined) state.roomPrayed = prayed;

@@ -17,6 +17,7 @@ import { buildTray, offer, offerBtn, openTray, trayOpen } from './app/offerings.
 import { dealQuick } from './app/prayers.js';
 import { anySheetOpen, openRitual } from './app/rituals.js';
 import './app/openShrine.js';
+import './app/incident.js';
 import { renderRecords } from './app/stats.js';
 import { renderResolve } from './app/resolve.js';
 import { openShare, shareOpen } from './app/shareSheet.js';

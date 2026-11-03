@@ -4,6 +4,7 @@
  * a quick "in an hour", or a day and a half-hour slot. The trigger button
  * holds the chosen time as an ISO string in `data-value` ('' for none) and
  * fires a bubbling `input` event whenever it changes, like a form field.
+ * With `label: false` the trigger's text is left to the caller.
  */
 
 const QUICK = [
@@ -43,7 +44,7 @@ export function etaLabel(iso) {
   return `${day}, ${timeLabel(d)}`;
 }
 
-export function etaPicker(trigger) {
+export function etaPicker(trigger, { label = true } = {}) {
   const pop = document.createElement('div');
   pop.className = 'eta-pop';
   pop.setAttribute('role', 'dialog');
@@ -57,8 +58,8 @@ export function etaPicker(trigger) {
   const value = () => (trigger.dataset.value ? new Date(trigger.dataset.value) : null);
   function set(d) {
     trigger.dataset.value = d ? d.toISOString() : '';
-    text.textContent = etaLabel(trigger.dataset.value);
-    if (sub) sub.textContent = d ? fromNow(d) : 'no ETA';
+    if (label) text.textContent = etaLabel(trigger.dataset.value);
+    if (label && sub) sub.textContent = d ? fromNow(d) : 'no ETA';
     trigger.dispatchEvent(new Event('input', { bubbles: true }));
   }
 

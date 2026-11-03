@@ -4,11 +4,11 @@ import { sound } from '../audio/index.js';
 import { shareUrl } from '../lib/config.js';
 import { syncPalette } from '../scene/palette.js';
 import { BRAND, applyStrings, t } from '../lib/strings.js';
-import { $, body, fmt, landing, meta, persist, resetSettings, roomName, settings, state, urlParams } from './context.js';
+import { $, body, fmt, landing, meta, persist, resetSettings, roomName, settings, state, tv, urlParams } from './context.js';
 import { fog, petals } from './engines.js';
 import { applyFx, lite } from './fx.js';
 import { splitTitle, title } from './stage.js';
-import { updateEta, updateStats } from './stats.js';
+import { updateEta, updateStats, updateVitalsLabel } from './stats.js';
 import { toast } from './ui.js';
 
 const panel = $('#panel');
@@ -42,6 +42,7 @@ export function applySettings(animate = false) {
 
   updateEta();
   updateStats();
+  updateVitalsLabel();
 }
 
 /* ---------- Theme: auto follows the system's light or dark setting ---------- */
@@ -84,27 +85,37 @@ $('#btn-close-panel').addEventListener('click', () => openPanel(false));
 backdrop.addEventListener('click', () => openPanel(false));
 
 
+/**
+ * Change a setting, from the panel or from the heading. Title, subtitle and ETA are the room's when
+ * there is one: the shrine keeps them and tells everyone (a moment after you stop typing).
+ */
 let metaTimer = 0;
-panel.addEventListener('input', (e) => {
-  const el = e.target;
-  if (!el.name) return;
-  const value = el.type === 'checkbox' ? el.checked : el.name === 'eta' ? (el.value ? new Date(el.value).toISOString() : '') : el.value;
-  if (roomName && ['title', 'subtitle', 'eta'].includes(el.name)) {
-    // Shared with the room: the shrine keeps it and tells everyone (a moment after you stop typing).
-    state.roomMeta[el.name] = value;
-    urlParams.delete(el.name);
+export function setSetting(name, value) {
+  const isMeta = ['title', 'subtitle', 'eta'].includes(name);
+  if (roomName && isMeta) {
+    state.roomMeta[name] = value;
+    urlParams.delete(name);
     clearTimeout(metaTimer);
-    metaTimer = setTimeout(() => state.shrine?.send('meta', { [el.name]: value }), 400);
+    metaTimer = setTimeout(() => state.shrine?.send('meta', { [name]: value }), 400);
   } else {
-    settings[el.name] = value;
+    settings[name] = value;
     persist();
     // A title on the home page makes it a maintenance page: reload into that mode once typing stops.
-    if (landing && ['title', 'subtitle', 'eta'].includes(el.name) && value) {
+    if (landing && isMeta && value) {
       clearTimeout(metaTimer);
       metaTimer = setTimeout(() => location.reload(), 900);
     }
   }
   applySettings();
+}
+/** Title, subtitle and ETA can be changed on the page itself, unless the page is a wall or the public demo. */
+export const metaEditable = () => !tv && !landing && roomName !== 'demo';
+
+panel.addEventListener('input', (e) => {
+  const el = e.target;
+  if (!el.name) return;
+  const value = el.type === 'checkbox' ? el.checked : el.name === 'eta' ? (el.value ? new Date(el.value).toISOString() : '') : el.value;
+  setSetting(el.name, value);
   if (el.type === 'checkbox') sound.tick(el.checked ? 880 : 440, 0.06);
 });
 

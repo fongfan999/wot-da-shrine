@@ -60,9 +60,10 @@ above the altar for every vigil survived, and the altar itself grows with the
 room's karma: a torii gate at 150, a lucky cat on the table at 400, a golden
 censer at 1000.
 
-Title, subtitle and "back at" are shared by the whole room: set them in
-Customize, or open `/new?title=Payments+API+is+down&eta=…` and the first
-person in sets them for everyone.
+Title, subtitle and "back at" are shared by the whole room: click the title
+and type what is down, click "back at" to pick a time, set them in Customize,
+or open `/new?title=Payments+API+is+down&eta=…` and the first person in sets
+them for everyone.
 
 ### Rituals
 
@@ -220,7 +221,8 @@ src/app/                 the shrine
   fx.js                  lite/full effects, frame budget, TV sleep
   settings.js            applying settings, the settings panel, sound toggle
   ui.js                  toasts, activity feed, shockwaves, copy
-  stats.js               counters, rank, enlightenment, vigil strip, records, ETA
+  stats.js               counters, rank, vigil strip, records, ETA
+  incident.js            the title and ETA, edited in the heading
   vigil.js               the solo page's vigils and records
   altar.js               light, burn out, bowl + combos, bow, puff, breathing
   offerings.js, prayers.js, rituals.js   the offering tray, prayers, blame + fortune sheets
