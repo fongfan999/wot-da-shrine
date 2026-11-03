@@ -69,6 +69,73 @@
 /* The credit, under the cards */
 .side > .credit { justify-content: flex-start; padding: 2px 2px 0; }
 
+/* Beside the altar the column is one screen and never scrolls, so it reads on a TV nobody can touch.
+   It is as tall as the altar and as sticky. The shrine card is always open and compact; the live card
+   takes the rest. People keep to one row and the feed to the newest lines that fit: what does not fit
+   wraps into a row or column out of sight (the count in the label still says how many are here). */
+@media (min-width: 1100px) {
+  .side {
+    position: sticky;
+    top: calc(var(--bar-h, 70px) + var(--space-5));
+    height: max(360px, calc(100dvh - var(--bar-h, 70px) - var(--dock-h, 160px) - 2 * var(--space-5)));
+    gap: var(--space-3);
+  }
+  .card--live { flex: 1 1 0; min-height: 0; overflow: hidden; }
+  /* Who is here: the label and one row of people side by side */
+  .live__people { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .live__people > .label { flex: none; margin: 0; padding: 0; border: 0; }
+  .card--live .people { flex: 1; min-width: 0; max-height: 28px; overflow: hidden; }
+  /* Names go by their first word here (the full name is in the tooltip), and your chip says it is you by its colour */
+  .card--live .name__rest, .card--live .person__tag { display: none; }
+  .card--live .person { gap: 6px; padding: 2px 10px 2px 2px; font-size: 13px; }
+  .card--live .person__avatar { width: 22px; height: 22px; font-size: .8rem; }
+  .card--live .person__name { max-width: 10ch; }
+  .people__more { display: grid; place-items: center; min-width: 28px; height: 28px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); font-family: var(--font-mono); font-size: 12px; color: var(--muted); cursor: default; }
+  .card--live .feed { flex: 1 1 0; max-height: none; overflow: hidden; flex-wrap: wrap; align-content: flex-start; }
+  .card--live .feed__item { width: 100%; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 0; }
+  .card--live .feed__avatar { width: 22px; height: 22px; font-size: .7rem; }
+  .feed__main { display: flex; align-items: baseline; gap: 6px; min-width: 0; white-space: nowrap; }
+  .card--live .feed__line { flex: 0 1 auto; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; }
+  /* A prayer reads as its words: "Phong “May the disk never fill”", not "Phong sent a prayer" over them */
+  .card--live .feed__item:has(.feed__quote) .feed__what { display: none; }
+  .card--live .feed__item:has(.feed__quote) .feed__line { flex: none; max-width: 10ch; }
+  .card--live .feed__quote { flex: 0 1 auto; min-width: 0; margin: 0; font-size: 15px; overflow: hidden; text-overflow: ellipsis; }
+  .card--live .feed__time { margin: 0; }
+
+  .card--shrine { flex: none; padding-bottom: 14px; }
+  .card--shrine .shrine-sum { cursor: default; }
+  .card--shrine .shrine-sum__chev { display: none; }
+  .card--shrine[open] > .shrine-sum { margin-bottom: 10px; padding-bottom: 8px; }
+  .shrine-card__body { gap: 10px; }
+  .card--shrine .vitals__ekg { height: 40px; }
+  .card--shrine .vitals .burn__row:first-child { margin-bottom: 6px; padding-bottom: 0; border-bottom: 0; }
+  /* The numbers on one line: 81 karma · 0 survived · 6 prayers */
+  .card--shrine .stats { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  .card--shrine .stat { flex-direction: row-reverse; justify-content: flex-end; align-items: baseline; gap: 5px; }
+  .card--shrine .stat dd { font-size: 15px; }
+  /* The rank on one line: badge, name, how far to the next, its bar under them */
+  .card--shrine .rank { padding: 0; gap: 10px; border: 0; background: none; }
+  .card--shrine .rank__badge { width: 26px; height: 26px; font-size: 12px; }
+  .card--shrine .rank__text { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 2px 8px; }
+  .card--shrine .rank__name { font-size: 14px; }
+  .card--shrine .rank__text .meter { grid-column: 1 / -1; margin-top: 2px; }
+  /* The vigils: how far the shrine is from growing, and only the last one (or a line saying there is none) */
+  .card--shrine .records-block { padding-top: 10px; }
+  .card--shrine .records-block > .label { display: none; }
+  .card--shrine .records__level { margin-bottom: 2px; }
+  .card--shrine .records li + li { display: none; }
+  .card--shrine .records li { padding-bottom: 0; border-top: 0; }
+  .card--shrine .records__empty { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* The credit: who made it and where the code is, without the tagline */
+  .side > .credit { flex: none; }
+  .side > .credit > .hide-sm, .side > .credit [data-i18n="madeBy"] { display: none; }
+}
+/* A short window beside the altar: the heart line goes, its reading stays beside the label */
+@media (min-width: 1100px) and (max-height: 819px) {
+  .card--shrine .vitals__ekg { display: none; }
+  .card--shrine .vitals .burn__row:first-child { margin-bottom: 0; }
+}
+
 /* People */
 .people { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; max-height: 22vh; overflow-y: auto; }
 .person {
@@ -137,8 +204,6 @@ button.person:hover { background: var(--accent-soft); border-color: var(--accent
   color: var(--ink);
   overflow-wrap: anywhere;
 }
-.feed__quote::before { content: "“"; }
-.feed__quote::after { content: "”"; }
 .feed__time { margin-top: 5px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .feed__item--quiet .feed__line { color: var(--muted); }
 .feed__empty { margin: 0; font-size: 14px; color: var(--muted); }

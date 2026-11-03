@@ -7,11 +7,32 @@ import { $, fmt, people, reduceMotion, roomName, state } from './context.js';
 import { congregation } from './engines.js';
 import { openPanel } from './settings.js';
 import { openJoin } from './shrine.js';
-import { feedVisible, toast } from './ui.js';
+import { feedVisible, nameParts, toast } from './ui.js';
 
 const peopleList = $('#people');
 const peopleCount = $('#people-count');
 export const presence = $('#presence');
+
+/* Beside the altar the people keep to one row: whoever does not fit is counted in a +N chip
+   (you are always first, so never the one left out). */
+const morePeople = document.createElement('li');
+morePeople.className = 'people__more';
+function fitPeople() {
+  morePeople.remove();
+  const items = [...peopleList.children];
+  for (const li of items) li.hidden = false;
+  const fits = () => peopleList.scrollHeight <= peopleList.clientHeight + 1;
+  if (!peopleList.clientHeight || fits()) return;
+  peopleList.appendChild(morePeople);
+  let hidden = 0;
+  for (let i = items.length - 1; i > 0 && !fits(); i--) {
+    items[i].hidden = true;
+    hidden += 1;
+    morePeople.textContent = `+${hidden}`;
+  }
+  morePeople.title = items.filter((li) => li.hidden).map((li) => li.firstElementChild?.dataset.name).filter(Boolean).join(', ');
+}
+new ResizeObserver(fitPeople).observe(peopleList);
 
 export function renderPeople(newId) {
   const list = [...people.values()].sort((a, b) => (b.id === state.myId) - (a.id === state.myId));
@@ -25,13 +46,15 @@ export function renderPeople(newId) {
     row.className = 'person';
     row.dataset.id = p.id;
     row.dataset.tone = String(look(p.id).tone); // the robe they kneel in
-    if (mine) { row.type = 'button'; row.title = t('rename'); }
+    row.dataset.name = p.name;
+    row.title = mine ? `${p.name} · ${t('rename')}` : p.name;
+    if (mine) row.type = 'button';
     const avatar = document.createElement('span');
     avatar.className = 'person__avatar';
     avatar.textContent = p.avatar;
     const name = document.createElement('span');
     name.className = 'person__name';
-    name.textContent = p.name;
+    nameParts(name, p.name);
     row.append(avatar, name);
     if (mine) {
       const tag = document.createElement('span');
@@ -44,6 +67,7 @@ export function renderPeople(newId) {
     if (p.id === newId && !reduceMotion) gsap.from(li, { x: -12, opacity: 0, duration: 0.5, ease: 'power3.out' });
   }
   peopleCount.textContent = list.length;
+  fitPeople();
   congregation.set(list, state.myId);
 
   // Compact stack in the top bar.

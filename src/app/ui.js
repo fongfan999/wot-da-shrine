@@ -17,6 +17,21 @@ export function toast(msg) {
     .to(toastEl, { opacity: 0, y: 20, duration: 0.5, ease: 'power2.in' }, '+=2.6');
 }
 
+/** A name as two parts, so a tight layout can show only the first: "Phong" and " Phan". */
+export function nameParts(el, name) {
+  const [first, ...rest] = name.trim().split(/\s+/);
+  const a = document.createElement('span');
+  a.className = 'name__first';
+  a.textContent = first;
+  el.append(a);
+  if (rest.length) {
+    const b = document.createElement('span');
+    b.className = 'name__rest';
+    b.textContent = ` ${rest.join(' ')}`;
+    el.append(b);
+  }
+}
+
 /* ---------- Activity feed ---------- */
 const feedEl = $('#feed');
 const feedEmpty = $('#feed-empty');
@@ -63,15 +78,21 @@ export function logEvent({ key, avatar = '🪔', who = '', what, quote = '', qui
   av.className = 'feed__avatar';
   av.textContent = avatar;
   const main = document.createElement('div');
+  main.className = 'feed__main';
   const line = document.createElement('p');
   line.className = 'feed__line';
+  const whatEl = document.createElement('span');
+  whatEl.className = 'feed__what';
   if (who) {
     const b = document.createElement('b');
-    b.textContent = who;
-    line.append(b, document.createTextNode(` ${what}`));
+    nameParts(b, who);
+    whatEl.textContent = ` ${what}`;
+    line.append(b, whatEl);
   } else {
-    line.textContent = what;
+    whatEl.textContent = what;
+    line.append(whatEl);
   }
+  li.title = `${who ? `${who} ` : ''}${what}${quote ? `: “${quote}”` : ''}`;
   main.appendChild(line);
   if (quote) {
     const q = document.createElement('p');

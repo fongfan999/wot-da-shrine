@@ -57,6 +57,8 @@
 .status-dot[data-status="open"] { background: var(--live); border: 0; }
 .status-dot[data-status="closed"] { background: var(--error); border: 0; }
 
+/* GitHub sits in the bar on a wide screen and in More on a phone, never both */
+#btn-github, .menu__sep:has(+ #btn-github) { display: none; }
 .bar__right { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
 /* In a shrine the chip pushes the rest right, so the incident pill sits beside the bar's buttons */
 .room-chip:not([hidden]) { margin-right: auto; }
@@ -135,6 +137,9 @@ body[data-conn="closed"] .presence { opacity: .45; }
 .menu__sep { height: 1px; margin: 4px 6px; background: var(--line); }
 @media (max-width: 760px) {
   #btn-share { width: 36px; padding: 0; }
+  #bar-github { display: none; }
+  #btn-github { display: grid; }
+  .menu__sep:has(+ #btn-github) { display: block; }
   /* The chip keeps only its status dot (the room's name is on the altar's tablet), and the state is still read out */
   .room-chip { flex-shrink: 0; padding: 4px 10px; }
   .room-chip__name { display: none; }

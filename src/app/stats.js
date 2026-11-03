@@ -113,9 +113,14 @@ export function tickVigil() {
 /* ---------- The shrine card: folded to one line until someone opens it; a TV on the wall shows it open ---------- */
 const shrineCard = $('#shrine-card');
 const SHRINE_OPEN_KEY = 'incense:shrine-card:v1';
-try { shrineCard.open = tv || localStorage.getItem(SHRINE_OPEN_KEY) === '1'; } catch { shrineCard.open = tv; }
+// Beside the altar (a wide screen, or a TV) the card is always open: the column is laid out to fit it.
+const besideAltar = matchMedia('(min-width: 1100px)');
+const keepOpen = () => tv || besideAltar.matches;
+try { shrineCard.open = keepOpen() || localStorage.getItem(SHRINE_OPEN_KEY) === '1'; } catch { shrineCard.open = keepOpen(); }
+besideAltar.addEventListener('change', () => { if (keepOpen()) shrineCard.open = true; });
+shrineCard.querySelector('summary').addEventListener('click', (e) => { if (keepOpen()) e.preventDefault(); });
 shrineCard.addEventListener('toggle', () => {
-  if (tv) return;
+  if (keepOpen()) return;
   try { localStorage.setItem(SHRINE_OPEN_KEY, shrineCard.open ? '1' : '0'); } catch { /* ignore */ }
 });
 
