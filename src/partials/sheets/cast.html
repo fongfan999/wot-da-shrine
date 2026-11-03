@@ -9,8 +9,9 @@
     </div>
     <div class="sheet__body">
       <ol class="cast-form__how">
-        <li><span class="cast-form__n">1</span><span><span data-i18n="castHow1">On the big screen, open</span> <b class="cast-form__url" id="cast-url">/tv</b></span></li>
-        <li><span class="cast-form__n">2</span><span data-i18n="castHow2">Type the code it shows</span></li>
+        <li><span class="cast-form__n">1</span><span><span data-i18n="castHow1">On the big screen, open</span> <button class="cast-form__url" id="cast-url" type="button" title="Copy the address">/tv</button></span></li>
+        <li><span class="cast-form__n">2</span><span data-i18n="castHow2">Type the six-letter code it shows</span></li>
+        <li><span class="cast-form__n">3</span><span id="cast-how3">Send it: the TV switches to this shrine</span></li>
       </ol>
       <label class="cast-form__code">
         <span class="sr-only" data-i18n="castCodeLabel">The code on the TV</span>
@@ -27,7 +28,7 @@
       <div class="sheet__row">
         <button class="btn btn--accent" id="cast-go" type="submit">
           <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><path d="M3 12a8 8 0 0 1 8 8M3 16a4 4 0 0 1 4 4"/><path d="M3 20h.01"/></svg>
-          <span data-i18n="castGo">Put it on the TV</span>
+          <span data-i18n="castGo">Send to the TV</span>
         </button>
         <button class="btn btn--glass" id="cast-demo" type="button" hidden data-i18n="castDemo">Show the demo instead</button>
       </div>

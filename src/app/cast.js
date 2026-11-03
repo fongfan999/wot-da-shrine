@@ -11,7 +11,7 @@ import { suggested, toSlug } from './openShrine.js';
 import { openRitual } from './rituals.js';
 import { spaced } from './screen.js';
 import { openShare } from './shareSheet.js';
-import { toast } from './ui.js';
+import { copyText, toast } from './ui.js';
 
 const LAST_KEY = 'incense:cast:v1'; // { code, room }: the TV you last cast to, the shrine you were last in
 
@@ -46,6 +46,7 @@ export function openCast(code = '') {
   const c = clean(code || last.code || '');
   codeInput.value = c.length > 3 ? spaced(c) : c;
   $('#cast-url').textContent = `${location.host}/tv`;
+  $('#cast-how3').textContent = roomName ? fmt('castHow3Room', { room: roomName }) : t('castHow3');
   // Outside a shrine you pick one: the last one you were in, or a fresh name.
   $('#cast-shrine').hidden = Boolean(roomName);
   $('#cast-demo').hidden = Boolean(roomName);
@@ -100,6 +101,7 @@ form.addEventListener('submit', (e) => {
   cast(roomName || toSlug(roomInput.value.trim() || roomInput.placeholder || suggested));
 });
 $('#cast-demo').addEventListener('click', () => cast('demo'));
+$('#cast-url').addEventListener('click', () => copyText(`${location.origin}/tv`, t('castUrlCopied')));
 
 // Every Cast to TV button, and the TV's QR (/?cast=CODE) on a phone.
 document.addEventListener('click', (e) => {

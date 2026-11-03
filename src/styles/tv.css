@@ -75,15 +75,17 @@ body[data-paired="lost"] .tv-join__cast { opacity: .4; }
 
 /* Cast to TV */
 .cast-form__how { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
-.cast-form__how li { display: flex; align-items: center; gap: 10px; }
+.cast-form__how li { display: flex; align-items: flex-start; gap: 10px; }
 .cast-form__n { display: grid; place-items: center; flex: none; width: 22px; height: 22px; border: 1.5px solid var(--accent); border-radius: 50%; font-family: var(--font-serif); font-style: italic; font-size: 12px; color: var(--accent); }
-.cast-form__url { font-family: var(--font-mono); font-weight: 500; color: var(--accent); overflow-wrap: anywhere; }
+.cast-form__url { padding: 0; border: 0; background: none; font: inherit; font-family: var(--font-mono); font-weight: 500; color: var(--accent); overflow-wrap: anywhere; text-decoration: underline dotted; text-underline-offset: 3px; cursor: copy; }
+.cast-form__url:hover { text-decoration-style: solid; }
 .cast-form__code input { width: 100%; padding: 12px 16px; border: 1.5px solid var(--ink); border-radius: var(--radius-md); outline: 0; background: var(--paper); color: var(--ink); font-family: var(--font-mono); font-size: clamp(28px, 7vw, 40px); font-weight: 600; letter-spacing: .22em; text-align: center; text-transform: uppercase; }
 .cast-form__code input::placeholder { color: var(--line-strong); }
 .cast-form__code input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .cast-form__shrine { display: flex; flex-direction: column; gap: 6px; }
 .cast-form__shrine-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--sheet-label); }
 .cast-form__shrine .name-form__field { min-height: 46px; }
-.cast-form__status { min-height: 1.4em; margin: -6px 0 0; font-size: 14px; color: var(--muted); }
+.cast-form__status:empty { display: none; }
+.cast-form__status { margin: -6px 0 0; font-size: 14px; color: var(--muted); }
 .cast-form__status[data-kind="error"] { color: var(--flame); }
 .cast-form__status[data-kind="ok"] { color: var(--live); }
