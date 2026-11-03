@@ -67,7 +67,7 @@
 .records-block { padding-top: 12px; border-top: 1px solid var(--sheet-line); }
 
 /* The credit, under the cards */
-.side > .credit { justify-content: flex-start; padding: 2px 2px 0; }
+.side > .credit { justify-content: center; padding: 2px 2px 0; }
 
 /* Beside the altar the column is one screen and never scrolls, so it reads on a TV nobody can touch.
    It is as tall as the altar and as sticky. The shrine card is always open and compact; the live card
