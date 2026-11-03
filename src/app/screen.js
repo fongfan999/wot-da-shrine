@@ -107,7 +107,7 @@ function offerFullscreen() {
   btn.addEventListener('click', toggle);
   document.addEventListener('fullscreenchange', sync);
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'f' && !e.metaKey && !e.ctrlKey && !e.altKey && !e.target.matches('input, textarea')) toggle();
+    if (e.key === 'f' && !e.repeat && !e.metaKey && !e.ctrlKey && !e.altKey && !e.target.matches('input, textarea')) toggle();
   });
   sync();
 }

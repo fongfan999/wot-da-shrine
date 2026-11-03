@@ -39,7 +39,7 @@ document.addEventListener('keydown', (e) => {
   openTray(false);
 });
 document.addEventListener('keydown', (e) => {
-  if (e.target.matches('input, textarea') || joinOpen() || menuOpen() || anySheetOpen() || tv || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.repeat || e.target.matches('input, textarea') || joinOpen() || menuOpen() || anySheetOpen() || tv || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key === 'l') light();
   if (e.key === 'b') ringBowl();
   if (e.key === 'p') bow();
