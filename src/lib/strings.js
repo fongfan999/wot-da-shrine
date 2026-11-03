@@ -87,6 +87,8 @@ export const STRINGS = {
     [250, 'Bodhisattva of five nines'],
     [500, 'Enlightened SRE'],
   ],
+  rankTip: 'A title earned by this shrine’s karma, {k} of {of}. Next: {next} at {at}.',
+  rankTipTop: 'A title earned by this shrine’s karma, {k} of {of}: the highest there is.',
   comboCaptions: [
     [3, 'the rack hears you'],
     [6, 'the monks are impressed'],

@@ -9,14 +9,12 @@ import { ago, bump, shockwave, toast } from './ui.js';
 import { every } from '../lib/clock.js';
 
 /* ---------- Stats + progress ---------- */
-export const statKarma = $('#stat-karma');
 export const burnBar = $('#burn-bar');
 const dockTime = $('#dock-time');
 
-const sumKarma = $('#sum-karma');
+export const statKarma = $('#sum-karma'); // the karma in the card's header, the one place it is written
 export function updateStats(quiet = false) {
   statKarma.textContent = counters.karma;
-  sumKarma.textContent = counters.karma;
   updateRank(quiet);
 }
 
@@ -25,7 +23,7 @@ export function updateStats(quiet = false) {
    (what the altar shows), so it is never full while there is still a temple to reach. */
 const rankName = $('#rank-name');
 const rankNext = $('#rank-next');
-const rankBadge = $('#rank-badge');
+const rankRow = $('#rank');
 const rankBar = $('#rank-bar');
 let shownRank = -1;
 function updateRank(quiet) {
@@ -33,7 +31,8 @@ function updateRank(quiet) {
   const i = ranks.reduce((idx, [at], k) => (counters.karma >= at ? k : idx), 0);
   const [, name] = ranks[i];
   rankName.textContent = name;
-  rankBadge.textContent = String(i + 1);
+  const up = ranks[i + 1];
+  rankRow.title = fmt(up ? 'rankTip' : 'rankTipTop', { k: i + 1, of: ranks.length, next: up?.[1], at: up?.[0] });
   const levels = STRINGS.shrineLevels;
   const lv = shrineLevel();
   const [at] = levels[lv];
