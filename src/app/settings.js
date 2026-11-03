@@ -1,7 +1,6 @@
 /* Settings: theme, effects, title and ETA, applied to the page; the settings panel and sound toggle. */
 import gsap from 'gsap';
 import { sound } from '../audio/index.js';
-import { shareUrl } from '../lib/config.js';
 import { syncPalette } from '../scene/palette.js';
 import { BRAND, STRINGS, applyStrings, t } from '../lib/strings.js';
 import { $, body, landing, meta, persist, resetSettings, roomName, settings, state, tv, urlParams } from './context.js';
@@ -48,8 +47,7 @@ export function applySettings(animate = false) {
   subtitleField.value = meta('subtitle');
   titleField.placeholder = roomName ? t('title') : '';
   subtitleField.placeholder = roomName ? subtitleShown() : '';
-  panel.querySelector('[name=eta]').value = meta('eta') ? toLocalInput(meta('eta')) : '';
-  $('#meta-note').hidden = !roomName;
+  $('#panel-shrine').hidden = !metaEditable();
   for (const k of ['music', 'sfx', 'petals', 'fog']) panel.querySelector(`[name=${k}]`).checked = settings[k];
   $('#theme-seg').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.theme === settings.theme)));
 
@@ -67,12 +65,6 @@ function applyTheme() {
   syncPalette();
 }
 darkQuery.addEventListener('change', () => { if (settings.theme === 'auto') applyTheme(); });
-
-function toLocalInput(iso) {
-  const d = new Date(iso);
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 /* ---------- Sound toggle ---------- */
 export const soundBtn = $('#btn-sound');
@@ -123,7 +115,7 @@ export const metaEditable = () => Boolean(roomName) && !tv && roomName !== 'demo
 panel.addEventListener('input', (e) => {
   const el = e.target;
   if (!el.name) return;
-  const value = el.type === 'checkbox' ? el.checked : el.name === 'eta' ? (el.value ? new Date(el.value).toISOString() : '') : el.value;
+  const value = el.type === 'checkbox' ? el.checked : el.value;
   setSetting(el.name, value);
   if (el.type === 'checkbox') sound.tick(el.checked ? 880 : 440, 0.06);
 });
@@ -137,17 +129,9 @@ $('#theme-seg').addEventListener('click', (e) => {
   sound.tick(740, 0.06);
 });
 
-$('#btn-copy-link').addEventListener('click', async () => {
-  const url = shareUrl(settings);
-  try { await navigator.clipboard.writeText(url); } catch { prompt('Copy this link:', url); }
-  history.replaceState(null, '', url);
-  toast(t('copied'));
-  sound.tick(990, 0.08);
-});
-
 $('#btn-reset').addEventListener('click', () => {
   resetSettings();
-  history.replaceState(null, '', location.pathname);
   applySettings(true);
+  toast(t('resetDone'));
   sound.tick(330, 0.06);
 });

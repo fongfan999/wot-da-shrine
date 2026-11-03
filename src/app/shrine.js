@@ -37,14 +37,12 @@ export function enterRoom() {
   $('#room-chip').hidden = false;
   $('#room-name').textContent = roomName;
   $('#people-card').hidden = false;
-  $('#btn-rename').hidden = false;
   $('#menu-rename').hidden = false;
   presence.hidden = false;
   $('#join-room').textContent = fmt('roomEyebrow', { room: roomName });
   if (tv) { state.me = { name: t('tvWatch'), avatar: '🤖' }; connect(); return; }
   if (roomName === 'demo') { // the public demo names you itself and takes only the ready-made prayers
     state.me = state.me ?? { name: gsap.utils.random(DEFAULT_NAMES), avatar: gsap.utils.random(AVATARS) };
-    $('#btn-rename').hidden = true;
     $('#menu-rename').hidden = true;
     wishInput.disabled = true;
     wishInput.placeholder = t('demoPrayers');

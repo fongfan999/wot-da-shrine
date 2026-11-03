@@ -2,7 +2,7 @@
 import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { t } from '../lib/strings.js';
-import { $, body, persist, reduceMotion, settings, tv } from './context.js';
+import { $, body, fmt, persist, reduceMotion, settings, tv } from './context.js';
 import { art, congregation, motes, petals, room, smoke } from './engines.js';
 import { applySettings } from './settings.js';
 import { toast } from './ui.js';
@@ -47,7 +47,7 @@ export function applyFx() {
     sound.setLite(lite);
     applyFrameBudget();
   }
-  $('#fx-note').textContent = t(settings.fx === 'auto' ? 'fxNoteAuto' : lite ? 'fxNoteLite' : 'fxNoteFull') + (settings.fx === 'auto' ? ` ${t(lite ? 'fxLite' : 'fxFull')}.` : '');
+  $('#fx-note').textContent = settings.fx === 'auto' ? fmt('fxNoteAuto', { fx: t(lite ? 'fxLite' : 'fxFull').toLowerCase() }) : t(lite ? 'fxNoteLite' : 'fxNoteFull');
   $('#fx-seg').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.fx === settings.fx)));
 }
 

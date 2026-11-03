@@ -163,5 +163,3 @@ body[data-landing="1"] .subtitle { color: color-mix(in srgb, var(--ink) 76%, tra
 .hero-ribbon__item.is-sent { animation: ribbon-sent .9s var(--ease); }
 @keyframes ribbon-sent { 0% { border-color: var(--flame); box-shadow: 0 0 0 0 color-mix(in srgb, var(--flame) 50%, transparent); } 100% { box-shadow: 0 0 0 12px transparent; } }
 
-/* On the home page Customize is preferences only: the maintenance-page fields live in the builder below */
-body[data-landing="1"] .panel .field--page { display: none; }

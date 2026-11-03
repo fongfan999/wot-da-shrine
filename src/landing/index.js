@@ -1,6 +1,5 @@
 /* The landing page below the shrine on the home page. */
 import { sound } from '../audio/index.js';
-import { t } from '../lib/strings.js';
 import { ignite } from '../app/altar.js';
 import { $, body, landing, reduceMotion, state } from '../app/context.js';
 import { introStarted } from '../app/stage.js';
@@ -23,7 +22,6 @@ export function setupLanding() {
   const landingEl = $('#landing');
   landingEl.hidden = false;
   $('#hero-form').hidden = false;
-  $('#panel .panel__hint').textContent = t('panelHintPrefs');
   setupBuilder();
   setupTv();
   // The altar is alive when you arrive: lit after the intro, with a hint that it can be touched.

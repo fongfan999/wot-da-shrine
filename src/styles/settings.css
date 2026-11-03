@@ -88,3 +88,9 @@
 .field__note { margin: 0; font-family: var(--font-sans); font-size: 13px; line-height: 1.45; letter-spacing: 0; text-transform: none; color: var(--muted); }
 .panel__actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .panel__hint { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+
+/* Two groups: what the whole shrine sees, then what only this browser keeps */
+.panel__group { display: flex; flex-direction: column; gap: 18px; }
+.panel__group + .panel__group { padding-top: 18px; border-top: 1px solid var(--line); }
+.panel__group-head { display: flex; align-items: baseline; gap: 8px; margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.01em; color: var(--ink); }
+.panel__group-head small { font-family: var(--font-mono); font-size: 11px; font-weight: 400; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }

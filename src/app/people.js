@@ -5,7 +5,6 @@ import { look } from '../scene/burner.js';
 import { t } from '../lib/strings.js';
 import { $, fmt, people, reduceMotion, roomName, state } from './context.js';
 import { congregation } from './engines.js';
-import { openPanel } from './settings.js';
 import { openJoin } from './shrine.js';
 import { feedVisible, nameParts, toast } from './ui.js';
 
@@ -111,5 +110,4 @@ presence.addEventListener('click', () => {
   toast(`${t('inShrine')}: ${[...people.values()].map((p) => (p.id === state.myId ? t('you') : p.name)).join(', ')}`);
 });
 
-$('#btn-rename').addEventListener('click', () => { openPanel(false); openJoin(); });
 $('#menu-rename').addEventListener('click', openJoin);
