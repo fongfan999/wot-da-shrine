@@ -54,11 +54,17 @@ shrine.
 
 ## A vigil, not a visit
 
-An incident is a *vigil*. It begins when the incense is lit in a shrine with
-no open vigil, and ends when someone presses **They're back!** (or when it is
-forgotten for six hours). While it is open the heading counts how long the
-servers have been down, who is praying and how many prayers were said. When
-it ends the shrine files it: minutes, people, prayers, karma. The **Shrine
+An incident is a *vigil*. It begins with the first thing anyone does at an
+altar with no open vigil (incense, a bow, a prayer, the bowl), and ends when
+someone presses **They're back!**. For ten minutes after that the room
+celebrates, and only fresh incense opens the next vigil, so the celebration's
+bows don't. Whoever said they're back can take it back for 30 seconds: the
+vigil reopens as it was. A vigil is never forgotten while anyone is kneeling;
+once the room has stood empty and untouched for 12 hours it is filed as
+forgotten. While it is open the heading counts how long the servers have been
+down, who is praying and how many prayers were said. When it ends the shrine
+files it: what was down (the title at the time), minutes, people, prayers,
+karma. The rules both sides play by live in `shared/rules.js`. The **Shrine
 records** card shows what the altar has survived, a paper lantern hangs
 above the altar for every vigil survived, and the altar itself grows with the
 room's karma: a torii gate at 150, a lucky cat on the table at 400, a golden
@@ -279,7 +285,7 @@ src/lib/
 public/favicon.svg       the mark
 public/og.png            the link preview card (1200×630)
 public/wotdafong-*.svg   the Wot Da Fong P?! mark for the credit line
-shared/                  used by the page and the Worker: ready-made prayers, room names, link previews
+shared/                  used by the page and the Worker: the rules (burn time, karma, vigils), ready-made prayers, room names, link previews
 worker/index.js          Cloudflare Worker: a Hono app that mounts the routes below
 worker/middleware.js     security headers, API headers, rate limits, socket-only
 worker/routes/api.js     /api/health, /api/status, /api/world, /api/pulse

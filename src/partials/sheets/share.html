@@ -8,6 +8,11 @@
       </button>
     </div>
     <div class="sheet__body">
+      <!-- They're back, a moment ago: still time to take it back -->
+      <p class="share-undo" id="share-undo" hidden>
+        <span data-i18n="undoHint">Spoke too soon?</span>
+        <button class="btn btn--glass btn--sm" id="share-undo-btn" type="button"><span data-i18n="undo">Not back? Undo</span> <span class="undo__left"></span></button>
+      </p>
       <section class="sheet__section" id="share-invite" hidden>
         <h3 class="label" data-i18n="inviteLabel">Invite the team</h3>
         <p class="sheet__hint" data-i18n="inviteHint">Drop the link in the incident channel. Anyone who opens it kneels at this altar.</p>

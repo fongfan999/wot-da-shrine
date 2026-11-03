@@ -1,5 +1,6 @@
 /* Rituals in a sheet: burn a blame, draw a fortune. */
 import gsap from 'gsap';
+import { KARMA } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { LEVELS as FORTUNE_LEVELS, asText as fortuneText, draw as drawFortune } from '../lib/omikuji.js';
 import { t } from '../lib/strings.js';
@@ -43,7 +44,7 @@ $('#blame-form').addEventListener('submit', (e) => {
   blameText.value = '';
   openRitual('blame', false);
   showBurn(text);
-  addKarma(5);
+  addKarma(KARMA.blame);
   vigilTouch(0, 'blames');
   logMine('blame', t('fBlame'), { toastText: t('blameBurned') });
   state.shrine?.send('blame');
@@ -89,7 +90,7 @@ $('#btn-fortune').addEventListener('click', () => {
   fortune = saved ?? drawFortune();
   if (!again) {
     try { sessionStorage.setItem(FORTUNE_KEY(), JSON.stringify(fortune)); } catch { /* ignore */ }
-    addKarma(2);
+    addKarma(KARMA.omikuji);
     vigilTouch(0, 'fortunes');
     logMine('omikuji', fmt('fOmikuji', { level: FORTUNE_LEVELS[fortune.level].name }));
     state.shrine?.send('omikuji', { level: fortune.level });

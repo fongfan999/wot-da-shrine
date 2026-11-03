@@ -1,7 +1,10 @@
 /* ---------- The incident: how long it has been down, when it is due back, and the button that ends it ---------- */
 .incident { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 6px; }
 .incident .vigil { margin: 0; }
-.incident__resolve { min-height: 34px; padding-block: 4px; }
+.incident__resolve, .incident__undo { min-height: 34px; padding-block: 4px; }
+.undo__left { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+.share-undo { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 8px 8px 8px 14px; border: 1px dashed var(--line-strong); border-radius: var(--radius-md); font-size: 14px; color: var(--muted); }
+.records__title { color: var(--ink); font-weight: 600; }
 /* No vigil open: a quiet hint where the timer goes */
 .vigil[data-idle] { border-style: dashed; }
 .vigil[data-idle] .vigil__dot { background: var(--muted); animation: none; }

@@ -7,23 +7,15 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
+import { AVATARS, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, KARMA, MAX_HISTORY, OFFERING_KINDS, RESOLVE_UNDO, VIGIL_IDLE } from '../../shared/rules.js';
 
-export const BURN_SECONDS = 600; // keep in sync with src/app/context.js
 const MAX_PRAYERS = 12;
 const MAX_OFFERINGS = 4; // the altar table has four slots
 const FORGET_AFTER = 30 * 24 * 3600 * 1000; // rooms nobody visits for 30 days are swept
 const TOUCH_EVERY = 24 * 3600 * 1000; // pushing the sweep back once a day is plenty, and saves a write per action
-const OFFERING_KINDS = ['energy', 'noodles', 'duck', 'coffee', 'keyboard', 'usb', 'laptop']; // keys of OFFERINGS in src/scene/burner.js
-const AVATARS = ['🧘', '🙇', '🙏', '🧑‍💻', '👩‍💻', '👨‍💻', '🐒', '🤖', '🦆', '🐱'];
-
-// What each action is worth.
-const KARMA = { bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20, blame: 5, omikuji: 2 };
 const CHORUS_BONUS = 3; // per person, when at least CHORUS_MIN people bow within CHORUS_WINDOW
 const CHORUS_MIN = 3;
 const CHORUS_WINDOW = 4000;
-const VIGIL_IDLE = 6 * 3600 * 1000; // a vigil nobody has touched for six hours is over, whatever anyone says
-const MAX_HISTORY = 12;
-export const FORTUNES = ['great', 'good', 'small', 'bad', 'terrible']; // omikuji levels, see src/lib/omikuji.js
 const META_MAX = { title: 60, subtitle: 140, eta: 40 };
 const LEAVE_GRACE = 5000; // a dropped socket gets this long to come back before the room hears it left
 const TOKEN_RE = /^[0-9a-f-]{36}$/;
@@ -42,16 +34,21 @@ const DEMO_META = { title: 'The demo rack is down', subtitle: 'This is the publi
 const PRESET = new Set(QUICK_PRAYERS);
 
 /**
- * A vigil is one incident: it begins when the incense is lit in a room with no
- * vigil, and ends when someone says the servers are back (or when it is
- * forgotten for six hours). The room keeps the last few, and counts the ones
- * it survived.
+ * A vigil is one incident: it begins with the first thing anyone does at the
+ * altar, and ends when someone says the servers are back, or when the room has
+ * stood empty and untouched for VIGIL_IDLE. For a while after They're back only
+ * fresh incense opens the next one, so the celebration's bowls and bows don't.
+ * The room keeps the last few, and counts the ones it survived.
  */
+const OPENS_VIGIL = new Set(['light', 'bowl', 'bow', 'offer', 'prayer', 'puff', 'blame', 'omikuji']);
+/** What the vigil counts of each action. */
+const VIGIL_FIELD = { light: 'lights', prayer: 'prayers', blame: 'blames', omikuji: 'fortunes' };
 const EMPTY = {
   incense: 0, karma: 0, litAt: 0, offerings: [], prayers: [],
   since: 0, prayed: 0, resolved: 0, resolvedAt: 0,
   meta: { title: '', subtitle: '', eta: '' }, // what's down and when it's back, shared by the whole room
   vigil: null, history: [], survived: 0, longest: 0,
+  undo: null, // { id, at, vigil, longest, resolvedAt }: They're back, while whoever said it can still take it back
 };
 
 function clean(text, max) {
@@ -151,8 +148,6 @@ export class Shrine extends DurableObject {
         if (s.litAt) { ws.send(JSON.stringify({ t: 'sync', ...this.counters() })); return; } // someone beat you to it
         s.litAt = Date.now();
         s.incense += 1;
-        if (!s.vigil) s.vigil = { startedAt: s.litAt, lastAt: s.litAt, peak: 0, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0 };
-        s.vigil.lights += 1;
         break;
       case 'burnout':
         // Every client reports the burn-out; settle() only pays out once.
@@ -179,12 +174,10 @@ export class Shrine extends DurableObject {
         break;
       case 'blame':
         // A confession burned in the censer. The words never reach the server; only the act does.
-        if (s.vigil) s.vigil.blames += 1;
         break;
       case 'omikuji':
         if (!FORTUNES.includes(msg.level)) return;
         out.level = msg.level;
-        if (s.vigil) s.vigil.fortunes += 1;
         break;
       case 'meta': {
         // What's down, and when it's back: one title for the whole room.
@@ -208,17 +201,33 @@ export class Shrine extends DurableObject {
         out.text = text;
         s.prayers = [...s.prayers, { name: by.name, avatar: by.avatar, text, at: Date.now() }].slice(-MAX_PRAYERS);
         s.prayed += 1;
-        if (s.vigil) s.vigil.prayers += 1;
         break;
       }
       case 'resolve': {
         // The servers are back: the vigil ends, the shrine remembers it, and the room celebrates.
         if (!s.vigil) return;
         const now = Date.now();
+        // Kept for a moment, so whoever said it can take it back if the servers fall over again.
+        s.undo = { id: by.id, at: now, vigil: { ...s.vigil }, longest: s.longest, resolvedAt: s.resolvedAt };
         s.resolvedAt = now;
         s.resolved += 1;
         s.vigil.karma += KARMA.resolve; // the record includes the karma for coming back
         out.record = this.closeVigil(now, 'survived'); // counters() carries `vigil` (now null), so the record travels under its own name
+        break;
+      }
+      case 'unresolve': {
+        // Not back after all: the vigil reopens as it was, and the record of it is torn up.
+        const u = s.undo;
+        if (!u || u.id !== by.id || Date.now() - u.at > RESOLVE_UNDO || s.history[0]?.endedAt !== u.at) return;
+        s.history = s.history.slice(1);
+        s.survived = Math.max(0, s.survived - 1);
+        s.longest = u.longest;
+        s.resolved = Math.max(0, s.resolved - 1);
+        s.resolvedAt = u.resolvedAt;
+        s.karma = Math.max(0, s.karma - KARMA.resolve);
+        s.vigil = u.vigil;
+        s.undo = null;
+        out.undone = u.at;
         break;
       }
       case 'rename': {
@@ -237,6 +246,8 @@ export class Shrine extends DurableObject {
 
     if (!s.since) s.since = Date.now();
     s.karma += KARMA[msg.t] ?? 0;
+    if (!s.vigil && OPENS_VIGIL.has(msg.t) && (msg.t === 'light' || Date.now() - s.resolvedAt > CELEBRATE_FOR)) this.openVigil();
+    if (s.vigil && VIGIL_FIELD[msg.t]) s.vigil[VIGIL_FIELD[msg.t]] += 1;
     if (s.vigil) {
       s.vigil.lastAt = Date.now();
       s.vigil.karma += (KARMA[msg.t] ?? 0) + (out.bonus ?? 0);
@@ -272,6 +283,9 @@ export class Shrine extends DurableObject {
     const person = ws.deserializeAttachment();
     if (!person || person.replaced || person.watcher) return;
     ws.serializeAttachment({ ...person, replaced: true }); // close and error can both fire: announce once
+    // The last one out starts the clock on forgetting the vigil.
+    const v = this.state.vigil;
+    if (v && !this.people().length) { v.seenAt = Date.now(); this.ctx.waitUntil(this.save().catch(() => {})); }
     if (!person.token) { this.broadcast({ t: 'leave', id: person.id }, ws); return; }
     clearTimeout(this.leaving.get(person.token)?.timer);
     const timer = setTimeout(() => {
@@ -309,7 +323,15 @@ export class Shrine extends DurableObject {
 
   counters() {
     const s = this.state;
-    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived };
+    const undo = s.undo && Date.now() - s.undo.at < RESOLVE_UNDO ? { by: s.undo.id, until: s.undo.at + RESOLVE_UNDO } : null;
+    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo };
+  }
+
+  /** A new incident: the vigil starts now, with everyone already kneeling. */
+  openVigil() {
+    const now = Date.now();
+    this.state.vigil = { startedAt: now, lastAt: now, seenAt: now, peak: this.people().length, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0 };
+    this.state.undo = null;
   }
 
   /** End the vigil and file it. Returns the record. */
@@ -325,6 +347,7 @@ export class Shrine extends DurableObject {
       karma: v.karma,
       blames: v.blames,
       fortunes: v.fortunes,
+      title: s.meta.title, // what was down, as it was called then: the room's title moves on to the next incident
       outcome,
     };
     s.history = [record, ...s.history].slice(0, MAX_HISTORY);
@@ -336,11 +359,16 @@ export class Shrine extends DurableObject {
     return record;
   }
 
-  /** A vigil nobody has touched for hours is filed as forgotten. True when it was. */
+  /**
+   * A vigil in a room that has stood empty and untouched for VIGIL_IDLE is filed as forgotten.
+   * Never while anyone is kneeling: a quiet team is still a team. True when it was.
+   */
   forget() {
     const v = this.state.vigil;
-    if (!v || Date.now() - v.lastAt < VIGIL_IDLE) return false;
-    this.closeVigil(v.lastAt, 'forgotten');
+    if (!v || this.people().length) return false;
+    const last = Math.max(v.lastAt, v.seenAt ?? 0);
+    if (Date.now() - last < VIGIL_IDLE) return false;
+    this.closeVigil(last, 'forgotten');
     return true;
   }
 

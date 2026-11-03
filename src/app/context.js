@@ -12,7 +12,7 @@ export const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').match
 /** t() with {placeholders} filled in. */
 export const fmt = (key, vars = {}) => Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), t(key));
 
-export const BURN_SECONDS = 600; // keep in sync with worker/objects/shrine.js
+export { BURN_SECONDS } from '../../shared/rules.js';
 
 /* ---------- Settings + counters ---------- */
 export const settings = loadSettings();
@@ -57,6 +57,7 @@ export const state = {
   roomMeta: { title: '', subtitle: '', eta: '' }, // what's down and when it's back, shared by the room
   vigil: null,        // { startedAt, lastAt, peak, prayers, karma, blames, fortunes, lights }
   lastVigil: null,    // the record of the vigil that just ended, for the heading and the card
+  undo: null,         // { by, until }: They're back, while whoever said it can still take it back
 };
 
 /** Title, subtitle and ETA: in a room the shrine's shared ones, unless this URL says otherwise. */

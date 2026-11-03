@@ -1,13 +1,13 @@
 /* The altar's own rituals: light the incense, ring the bowl, bow, puff, breathe. */
 import gsap from 'gsap';
+import { KARMA } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { saveCounters } from '../lib/config.js';
 import { STRINGS, t } from '../lib/strings.js';
-import { $, body, BURN_SECONDS, counters, fmt, landing, roomName, state } from './context.js';
+import { $, body, BURN_SECONDS, counters, fmt, roomName, state } from './context.js';
 import { art, burner, congregation, kick, motes, petals, room, smoke } from './engines.js';
 import { pulse } from './prayers.js';
-import { clearResolved, renderResolve } from './resolve.js';
-import { addKarma, burnBar, tickProgress, tickVigil, updateStats } from './stats.js';
+import { addKarma, burnBar, tickProgress, updateStats } from './stats.js';
 import { logEvent, logMine, shockwave, toast } from './ui.js';
 import { vigilTouch } from './vigil.js';
 
@@ -27,11 +27,7 @@ export function light() {
   if (state.myId) congregation.bow(state.myId, 3);
   logMine('light', t('fLight'), { toastText: t('litToast') });
   pulse('light');
-  if (!roomName && !landing) {
-    if (!state.vigil) { state.vigil = { startedAt: Date.now(), lastAt: Date.now(), peak: 1, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0 }; if (body.dataset.resolved) clearResolved(); renderResolve(); }
-    vigilTouch(0, 'lights');
-    tickVigil();
-  }
+  vigilTouch(0, 'lights'); // the solo page's vigil: fresh incense opens one even mid-celebration
 }
 
 /** Set the altar burning, `at` being when it was lit (earlier than now for late joiners). */
@@ -88,7 +84,7 @@ export function burnOut() {
   congregation.setLit(false);
   motes.setLit(false);
   if (state.shrine) state.shrine.send('burnout');
-  else addKarma(10);
+  else addKarma(KARMA.burnout);
   const what = t(roomName ? 'fBurnout' : 'fBurnoutSolo');
   logEvent({ what, quiet: true, toastText: what });
   gsap.fromTo('#btn-light', { opacity: 0.4 }, { opacity: 1, duration: 0.6, ease: 'power3.out' });
@@ -104,7 +100,7 @@ export function ringBowl() {
   sound.unlock();
   const note = gsap.utils.random([174, 196, 220, 261]);
   bowlFx(note);
-  addKarma(1);
+  addKarma(KARMA.bowl);
   logMine('bowl', t('fBowl'));
   state.shrine?.send('bowl', { note });
 }
@@ -155,7 +151,7 @@ function comboEnd() {
 export function bow() {
   sound.unlock();
   bowFx(state.myId);
-  addKarma(2);
+  addKarma(KARMA.bow);
   logMine('bow', t('fBow'), { toastText: t('bowed') });
   state.shrine?.send('bow');
   pulse('bow');
@@ -186,7 +182,7 @@ export function chorusFx(n, bonus) {
 export function puff() {
   sound.unlock();
   puffFx();
-  addKarma(1);
+  addKarma(KARMA.puff);
   state.shrine?.send('puff');
 }
 

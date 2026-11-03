@@ -9,11 +9,11 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
+import { BURN_SECONDS } from '../../shared/rules.js';
 
-export const BURN_SECONDS = 600; // keep in sync with shrine.js
 const ACTIVE_FOR = 10 * 60 * 1000; // a shrine counts as "praying now" for ten minutes after its last action
 const RECENT_MAX = 12;
-const KINDS = ['light', 'prayer', 'bow', 'bowl', 'offer', 'resolve', 'burnout', 'blame', 'omikuji'];
+const KINDS = ['light', 'prayer', 'bow', 'bowl', 'offer', 'resolve', 'unresolve', 'burnout', 'blame', 'omikuji'];
 const COUNTED = { light: 'incense', prayer: 'prayers', bow: 'bows', bowl: 'bowls', offer: 'offerings', resolve: 'resolved', blame: 'blames', omikuji: 'fortunes' };
 const PRESET = new Set(QUICK_PRAYERS);
 
@@ -43,6 +43,15 @@ export class World extends DurableObject {
     if (!KINDS.includes(kind)) return;
     const now = Date.now();
     const t = this.totals;
+    if (kind === 'unresolve') {
+      // A shrine took back its They're back: so does the world, and the line saying so goes.
+      t.resolved = Math.max(0, t.resolved - 1);
+      const i = t.recent.findIndex((r) => r.kind === 'resolve');
+      if (i !== -1) t.recent.splice(i, 1);
+      this.dirty = true;
+      this.scheduleFlush();
+      return;
+    }
     if (fresh) t.shrines += 1;
     if (COUNTED[kind]) t[COUNTED[kind]] += 1;
     t.karma += Math.max(0, Math.min(50, karma | 0));

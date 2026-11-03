@@ -23,5 +23,10 @@
     <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4L19 6"/></svg>
     <span data-i18n="resolve">They’re back!</span>
   </button>
+  <!-- Shown for a moment to whoever said They're back, in case the servers fall over again -->
+  <button class="btn btn--glass btn--sm incident__undo" id="btn-unresolve" type="button" hidden>
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>
+    <span data-i18n="undo">Not back? Undo</span> <span class="undo__left"></span>
+  </button>
 </div>
 <p class="mantra" aria-live="polite"><span class="mantra__dot" aria-hidden="true"></span><span id="mantra">Clearing cache and karma…</span></p>

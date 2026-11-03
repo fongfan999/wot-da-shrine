@@ -12,7 +12,7 @@ import { activity } from './fx.js';
 import { offerFx } from './offerings.js';
 import { pingPerson, presence, renderPeople } from './people.js';
 import { prayerFx, remember, wishInput } from './prayers.js';
-import { clearResolved, renderResolve, RESOLVED_FOR, resolveFx, showResolved } from './resolve.js';
+import { clearResolved, renderResolve, renderUndo, RESOLVED_FOR, resolveFx, showResolved, undoneFx } from './resolve.js';
 import { blameFx, fortuneFx } from './rituals.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
 import { applySettings } from './settings.js';
@@ -22,7 +22,7 @@ import { records } from './vigil.js';
 
 /* ---------- Shared shrine ---------- */
 const DEFAULT_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader'];
-const ACT_ICONS = { light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check' };
+const ACT_ICONS = { light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense' };
 export const joinEl = $('#join');
 /** The join sheet is up and waiting: not merely fading out after you joined. */
 export const joinOpen = () => !joinEl.hidden && !joinEl.inert;
@@ -253,8 +253,8 @@ function onShrineMessage(msg) {
       if (msg.kind === 'resolve' && msg.record) {
         state.lastVigil = msg.record;
         records.history = [msg.record, ...records.history].slice(0, 12);
-        records.longest = Math.max(records.longest, msg.record.minutes);
       }
+      if (msg.kind === 'unresolve') records.history = records.history.filter((r) => r.endedAt !== msg.undone);
       syncCounters(msg);
       if (msg.kind === 'light' || msg.by.id === state.myId) syncAltar(msg.litAt);
       if (msg.by.id !== state.myId) remoteAct(msg);
@@ -275,10 +275,11 @@ function remoteAct({ kind, by, note, item, text, level }) {
   else if (kind === 'blame') { blameFx(null); log(t('fBlame')); }
   else if (kind === 'omikuji') { fortuneFx(); log(fmt('fOmikuji', { level: FORTUNE_LEVELS[level]?.name ?? level })); }
   else if (kind === 'resolve') { resolveFx(); showResolved(Date.now()); log(t('fResolve'), { toastText: fmt('resolvedToast', { name: by.name }) }); }
+  else if (kind === 'unresolve') { undoneFx(); log(t('fUnresolve'), { toastText: fmt('unresolvedToast', { name: by.name }) }); }
 }
 
 /** The shrine is the source of truth for the room's counters. */
-function syncCounters({ incense, karma, since, prayed, vigil: v, survived }) {
+function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo }) {
   if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); }
   if (karma !== undefined && karma !== counters.karma) { counters.karma = karma; updateStats(!state.greeted); bump(statKarma); }
   if (since) state.roomSince = since - state.clockSkew;
@@ -289,6 +290,9 @@ function syncCounters({ incense, karma, since, prayed, vigil: v, survived }) {
     renderResolve();
     tickVigil();
   }
+  if (longest !== undefined) records.longest = longest;
+  // They're back can be taken back for a moment, by whoever said it (renderUndo checks who).
+  if (undo !== undefined) { state.undo = undo ? { by: undo.by, until: undo.until - state.clockSkew } : null; renderUndo(); }
   if (survived !== undefined && survived !== records.survived) { records.survived = survived; if (state.greeted) renderRecords(); }
   if (state.greeted) renderRecords();
 }

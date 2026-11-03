@@ -3,6 +3,7 @@
  * From inside a shrine it sends that shrine; from the home page (or a phone that scanned the TV)
  * it asks which one, then takes you there to kneel.
  */
+import { CODE_ALPHABET } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { t } from '../lib/strings.js';
 import { $, fmt, roomName, state, tv, urlParams } from './context.js';
@@ -13,7 +14,6 @@ import { openShare } from './shareSheet.js';
 import { toast } from './ui.js';
 
 const LAST_KEY = 'incense:cast:v1'; // { code, room }: the TV you last cast to, the shrine you were last in
-const ALPHABET = 'ACDEFHJKMNPQRTUVWXY34679'; // keep in sync with worker/objects/pairing.js
 
 const form = $('#cast-form');
 const codeInput = $('#cast-code');
@@ -31,7 +31,7 @@ function saveLast(patch) {
 /** Whatever was typed or pasted, as the code's six letters (a pasted /?cast= link works too). */
 const clean = (raw) => {
   const fromLink = String(raw).match(/[?&]cast=([a-z0-9]+)/i)?.[1];
-  return [...(fromLink ?? raw).toUpperCase()].filter((c) => ALPHABET.includes(c)).join('').slice(0, 6);
+  return [...(fromLink ?? raw).toUpperCase()].filter((c) => CODE_ALPHABET.includes(c)).join('').slice(0, 6);
 };
 
 function say(text, kind = '') {

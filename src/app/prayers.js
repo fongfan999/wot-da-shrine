@@ -1,5 +1,6 @@
 /* Prayers: typed or ready-made, each one rises as a lantern. */
 import gsap from 'gsap';
+import { KARMA } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { releaseLantern } from '../scene/lanterns.js';
 import { STRINGS, t } from '../lib/strings.js';
@@ -25,7 +26,7 @@ export function sendPrayer(text) {
   prayerFx(text, roomName ? `${state.me?.avatar ?? ''} ${t('you')}` : '', false, congregation.element(state.myId));
   wishes.hang(text, roomName ? state.me?.name ?? '' : '');
   remember(text, roomName ? state.me?.name ?? '' : '');
-  addKarma(3);
+  addKarma(KARMA.prayer);
   logMine('prayer', t('fPrayer'), { quote: text, toastText: t('wishSent') });
   state.shrine?.send('prayer', { text });
   pulse('prayer', text);

@@ -13,10 +13,10 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { ROOM_RE } from '../../shared/names.js';
+import { CODE_ALPHABET } from '../../shared/rules.js';
 
 // No letters or digits that read alike from across a room (0/O, 1/I/L, 2/Z, 5/S, 8/B, G/6).
-export const CODE_ALPHABET = 'ACDEFHJKMNPQRTUVWXY34679';
-export const CODE_RE = /^[ACDEFHJKMNPQRTUVWXY34679]{6}$/;
+export const CODE_RE = new RegExp(`^[${CODE_ALPHABET}]{6}$`);
 const KEY_RE = /^[a-f0-9]{32}$/;
 const FORGET_AFTER = 7 * 24 * 3600 * 1000;
 const TAKEN = 4009; // close code: another screen holds this code, ask for a new one

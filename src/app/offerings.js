@@ -1,5 +1,6 @@
 /* Offerings: what the servers get, chosen from the tray or left to fate. */
 import gsap from 'gsap';
+import { KARMA } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { OFFERINGS } from '../scene/burner.js';
 import { icon } from '../lib/icons.js';
@@ -17,7 +18,7 @@ export function offer(kind = null) {
   if (!OFFERINGS[kind]) kind = gsap.utils.random(Object.keys(OFFERINGS).filter((k) => k !== lastOffering));
   lastOffering = kind;
   const label = offerFx(kind, t('you'));
-  addKarma(3);
+  addKarma(KARMA.offer);
   logMine(`offer:${kind}`, fmt('fOffer', { item: label }), { toastText: fmt('offered', { item: label }) });
   state.shrine?.send('offer', { kind });
   pulse('offer');

@@ -153,7 +153,14 @@ export function renderRecords() {
     mins.textContent = minutesText(r.minutes);
     const facts = document.createElement('span');
     facts.className = 'records__facts';
-    facts.textContent = r.outcome === 'forgotten' ? t('recForgotten') : [fmt('recPeople', { n: r.peak }), fmt('vigilPrayers', { n: r.prayers }), `${r.karma} karma`].join(' · ');
+    const bits = r.outcome === 'forgotten' ? [t('recForgotten')] : [fmt('recPeople', { n: r.peak }), fmt('vigilPrayers', { n: r.prayers }), `${r.karma} karma`];
+    if (r.title) { // what was down, as it was called then
+      const name = document.createElement('b');
+      name.className = 'records__title';
+      name.textContent = r.title;
+      facts.append(name, ` · ${bits.join(' · ')}`);
+    } else facts.textContent = bits.join(' · ');
+    facts.title = facts.textContent;
     const when = document.createElement('time');
     when.className = 'records__when';
     when.textContent = ago(r.endedAt);
