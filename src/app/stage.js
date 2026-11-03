@@ -131,10 +131,14 @@ export function parallax() {
 
 /* ---------- Mantras ---------- */
 export function startMantras() {
-  const lines = () => STRINGS.mantras;
-  let i = Math.floor(Math.random() * lines().length);
+  // A fresh shuffle each time round, so no two visits hear the same lines in the same order
+  let deck = [];
+  const draw = () => {
+    if (!deck.length) deck = gsap.utils.shuffle([...STRINGS.mantras]);
+    return deck.pop();
+  };
   const swap = () => {
-    const next = lines()[i++ % lines().length];
+    const next = draw();
     gsap.timeline()
       .to(mantra, { y: -8, opacity: 0, duration: 0.35, ease: 'power2.in', onComplete: () => { mantra.textContent = next; } })
       .fromTo(mantra, { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power2.out' });

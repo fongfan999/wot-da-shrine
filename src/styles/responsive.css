@@ -138,7 +138,6 @@
   .title, .title-edit__input { font-size: clamp(2rem, 10vw, 2.6rem); }
   .subtitle { font-size: 16px; }
   .mantra { font-size: 12px; max-width: 92vw; }
-  #mantra { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 78vw; }
   .dock { padding: 10px 12px max(8px, env(safe-area-inset-bottom)); row-gap: 8px; }
   .pray { min-height: 50px; }
   .pray__send { width: 40px; height: 40px; }

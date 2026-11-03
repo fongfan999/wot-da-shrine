@@ -40,7 +40,9 @@ body[data-mode="room"] .eyebrow { display: none; }
 }
 .mantra__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
 body[data-state="lit"] .mantra__dot { background: var(--flame); }
-#mantra { display: inline-block; }
+/* One line at every size: a long mantra wrapping would grow the heading and shrink the altar under it */
+.mantra { max-width: 100%; }
+#mantra { display: inline-block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------- Altar ---------- */
 .altar {
