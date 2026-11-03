@@ -3,12 +3,13 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { syncPalette } from '../scene/palette.js';
 import { BRAND, STRINGS, applyStrings, t } from '../lib/strings.js';
-import { $, body, landing, meta, persist, resetSettings, roomName, settings, state, tv, urlParams } from './context.js';
+import { $, body, landing, meta, persist, resetSettings, roomName, settings, state, track, tv, urlParams } from './context.js';
 import { fog, petals } from './engines.js';
 import { applyFx, lite } from './fx.js';
 import { splitTitle, title } from './stage.js';
 import { updateEta, updateStats, updateVitalsLabel } from './stats.js';
 import { toast } from './ui.js';
+import { quietHeading } from './quiet.js';
 
 /** The stock headline a shrine gets until someone names what is down: picked from its name, so everyone in it reads the same one. */
 function headlineFor(room) {
@@ -30,13 +31,15 @@ export function applySettings(animate = false) {
   applyFx();
   if (body.dataset.resolved) applyStrings({ title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
   else if (landing) applyStrings({ eyebrow: t('landEyebrow'), title: t('landTitle'), subtitle: t('landSubtitle') });
+  else if (body.dataset.quiet) applyStrings(quietHeading());
   else applyStrings({ title: meta('title'), subtitle: subtitleShown() });
   body.dataset.subtitle = meta('subtitle') ? 'custom' : ''; // phones hide a shrine's stock subtitle, never one the room wrote
-  document.title = body.dataset.resolved ? `${t('resolvedTitle')} · ${BRAND}` : meta('title') ? `${meta('title')} · ${BRAND}` : landing ? `${BRAND}: ${t('landDocTitle')}` : `${t('title')} · ${BRAND}`;
+  document.title = body.dataset.quiet ? `${quietHeading().title} · ${BRAND}` : body.dataset.resolved ? `${t('resolvedTitle')} · ${BRAND}` : meta('title') ? `${meta('title')} · ${BRAND}` : landing ? `${BRAND}: ${t('landDocTitle')}` : `${t('title')} · ${BRAND}`;
   if (animate || !title.querySelector('.word')) splitTitle(animate);
 
   fog.setEnabled(settings.fog && !lite);
   petals.setEnabled(settings.petals);
+  sound.setTrack(track());
   sound.setMusic(settings.music);
   sound.setSfx(settings.sfx);
 
@@ -50,6 +53,8 @@ export function applySettings(animate = false) {
   $('#panel-shrine').hidden = !metaEditable();
   for (const k of ['music', 'sfx', 'petals', 'fog']) panel.querySelector(`[name=${k}]`).checked = settings[k];
   $('#theme-seg').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.theme === settings.theme)));
+  $('#track-seg').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.track === track())));
+  $('#track-note').textContent = `${t(`trackHint_${track()}`)} ${settings.music ? t('trackShared') : t('trackOff')}`;
 
   updateEta();
   updateStats();
@@ -96,13 +101,16 @@ backdrop.addEventListener('click', () => openPanel(false));
  */
 let metaTimer = 0;
 export function setSetting(name, value) {
-  const isMeta = ['title', 'subtitle', 'eta'].includes(name);
+  const isMeta = ['title', 'subtitle', 'eta', 'track'].includes(name);
   if (isMeta) {
     if (!roomName) return; // only a room has a title
     state.roomMeta[name] = value;
     urlParams.delete(name);
-    clearTimeout(metaTimer);
-    metaTimer = setTimeout(() => state.shrine?.send('meta', { [name]: value }), 400);
+    if (name === 'track') state.shrine?.send('meta', { track: value }); // a click, not typing: no need to wait
+    else {
+      clearTimeout(metaTimer);
+      metaTimer = setTimeout(() => state.shrine?.send('meta', { [name]: value }), 400);
+    }
   } else {
     settings[name] = value;
     persist();
@@ -126,6 +134,14 @@ $('#theme-seg').addEventListener('click', (e) => {
   settings.theme = b.dataset.theme;
   persist();
   applySettings();
+  sound.tick(740, 0.06);
+});
+
+$('#track-seg').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-track]');
+  if (!b || b.dataset.track === track()) return;
+  sound.unlock();
+  setSetting('track', b.dataset.track);
   sound.tick(740, 0.06);
 });
 

@@ -6,7 +6,7 @@ import { LEVELS as FORTUNE_LEVELS } from '../lib/omikuji.js';
 import { AVATARS, connectRoom, saveMe } from '../lib/room.js';
 import { t } from '../lib/strings.js';
 import { bowFx, bowlFx, burnOut, chorusFx, ignite, puffFx, scheduleBurnOut } from './altar.js';
-import { $, body, counters, fmt, meta, people, recentPrayers, reduceMotion, roomName, roomUrl, records, state, tv, urlParams } from './context.js';
+import { $, body, counters, fmt, meta, people, recentPrayers, reduceMotion, roomName, roomUrl, records, state, track, tv, urlParams } from './context.js';
 import { art, congregation, wishes } from './engines.js';
 import { activity } from './fx.js';
 import { offerFx } from './offerings.js';
@@ -219,7 +219,7 @@ function onShrineMessage(msg) {
         if (msg.resolvedAt && msg.now - msg.resolvedAt < RESOLVED_FOR) showResolved(msg.resolvedAt - state.clockSkew, true);
         // Arrived with ?title=… or ?eta=… on a shrine that has none yet: that becomes the room's.
         const seed = {};
-        for (const k of ['title', 'subtitle', 'eta']) if (meta(k) && urlParams.has(k) && !state.roomMeta[k]) seed[k] = meta(k);
+        for (const k of ['title', 'subtitle', 'eta', 'track']) if (meta(k) && urlParams.has(k) && !state.roomMeta[k]) seed[k] = meta(k);
         if (Object.keys(seed).length) state.shrine.send('meta', seed);
         if (tv) renderTv();
         if (arrivedFromTv()) greetFromTv(people.get(msg.me)?.name ?? state.me.name);
@@ -231,12 +231,20 @@ function onShrineMessage(msg) {
       }
       break;
     }
-    case 'meta':
+    case 'meta': {
+      // The shrine sends the whole of it; only what changed is news.
+      const was = state.roomMeta;
+      const changed = (k) => k in msg.meta && (msg.meta[k] || '') !== (was[k] || '');
+      const renamed = changed('title') && Boolean(msg.meta.title);
+      const retuned = changed('track');
       state.roomMeta = { ...state.roomMeta, ...msg.meta };
       for (const k of Object.keys(msg.meta)) urlParams.delete(k);
-      applySettings(msg.by.id !== state.myId && Boolean(msg.meta.title));
-      if (msg.by.id !== state.myId && msg.meta.title) toast(fmt('metaChanged', { name: msg.by.name, title: msg.meta.title }));
+      const theirs = msg.by.id !== state.myId;
+      applySettings(theirs && renamed);
+      if (theirs && renamed) toast(fmt('metaChanged', { name: msg.by.name, title: msg.meta.title }));
+      if (theirs && retuned) toast(fmt('trackChanged', { name: msg.by.name, track: t(`track_${track()}`) }));
       break;
+    }
     case 'join':
       people.set(msg.person.id, msg.person);
       renderPeople(msg.person.id);

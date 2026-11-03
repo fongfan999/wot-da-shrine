@@ -26,6 +26,7 @@ import { enterRoom, joinOpen } from './app/shrine.js';
 import { menuOpen } from './app/menus.js';
 import { setupScreen } from './app/screen.js';
 import { setupCast } from './app/cast.js';
+import { setupQuiet } from './app/quiet.js';
 
 /* ---------- Keyboard shortcuts ---------- */
 document.addEventListener('keydown', (e) => {
@@ -58,6 +59,7 @@ breathBtn.addEventListener('click', toggleBreathing);
 
 // The first interaction anywhere unlocks audio so music can start on the first click.
 document.addEventListener('pointerdown', () => sound.unlock(), { once: true });
+document.addEventListener('keydown', () => sound.unlock(), { once: true }); // a TV's remote has keys, not a pointer
 
 if (import.meta.env.DEV) window.__incense = { gsap, sound, smoke, fog, petals, previewCard, get settings() { return settings; } };
 
@@ -71,6 +73,7 @@ export function start({ setupLanding, loadWorld } = {}) {
   setupLanding?.();
   setupScreen();
   setupCast();
+  setupQuiet();
   applySettings();
   renderResolve();
   renderRecords();

@@ -33,5 +33,8 @@ export const RESOLVE_UNDO = 30 * 1000;
 /** Vigils a shrine remembers. */
 export const MAX_HISTORY = 12;
 
+/** The music a shrine can play, all synthesized in src/audio/music.js. The first is the default. */
+export const TRACKS = ['vigil', 'focus', 'chant', 'rain'];
+
 /** The letters a TV pairing code is made of: no 0/O, 1/I/L, 2/Z, 5/S or 8/B to mix up across a room. */
 export const CODE_ALPHABET = 'ACDEFHJKMNPQRTUVWXY34679';

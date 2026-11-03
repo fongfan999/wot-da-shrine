@@ -46,6 +46,11 @@ shrine.
   person, and the room only hears someone left after five quiet seconds.
 - `/r/:room?tv=1` is the war-room screen: it watches without kneeling (it is
   not counted as praying), shows the vigil timer big, and a QR code to join.
+  When nothing is down it stays worth leaving on: the heading says how long it
+  has been quiet ("4 days without an incident") and what was down last, and a
+  card shows the room's music and how to change it. A TV nobody has touched yet
+  may be held silent by the browser; the card says so until someone presses a
+  key. The first thing done at the altar turns it back into the incident screen.
 - Every shrine reports its actions to one `World` Durable Object, which keeps
   the site-wide totals the landing page shows.
 - Durable Objects use the WebSocket Hibernation API, so idle shrines cost
@@ -162,7 +167,12 @@ The shrine is built to travel from one incident channel to the next:
   painted at runtime, and the ambient music is synthesized in the browser.
 - **Light and dark**: paper by day, a night vigil after dark. It follows the
   system setting unless you pick one.
-- **Customizable**: title, subtitle, "back at" time, theme, toggles for
+- **Music for the room**: four synthesized tracks, picked under Customize and
+  heard by everyone in the shrine, the TV too. Vigil (drone, chords, temple
+  bells), Focus (slower and darker, for heads-down work), Chant (a chanting
+  remix: "om" over a hand-drum groove) and Rain (rain on the roof, thunder far
+  away). Changing it opens no vigil, and the room hears who put it on.
+- **Customizable**: title, subtitle, "back at" time, music, theme, toggles for
   music/effects/petals/fog. Open the settings panel or use URL params.
 - **Keyboard**: `L` light · `B` bowl · `P` bow · `O` offer · `Space` breathe ·
   `M` mute · `T` theme.
@@ -180,10 +190,11 @@ The shrine is built to travel from one incident channel to the next:
 | `title`    | any text (rooms only)                    | `?title=Back+in+5+minutes`     |
 | `subtitle` | any text (rooms only)                    | `?subtitle=Deploying+v2.0`     |
 | `eta`      | ISO 8601 date/time (rooms only)          | `?eta=2026-10-14T18:30:00Z`    |
+| `track`    | `vigil` `focus` `chant` `rain` (rooms only) | `?track=focus`              |
 | `theme`    | `auto` `light` `dark`                    | `?theme=dark`                  |
 | `music` `sfx` `petals` `fog` | `1` / `0`              | `?petals=0&fog=0`              |
 
-`title`, `subtitle` and `eta` seed a room that has none yet, e.g.
+`title`, `subtitle`, `eta` and `track` seed a room that has none yet, e.g.
 `/r/serene-rack-42?title=Payments+API`. The rest work everywhere.
 
 ## Develop
@@ -268,6 +279,7 @@ src/app/                 the shrine
   shareSheet.js          invite + share card sheet
   menus.js               the top bar's Share and More menus
   cast.js, screen.js     Cast to TV, and the TV's own screens
+  quiet.js               the TV when nothing is down: how long it has been quiet, the music
   etaPicker.js           the Back at picker, in the heading and the builder
   openShrine.js          name fields and the Open sheet
 src/landing/             the home page's sections (pulse, showcase, steps, builder, TV…) and its world line
@@ -283,7 +295,7 @@ src/scene/               what is drawn
   palette.js             theme colours for the canvas layers
 src/audio/
   index.js               Web Audio sound kit (one-shot effects)
-  music.js               generative ambient music
+  music.js               generative ambient music: vigil, focus, chant, rain
 src/lib/
   clock.js               the page's one clock, and the rules for anything timed
   config.js              settings: URL params > localStorage > defaults

@@ -18,6 +18,16 @@
         <span data-i18n="fSubtitle">Subtitle</span>
         <input type="text" name="subtitle" maxlength="140" />
       </label>
+      <div class="field">
+        <span data-i18n="fTrack">Music</span>
+        <div class="seg" id="track-seg" role="radiogroup" aria-label="Music">
+          <button type="button" role="radio" data-track="vigil" aria-checked="true" data-i18n="track_vigil">Vigil</button>
+          <button type="button" role="radio" data-track="focus" aria-checked="false" data-i18n="track_focus">Focus</button>
+          <button type="button" role="radio" data-track="chant" aria-checked="false" data-i18n="track_chant">Chant</button>
+          <button type="button" role="radio" data-track="rain" aria-checked="false" data-i18n="track_rain">Rain</button>
+        </div>
+        <p class="field__note" id="track-note"></p>
+      </div>
     </section>
     <!-- Only this browser -->
     <section class="panel__group" aria-labelledby="panel-you-h">

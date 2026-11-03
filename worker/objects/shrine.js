@@ -7,7 +7,7 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
-import { AVATARS, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, KARMA, MAX_HISTORY, OFFERING_KINDS, RESOLVE_UNDO, VIGIL_IDLE } from '../../shared/rules.js';
+import { AVATARS, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, KARMA, MAX_HISTORY, OFFERING_KINDS, RESOLVE_UNDO, TRACKS, VIGIL_IDLE } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_OFFERINGS = 4; // the altar table has four slots
@@ -46,7 +46,7 @@ const VIGIL_FIELD = { light: 'lights', prayer: 'prayers', blame: 'blames', omiku
 const EMPTY = {
   incense: 0, karma: 0, litAt: 0, offerings: [], prayers: [],
   since: 0, prayed: 0, resolved: 0, resolvedAt: 0,
-  meta: { title: '', subtitle: '', eta: '' }, // what's down and when it's back, shared by the whole room
+  meta: { title: '', subtitle: '', eta: '', track: '' }, // what's down and when it's back, shared by the whole room
   vigil: null, history: [], survived: 0, longest: 0,
   undo: null, // { id, at, vigil, longest, resolvedAt }: They're back, while whoever said it can still take it back
 };
@@ -187,6 +187,8 @@ export class Shrine extends DurableObject {
         const meta = { ...s.meta };
         for (const k of Object.keys(META_MAX)) if (k in msg) meta[k] = clean(msg[k], META_MAX[k]);
         if (meta.eta && Number.isNaN(Date.parse(meta.eta))) meta.eta = '';
+        // The music the whole room hears, the TV too. Changing it is not an action: it opens no vigil.
+        if ('track' in msg) meta.track = TRACKS.includes(msg.track) ? msg.track : TRACKS[0];
         s.meta = meta;
         this.broadcast({ t: 'meta', meta, by });
         await this.save();

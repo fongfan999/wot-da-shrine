@@ -18,7 +18,17 @@ class SoundKit {
     this.unlocked = false;
     this.lite = false;
     this.conv = null;
+    this.track = 'vigil';
   }
+
+  /** The shrine's track (TRACKS in shared/rules.js): crossfades if the music is already playing. */
+  setTrack(track) {
+    this.track = track;
+    this.music?.setTrack(track, this.effectiveMusic ? MUSIC_VOLUME : 0);
+  }
+
+  /** Whether the browser is letting us play: a page nobody has touched yet is held silent. */
+  get playing() { return this.ctx?.state === 'running'; }
 
   /** Lite mode: a shorter impulse response. Convolution is the heaviest node in the graph. */
   setLite(on) {
@@ -43,6 +53,8 @@ class SoundKit {
       this.master.connect(dry).connect(this.ctx.destination);
       this.master.connect(conv).connect(wet).connect(this.ctx.destination);
       this.music = new AmbientMusic(this.ctx, this.master);
+      this.music.track = this.track;
+      this.ctx.addEventListener('statechange', () => document.dispatchEvent(new CustomEvent('soundstate')));
     }
     if (this.ctx.state === 'suspended') this.ctx.resume();
     this.unlocked = true;

@@ -89,3 +89,24 @@ body[data-paired="lost"] .tv-join__cast { opacity: .4; }
 .cast-form__status { margin: -6px 0 0; font-size: 14px; color: var(--muted); }
 .cast-form__status[data-kind="error"] { color: var(--flame); }
 .cast-form__status[data-kind="ok"] { color: var(--live); }
+
+/* ---------- On the TV, when nothing is down: the heading says how long it has been quiet, and what plays ---------- */
+/* one column (a small screen): the cards in the altar's corners stay with the altar, not the page */
+@media (max-width: 1099px) { body[data-tv="1"] .center { position: relative; } }
+body[data-quiet="1"] .eyebrow { color: var(--live); }
+body[data-quiet="1"] .vigil { display: none; }
+.tv-now { position: absolute; right: 0; bottom: 6px; z-index: 4; display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 14px; row-gap: 2px; margin: 0; padding: 12px 18px 12px 14px; border: 1px solid var(--ink); border-radius: var(--radius-md); background: var(--paper-raised); box-shadow: var(--shadow-float); }
+.tv-now__bars { grid-row: span 2; display: flex; align-items: flex-end; gap: 3px; height: 26px; }
+.tv-now__bars i { width: 4px; height: 100%; border-radius: 2px; background: var(--accent); transform-origin: 50% 100%; animation: tv-now-bar 1.6s ease-in-out infinite; }
+.tv-now__bars i:nth-child(2) { animation-delay: -.5s; animation-duration: 1.9s; }
+.tv-now__bars i:nth-child(3) { animation-delay: -1.1s; animation-duration: 1.4s; }
+.tv-now__bars i:nth-child(4) { animation-delay: -.3s; animation-duration: 2.2s; }
+@keyframes tv-now-bar { 0%, 100% { transform: scaleY(.25); } 50% { transform: scaleY(1); } }
+.tv-now__text { font-size: 18px; }
+.tv-now__label { font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.tv-now__text b { font-weight: 600; }
+.tv-now__hint { font-size: 14px; color: var(--muted); }
+/* held silent until someone presses a key: the bars rest, and the hint is the thing to read */
+.tv-now[data-held="1"] .tv-now__bars i { animation: none; transform: scaleY(.25); }
+.tv-now[data-held="1"] .tv-now__hint { color: var(--flame); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .tv-now__bars i { animation: none; transform: scaleY(.6); } }
