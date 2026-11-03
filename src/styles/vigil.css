@@ -9,11 +9,13 @@
 .records__title { color: var(--ink); font-weight: 600; }
 /* No vigil open: the pill holds Something's down, and an ETA only if the room set one. Where nobody can say it (a TV, the demo) the pill waits. */
 body:not([data-vigil]) .incident .eta:has(#eta-btn[data-value=""]) { display: none; }
-body:not([data-vigil]):not([data-resolved]) .incident:has(#eta-btn[data-value=""]):has(#btn-down[hidden]) { display: none; }
+body:not([data-vigil]):not([data-resolved]) .incident:has(#eta-btn[data-value=""]):has(#btn-down[hidden]):has(#btn-bless[hidden]):has(#btn-ship[hidden]) { display: none; }
 /* They're back: no more ETA, and the pill only stays while its Undo or Something's down does */
-body[data-resolved] .incident .eta, body[data-resolved] .incident:has(#btn-unresolve[hidden]):has(#btn-down[hidden]) { display: none; }
-.incident__down { min-height: 28px; gap: 6px; padding: 4px 12px 4px 10px; font-size: 13px; }
-.incident__down .ico { width: 15px; height: 15px; }
+body[data-resolved] .incident .eta, body[data-resolved] .incident:has(#btn-unresolve[hidden]):has(#btn-down[hidden]):has(#btn-bless[hidden]):has(#btn-ship[hidden]) { display: none; }
+.incident__down, .incident__bless, .incident__ship, .incident__broke { min-height: 28px; gap: 6px; padding: 4px 12px 4px 10px; font-size: 13px; }
+.incident__down .ico, .incident__bless .ico, .incident__ship .ico, .incident__broke .ico { width: 15px; height: 15px; }
+/* A deploy going out: the ETA is for outages, and waits */
+body[data-blessing] .incident .eta { display: none; }
 
 /* What is down? Asked under the pill when the vigil opens */
 .down-pop { left: 0; right: auto; gap: 10px; }
@@ -65,9 +67,13 @@ body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { 
 .vigil__meta { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; }
 .vigil__meta:empty { display: none; }
 /* The title leaves the corner to the clock */
-body:is([data-vigil], [data-resolved]) .title { max-width: calc(100% - 15rem); }
+body:is([data-vigil], [data-resolved], [data-blessing], [data-shipped]) .title { max-width: calc(100% - 15rem); }
 body[data-resolved="1"] .vigil__dot { background: var(--live); animation: none; }
 body[data-resolved="1"] .vigil__time { font-size: 22px; letter-spacing: 0; color: var(--live); }
+/* A deploy being blessed counts up in the corner too, with a calm dot; Shipped reads like They're back */
+.vigil[data-mode="bless"] .vigil__dot { background: var(--accent); box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+.vigil[data-mode="shipped"] .vigil__dot { background: var(--live); animation: none; }
+.vigil[data-mode="shipped"] .vigil__time { font-size: 22px; letter-spacing: 0; color: var(--live); }
 
 /* Shrine records */
 .stats--records { margin-bottom: 10px; }

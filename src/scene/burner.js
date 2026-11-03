@@ -293,6 +293,7 @@ export function buildBurner(host) {
   <g class="burner__sticks">
     ${STICKS.map((s, i) => `
     <g class="stick" data-i="${i}" transform="rotate(${s.lean} ${s.x} ${STICK_BOTTOM})">
+      <rect class="stick__ghost" x="${s.x - STICK_W / 2}" y="${s.top}" width="${STICK_W}" height="${STICK_BOTTOM - s.top}" rx="2"/>
       <rect class="stick__body" x="${s.x - STICK_W / 2}" y="${s.top}" width="${STICK_W}" height="${STICK_BOTTOM - s.top}" rx="2"/>
       <rect class="stick__ash" x="${s.x - STICK_W / 2 - 0.5}" y="${s.top}" width="${STICK_W + 1}" height="0" rx="2.5"/>
       <circle class="stick__halo soft" cx="${s.x}" cy="${s.top}" r="10" opacity="0"/>

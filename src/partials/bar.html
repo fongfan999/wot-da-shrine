@@ -37,6 +37,28 @@
         <button class="btn btn--accent btn--sm" type="submit" data-i18n="downSave">Name it</button>
       </div>
     </form>
+    <!-- Nothing down: bless the next deploy. While one goes out, Shipped and It broke stand in the pill instead. -->
+    <button class="btn btn--glass btn--sm incident__bless" id="btn-bless" type="button" hidden>
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c3 2 4.5 5.5 4.5 9.5L14 15h-4l-2.5-2.5C7.5 8.5 9 5 12 3z"/><circle cx="12" cy="9.5" r="1.5"/><path d="M10 15l-1.5 4.5L12 18l3.5 1.5L14 15"/></svg>
+      <span data-i18n="blessBtn">Bless a deploy</span>
+    </button>
+    <form class="eta-pop down-pop" id="bless-pop" hidden aria-labelledby="bless-pop-label">
+      <label class="eta-pop__label" id="bless-pop-label" for="bless-what" data-i18n="blessWhat">What are you shipping?</label>
+      <input class="down-pop__input" id="bless-what" name="bless-what" type="text" maxlength="40" autocomplete="off" data-i18n-placeholder="blessWhatPh" />
+      <p class="down-pop__note" data-i18n="blessWhatNote">The room bows with you. Say Shipped when it is out, or It broke, and the vigil begins.</p>
+      <div class="down-pop__actions">
+        <button class="btn btn--glass btn--sm" id="bless-cancel" type="button" data-i18n="blessCancel">Cancel</button>
+        <button class="btn btn--accent btn--sm" type="submit" data-i18n="blessGo">Bless it</button>
+      </div>
+    </form>
+    <button class="btn btn--live btn--sm incident__ship" id="btn-ship" type="button" hidden>
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4L19 6"/></svg>
+      <span data-i18n="shipBtn">Shipped</span>
+    </button>
+    <button class="btn btn--ember btn--sm incident__broke" id="btn-broke" type="button" hidden>
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>
+      <span data-i18n="brokeBtn">It broke</span>
+    </button>
     <button class="btn btn--live btn--sm incident__resolve" id="btn-resolve" type="button">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4L19 6"/></svg>
       <span data-i18n="resolve">They’re back!</span>

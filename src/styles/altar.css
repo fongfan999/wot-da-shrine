@@ -195,6 +195,9 @@ body[data-resolved="1"] .tablet__back { display: block; }
 .person__avatar { border: 1.5px solid transparent; }
 
 .stick__body { fill: var(--muted); }
+/* Where a burning stick began: a faint outline of the part already burned, so the time left reads at a glance */
+.stick__ghost { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0; transition: opacity 1s; }
+body[data-state="lit"] .stick__ghost { opacity: .6; }
 .stick__ash { fill: var(--line-strong); }
 .stick__halo { fill: var(--ember-soft); }
 .stick__ember, .devotee__ember { fill: var(--flame); }
