@@ -13,28 +13,6 @@ body:not([data-vigil]):not([data-resolved]) .incident:has(#eta-btn[data-value=""
 body[data-resolved] .incident .eta, body[data-resolved] .incident:has(#btn-unresolve[hidden]) { display: none; }
 .vigil[data-idle] { display: none; }
 
-/* The title is what is down: on a shrine it can be typed over in place */
-body[data-meta-editable="1"]:not([data-resolved]) .title { cursor: text; }
-body[data-meta-editable="1"]:not([data-resolved]) .title:hover .word, body[data-meta-editable="1"]:not([data-resolved]) .title:focus-visible .word { text-decoration: underline dashed color-mix(in srgb, var(--accent) 55%, transparent); text-decoration-thickness: 1px; text-underline-offset: .12em; }
-.title-edit { width: 100%; max-width: 720px; margin: 4px 0 0; }
-.title-edit__input {
-  display: block;
-  width: 100%;
-  padding: 0 0 .06em;
-  border: 0;
-  border-bottom: 2px dashed var(--accent);
-  outline: 0;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  font-weight: 500;
-  font-size: clamp(2.4rem, min(4.8vw, 8vh), 4.6rem);
-  line-height: 1.02;
-  letter-spacing: -.04em;
-}
-.title-edit__input::placeholder { color: var(--line-strong); }
-.title-edit__hint { margin: 8px 0 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
-.title-edit:not([hidden]) + .subtitle { display: none; }
 /* The heading floats over the altar (the parallax transform makes it its own layer) */
 .heading { position: relative; z-index: 3; }
 /* The ETA is the pill's first half: it opens the Back at picker under the bar. It keeps its width; the room chip gives way first. */

@@ -91,7 +91,7 @@ backdrop.addEventListener('click', () => openPanel(false));
 
 
 /**
- * Change a setting, from the panel or from the heading. Title, subtitle and ETA are the room's when
+ * Change a setting, from the panel or from the ETA pill. Title, subtitle and ETA are the room's when
  * there is one: the shrine keeps them and tells everyone (a moment after you stop typing).
  */
 let metaTimer = 0;

@@ -134,7 +134,7 @@
   .tray__name { white-space: normal; font-size: 11px; line-height: 1.15; text-align: center; }
   .combo__n { font-size: 1.6rem; }
   .heading { gap: 4px; }
-  .title, .title-edit__input { font-size: clamp(2rem, 10vw, 2.6rem); }
+  .title { font-size: clamp(2rem, 10vw, 2.6rem); }
   .subtitle { font-size: 16px; }
   .mantra { font-size: 12px; max-width: 92vw; }
   .dock { padding: 10px 12px max(8px, env(safe-area-inset-bottom)); row-gap: 8px; }
