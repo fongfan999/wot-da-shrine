@@ -1,6 +1,7 @@
 /* Who is kneeling: the people card, the presence stack in the top bar, pings. */
 import gsap from 'gsap';
 import { icon } from '../lib/icons.js';
+import { look } from '../scene/burner.js';
 import { t } from '../lib/strings.js';
 import { $, fmt, people, reduceMotion, roomName, state } from './context.js';
 import { congregation } from './engines.js';
@@ -23,6 +24,7 @@ export function renderPeople(newId) {
     const row = document.createElement(mine ? 'button' : 'div');
     row.className = 'person';
     row.dataset.id = p.id;
+    row.dataset.tone = String(look(p.id).tone); // the robe they kneel in
     if (mine) { row.type = 'button'; row.title = t('rename'); }
     const avatar = document.createElement('span');
     avatar.className = 'person__avatar';

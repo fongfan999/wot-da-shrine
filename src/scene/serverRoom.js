@@ -22,6 +22,7 @@ const ZEND = Z0 + RACKS * (DEPTH + GAP);
 
 // mostly cobalt, a few green, the odd warning
 const LED_CLASSES = ['led', 'led', 'led', 'led', 'led', 'led--live', 'led--live', 'led--ember'];
+const RACK_42 = 2; // the back-wall column that is down: its lights go out during a vigil and come back on They're back
 
 const proj = (x, y, z) => [CX + (x * F) / z, CY + (y * F) / z];
 const pts = (list) => list.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
@@ -63,7 +64,7 @@ export function buildServerRoom(host) {
       for (let y = TOP + 0.25; y < FLOOR - 0.2; y += 0.3) {
         for (let k = 0; k < 2; k++) {
           const [lx, ly] = proj(x0 + 0.16 + k * 0.2, y, ZEND);
-          leds.push({ x: lx, y: ly, r: 1.6 });
+          leds.push({ x: lx, y: ly, r: 1.6, rack42: c === RACK_42 });
         }
         parts.push(line(proj(x0 + 0.05, y + 0.14, ZEND), proj(x1 - 0.05, y + 0.14, ZEND), 'class="r-line" stroke-width="0.6"'));
       }
@@ -105,13 +106,14 @@ export function buildServerRoom(host) {
   // The LEDs live in a second SVG on top, so a blink repaints a few hundred circles, never the room.
   parts.push(`<svg class="room room--leds" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">`);
   parts.push('<g class="leds">');
-  leds.forEach((l) => parts.push(`<circle cx="${l.x.toFixed(1)}" cy="${l.y.toFixed(1)}" r="${l.r.toFixed(2)}" class="${LED_CLASSES[Math.floor(Math.random() * LED_CLASSES.length)]}" opacity="${(0.25 + Math.random() * 0.75).toFixed(2)}"/>`));
+  leds.forEach((l) => parts.push(`<circle cx="${l.x.toFixed(1)}" cy="${l.y.toFixed(1)}" r="${l.r.toFixed(2)}" class="${LED_CLASSES[Math.floor(Math.random() * LED_CLASSES.length)]}${l.rack42 ? ' led--rack42' : ''}" opacity="${(0.25 + Math.random() * 0.75).toFixed(2)}"/>`));
   parts.push('</g></svg>');
 
   host.innerHTML = parts.join('\n');
 
   // Blink: every tick, a handful of random LEDs change brightness. No tweens needed.
   const nodes = [...host.querySelectorAll('.leds circle')];
+  const rack42 = [...host.querySelectorAll('.led--rack42')];
   let acc = 0;
   let lite = false;
   let paused = false;
@@ -125,12 +127,22 @@ export function buildServerRoom(host) {
       const n = nodes[(Math.random() * nodes.length) | 0];
       n.setAttribute('opacity', (Math.random() < 0.3 ? 0.1 : 0.4 + Math.random() * 0.6).toFixed(2));
     }
+    // the down rack: most of its lights out, the odd one struggling
+    if (document.body.dataset.vigil === '1') {
+      const n = rack42[(Math.random() * rack42.length) | 0];
+      n.setAttribute('opacity', (Math.random() < 0.75 ? 0.08 : 0.6 + Math.random() * 0.4).toFixed(2));
+    }
   });
 
   return {
     /** A ripple of activity across the room (e.g. when the bowl rings). */
     pulse() {
       gsap.fromTo(host.querySelector('.leds'), { opacity: 0.3 }, { opacity: 1, duration: 1.4, ease: 'power2.out' });
+    },
+    /** They're back: rack 42's lights come up one by one, top to bottom. */
+    recover() {
+      gsap.killTweensOf(rack42);
+      gsap.fromTo(rack42, { attr: { opacity: 0.05 } }, { attr: { opacity: 1 }, duration: 0.5, stagger: 0.05, ease: 'power2.out' });
     },
     /** Lite mode: the LEDs blink less often. */
     setLite(on) { lite = on; },

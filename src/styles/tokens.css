@@ -32,6 +32,14 @@ body {
   --shadow-key: 0 2px 0 #7d8276;
   --shadow-float: 4px 5px 0 #292d2812;
 
+  /* The four robe tones people kneel in; a person keeps theirs on the altar, in the card and on their tag */
+  --tone-1: #b8563a;
+  --tone-2: #2f7d62;
+  --tone-3: #6a5bb5;
+  --tone-1-soft: #f5dcd2;
+  --tone-2-soft: #d6eee3;
+  --tone-3-soft: #e4dff7;
+
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Charter, "Bitstream Charter", Georgia, "Times New Roman", serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -80,6 +88,13 @@ body {
     --sheet-shadow: #10120e;
     --sheet-label: #a3a998;
     --selection: #2b3768;
+    --tone-1: #e0916f;
+    --tone-2: #7fcfa8;
+    --tone-3: #b1a4ee;
+    --tone-1-soft: #3a261d;
+    --tone-2-soft: #1a2f27;
+    --tone-3-soft: #2a2641;
+
     --selection-ink: #eef1ff;
     --backdrop: #000000b3;
     --shadow-sheet: 5px 6px 0 #10120e;
@@ -115,6 +130,12 @@ body[data-theme="dark"] {
   --sheet-shadow: #10120e;
   --sheet-label: #a3a998;
   --selection: #2b3768;
+  --tone-1: #e0916f;
+  --tone-2: #7fcfa8;
+  --tone-3: #b1a4ee;
+  --tone-1-soft: #3a261d;
+  --tone-2-soft: #1a2f27;
+  --tone-3-soft: #2a2641;
   --selection-ink: #eef1ff;
   --backdrop: #000000b3;
   --shadow-sheet: 5px 6px 0 #10120e;

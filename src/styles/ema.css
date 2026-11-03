@@ -33,4 +33,4 @@
 }
 .ema__by { display: block; margin-top: 4px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ema__by:empty { display: none; }
-.ema__seal { display: none; }
+.ema__seal { position: absolute; right: 5px; bottom: 5px; width: 13px; height: 13px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--ember); font-family: var(--font-serif); font-size: 8px; line-height: 1; color: var(--ember); opacity: .8; }

@@ -197,7 +197,13 @@ export function puffFx() {
   gsap.fromTo('.burner', { rotation: -2 }, { rotation: 0, duration: 0.8, ease: 'elastic.out(1, 0.3)' });
 }
 
-burner.addEventListener('click', light);
+// The censer lights the incense (or, lit, stirs the smoke); a candle stirs it; an offering says who gave it.
+burner.addEventListener('click', (e) => {
+  const offering = e.target.closest('.offering');
+  if (offering) { toast(offering.dataset.by ? fmt('offeringBy', { item: offering.dataset.label, name: offering.dataset.by }) : fmt('offeringAnon', { item: offering.dataset.label })); return; }
+  if (e.target.closest('.candle')) { if (state.lit) puff(); else toast(t('candleCold')); return; }
+  light();
+});
 
 let breathing = false;
 let breathTl = null;

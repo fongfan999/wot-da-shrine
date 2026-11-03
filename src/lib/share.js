@@ -11,7 +11,7 @@ const W = 1200;
 const H = 630;
 const SCALE = 2; // retina PNG
 
-const TOKENS = ['paper', 'paper-raised', 'paper-sunk', 'ink', 'muted', 'line', 'line-strong', 'accent', 'accent-soft', 'note-ink', 'ember', 'ember-soft', 'ember-ink', 'flame', 'live', 'sheet-label'];
+const TOKENS = ['paper', 'paper-raised', 'paper-sunk', 'ink', 'muted', 'line', 'line-strong', 'accent', 'accent-soft', 'note-ink', 'ember', 'ember-soft', 'ember-ink', 'flame', 'live', 'sheet-label', 'tone-1-soft', 'tone-2-soft', 'tone-3-soft'];
 const SANS = `ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`;
 const SERIF = `'Iowan Old Style', 'Palatino Linotype', Palatino, Charter, Georgia, 'Times New Roman', serif`;
 const MONO = `ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace`;
@@ -46,7 +46,12 @@ function drawingCss(c) {
     .stick__ash { fill: ${c['line-strong']}; }
     .stick__halo, .devotee__halo { fill: ${c['ember-soft']}; }
     .stick__ember, .devotee__ember { fill: ${c.flame}; }
-    .burner__shine { display: none; }
+    .tablet__back { display: none; fill: ${c.live}; }
+    [data-resolved="1"] .tablet__title { display: none; }
+    [data-resolved="1"] .tablet__back { display: block; }
+    [data-tone="1"] .robe { fill: ${c['tone-1-soft']}; }
+    [data-tone="2"] .robe { fill: ${c['tone-2-soft']}; }
+    [data-tone="3"] .robe { fill: ${c['tone-3-soft']}; }
     .torii, .cat { display: none; }
     [data-level="1"] .torii, [data-level="2"] .torii, [data-level="3"] .torii { display: block; }
     [data-level="2"] .cat, [data-level="3"] .cat { display: block; }
@@ -80,7 +85,8 @@ function altarMarkup(host) {
     return copy.innerHTML;
   }).join('\n');
   const level = host.closest('.burner')?.dataset.level ?? '0';
-  return `<svg viewBox="0 0 520 470" x="650" y="86" width="500" height="452" overflow="visible" data-level="${level}">${inner}</svg>`;
+  const resolved = document.body.dataset.resolved ?? '';
+  return `<svg viewBox="0 0 520 470" x="650" y="86" width="500" height="452" overflow="visible" data-level="${level}" data-resolved="${resolved}">${inner}</svg>`;
 }
 
 /**

@@ -16,15 +16,15 @@ export function offer(kind = null) {
   sound.unlock();
   if (!OFFERINGS[kind]) kind = gsap.utils.random(Object.keys(OFFERINGS).filter((k) => k !== lastOffering));
   lastOffering = kind;
-  const label = offerFx(kind);
+  const label = offerFx(kind, t('you'));
   addKarma(3);
   logMine(`offer:${kind}`, fmt('fOffer', { item: label }), { toastText: fmt('offered', { item: label }) });
   state.shrine?.send('offer', { kind });
   pulse('offer');
 }
 
-export function offerFx(kind) {
-  const label = art.offer(kind);
+export function offerFx(kind, by = '') {
+  const label = art.offer(kind, by);
   kick(8);
   sound.whoosh();
   gsap.delayedCall(0.35, () => sound.tick(1046, 0.08));

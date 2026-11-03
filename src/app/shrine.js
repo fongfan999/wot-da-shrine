@@ -210,7 +210,7 @@ function remoteAct({ kind, by, note, item, text, level }) {
   if (kind === 'light') { congregation.bow(by.id, 3); log(t('fLight')); }
   else if (kind === 'bowl') { bowlFx(note); log(t('fBowl')); }
   else if (kind === 'bow') { bowFx(by.id); log(t('fBow')); }
-  else if (kind === 'offer') { const label = offerFx(item); if (label) log(fmt('fOffer', { item: label })); }
+  else if (kind === 'offer') { const label = offerFx(item, by.name); if (label) log(fmt('fOffer', { item: label })); }
   else if (kind === 'prayer') { prayerFx(text, `${by.avatar} ${by.name}`, false, congregation.element(by.id)); wishes.hang(text, by.name); remember(text, by.name); log(t('fPrayer'), { quote: text, toastText: `${by.name}: “${text}”` }); }
   else if (kind === 'puff') puffFx();
   else if (kind === 'blame') { blameFx(null); log(t('fBlame')); }

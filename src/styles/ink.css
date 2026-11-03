@@ -11,5 +11,8 @@ body[data-scheme="dark"] .credit__mark--paper { display: inline; }
 .room .led { fill: var(--accent); }
 .room .led--live { fill: var(--live); }
 .room .led--ember { fill: var(--flame); }
+/* Rack 42 is the one that is down: its lights flicker ember while a vigil is open, and go green when they are back */
+body[data-vigil="1"] .room .led--rack42 { fill: var(--flame); }
+body[data-resolved="1"] .room .led--rack42 { fill: var(--live); }
 .d-ash { fill: var(--line); stroke: none; }
 .devotee__halo { fill: var(--ember-soft); }

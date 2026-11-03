@@ -7,7 +7,7 @@
  * Sized in the burner's own units so the people always match the altar.
  */
 import gsap from 'gsap';
-import { FIGURE } from './burner.js';
+import { FIGURE, look } from './burner.js';
 
 const VB_H = 470;      // the burner's viewBox height
 const SCALE = 1.18;    // same size as the ops team drawn into the burner
@@ -17,8 +17,8 @@ const GAP = 76;
 const MIN_GAP = 46;
 const EDGE = 34;
 
-const FIGURE_SVG = `
-<svg class="kneeler__svg" viewBox="-44 -196 88 204" aria-hidden="true">${FIGURE('kneeler')}
+const figureSvg = (hair) => `
+<svg class="kneeler__svg" viewBox="-44 -196 88 204" aria-hidden="true">${FIGURE('kneeler', { hair })}
 </svg>`;
 
 export class Congregation {
@@ -56,7 +56,9 @@ export class Congregation {
   add(person, mine) {
     const el = document.createElement('div');
     el.className = 'kneeler';
-    el.innerHTML = `<div class="kneeler__tag"><span class="kneeler__avatar"></span><span class="kneeler__name"></span></div>${FIGURE_SVG}`;
+    const { tone, hair } = look(person.id); // their own robe and hair, the same on every visit
+    el.dataset.tone = String(tone);
+    el.innerHTML = `<div class="kneeler__tag"><span class="kneeler__avatar"></span><span class="kneeler__name"></span></div>${figureSvg(hair)}`;
     this.host.appendChild(el);
     const item = {
       el,

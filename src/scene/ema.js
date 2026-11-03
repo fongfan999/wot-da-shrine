@@ -22,7 +22,7 @@ export class WishBoard {
   hang(text, author = '', animate = true) {
     const el = document.createElement('div');
     el.className = 'ema__plaque';
-    el.innerHTML = '<div class="ema__swing"><span class="ema__string"></span><div class="ema__wood"><span class="ema__text"></span><span class="ema__by"></span><span class="ema__seal" aria-hidden="true">卍</span></div></div>';
+    el.innerHTML = '<div class="ema__swing"><span class="ema__string"></span><div class="ema__wood"><span class="ema__text"></span><span class="ema__by"></span><span class="ema__seal" aria-hidden="true">願</span></div></div>';
     el.querySelector('.ema__text').textContent = text;
     el.querySelector('.ema__by').textContent = author;
     el.style.setProperty('--tone', gsap.utils.random(-6, 6).toFixed(0));

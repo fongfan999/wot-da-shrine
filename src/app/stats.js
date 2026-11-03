@@ -4,7 +4,7 @@ import { sound } from '../audio/index.js';
 import { saveCounters } from '../lib/config.js';
 import { STRINGS, t } from '../lib/strings.js';
 import { $, body, BURN_SECONDS, counters, fmt, meta, people, reduceMotion, roomName, state, tv } from './context.js';
-import { burner, petals } from './engines.js';
+import { art, burner, petals } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';
 import { records, vigilTouch } from './vigil.js';
 import { every } from '../lib/clock.js';
@@ -81,6 +81,8 @@ const hhmmss = (ms) => {
 };
 const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
 export function tickVigil() {
+  // The scene reads this: the down rack's lights go out while a vigil is open.
+  if (state.vigil) body.dataset.vigil = '1'; else delete body.dataset.vigil;
   if (body.dataset.resolved && state.lastVigil) {
     delete vigilEl.dataset.idle;
     vigilLabel.textContent = '';
@@ -133,6 +135,7 @@ export function renderRecords() {
   $('#records-level').textContent = name;
   $('#records-next').textContent = next ? fmt('shrineNext', { n: next[0] - counters.karma, name: next[1] }) : '';
   burner.dataset.level = String(i);
+  updateTablet();
   if (shownLevel !== -1 && i > shownLevel) {
     toast(fmt('shrineUnlocked', { name }));
     sound.bowl(392);
@@ -195,6 +198,13 @@ function renderLanterns() {
 const vitalsOf = $('#vitals-of');
 export function updateVitalsLabel() {
   vitalsOf.textContent = meta('title') || t('vitalsLabel');
+  updateTablet();
+}
+
+/** The memorial tablet on the altar: which vigil this is, and what is down (the title, or the room's name). */
+export function updateTablet() {
+  const no = state.vigil ? records.survived + 1 : body.dataset.resolved ? records.survived : 0;
+  art.tablet(no, meta('title') || roomName || t('tabletDefault'));
 }
 
 /* ---------- ETA ---------- */

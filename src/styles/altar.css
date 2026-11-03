@@ -131,11 +131,28 @@ body[data-state="lit"] .mantra__dot { background: var(--flame); }
 .burner__svg { display: block; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .burner__svg--live { position: absolute; inset: 0; }
 .burner__svg--live, .burner__svg--live * { pointer-events: none !important; cursor: default; }
-/* only painted shapes catch clicks, never the transparent box around them */
-.burner__svg .altar-table, .burner__svg .candle, .burner__svg .offerings, .burner__svg .devotee,
-.burner__svg > path, .burner__svg > ellipse, .burner__svg > g { pointer-events: visiblePainted; cursor: pointer; }
-.burner__svg defs { pointer-events: none; }
-.burner__shine { display: none; }
+/* Only painted shapes catch clicks, never the transparent box around them. The censer lights the
+   incense, a candle stirs the smoke, an offering says who gave it; the table, tablet, vase and the
+   cat are scenery. */
+.burner__svg > path, .burner__svg > ellipse, .burner__svg .candle, .burner__svg .offering { pointer-events: visiblePainted; cursor: pointer; }
+.burner__svg defs, .burner__svg .altar-table, .burner__svg .tablet, .burner__svg .vase, .burner__svg .cat, .burner__svg .torii, .burner__svg .devotee { pointer-events: none; }
+/* The memorial tablet names the vigil and what is down; for ten minutes after They're back it says so */
+.tablet__back { display: none; fill: var(--live); }
+body[data-resolved="1"] .tablet__title { display: none; }
+body[data-resolved="1"] .tablet__back { display: block; }
+
+/* Robe tones: a kneeler's own, the ops team's, and the same colour on their tag and card row */
+[data-tone="1"] .robe { fill: var(--tone-1-soft); }
+[data-tone="2"] .robe { fill: var(--tone-2-soft); }
+[data-tone="3"] .robe { fill: var(--tone-3-soft); }
+.kneeler[data-tone="1"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="1"]:not(button) .person__avatar { border-color: var(--tone-1); }
+.kneeler[data-tone="2"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="2"]:not(button) .person__avatar { border-color: var(--tone-2); }
+.kneeler[data-tone="3"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="3"]:not(button) .person__avatar { border-color: var(--tone-3); }
+.kneeler[data-tone="1"] .kneeler__avatar, .person[data-tone="1"] .person__avatar { background: var(--tone-1-soft); }
+.kneeler[data-tone="2"] .kneeler__avatar, .person[data-tone="2"] .person__avatar { background: var(--tone-2-soft); }
+.kneeler[data-tone="3"] .kneeler__avatar, .person[data-tone="3"] .person__avatar { background: var(--tone-3-soft); }
+.person__avatar { border: 1.5px solid transparent; }
+
 .stick__body { fill: var(--muted); }
 .stick__ash { fill: var(--line-strong); }
 .stick__halo { fill: var(--ember-soft); }

@@ -65,30 +65,40 @@ export const OFFERINGS = {
  * its knees at (0, 0) inside the box x −44…44, y −196…8. Robe folds, a sash,
  * sleeves hanging from the raised arms, hair in a bun, soles peeking out under the hem.
  */
-export const FIGURE = (cls) => `
+/** The hair, three ways: a bun (0), a short crop (1), a tail down the back (2). Drawn over the head at (0, -108). */
+const HAIR = [
+  `<path class="d-ink" d="M -15 -108 Q -13 -127 0 -127 Q 13 -127 15 -108 Q 9 -116 0 -115 Q -9 -116 -15 -108 Z"/>
+      <circle class="d-ink" cx="0" cy="-126" r="4.5"/>
+      <path class="d-strand" d="M -10 -118 Q -5 -122 0 -122 M 5 -122 Q 9 -121 12 -116"/>`,
+  `<path class="d-ink" d="M -15 -106 Q -15 -126 0 -125 Q 15 -126 15 -106 Q 12 -112 8 -111 Q 0 -117 -8 -111 Q -12 -112 -15 -106 Z"/>
+      <path class="d-strand" d="M -9 -116 Q -3 -120 3 -119 M 6 -118 Q 10 -116 12 -112"/>`,
+  `<path class="d-ink" d="M -15 -108 Q -13 -127 0 -127 Q 13 -127 15 -108 Q 9 -116 0 -115 Q -9 -116 -15 -108 Z"/>
+      <path class="d-ink" d="M -4 -112 Q -8 -96 -3 -78 Q 2 -72 5 -78 Q 8 -96 4 -112 Z"/>
+      <path class="d-strand" d="M -10 -118 Q -5 -122 0 -122 M 5 -122 Q 9 -121 12 -116 M 0 -108 Q -2 -92 1 -80"/>`,
+];
+
+export const FIGURE = (cls, { hair = 0 } = {}) => `
     <ellipse class="d-shade" cx="0" cy="4" rx="44" ry="4"/>
     <path class="d-sunk" d="M -40 -4 Q 0 -14 40 -4 L 40 0 Q 0 8 -40 0 Z"/>
     <path class="d-thin" d="M -40 -4 Q 0 6 40 -4"/>
-    <path class="d-paper" d="M -30 0 Q -33 -24 -14 -32 L 14 -32 Q 33 -24 30 0 Q 0 4 -30 0 Z"/>
+    <path class="d-paper robe" d="M -30 0 Q -33 -24 -14 -32 L 14 -32 Q 33 -24 30 0 Q 0 4 -30 0 Z"/>
     <path class="d-h2" d="M -17 -26 Q -21 -14 -18 -2 M -6 -30 Q -8 -16 -5 0 M 6 -30 Q 8 -16 5 0 M 17 -26 Q 21 -14 18 -2"/>
     <ellipse class="d-paper" cx="-13" cy="1" rx="8" ry="4"/>
     <ellipse class="d-paper" cx="13" cy="1" rx="8" ry="4"/>
     <path class="d-thin" d="M -19 0 h 3 M -17 -2 h 3 M 16 0 h 3 M 14 -2 h 3"/>
     <g class="${cls}__upper" style="transform-origin: 0px -30px">
-      <path class="d-paper" d="M -18 -30 L -22 -80 Q 0 -96 22 -80 L 18 -30 Z"/>
+      <path class="d-paper robe" d="M -18 -30 L -22 -80 Q 0 -96 22 -80 L 18 -30 Z"/>
       <path class="d-h2" d="M 0 -78 V -38"/>
       <path class="d-thin" d="M -19 -40 Q 0 -35 19 -40 M -19 -35 Q 0 -30 19 -35"/>
-      <path class="d-paper" d="M -22 -80 L -33 -48 Q -25 -41 -13 -49 L -9 -78 Z"/>
-      <path class="d-paper" d="M 22 -80 L 33 -48 Q 25 -41 13 -49 L 9 -78 Z"/>
+      <path class="d-paper robe" d="M -22 -80 L -33 -48 Q -25 -41 -13 -49 L -9 -78 Z"/>
+      <path class="d-paper robe" d="M 22 -80 L 33 -48 Q 25 -41 13 -49 L 9 -78 Z"/>
       <path class="d-tube-out" stroke-width="11" d="M -18 -78 Q -26 -106 -8 -118 L 0 -122"/>
       <path class="d-tube-out" stroke-width="11" d="M 18 -78 Q 26 -106 8 -118 L 0 -122"/>
       <path class="d-tube-in" stroke-width="7.5" d="M -18 -78 Q -26 -106 -8 -118 L 0 -122"/>
       <path class="d-tube-in" stroke-width="7.5" d="M 18 -78 Q 26 -106 8 -118 L 0 -122"/>
       <rect class="d-paper" x="-5" y="-102" width="10" height="14" rx="2.5"/>
       <circle class="d-paper" cx="0" cy="-108" r="15"/>
-      <path class="d-ink" d="M -15 -108 Q -13 -127 0 -127 Q 13 -127 15 -108 Q 9 -116 0 -115 Q -9 -116 -15 -108 Z"/>
-      <circle class="d-ink" cx="0" cy="-126" r="4.5"/>
-      <path class="d-strand" d="M -10 -118 Q -5 -122 0 -122 M 5 -122 Q 9 -121 12 -116"/>
+      ${HAIR[hair % HAIR.length]}
       <path class="d-thin" d="M -15 -106 q -2 2 0 4 M 15 -106 q 2 2 0 4"/>
       <circle class="d-paper" cx="-3.5" cy="-123" r="4"/>
       <circle class="d-paper" cx="3.5" cy="-123" r="4"/>
@@ -96,6 +106,12 @@ export const FIGURE = (cls) => `
       <circle class="${cls}__halo" cx="0" cy="-182" r="7" opacity="0"/>
       <circle class="${cls}__ember" cx="0" cy="-182" r="2.6" opacity="0"/>
     </g>`;
+
+/** A person's look, from their id: one of four robe tones and three hair styles, the same every time they kneel. */
+export function look(id) {
+  const n = parseInt(String(id).slice(0, 8), 16) || 0;
+  return { tone: n % 4, hair: Math.floor(n / 4) % 3 };
+}
 
 export function buildBurner(host) {
   host.innerHTML = `
@@ -159,9 +175,11 @@ export function buildBurner(host) {
     <rect class="d-raised" x="98" y="390" width="52" height="8" rx="1"/>
     <path class="d-raised" d="M 104 392 V 170 Q 104 152 124 148 Q 144 152 144 170 V 392 Z"/>
     <path class="d-thin" d="M 109 386 V 172 Q 109 158 124 154 Q 139 158 139 172 V 386" opacity=".6"/>
-    <text class="d-mono" x="124" y="183" text-anchor="middle">RACK-01</text>
-    <path class="d-thin" d="M 115 190 H 133" opacity=".6"/>
-    <text class="d-mono" x="124" y="203" text-anchor="middle">03:14</text>
+    <text class="d-mono tablet__vigil" x="124" y="183" text-anchor="middle">VIGIL</text>
+    <text class="d-mono tablet__no" x="124" y="195" text-anchor="middle"></text>
+    <path class="d-thin" d="M 115 202 H 133" opacity=".6"/>
+    <text class="d-mono tablet__title" x="124" y="217" text-anchor="middle"></text>
+    <text class="d-mono tablet__back" x="124" y="217" text-anchor="middle"><tspan x="124" dy="0">THEY</tspan><tspan x="124" dy="12">ARE</tspan><tspan x="124" dy="12">BACK</tspan></text>
   </g>
 
   <!-- chrysanthemums -->
@@ -236,7 +254,6 @@ export function buildBurner(host) {
       <path d="M 208 326 c 6 -10 18 -10 22 0 c 8 -8 20 -2 18 8 c 8 2 8 12 0 14 h -40 c -10 0 -10 -14 0 -22 z"/>
       <path d="M 276 326 c 6 -10 18 -10 22 0 c 8 -8 20 -2 18 8 c 8 2 8 12 0 14 h -40 c -10 0 -10 -14 0 -22 z"/>
     </g>
-    <rect class="burner__shine" x="-140" y="220" width="90" height="190"/>
   </g>
   <path class="d-line" d="M 142 ${RIM_Y} C 96 270, 100 340, 192 376 H 328 C 420 340, 424 270, 378 ${RIM_Y}"/>
 
@@ -282,8 +299,8 @@ export function buildBurner(host) {
   </g>
 
   <!-- the ops team, kneeling, backs to us, incense raised -->
-  ${[{ x: 34, s: 1.18, flip: 1 }, { x: 486, s: 1.18, flip: -1 }].map((d, i) => `
-  <g class="devotee" data-i="${i}" transform="translate(${d.x} 470) scale(${d.flip * d.s} ${d.s})">${FIGURE('devotee')}
+  ${[{ x: 34, s: 1.18, flip: 1, tone: 1, hair: 2 }, { x: 486, s: 1.18, flip: -1, tone: 2, hair: 1 }].map((d, i) => `
+  <g class="devotee" data-i="${i}" data-tone="${d.tone}" transform="translate(${d.x} 470) scale(${d.flip * d.s} ${d.s})">${FIGURE('devotee', { hair: d.hair })}
   </g>`).join('')}
 </svg>`;
 
@@ -302,20 +319,13 @@ export function buildBurner(host) {
   const offeringsG = host.querySelector('.offerings');
   const offerings = []; // { el, slot }
 
-  const shine = host.querySelector('.burner__shine');
   let lite = false;
   let burning = false;
   let burnTl = null;
   let flickerCall = null;
 
-  // Anything that moves inside this SVG repaints the whole censer, pattern and
-  // all, so in lite mode the idle motion stops and the flames update 6 times a second.
-  function startShine() {
-    gsap.killTweensOf(shine);
-    if (lite) { gsap.set(shine, { attr: { x: -140 } }); return; }
-    gsap.to(shine, { attr: { x: 560 }, duration: 8, repeat: -1, repeatDelay: 16, ease: 'steps(60)' });
-  }
-
+  // Anything that moves inside the live SVG repaints it whole, so in lite mode the idle
+  // motion stops and the flames update 6 times a second.
   /** The devotees sway almost imperceptibly while they wait. */
   function startSway() {
     devotees.forEach((d, i) => {
@@ -362,8 +372,9 @@ export function buildBurner(host) {
     devoteeEmbers.forEach((e, i) => gsap.to(e, { opacity: 0.5, duration: 0.6, yoyo: true, repeat: -1, ease: 'steps(8)', delay: 1.5 + i * 0.3 }));
   }
 
-  startShine();
   startSway();
+  const tabletTitle = host.querySelector('.tablet__title');
+  const tabletNo = host.querySelector('.tablet__no');
 
   return {
     svg,
@@ -401,9 +412,24 @@ export function buildBurner(host) {
     /** Lite mode: no idle motion, slow flame flicker, steady embers. */
     setLite(on) {
       lite = on;
-      startShine();
       startSway();
       if (burning) { startFlicker(); startEmbers(); }
+    },
+
+    /**
+     * Write the memorial tablet: which vigil this is, and what is down, in short upright lines
+     * (the tablet is 30 units wide: six mono characters a line, nine lines).
+     */
+    tablet(no, title) {
+      tabletNo.textContent = no ? `#${no}` : '';
+      const words = String(title ?? '').toUpperCase().split(/[\s_-]+/).filter(Boolean);
+      const lines = [];
+      for (const w of words) {
+        const last = lines[lines.length - 1];
+        if (last !== undefined && `${last} ${w}`.length <= 6) lines[lines.length - 1] = `${last} ${w}`;
+        else lines.push(w.length > 6 ? `${w.slice(0, 5)}.` : w);
+      }
+      tabletTitle.innerHTML = lines.slice(0, 9).map((l, i) => `<tspan x="124" dy="${i ? 12 : 0}">${l.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))}</tspan>`).join('');
     },
 
     /** Show or hide the two built-in ops-team devotees (rooms show the real people instead). */
@@ -448,8 +474,8 @@ export function buildBurner(host) {
       return tl;
     },
 
-    /** Place an offering on the table. Returns its label. */
-    offer(kind) {
+    /** Place an offering on the table, remembering who gave it. Returns its label. */
+    offer(kind, by = '') {
       const def = OFFERINGS[kind];
       if (!def) return null;
       // free slot, or recycle the oldest
@@ -461,7 +487,9 @@ export function buildBurner(host) {
       }
       const el = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       el.setAttribute('class', 'offering');
-      el.innerHTML = `<ellipse class="d-shade" cx="4" cy="0" rx="18" ry="3.5"/>${def.svg}`;
+      el.dataset.label = def.label;
+      el.dataset.by = by;
+      el.innerHTML = `<title>${def.label}${by ? ` · ${by.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))}` : ''}</title><ellipse class="d-shade" cx="4" cy="0" rx="18" ry="3.5"/>${def.svg}`;
       el.style.transformOrigin = `${SLOTS[slot]}px ${TABLE_Y}px`;
       gsap.set(el, { x: SLOTS[slot], y: TABLE_Y, scale: 1.3 });
       offeringsG.appendChild(el);
