@@ -2,13 +2,20 @@
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-export function badge(st) {
+const span = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`);
+
+/** "down 12m · 3 praying" while a vigil is open, "back · 3 praying" for the hour after, else who is there and whether it burns. */
+export function badge(st, now = Date.now()) {
   const left = 'shrine';
-  const right = st.people ? `${st.people} praying${st.lit ? ' · burning' : ''}` : st.lit ? 'burning' : 'cold';
+  const praying = st.people ? `${st.people} praying` : '';
+  const back = st.resolvedAt && now - st.resolvedAt < 3600 * 1000;
+  const right = st.downFor ? ['down ' + span(st.downFor), praying].filter(Boolean).join(' · ')
+    : back ? ['back', praying].filter(Boolean).join(' · ')
+    : st.people ? `${praying}${st.lit ? ' · burning' : ''}` : st.lit ? 'burning' : 'cold';
   const w = (t) => Math.round(t.length * 6.3 + 14);
   const lw = w(left) + 14; // room for the censer
   const rw = w(right);
-  const color = st.lit ? '#a8461a' : st.people ? '#3453b6' : '#595d54';
+  const color = st.downFor || st.lit ? '#a8461a' : back ? '#1d6a45' : st.people ? '#3453b6' : '#595d54';
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${lw + rw}" height="20" role="img" aria-label="${esc(left)}: ${esc(right)}">
 <title>${esc(left)}: ${esc(right)}</title>
 <linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>

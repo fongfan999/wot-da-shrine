@@ -17,9 +17,24 @@ export function describe(st) {
   return line;
 }
 
+/** They came back within the hour: the preview still celebrates. */
+const justBack = (st, now) => Boolean(st?.resolvedAt && now - st.resolvedAt < 3600 * 1000);
+
 /** The preview's title: the room's own title when it has one, else what state it is in. */
 export function previewTitle(st, room, now = Date.now()) {
-  const back = st?.resolvedAt && now - st.resolvedAt < 3600 * 1000;
+  const back = justBack(st, now);
   if (st?.title) return `${st.title} · ${st.downFor ? 'pray at' : back ? 'back online ·' : ''} ${room}`.replace(/\s+/g, ' ');
   return st?.downFor ? `The servers are down · pray at ${room}` : back ? `The servers are back · ${room}` : `Pray for the servers · ${room}`;
+}
+
+
+/**
+ * The preview's picture: one of three drawn in advance (public/og*.png), since chat apps want a
+ * PNG and the Worker draws none. A room that is down shows the lit altar, one that just came back
+ * the celebration, and any other the shrine's own card.
+ */
+export function previewImage(st, now = Date.now()) {
+  if (st?.downFor) return { file: 'og-down.png', alt: 'The servers are down. An ink drawing of the altar, incense lit, the team praying.' };
+  if (justBack(st, now)) return { file: 'og-back.png', alt: 'The servers are back. An ink drawing of the altar after the vigil.' };
+  return { file: 'og.png', alt: 'An ink drawing of an incense burner on an altar, with the words: pray for uptime, together.' };
 }

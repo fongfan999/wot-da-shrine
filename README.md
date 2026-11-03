@@ -99,6 +99,12 @@ The shrine is built to travel from one incident channel to the next:
 - **Share**: the Share menu copies the link, casts to the TV, or opens a sheet with the link, a ready-made
   Slack message ("🪔 The servers are down. The shrine is open, come pray
   with us: …"), a post for X, and the system share sheet on phones.
+- **Previews that show the state**: the unfurl's picture is one of three drawn
+  in advance (`public/og.png`, `og-down.png`, `og-back.png`): a room with an
+  open vigil shows the lit altar, one that came back within the hour the
+  celebration, any other the shrine's own card. In dev,
+  `await __incense.previewCard('down' | 'back')` draws them again from the live
+  altar.
 - **The share card**: a PNG of this shrine as it is right now, drawn from the
   live altar (every offering on the table), the team's avatars, how long
   you prayed, the karma and the last prayers. Share it, copy it or download
@@ -111,9 +117,14 @@ The shrine is built to travel from one incident channel to the next:
   sent, shrines opened, how many are burning right now, and the last thing
   that happened (only the ready-made prayers are ever echoed, never free
   text, and no room name leaves the counter).
+- **For the retro**: the share sheet also hands out the vigil as a few lines
+  of Markdown (down for how long, people at the peak, prayers, blames,
+  fortunes, karma, the link) for the postmortem doc.
 - **A badge for the README or status page**:
   `[![Wot Da Shrine](https://shrine.wotdafong.dev/api/rooms/serene-rack-42/badge.svg)](https://shrine.wotdafong.dev/r/serene-rack-42)`
-  shows "shrine | 3 praying · burning" and links to the altar.
+  shows "shrine | down 12m · 3 praying" while a vigil is open, "back · 3
+  praying" for the hour after, and otherwise who is there and whether the
+  incense burns. It links to the altar.
 
 ## Features
 
@@ -283,7 +294,7 @@ src/lib/
   omikuji.js             the fortunes: five levels, three lines each
   icons.js               line icons for the dock, tray and pings
 public/favicon.svg       the mark
-public/og.png            the link preview card (1200×630)
+public/og*.png           the link preview cards (1200×630): the shrine, a room that is down, one that is back
 public/wotdafong-*.svg   the Wot Da Fong P?! mark for the credit line
 shared/                  used by the page and the Worker: the rules (burn time, karma, vigils), ready-made prayers, room names, link previews
 worker/index.js          Cloudflare Worker: a Hono app that mounts the routes below

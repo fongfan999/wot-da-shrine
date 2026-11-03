@@ -21,7 +21,7 @@ import './app/openShrine.js';
 import './app/incident.js';
 import { renderRecords } from './app/stats.js';
 import { renderResolve } from './app/resolve.js';
-import { openShare, shareOpen } from './app/shareSheet.js';
+import { openShare, previewCard, shareOpen } from './app/shareSheet.js';
 import { enterRoom, joinOpen } from './app/shrine.js';
 import { menuOpen } from './app/menus.js';
 import { setupScreen } from './app/screen.js';
@@ -59,7 +59,7 @@ breathBtn.addEventListener('click', toggleBreathing);
 // The first interaction anywhere unlocks audio so music can start on the first click.
 document.addEventListener('pointerdown', () => sound.unlock(), { once: true });
 
-if (import.meta.env.DEV) window.__incense = { gsap, sound, smoke, fog, petals, get settings() { return settings; } };
+if (import.meta.env.DEV) window.__incense = { gsap, sound, smoke, fog, petals, previewCard, get settings() { return settings; } };
 
 /**
  * Start the page. `setupLanding` lays out the home page's sections (it does nothing on a maintenance

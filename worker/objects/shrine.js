@@ -391,7 +391,7 @@ export class Shrine extends DurableObject {
       offerings: s.offerings.length,
       since: s.since,
       resolvedAt: s.resolvedAt,
-      downFor: s.vigil ? Math.round((now - s.vigil.startedAt) / 60000) : 0,
+      downFor: s.vigil ? Math.max(1, Math.round((now - s.vigil.startedAt) / 60000)) : 0, // at least 1: an open vigil is always "down"
       survived: s.survived,
       title: s.meta.title,
       lastPrayer: s.prayers.at(-1)?.text ?? '',

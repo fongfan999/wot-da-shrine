@@ -11,7 +11,7 @@ const W = 1200;
 const H = 630;
 const SCALE = 2; // retina PNG
 
-const TOKENS = ['paper', 'paper-raised', 'paper-sunk', 'ink', 'muted', 'line', 'line-strong', 'accent', 'accent-soft', 'note-ink', 'ember', 'ember-soft', 'ember-ink', 'flame', 'live', 'sheet-label', 'tone-1-soft', 'tone-2-soft', 'tone-3-soft'];
+const TOKENS = ['paper', 'paper-raised', 'paper-sunk', 'ink', 'muted', 'line', 'line-strong', 'sheet-line', 'accent', 'accent-soft', 'note-ink', 'ember', 'ember-soft', 'ember-ink', 'flame', 'live', 'sheet-label', 'tone-1-soft', 'tone-2-soft', 'tone-3-soft'];
 const SANS = `ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`;
 const SERIF = `'Iowan Old Style', 'Palatino Linotype', Palatino, Charter, Georgia, 'Times New Roman', serif`;
 const MONO = `ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace`;
@@ -42,6 +42,15 @@ function drawingCss(c) {
     .d-tube-out { fill: none; stroke: ${c.ink}; stroke-linecap: round; }
     .d-tube-in { fill: none; stroke: ${c.paper}; stroke-linecap: round; }
     .d-ash { fill: ${c.line}; stroke: none; }
+    .d-accent-line { fill: none; stroke: ${c.accent}; stroke-width: 2; stroke-linecap: round; }
+    .d-h2 { fill: none; stroke: ${c.ink}; stroke-width: .9; stroke-linecap: round; opacity: .45; }
+    .d-hl { stroke: ${c.ink}; stroke-width: .8; opacity: .5; }
+    .d-st { fill: ${c.ink}; opacity: .55; }
+    .d-cav { fill: ${c.ink}; stroke: none; opacity: .22; }
+    .d-core { fill: ${c['paper-raised']}; stroke: none; }
+    .d-strand { fill: none; stroke: ${c.paper}; stroke-width: 1.1; stroke-linecap: round; }
+    .d-mat { fill: ${c['paper-raised']}; stroke: ${c['sheet-line']}; stroke-width: 1.2; }
+    .d-mono { font-family: ${MONO}; font-size: 8px; letter-spacing: .04em; fill: ${c.ink}; }
     .stick__body { fill: ${c.muted}; }
     .stick__ash { fill: ${c['line-strong']}; }
     .stick__halo, .devotee__halo { fill: ${c['ember-soft']}; }
@@ -76,12 +85,15 @@ function wrap(text, max, lines = 2) {
   return out;
 }
 
-/** Strip the live altar of anything that would not survive as a standalone SVG. */
-function altarMarkup(host) {
+/** Strip the live altar of anything that would not survive as a standalone SVG. `plain` also clears the tablet (a picture for every room). */
+function altarMarkup(host, plain = false) {
   const svgs = [...host.querySelectorAll('svg.burner__svg')];
   const inner = svgs.map((svg) => {
     const copy = svg.cloneNode(true);
     copy.querySelectorAll('[class*="halo"], .soft').forEach((el) => el.remove()); // blurred glows need filters we don't ship
+    // the flames' flicker is a transform mid-step; still is fine for a picture (and sits right without the page's transform origin)
+    copy.querySelectorAll('.flame').forEach((el) => { el.removeAttribute('transform'); el.style.transform = ''; });
+    if (plain) copy.querySelectorAll('.tablet__vigil, .tablet__no, .tablet__title').forEach((el) => el.remove());
     return copy.innerHTML;
   }).join('\n');
   const level = host.closest('.burner')?.dataset.level ?? '0';
@@ -90,18 +102,35 @@ function altarMarkup(host) {
 }
 
 /**
+ * The headline: the room's title when it has one (what is down, as the team called it), with the
+ * state under it in the accent serif; otherwise the stock line. A long title shrinks to fit.
+ */
+function headline(data) {
+  if (data.headline) return data.headline;
+  const title = String(data.title ?? '').trim();
+  if (title) return [title, data.resolved ? 'Back online.' : data.open ? 'The team is praying.' : 'The team prayed.'];
+  return data.resolved ? ['The servers are', 'back.'] : ['We prayed for', 'the servers.'];
+}
+
+/** A font size at which `text` fits `width`, at most `base` (`em` is the font's average width per character). */
+const fit = (text, base, width, em) => Math.min(base, Math.floor(width / (Math.max(1, text.length) * em)));
+
+/**
  * Build the card. `data`:
- *   room, resolved, people (count), avatars (emoji), minutes, karma, prayers (count),
- *   incense (count), quotes [{text, name}], url
+ *   room, title, resolved, open (a vigil is on), people (count), avatars (emoji), minutes, karma, prayers (count),
+ *   incense (count), quotes [{text, name}], url; `eyebrow`, `headline` [line1, line2] and `facts` override
+ *   what the state would say (the link preview images are drawn this way).
  */
 export function cardSvg(data) {
   const c = palette();
   const brandMark = document.querySelector('.brand__mark')?.outerHTML ?? '';
   const brandWord = document.querySelector('.brand__word')?.outerHTML ?? '';
-  const altar = altarMarkup(document.querySelector('#burner-art'));
+  const altar = altarMarkup(document.querySelector('#burner-art'), Boolean(data.plain));
 
-  const eyebrow = data.room ? `SHARED SHRINE / ${data.room}` : 'A SOLO VIGIL';
-  const title = data.resolved ? ['The servers are', 'back.'] : ['We prayed for', 'the servers.'];
+  const eyebrow = data.eyebrow ?? (data.room ? `SHARED SHRINE / ${data.room}` : 'A SOLO VIGIL');
+  const title = headline(data);
+  const size1 = fit(title[0], 78, 580, 0.46);
+  const size2 = fit(title[1], 82, 580, 0.4);
   const facts = [];
   if (data.people > 1) facts.push(`${data.people} devotees`);
   else if (data.people === 1 && data.room) facts.push('1 devotee');
@@ -110,7 +139,7 @@ export function cardSvg(data) {
   if (data.karma) facts.push(`${data.karma} karma`);
   if (data.prayers) facts.push(`${data.prayers} prayer${data.prayers === 1 ? '' : 's'}`);
   if (data.survived) facts.push(`vigil #${data.survived + (data.resolved ? 0 : 1)}`);
-  const factsLine = facts.join(' · ') || 'The incense is lit. The rack is listening.';
+  const factsLine = data.facts ?? (facts.join(' · ') || 'The incense is lit. The rack is listening.');
 
   const quotes = (data.quotes ?? []).slice(-3).reverse();
   let y = 330;
@@ -141,8 +170,8 @@ export function cardSvg(data) {
   <circle cx="78" cy="78" r="5" fill="${c.accent}"/>
   <text x="94" y="84" font-family="${MONO}" font-size="16" letter-spacing="2" fill="${c.muted}">${esc(eyebrow)}</text>
 
-  <text x="68" y="172" font-family="${SANS}" font-size="78" font-weight="500" letter-spacing="-3" fill="${c.ink}">${esc(title[0])}</text>
-  <text x="68" y="256" font-family="${SERIF}" font-style="italic" font-size="82" letter-spacing="-2" fill="${c.accent}">${esc(title[1])}</text>
+  <text x="68" y="172" font-family="${SANS}" font-size="${size1}" font-weight="500" letter-spacing="${-size1 / 26}" fill="${c.ink}">${esc(title[0])}</text>
+  <text x="68" y="256" font-family="${SERIF}" font-style="italic" font-size="${size2}" letter-spacing="${-size2 / 41}" fill="${c.accent}">${esc(title[1])}</text>
   <text x="72" y="296" font-family="${SANS}" font-size="22" fill="${c.muted}">${esc(factsLine)}</text>
 
   ${quoteSvg}

@@ -4,7 +4,7 @@ import { sound } from '../audio/index.js';
 import { shareUrl } from '../lib/config.js';
 import { canCopyImage, canShareFiles, cardPng, cardSvg, copyImage, download, shareFile } from '../lib/share.js';
 import { BRAND, t } from '../lib/strings.js';
-import { $, body, counters, fmt, people, recentPrayers, roomName, roomUrl, settings, state } from './context.js';
+import { $, body, counters, fmt, meta, people, recentPrayers, roomName, roomUrl, settings, state } from './context.js';
 import { openTray } from './offerings.js';
 import { minutesPrayed } from './resolve.js';
 import { openPanel } from './settings.js';
@@ -39,7 +39,9 @@ async function drawCard() {
   const list = [...people.values()].sort((a, b) => (a.id === state.myId) - (b.id === state.myId));
   const svg = cardSvg({
     room: roomName,
+    title: meta('title'),
     resolved: Boolean(body.dataset.resolved),
+    open: Boolean(state.vigil),
     people: roomName ? people.size : 0,
     avatars: roomName ? list.map((p) => p.avatar) : [],
     minutes: minutesPrayed(),
@@ -60,6 +62,59 @@ async function drawCard() {
     if (seq === cardSeq) toast(t('cardFailed'));
   }
 }
+
+/**
+ * The link preview pictures (public/og-down.png, og-back.png) are this card with a fixed headline,
+ * drawn once from the dev console: `await __incense.previewCard('down')` returns the PNG blob.
+ * Light the altar first for 'down' (and press They're back for 'back') so the drawing matches.
+ */
+export async function previewCard(kind) {
+  const down = kind === 'down';
+  const svg = cardSvg({
+    room: '', resolved: !down, people: 0, avatars: [], quotes: [], url: 'shrine.wotdafong.dev', plain: true,
+    eyebrow: down ? 'THE SERVERS ARE DOWN' : 'THE SERVERS ARE BACK',
+    headline: down ? ['The servers are', 'down.'] : ['The servers are', 'back.'],
+    facts: down ? 'The team is at the shrine. Open the link, kneel, and pray with them.' : 'The vigil is over. Come and see what the team prayed for.',
+  });
+  return cardPng(svg);
+}
+
+/* ---------- For the retro: the vigil as a few lines of Markdown, for the postmortem doc ---------- */
+const retroEl = $('#share-retro');
+const retroText = $('#retro-md');
+const clock = (at) => new Date(at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+const span = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
+
+/** The vigil to write up: the open one, or the one that just ended. Null when the altar has seen none. */
+function retroVigil() {
+  if (state.vigil) return { ...state.vigil, open: true, minutes: minutesPrayed(), peak: Math.max(state.vigil.peak ?? 0, roomName ? people.size : 1) };
+  const last = state.lastVigil ?? records.history[0];
+  return last ? { ...last, open: false } : null;
+}
+
+export function retroMarkdown() {
+  const v = retroVigil();
+  if (!v) return '';
+  const what = v.title || meta('title') || (roomName ? `/r/${roomName}` : t('title'));
+  const n = (k) => v[k] ?? 0;
+  const lines = [
+    `## 🪔 ${fmt('retroHeading', { what })}`,
+    '',
+    `- ${v.open ? fmt('retroDownOpen', { t: span(Math.max(1, v.minutes)), from: clock(v.startedAt) }) : fmt('retroDown', { t: span(v.minutes), from: clock(v.startedAt), to: clock(v.endedAt) })}`,
+    `- ${fmt('retroPeople', { n: Math.max(1, v.peak ?? 1) })}`,
+    `- ${fmt('retroActs', { prayers: n('prayers'), blames: n('blames'), fortunes: n('fortunes') })}`,
+    `- ${fmt('retroKarma', { n: n('karma') })}`,
+    `- ${fmt('retroLink', { url: roomUrl() })}`,
+  ];
+  return lines.join('\n');
+}
+
+function renderRetro() {
+  const md = retroMarkdown();
+  retroEl.hidden = !md;
+  retroText.textContent = md;
+}
+$('#btn-retro-copy').addEventListener('click', () => copyText(retroMarkdown(), t('retroCopied')));
 
 export function openShare(open, celebrate = false) {
   if (open === shareOpen) return;
@@ -87,6 +142,7 @@ export function openShare(open, celebrate = false) {
   gsap.fromTo(shareEl, { opacity: 0 }, { opacity: 1, duration: 0.3 });
   gsap.fromTo('.sheet__card', { y: 24, opacity: 0, scale: 0.98 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' });
   sound.tick(660, 0.06);
+  renderRetro();
   drawCard();
 }
 
