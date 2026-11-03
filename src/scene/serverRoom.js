@@ -137,8 +137,9 @@ export function buildServerRoom(host) {
   return {
     /** A ripple of activity across the room (e.g. when the bowl rings). */
     pulse() {
-      if (scene.still) return;
-      gsap.fromTo(host.querySelector('.leds'), { opacity: 0.3 }, { opacity: 1, duration: 1.4, ease: 'power2.out' });
+      const leds = host.querySelector('.leds');
+      if (scene.still || gsap.isTweening(leds)) return; // rung fast, the room keeps glowing rather than strobing
+      gsap.fromTo(leds, { opacity: 0.3 }, { opacity: 1, duration: 1.4, ease: 'power2.out' });
     },
     /** They're back: rack 42's lights come up one by one, top to bottom. */
     recover() {

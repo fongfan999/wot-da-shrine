@@ -28,7 +28,7 @@ export function offerFx(kind, by = '') {
   sound.whoosh();
   gsap.delayedCall(0.35, () => sound.tick(1046, 0.08));
   smoke.puff(0.6);
-  gsap.fromTo('.burner', { scale: 1 }, { scale: 1.02, duration: 0.25, yoyo: true, repeat: 1, ease: 'sine.inOut' });
+  gsap.fromTo('.burner', { scale: 1 }, { scale: 1.02, duration: 0.25, yoyo: true, repeat: 1, ease: 'sine.inOut', overwrite: 'auto' });
   return label;
 }
 

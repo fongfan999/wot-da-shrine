@@ -105,6 +105,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 /* ---------- Bowl ---------- */
+const sceneEl = $('#scene');
 export function ringBowl() {
   sound.unlock();
   const note = gsap.utils.random([174, 196, 220, 261]);
@@ -121,8 +122,9 @@ export function bowlFx(note) {
   room.pulse();
   shockwave();
   kick(4);
-  gsap.fromTo($('#btn-bowl').querySelector('.act__icon'), { rotation: -20 }, { rotation: 0, duration: 1, ease: 'elastic.out(1, 0.3)' });
-  gsap.fromTo('.scene', { scale: 1.012 }, { scale: 1, duration: 1.2, ease: 'power2.out' });
+  gsap.fromTo($('#btn-bowl').querySelector('.act__icon'), { rotation: -20 }, { rotation: 0, duration: 1, ease: 'elastic.out(1, 0.3)', overwrite: 'auto' });
+  // the whole scene breathes out once; rung again mid-breath, it doesn't jump back (repainting the full screen each ring is what lagged)
+  if (!gsap.isTweening(sceneEl)) gsap.fromTo(sceneEl, { scale: 1.012 }, { scale: 1, duration: 1.2, ease: 'power2.out' });
 }
 
 /* ---------- Bowl combos: ring fast (or together) and the rack starts to notice ---------- */
@@ -172,7 +174,8 @@ export function bowFx(id) {
   kick(6);
   sound.tick(392, 0.07);
   gsap.delayedCall(0.5, () => sound.bowl(147));
-  gsap.fromTo('.heading', { y: 0 }, { y: 6, duration: 0.5, yoyo: true, repeat: 1, ease: 'sine.inOut' });
+  const heading = $('.heading');
+  if (!gsap.isTweening(heading)) gsap.fromTo(heading, { y: 0 }, { y: 6, duration: 0.5, yoyo: true, repeat: 1, ease: 'sine.inOut' });
 }
 
 /** Enough people bowed together. */
@@ -198,7 +201,7 @@ export function puffFx() {
   sound.tick(520, 0.08);
   kick(2, 0.6);
   smoke.puff(1);
-  gsap.fromTo('.burner', { rotation: -2 }, { rotation: 0, duration: 0.8, ease: 'elastic.out(1, 0.3)' });
+  gsap.fromTo('.burner', { rotation: -2 }, { rotation: 0, duration: 0.8, ease: 'elastic.out(1, 0.3)', overwrite: 'auto' });
 }
 
 // The censer lights the incense (or, lit, stirs the smoke); a candle stirs it; an offering says who gave it.

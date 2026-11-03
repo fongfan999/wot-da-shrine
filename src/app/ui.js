@@ -133,9 +133,11 @@ export function bump(el) {
   gsap.fromTo(el, { scale: 1.3, color: getComputedStyle(body).getPropertyValue('--accent') }, { scale: 1, color: '', duration: 0.6, ease: 'elastic.out(1, 0.5)', transformOrigin: '0% 100%' });
 }
 
-/** Golden rings roll out across the floor from the foot of the altar. */
+/** Golden rings roll out across the floor from the foot of the altar. Clicked fast, one set at a time, not a pile of them. */
+let shockAt = 0;
 export function shockwave() {
-  if (reduceMotion) return;
+  if (reduceMotion || performance.now() - shockAt < 600) return;
+  shockAt = performance.now();
   const floor = $('#floor');
   for (let i = 0; i < 3; i++) {
     const ring = document.createElement('span');
