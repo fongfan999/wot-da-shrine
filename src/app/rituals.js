@@ -7,11 +7,9 @@ import { t } from '../lib/strings.js';
 import { $, fmt, reduceMotion, roomName, roomUrl, state } from './context.js';
 import { art, burner, kick, motes, petals, smoke, wishes } from './engines.js';
 import { openTray } from './offerings.js';
-import { pulse } from './prayers.js';
 import { shareOpen } from './shareSheet.js';
 import { addKarma } from './stats.js';
 import { copyText, logMine, toast } from './ui.js';
-import { vigilTouch } from './vigil.js';
 
 /* ---------- Rituals ---------- */
 /** A small dialog: `#blame`, `#fortune`. */
@@ -45,10 +43,8 @@ $('#blame-form').addEventListener('submit', (e) => {
   openRitual('blame', false);
   showBurn(text);
   addKarma(KARMA.blame);
-  vigilTouch(0, 'blames');
   logMine('blame', t('fBlame'), { toastText: t('blameBurned') });
   state.shrine?.send('blame');
-  pulse('blame');
 });
 
 /** A paper slip flies into the censer and burns. `text` is only ever shown on this screen. */
@@ -80,7 +76,7 @@ export function blameFx(text, fromEl = null) {
 }
 
 /* Draw a fortune: one omikuji per person per vigil */
-const FORTUNE_KEY = () => `incense:fortune:${roomName || 'solo'}:${state.vigil?.startedAt ?? 0}`;
+const FORTUNE_KEY = () => `incense:fortune:${roomName || 'home'}:${state.vigil?.startedAt ?? 0}`;
 let fortune = null;
 $('#btn-fortune').addEventListener('click', () => {
   sound.unlock();
@@ -91,10 +87,8 @@ $('#btn-fortune').addEventListener('click', () => {
   if (!again) {
     try { sessionStorage.setItem(FORTUNE_KEY(), JSON.stringify(fortune)); } catch { /* ignore */ }
     addKarma(KARMA.omikuji);
-    vigilTouch(0, 'fortunes');
     logMine('omikuji', fmt('fOmikuji', { level: FORTUNE_LEVELS[fortune.level].name }));
     state.shrine?.send('omikuji', { level: fortune.level });
-    pulse('omikuji');
     fortuneFx();
   } else toast(t('fortuneAgain'));
   renderFortune(fortune, !again);

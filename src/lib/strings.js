@@ -25,9 +25,9 @@ export const STRINGS = {
 
   // Side cards
   inShrine: 'In the shrine',
-  soloLabel: 'Praying alone',
-  soloText: 'Open a shared shrine and send the link to your team. Everyone’s incense, offerings and prayers land on the same altar, live.',
-  soloCta: 'Open a team shrine',
+  openLabel: 'Praying alone',
+  openText: 'Open a shared shrine and send the link to your team. Everyone’s incense, offerings and prayers land on the same altar, live.',
+  openCta: 'Open a team shrine',
   demoLabel: 'Your team’s shrine',
   demoText: 'This altar is the demo. Open yours, name it after what is down, send the link, and everyone kneels at the same altar.',
   demoNudge: 'Praying alone? Open a shrine and bring the team.',
@@ -154,7 +154,7 @@ export const STRINGS = {
   liteToast: 'Switched to lite effects for a smoother shrine.',
   copyLink: 'Copy share link',
 
-  // Landing page (the home page, below and around the solo shrine)
+  // Landing page (the home page, below and around the demo altar)
   landEyebrow: 'When the servers are down',
   landTitle: 'Pray for uptime, together',
   landSubtitle: 'A shared altar for the incident channel. Open one, drop the link in Slack, and the whole team prays to the rack, live.',

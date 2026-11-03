@@ -1,5 +1,5 @@
 /**
- * What every part of the page shares: where we are (solo, a room, the TV, the home page),
+ * What every part of the page shares: where we are (a room, the TV, the home page),
  * the visitor's settings and counters, and the little state that more than one part changes.
  */
 import { loadSettings, saveSettings, clearSettings, loadCounters, DEFAULTS } from '../lib/config.js';
@@ -28,15 +28,13 @@ export function resetSettings() {
 }
 
 /* ---------- Where we are ---------- */
-export const roomName = roomFromPath(); // a shared shrine at /r/:room, or '' for the solo page
+export const roomName = roomFromPath(); // a shared shrine at /r/:room, or '' on the home page
 export const urlParams = new URLSearchParams(location.search);
 export const tvHome = /^\/tv\/?$/.test(location.pathname); // a screen waiting to be paired: shows its code
 export const tv = urlParams.get('tv') === '1' || tvHome; // the war-room screen: watches, never kneels
 export const embedded = window.parent !== window; // the home page's TV, inside its frame
-// The home page is the landing page, unless it is being used as a maintenance page (a title, subtitle or ETA
-// in the URL or saved in this browser) or asked to be the bare shrine.
-export const landing = !roomName && !tv && urlParams.get('landing') !== '0' && !urlParams.has('solo')
-  && !['title', 'subtitle', 'eta'].some((k) => urlParams.has(k) || settings[k]);
+// The home page's altar is a demo: nothing done there is kept or counted.
+export const landing = !roomName && !tv;
 export const roomUrl = () => `${location.origin}${roomName ? `/r/${roomName}` : '/'}`;
 
 /* ---------- Shared state ---------- */
@@ -55,10 +53,20 @@ export const state = {
   roomPrayed: 0,      // every prayer ever said in the room
   resolvedAt: 0,      // the last "they're back"
   roomMeta: { title: '', subtitle: '', eta: '' }, // what's down and when it's back, shared by the room
-  vigil: null,        // { startedAt, lastAt, peak, prayers, karma, blames, fortunes, lights }
+  vigil: null,        // the room's open vigil: { startedAt, lastAt, peak, prayers, karma, blames, fortunes, lights }
   lastVigil: null,    // the record of the vigil that just ended, for the heading and the card
   undo: null,         // { by, until }: They're back, while whoever said it can still take it back
 };
 
-/** Title, subtitle and ETA: in a room the shrine's shared ones, unless this URL says otherwise. */
-export const meta = (k) => (roomName && !urlParams.has(k) ? state.roomMeta[k] : settings[k]) || '';
+/** What this room's shrine has survived: its past vigils, kept by the shrine. */
+export const records = { survived: 0, longest: 0, history: [] };
+
+/**
+ * Title, subtitle and ETA: the room's shared ones, unless this URL brings its own (the maintenance
+ * page builder's /r/<slug>?title=…&eta=…, which seeds a room that has none). The home page has none.
+ */
+const fromUrl = (k) => {
+  const v = urlParams.get(k);
+  return k === 'eta' && v && Number.isNaN(Date.parse(v)) ? '' : v;
+};
+export const meta = (k) => (roomName ? (urlParams.has(k) ? fromUrl(k) : state.roomMeta[k]) : '') || '';

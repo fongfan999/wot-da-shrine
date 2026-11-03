@@ -5,11 +5,10 @@ import { sound } from '../audio/index.js';
 import { releaseLantern } from '../scene/lanterns.js';
 import { STRINGS, t } from '../lib/strings.js';
 import { puff } from './altar.js';
-import { $, landing, recentPrayers, reduceMotion, roomName, state } from './context.js';
+import { $, recentPrayers, reduceMotion, roomName, state } from './context.js';
 import { congregation, kick, petals, wishes } from './engines.js';
 import { addKarma } from './stats.js';
 import { logMine, toast } from './ui.js';
-import { vigilTouch } from './vigil.js';
 
 /* ---------- Prayers ---------- */
 export const wishInput = $('#wish-input');
@@ -29,21 +28,12 @@ export function sendPrayer(text) {
   addKarma(KARMA.prayer);
   logMine('prayer', t('fPrayer'), { quote: text, toastText: t('wishSent') });
   state.shrine?.send('prayer', { text });
-  pulse('prayer', text);
 }
 
 export function remember(text, name) {
   recentPrayers.push({ text, name });
   if (recentPrayers.length > 6) recentPrayers.shift();
-  if (!roomName) { state.roomPrayed += 1; vigilTouch(0, 'prayers'); }
-}
-
-/** The solo page tells the world what happened (rooms report through their own shrine). Best effort. */
-export function pulse(kind, text = '') {
-  if (roomName || landing) return; // rooms report through their shrine; the home page is a demo
-  try {
-    fetch('/api/pulse', { method: 'POST', body: JSON.stringify({ kind, text }), keepalive: true, headers: { 'Content-Type': 'application/json' } }).catch(() => {});
-  } catch { /* offline, or a maintenance page served from somewhere else */ }
+  if (!roomName) state.roomPrayed += 1;
 }
 
 /* ---------- Quick prayers: three ready-made ones, reshuffled every time ---------- */

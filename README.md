@@ -21,15 +21,14 @@ shrine.
 - `/` is the landing page. The altar on the first screen is a demo: light
   it, ring the bowl, say a prayer, and after a few actions it points you at
   the one thing to do here, open a shrine for your team. Rituals, vigils,
-  records and sharing only exist in a shrine (or a maintenance page), and
+  records and sharing only exist in a shrine, and
   nothing done on the demo is counted in the world totals. Below it: how a
   vigil works, the rituals, how the link travels through Slack, and the
   live world count.
-- Give `/` a `title`, `subtitle` or `eta` in the URL and it becomes your
-  maintenance page: the full solo shrine, with the landing sections gone.
-  `?solo=1` does the same without a title. For planned downtime the landing
-  page's builder makes a shrine of its own instead: `/r/<slug>?title=…&eta=…`,
-  whose first visit gives the room that title and time. On the home page Customize is preferences only.
+- There is no solo page: praying alone is a shrine with one person in it.
+  For planned downtime the landing page's builder makes a shrine of its own,
+  `/r/<slug>?title=…&eta=…`, whose first visit gives the room that title and
+  time. On the home page Customize is preferences only.
 - `/r/demo` is the public demo shrine, streamed onto the landing page in TV
   mode. Names there come from a list, only the ready-made prayers are
   accepted and the title is fixed, so it stays fit for a wall.
@@ -171,20 +170,21 @@ The shrine is built to travel from one incident channel to the next:
   `GET /api/world` (totals across every shrine), `GET /api/rooms/:room/status`
   (the room at a glance, including how long it has been down and how many
   vigils it survived), `GET /api/rooms/:room/badge.svg`,
-  `GET /api/rooms/:room/ws` (WebSocket), `POST /api/pulse` (the solo page
-  reporting a light, prayer, bow, offering or recovery to the world counter).
+  `GET /api/rooms/:room/ws` (WebSocket). Shrines report to the world counter
+  themselves.
 
 ## URL parameters
 
 | Param      | Values                                   | Example                        |
 | ---------- | ---------------------------------------- | ------------------------------ |
-| `title`    | any text                                 | `?title=Back+in+5+minutes`     |
-| `subtitle` | any text                                 | `?subtitle=Deploying+v2.0`     |
-| `eta`      | ISO 8601 date/time                       | `?eta=2026-10-14T18:30:00Z`    |
+| `title`    | any text (rooms only)                    | `?title=Back+in+5+minutes`     |
+| `subtitle` | any text (rooms only)                    | `?subtitle=Deploying+v2.0`     |
+| `eta`      | ISO 8601 date/time (rooms only)          | `?eta=2026-10-14T18:30:00Z`    |
 | `theme`    | `auto` `light` `dark`                    | `?theme=dark`                  |
 | `music` `sfx` `petals` `fog` | `1` / `0`              | `?petals=0&fog=0`              |
 
-They work on room pages too: `/r/serene-rack-42?theme=dark`.
+`title`, `subtitle` and `eta` seed a room that has none yet, e.g.
+`/r/serene-rack-42?title=Payments+API`. The rest work everywhere.
 
 ## Develop
 
@@ -210,7 +210,7 @@ It deploys to https://shrine.wotdafong.dev as a Workers custom domain (the
 
 One folder per kind of thing, one file per part of the page, and nothing very long:
 
-- **Two pages.** `index.html` is the home page: `/`, a maintenance page and the `/tv` code
+- **Two pages.** `index.html` is the home page: `/` and the `/tv` code
   screen. `r/index.html` is a shared shrine, which the Worker serves for every `/r/:room`.
   Each is only its head and a list of `<include src="…">` lines, which a small Vite plugin
   (in `vite.config.js`) replaces with the partials at dev and build time. The shrine's
@@ -234,7 +234,7 @@ One folder per kind of thing, one file per part of the page, and nothing very lo
 A new part of the page usually means a partial, a stylesheet and a module with the same name.
 
 ```
-index.html               the home page: head + includes (/, maintenance pages, /tv)
+index.html               the home page: head + includes (/ and /tv)
 r/index.html             a shared shrine: head + includes (/r/:room, served by the Worker)
 vite.config.js           Vite, the Cloudflare plugin, the partials plugin and the two pages
 src/main.js              what every page runs: loads the modules, keyboard shortcuts, start()
@@ -244,7 +244,7 @@ src/partials/            the pages' markup
   scene.html, bar.html, breath.html, tv.html, settings.html
   shrine/                heading, altar, live card, shrine card, credit, TV join, the dock
   sheets/                join, open a shrine, cast, blame, fortune, share
-  landing/               the home page's hero pieces, solo card and sections, and the footer
+  landing/               the home page's hero pieces, open card and sections, and the footer
 src/styles/              the pages' styles, in cascade order
   home.css, room.css     each page's stylesheet
   core.css               the shrine's parts, from tokens.css on
@@ -252,7 +252,7 @@ src/styles/              the pages' styles, in cascade order
   overrides.css          modes.css, responsive.css, ink.css: overrides by mode and screen width
   tokens.css             design tokens, light and dark themes
 src/app/                 the shrine
-  context.js             where we are (solo, room, TV, home page), settings, shared state
+  context.js             where we are (room, TV, home page), settings, shared state, records
   engines.js             builds the drawing engines (room, burner, smoke, fog, petals…)
   stage.js               layout, split title, intro, parallax, mantras
   fx.js                  lite/full effects, frame budget, TV sleep
@@ -260,7 +260,6 @@ src/app/                 the shrine
   ui.js                  toasts, activity feed, shockwaves, copy
   stats.js               counters, rank, vigil strip, records, ETA
   incident.js            the title and ETA, edited in the heading
-  vigil.js               the solo page's vigils and records
   altar.js               light, burn out, bowl + combos, bow, puff, breathing
   offerings.js, prayers.js, rituals.js   the offering tray, prayers, blame + fortune sheets
   shrine.js              shared-shrine client: join, connection, remote actions
@@ -299,7 +298,7 @@ public/wotdafong-*.svg   the Wot Da Fong P?! mark for the credit line
 shared/                  used by the page and the Worker: the rules (burn time, karma, vigils), ready-made prayers, room names, link previews
 worker/index.js          Cloudflare Worker: a Hono app that mounts the routes below
 worker/middleware.js     security headers, API headers, rate limits, socket-only
-worker/routes/api.js     /api/health, /api/status, /api/world, /api/pulse
+worker/routes/api.js     /api/health, /api/status, /api/world
 worker/routes/rooms.js   /new, /r/:room (link previews), a room's socket, status and badge
 worker/routes/tv.js      /api/tv/ws and casting to a paired TV
 worker/views/            the room page (r/index.html) with its link preview rewritten, the README badge SVG

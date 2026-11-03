@@ -11,9 +11,6 @@ export const FX = ['auto', 'full', 'lite']; // effects: auto picks lite on phone
 const STORAGE_KEY = 'incense:settings:v2';
 
 export const DEFAULTS = {
-  title: '',        // '' => use i18n default
-  subtitle: '',     // '' => use i18n default
-  eta: '',          // ISO date string or ''
   theme: 'dark',
   music: true,
   sfx: true,
@@ -46,7 +43,6 @@ export function loadSettings() {
 
   if (!THEMES.includes(out.theme)) out.theme = DEFAULTS.theme;
   if (!FX.includes(out.fx)) out.fx = DEFAULTS.fx;
-  if (out.eta && Number.isNaN(Date.parse(out.eta))) out.eta = '';
 
   return out;
 }

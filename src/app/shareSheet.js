@@ -1,15 +1,13 @@
 /* The share sheet: invite the team, and a picture of the shrine to post. */
 import gsap from 'gsap';
 import { sound } from '../audio/index.js';
-import { shareUrl } from '../lib/config.js';
 import { canCopyImage, canShareFiles, cardPng, cardSvg, copyImage, download, shareFile } from '../lib/share.js';
 import { BRAND, t } from '../lib/strings.js';
-import { $, body, counters, fmt, meta, people, recentPrayers, roomName, roomUrl, settings, state } from './context.js';
+import { $, body, counters, fmt, meta, people, recentPrayers, roomName, roomUrl, records, state } from './context.js';
 import { openTray } from './offerings.js';
 import { minutesPrayed } from './resolve.js';
 import { openPanel } from './settings.js';
 import { copyText, toast } from './ui.js';
-import { records } from './vigil.js';
 
 /* ---------- Share sheet: invite the team, and a picture of the shrine to post ---------- */
 const shareEl = $('#share');
@@ -17,7 +15,7 @@ const shareImg = $('#share-img');
 export let shareOpen = false;
 let cardBlob = null;
 let cardSeq = 0;
-const cardName = () => `wot-da-shrine-${roomName || 'solo'}.png`;
+const cardName = () => `wot-da-shrine-${roomName}.png`;
 
 /** What the card says when it goes out with text. */
 function cardText() {
@@ -25,7 +23,7 @@ function cardText() {
   const mins = minutesPrayed();
   if (body.dataset.resolved) return fmt('cardTextResolved', { minutes: Math.max(1, mins), url });
   const facts = [];
-  if (roomName && people.size > 1) facts.push(`${people.size} devotees`);
+  if (people.size > 1) facts.push(`${people.size} devotees`);
   if (mins >= 1) facts.push(`${mins} min of incense`);
   if (counters.karma) facts.push(`${counters.karma} karma`);
   if (state.roomPrayed) facts.push(`${state.roomPrayed} prayer${state.roomPrayed === 1 ? '' : 's'}`);
@@ -42,8 +40,8 @@ async function drawCard() {
     title: meta('title'),
     resolved: Boolean(body.dataset.resolved),
     open: Boolean(state.vigil),
-    people: roomName ? people.size : 0,
-    avatars: roomName ? list.map((p) => p.avatar) : [],
+    people: people.size,
+    avatars: list.map((p) => p.avatar),
     minutes: minutesPrayed(),
     karma: counters.karma,
     prayers: state.vigil?.prayers ?? state.lastVigil?.prayers ?? state.roomPrayed,
@@ -87,7 +85,7 @@ const span = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`)
 
 /** The vigil to write up: the open one, or the one that just ended. Null when the altar has seen none. */
 function retroVigil() {
-  if (state.vigil) return { ...state.vigil, open: true, minutes: minutesPrayed(), peak: Math.max(state.vigil.peak ?? 0, roomName ? people.size : 1) };
+  if (state.vigil) return { ...state.vigil, open: true, minutes: minutesPrayed(), peak: Math.max(state.vigil.peak ?? 0, people.size) };
   const last = state.lastVigil ?? records.history[0];
   return last ? { ...last, open: false } : null;
 }
@@ -95,7 +93,7 @@ function retroVigil() {
 export function retroMarkdown() {
   const v = retroVigil();
   if (!v) return '';
-  const what = v.title || meta('title') || (roomName ? `/r/${roomName}` : t('title'));
+  const what = v.title || meta('title') || `/r/${roomName}`;
   const n = (k) => v[k] ?? 0;
   const lines = [
     `## 🪔 ${fmt('retroHeading', { what })}`,
@@ -125,19 +123,15 @@ export function openShare(open, celebrate = false) {
   }
   openTray(false);
   openPanel(false);
-  $('#share-invite').hidden = !roomName;
-  $('#share-badge').hidden = !roomName;
   $('#btn-share-native').hidden = typeof navigator.share !== 'function';
   $('#btn-card-copy').hidden = !canCopyImage();
   $('#btn-card-share').hidden = !canShareFiles();
   $('#card-label').textContent = celebrate || body.dataset.resolved ? t('resolvedTitle') : t('cardLabel');
-  if (roomName) {
-    $('#share-url').value = roomUrl();
-    $('#btn-share-x').href = `https://x.com/intent/post?${new URLSearchParams({ text: fmt('slackMessage', { url: roomUrl() }) })}`;
-    const badge = `${location.origin}/api/rooms/${roomName}/badge.svg`;
-    $('#badge-img').src = `${badge}?t=${Date.now()}`;
-    $('#badge-md').textContent = `[![Wot Da Shrine](${badge})](${roomUrl()})`;
-  }
+  $('#share-url').value = roomUrl();
+  $('#btn-share-x').href = `https://x.com/intent/post?${new URLSearchParams({ text: fmt('slackMessage', { url: roomUrl() }) })}`;
+  const badge = `${location.origin}/api/rooms/${roomName}/badge.svg`;
+  $('#badge-img').src = `${badge}?t=${Date.now()}`;
+  $('#badge-md').textContent = `[![Wot Da Shrine](${badge})](${roomUrl()})`;
   shareEl.hidden = false;
   gsap.fromTo(shareEl, { opacity: 0 }, { opacity: 1, duration: 0.3 });
   gsap.fromTo('.sheet__card', { y: 24, opacity: 0, scale: 0.98 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' });
@@ -152,8 +146,7 @@ $('#menu-card').addEventListener('click', () => {
   openShare(true);
   $('#card-label').scrollIntoView({ block: 'start' }); // the picture, not the invite above it
 });
-// A shrine's link, or on a maintenance page the link that brings back its title and ETA.
-$('#menu-copy-link').addEventListener('click', () => copyText(roomName ? roomUrl() : shareUrl(settings), t(roomName ? 'inviteCopied' : 'linkCopied')));
+$('#menu-copy-link').addEventListener('click', () => copyText(roomUrl(), t('inviteCopied')));
 $('#btn-close-share').addEventListener('click', () => openShare(false));
 shareEl.addEventListener('click', (e) => { if (e.target === shareEl) openShare(false); });
 $('#btn-share-copy').addEventListener('click', () => copyText(roomUrl(), t('inviteCopied')));

@@ -1,4 +1,4 @@
-/* ---------- Name your shrine (solo card) ---------- */
+/* ---------- Name your shrine (the home page's open card and the open-shrine sheet) ---------- */
 .name-form { display: flex; flex-direction: column; gap: 10px; }
 .name-form__field {
   display: flex;

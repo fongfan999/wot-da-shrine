@@ -6,7 +6,7 @@ import { LEVELS as FORTUNE_LEVELS } from '../lib/omikuji.js';
 import { AVATARS, connectRoom, saveMe } from '../lib/room.js';
 import { t } from '../lib/strings.js';
 import { bowFx, bowlFx, burnOut, chorusFx, ignite, puffFx, scheduleBurnOut } from './altar.js';
-import { $, body, counters, fmt, people, recentPrayers, reduceMotion, roomName, roomUrl, settings, state, tv, urlParams } from './context.js';
+import { $, body, counters, fmt, meta, people, recentPrayers, reduceMotion, roomName, roomUrl, records, state, tv, urlParams } from './context.js';
 import { art, congregation, wishes } from './engines.js';
 import { activity } from './fx.js';
 import { offerFx } from './offerings.js';
@@ -18,7 +18,6 @@ import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen
 import { applySettings } from './settings.js';
 import { renderRecords, statKarma, tickVigil, updateStats } from './stats.js';
 import { bump, logEvent, toast } from './ui.js';
-import { records } from './vigil.js';
 
 /* ---------- Shared shrine ---------- */
 const DEFAULT_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader'];
@@ -212,7 +211,7 @@ function onShrineMessage(msg) {
         if (msg.resolvedAt && msg.now - msg.resolvedAt < RESOLVED_FOR) showResolved(msg.resolvedAt - state.clockSkew, true);
         // Arrived with ?title=… or ?eta=… on a shrine that has none yet: that becomes the room's.
         const seed = {};
-        for (const k of ['title', 'subtitle', 'eta']) if (urlParams.has(k) && settings[k] && !state.roomMeta[k]) seed[k] = settings[k];
+        for (const k of ['title', 'subtitle', 'eta']) if (meta(k) && urlParams.has(k) && !state.roomMeta[k]) seed[k] = meta(k);
         if (Object.keys(seed).length) state.shrine.send('meta', seed);
         if (tv) renderTv();
         if (arrivedFromTv()) greetFromTv(people.get(msg.me)?.name ?? state.me.name);

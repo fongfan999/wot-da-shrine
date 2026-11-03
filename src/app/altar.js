@@ -6,10 +6,8 @@ import { saveCounters } from '../lib/config.js';
 import { STRINGS, t } from '../lib/strings.js';
 import { $, body, BURN_SECONDS, counters, fmt, roomName, state } from './context.js';
 import { art, burner, congregation, kick, motes, petals, room, smoke } from './engines.js';
-import { pulse } from './prayers.js';
 import { addKarma, burnBar, tickProgress, updateStats } from './stats.js';
 import { logEvent, logMine, shockwave, toast } from './ui.js';
-import { vigilTouch } from './vigil.js';
 
 /* ---------- Light the incense ---------- */
 export function light() {
@@ -26,8 +24,6 @@ export function light() {
   ignite(Date.now());
   if (state.myId) congregation.bow(state.myId, 3);
   logMine('light', t('fLight'), { toastText: t('litToast') });
-  pulse('light');
-  vigilTouch(0, 'lights'); // the solo page's vigil: fresh incense opens one even mid-celebration
 }
 
 /** Set the altar burning, `at` being when it was lit (earlier than now for late joiners). */
@@ -154,7 +150,6 @@ export function bow() {
   addKarma(KARMA.bow);
   logMine('bow', t('fBow'), { toastText: t('bowed') });
   state.shrine?.send('bow');
-  pulse('bow');
 }
 
 /** Someone bows: their figure if they kneel in the room, otherwise the ops team. */

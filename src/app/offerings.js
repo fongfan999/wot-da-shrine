@@ -7,7 +7,6 @@ import { icon } from '../lib/icons.js';
 import { t } from '../lib/strings.js';
 import { $, fmt, reduceMotion, state } from './context.js';
 import { art, kick, smoke } from './engines.js';
-import { pulse } from './prayers.js';
 import { addKarma } from './stats.js';
 import { logMine } from './ui.js';
 
@@ -21,7 +20,6 @@ export function offer(kind = null) {
   addKarma(KARMA.offer);
   logMine(`offer:${kind}`, fmt('fOffer', { item: label }), { toastText: fmt('offered', { item: label }) });
   state.shrine?.send('offer', { kind });
-  pulse('offer');
 }
 
 export function offerFx(kind, by = '') {

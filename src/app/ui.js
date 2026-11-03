@@ -103,7 +103,7 @@ function demoAction() {
   demoActions += 1;
   if (demoActions !== 3) return;
   toast(t('demoNudge'));
-  const card = $('#solo-card');
+  const card = $('#open-card');
   card.classList.add('is-nudged');
   card.addEventListener('animationend', () => card.classList.remove('is-nudged'), { once: true });
 }

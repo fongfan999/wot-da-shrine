@@ -3,10 +3,9 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { saveCounters } from '../lib/config.js';
 import { STRINGS, t } from '../lib/strings.js';
-import { $, body, BURN_SECONDS, counters, fmt, meta, people, reduceMotion, roomName, state, tv } from './context.js';
+import { $, body, BURN_SECONDS, counters, fmt, meta, people, reduceMotion, roomName, records, state, tv } from './context.js';
 import { art, burner, petals } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';
-import { records, vigilTouch } from './vigil.js';
 import { every } from '../lib/clock.js';
 
 /* ---------- Stats + progress ---------- */
@@ -49,7 +48,6 @@ export function addKarma(n = 1) {
   if (roomName) return; // the room's karma is shared; the shrine sends the new total
   counters.karma += n;
   saveCounters(counters);
-  vigilTouch(n);
   updateStats();
   bump(statKarma);
   renderRecords();

@@ -1,20 +1,17 @@
 /* They're back: closing the vigil. */
 import gsap from 'gsap';
-import { CELEBRATE_FOR, KARMA, RESOLVE_UNDO } from '../../shared/rules.js';
+import { CELEBRATE_FOR, KARMA } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { every } from '../lib/clock.js';
-import { saveCounters } from '../lib/config.js';
 import { applyStrings, t } from '../lib/strings.js';
-import { $, body, counters, fmt, reduceMotion, roomName, state } from './context.js';
+import { $, body, counters, fmt, records, reduceMotion, roomName, state } from './context.js';
 import { art, kick, motes, petals, room } from './engines.js';
 import { activity } from './fx.js';
-import { pulse } from './prayers.js';
 import { applySettings } from './settings.js';
 import { openShare } from './shareSheet.js';
 import { splitTitle } from './stage.js';
-import { addKarma, renderRecords, tickVigil, updateStats, updateTablet } from './stats.js';
+import { addKarma, renderRecords, tickVigil, updateTablet } from './stats.js';
 import { logMine, shockwave, toast } from './ui.js';
-import { fileVigil, onVigilOpen, records, unfileVigil, vigilTouch } from './vigil.js';
 
 /* ---------- They're back: the moment worth sharing ---------- */
 export const RESOLVED_FOR = CELEBRATE_FOR; // the heading celebrates for a while, then the shrine is a shrine again
@@ -31,14 +28,11 @@ export function renderResolve() {
   renderUndo();
 }
 
-// The solo page opened a vigil: a celebration still on screen is over, and They're back works again.
-onVigilOpen(() => { if (body.dataset.resolved) clearResolved(); renderResolve(); tickVigil(); });
-
 /* ---------- Not back after all: whoever said They're back can take it back for a moment ---------- */
 const undoBtns = [$('#btn-unresolve'), $('#share-undo-btn')];
 const undoRow = $('#share-undo');
-/** `state.undo` is { by, until }: the shrine's (by a person's id), or the solo page's own (by 'me'). */
-const mayUndo = () => state.undo && (state.undo.by === 'me' || state.undo.by === state.myId) && Date.now() < state.undo.until;
+/** `state.undo` is { by, until }, from the shrine: by is the id of whoever said They're back. */
+const mayUndo = () => state.undo && state.undo.by === state.myId && Date.now() < state.undo.until;
 export function renderUndo() {
   const on = Boolean(mayUndo());
   undoBtns[0].hidden = !on;
@@ -53,15 +47,7 @@ function unresolve() {
   sound.unlock();
   if (!mayUndo()) return;
   state.undo = null;
-  if (!roomName) {
-    if (!unfileVigil()) { renderUndo(); return; }
-    counters.karma = Math.max(0, counters.karma - KARMA.resolve);
-    saveCounters(counters);
-    updateStats(true);
-    pulse('unresolve');
-  } else {
-    state.shrine?.send('unresolve'); // the shrine reopens the vigil and tells everyone
-  }
+  state.shrine?.send('unresolve'); // the shrine reopens the vigil and tells everyone
   undoneFx();
   logMine('unresolve', t('fUnresolve'), { toastText: t('undoneToast') });
 }
@@ -81,17 +67,11 @@ function resolve() {
   sound.unlock();
   if (!state.vigil) { toast(t('resolveHint')); return; }
   if (Date.now() - state.resolvedAt < 60000) return;
-  if (!roomName) {
-    vigilTouch(KARMA.resolve);
-    state.lastVigil = fileVigil(Date.now(), 'survived');
-    state.undo = { by: 'me', until: Date.now() + RESOLVE_UNDO };
-  }
   resolveFx();
   showResolved(Date.now());
   addKarma(KARMA.resolve);
   logMine('resolve', t('fResolve'), { toastText: t('resolveMessage') });
   state.shrine?.send('resolve');
-  pulse('resolve');
   setTimeout(() => { if (body.dataset.resolved) openShare(true, true); }, 1600); // a plain timer: GSAP's ticker sleeps in background tabs
 }
 

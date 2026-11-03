@@ -35,11 +35,8 @@ export class World extends DurableObject {
     });
   }
 
-  /**
-   * A shrine (or the solo page) did something. `room` is '' for the solo page,
-   * whose actions count but never show as a shrine.
-   */
-  pulse({ room = '', kind, text = '', karma = 0, fresh = false, litAt = 0 } = {}) {
+  /** A shrine did something: it counts, and for a while the room shows as active or burning. */
+  pulse({ room, kind, text = '', karma = 0, fresh = false, litAt = 0 } = {}) {
     if (!KINDS.includes(kind)) return;
     const now = Date.now();
     const t = this.totals;
@@ -55,11 +52,9 @@ export class World extends DurableObject {
     if (fresh) t.shrines += 1;
     if (COUNTED[kind]) t[COUNTED[kind]] += 1;
     t.karma += Math.max(0, Math.min(50, karma | 0));
-    if (room) {
-      this.active.set(room, now);
-      if (kind === 'light') this.burning.set(room, litAt || now);
-      if (kind === 'burnout' || kind === 'resolve') this.burning.delete(room);
-    }
+    this.active.set(room, now);
+    if (kind === 'light') this.burning.set(room, litAt || now);
+    if (kind === 'burnout' || kind === 'resolve') this.burning.delete(room);
     if (kind !== 'bowl' && kind !== 'burnout') {
       const item = { kind, at: now };
       if (kind === 'prayer' && PRESET.has(text)) item.text = text;

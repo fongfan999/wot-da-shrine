@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  The home page: /, a maintenance page (/?title=…), and the /tv code screen. A shared shrine at
+  The home page: / and the /tv code screen. A shared shrine at
   /r/:room is r/index.html. Both pages are put together from src/partials: the shrine's pieces
   are in shrine/, the home page's own in landing/.
 -->
@@ -9,7 +9,7 @@
   <include src="src/partials/head.html">
   <link rel="stylesheet" href="/src/styles/home.css" />
 </head>
-<body data-theme="dark" data-state="unlit" data-mode="solo" data-fx="full">
+<body data-theme="dark" data-state="unlit" data-mode="home" data-fx="full">
   <include src="src/partials/scene.html">
 
   <include src="src/partials/bar.html">
@@ -35,7 +35,7 @@
       <aside class="side" aria-label="Shrine activity">
         <include src="src/partials/shrine/live-card.html">
 
-        <include src="src/partials/landing/solo-card.html">
+        <include src="src/partials/landing/open-card.html">
 
         <include src="src/partials/shrine/shrine-card.html">
 
@@ -46,7 +46,7 @@
     <include src="src/partials/shrine/dock.html">
   </div>
 
-  <!-- The landing page: everything below the shrine on / (hidden on maintenance pages and /tv) -->
+  <!-- The landing page: everything below the shrine on / (hidden on /tv) -->
   <div class="landing" id="landing" hidden>
     <include src="src/partials/landing/how.html">
 

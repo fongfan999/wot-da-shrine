@@ -25,7 +25,7 @@ function partials() {
 }
 
 /**
- * Two pages: index.html is the home page (/, maintenance pages, /tv), r/index.html a shared shrine,
+ * Two pages: index.html is the home page (/ and /tv), r/index.html a shared shrine,
  * which the Worker serves for every /r/:room. What they share is built into common chunks.
  */
 const root = dirname(fileURLToPath(import.meta.url));

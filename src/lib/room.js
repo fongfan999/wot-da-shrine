@@ -10,7 +10,7 @@ import { AVATARS } from '../../shared/rules.js';
 
 export { AVATARS };
 
-/** The room name from the URL, or null on the solo page. */
+/** The room name from the URL, or null on the home page. */
 export function roomFromPath(path = location.pathname) {
   const m = path.match(/^\/r\/([a-z0-9-]{3,48})\/?$/i);
   return m ? m[1].toLowerCase() : null;

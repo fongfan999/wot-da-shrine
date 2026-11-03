@@ -1,7 +1,7 @@
 /**
  * Wot Da Shrine: what every page runs. Each part of the shrine lives in its own module under app/;
  * this file loads them in order, binds the keyboard and the altar's buttons, and start() begins the
- * show. The pages' own entries call it: home.js (/, maintenance pages, /tv) with the landing
+ * show. The pages' own entries call it: home.js (/ and /tv) with the landing
  * sections and the world line, room.js (/r/:room) with neither.
  */
 import gsap from 'gsap';
@@ -62,8 +62,8 @@ document.addEventListener('pointerdown', () => sound.unlock(), { once: true });
 if (import.meta.env.DEV) window.__incense = { gsap, sound, smoke, fog, petals, previewCard, get settings() { return settings; } };
 
 /**
- * Start the page. `setupLanding` lays out the home page's sections (it does nothing on a maintenance
- * page or /tv); `loadWorld` shows what every shrine is doing. A room page passes neither.
+ * Start the page. `setupLanding` lays out the home page's sections (it does nothing
+ * on /tv); `loadWorld` shows what every shrine is doing. A room page passes neither.
  */
 export function start({ setupLanding, loadWorld } = {}) {
   buildTray();

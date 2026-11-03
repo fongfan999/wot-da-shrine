@@ -127,7 +127,7 @@ export function cardSvg(data) {
   const brandWord = document.querySelector('.brand__word')?.outerHTML ?? '';
   const altar = altarMarkup(document.querySelector('#burner-art'), Boolean(data.plain));
 
-  const eyebrow = data.eyebrow ?? (data.room ? `SHARED SHRINE / ${data.room}` : 'A SOLO VIGIL');
+  const eyebrow = data.eyebrow ?? `SHARED SHRINE / ${data.room}`;
   const title = headline(data);
   const size1 = fit(title[0], 78, 580, 0.46);
   const size2 = fit(title[1], 82, 580, 0.4);

@@ -1,9 +1,9 @@
 /* The home page is a demo with one action: the altar and its sounds stay, the product surface goes.
-   Rituals, vigils, records, the feed and sharing belong to a shrine with a team (or a maintenance page). */
+   Rituals, vigils, records, the feed and sharing belong to a shrine with a team. */
 body[data-landing="1"] :is(.incident, .plantern-row, .quick__chip--ritual, .quick__sep, #share-menu-wrap) { display: none; }
-body[data-landing="1"] .card--solo { border-color: var(--accent); }
-body[data-landing="1"] .card--solo .label { color: var(--accent); }
-body[data-landing="1"] .card--solo.is-nudged { animation: nudge 1.2s var(--ease) 2; }
+body[data-landing="1"] .card--open { border-color: var(--accent); }
+body[data-landing="1"] .card--open .label { color: var(--accent); }
+body[data-landing="1"] .card--open.is-nudged { animation: nudge 1.2s var(--ease) 2; }
 @keyframes nudge { 0%, 100% { transform: none; box-shadow: var(--shadow-sheet); } 40% { transform: translateY(-4px); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-sheet); } }
 
 /* ---------- Off screen, asleep: the home page's scene layers stop compositing, and animations nobody can see pause ---------- */
@@ -14,7 +14,7 @@ body[data-scene="off"] .center :is(*, *::before, *::after),
 body[data-paused="1"] :is(*, *::before, *::after) { animation-play-state: paused !important; }
 
 /* ---------- Mode switches ---------- */
-body[data-mode="room"] .card--solo { display: none; }
+body[data-mode="room"] .card--open { display: none; }
 
 /* ---------- Lite effects: fewer moving parts on phones and slow devices ---------- */
 body[data-fx="lite"] .layer--fog { display: none; }

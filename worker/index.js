@@ -3,7 +3,7 @@
  * wrangler.jsonc); the page and bundles come straight from the asset store, with headers
  * from public/_headers.
  *
- * routes/api.js    /api/health, /api/status, /api/world, /api/pulse
+ * routes/api.js    /api/health, /api/status, /api/world
  * routes/rooms.js  /new, /r/:room, /api/rooms/:room/{ws,status,badge.svg}
  * routes/tv.js     /api/tv/ws, /api/tv/:code/cast
  * views/           what the routes draw: the room page's link preview, the README badge

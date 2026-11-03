@@ -20,7 +20,7 @@ export function applySettings(animate = false) {
   applyTheme();
   applyFx();
   if (body.dataset.resolved) applyStrings({ eyebrow: t('resolvedEyebrow'), title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
-  else if (landing && !meta('title') && !meta('subtitle')) applyStrings({ eyebrow: t('landEyebrow'), title: t('landTitle'), subtitle: t('landSubtitle') });
+  else if (landing) applyStrings({ eyebrow: t('landEyebrow'), title: t('landTitle'), subtitle: t('landSubtitle') });
   else applyStrings({ title: meta('title'), subtitle: meta('subtitle') });
   body.dataset.subtitle = meta('subtitle') ? 'custom' : ''; // phones hide a shrine's stock subtitle, never one the room wrote
   document.title = body.dataset.resolved ? `${t('resolvedTitle')} · ${BRAND}` : meta('title') ? `${meta('title')} · ${BRAND}` : landing ? `${BRAND}: ${t('landDocTitle')}` : `${t('title')} · ${BRAND}`;
@@ -92,7 +92,8 @@ backdrop.addEventListener('click', () => openPanel(false));
 let metaTimer = 0;
 export function setSetting(name, value) {
   const isMeta = ['title', 'subtitle', 'eta'].includes(name);
-  if (roomName && isMeta) {
+  if (isMeta) {
+    if (!roomName) return; // only a room has a title
     state.roomMeta[name] = value;
     urlParams.delete(name);
     clearTimeout(metaTimer);
@@ -100,16 +101,11 @@ export function setSetting(name, value) {
   } else {
     settings[name] = value;
     persist();
-    // A title on the home page makes it a maintenance page: reload into that mode once typing stops.
-    if (landing && isMeta && value) {
-      clearTimeout(metaTimer);
-      metaTimer = setTimeout(() => location.reload(), 900);
-    }
   }
   applySettings();
 }
 /** Title, subtitle and ETA can be changed on the page itself, unless the page is a wall or the public demo. */
-export const metaEditable = () => !tv && !landing && roomName !== 'demo';
+export const metaEditable = () => Boolean(roomName) && !tv && roomName !== 'demo';
 
 panel.addEventListener('input', (e) => {
   const el = e.target;
