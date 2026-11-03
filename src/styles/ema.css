@@ -1,8 +1,9 @@
 /* ---------- Wish board: prayers hang on the altar as ema plaques ---------- */
-.ema { position: absolute; left: 0; top: 2%; width: 240px; height: 150px; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 1.2s ease; }
+.ema { position: absolute; left: 0; top: max(2%, 28px); width: 240px; height: 150px; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 1.2s ease; }
 .ema:has(.ema__plaque) { opacity: 1; }
 .ema__rail { position: absolute; left: 0; right: 0; top: 0; height: 6px; border-radius: var(--radius-xs); background: var(--paper-raised); border: 1.5px solid var(--ink); }
-.ema__rail::before, .ema__rail::after { content: ""; position: absolute; bottom: 100%; width: 1.5px; height: 90px; background: var(--ink); }
+/* The rail hangs from somewhere above: its cords fade out before they reach the heading's text */
+.ema__rail::before, .ema__rail::after { content: ""; position: absolute; bottom: 100%; width: 1.5px; height: 28px; background: linear-gradient(to top, var(--ink), transparent); }
 .ema__rail::before { left: 24px; }
 .ema__rail::after { right: 10px; }
 .ema__plaque { position: absolute; left: 0; top: 6px; width: 104px; will-change: transform; }
