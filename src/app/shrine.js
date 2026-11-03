@@ -199,7 +199,11 @@ function onShrineMessage(msg) {
       if (!state.greeted) {
         state.greeted = true;
         // Restore what is already on the altar, and the prayers said before we arrived.
-        msg.offerings.forEach((kind, i) => gsap.delayedCall(1.6 + i * 0.25, () => art.offer(kind)));
+        // Older rooms stored only the kind, so a plain string has no giver.
+        msg.offerings.forEach((o, i) => {
+          const { kind, by = '' } = typeof o === 'string' ? { kind: o } : o;
+          gsap.delayedCall(1.6 + i * 0.25, () => art.offer(kind, by));
+        });
         for (const p of msg.prayers) logEvent({ avatar: p.avatar, who: p.name, what: t('fPrayer'), quote: p.text, at: p.at });
         for (const p of msg.prayers.slice(-6)) recentPrayers.push({ text: p.text, name: p.name });
         records.history = msg.history ?? [];

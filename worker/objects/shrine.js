@@ -193,7 +193,7 @@ export class Shrine extends DurableObject {
       case 'offer':
         if (!OFFERING_KINDS.includes(msg.kind)) return;
         out.item = msg.kind;
-        s.offerings = [...s.offerings, msg.kind].slice(-MAX_OFFERINGS);
+        s.offerings = [...s.offerings, { kind: msg.kind, by: by.name }].slice(-MAX_OFFERINGS);
         break;
       case 'prayer': {
         const text = clean(msg.text, 60);
