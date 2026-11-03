@@ -57,7 +57,7 @@ export function buildTray() {
   item('', icon('dice'), t('surprise'));
   tray.append(title, grid);
 
-  // On phones the ritual chips and Breathe leave the dock and live here (CSS shows this row only there).
+  // The rituals live here, not in the dock; on a phone Breathe joins them (CSS shows it only there).
   const rituals = document.createElement('div');
   rituals.className = 'tray__rituals';
   const rTitle = document.createElement('p');

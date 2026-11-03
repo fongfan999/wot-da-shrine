@@ -149,7 +149,10 @@ body[data-state="lit"] .act__burn { opacity: 1; }
 .tray__emoji { display: grid; place-items: center; height: 36px; }
 .tray__emoji svg { width: 44px; height: 36px; overflow: visible; }
 .tray__emoji .ico { width: 24px; height: 24px; }
-.tray__rituals { display: none; margin-top: var(--space-3); }
+/* Burn a blame and Draw a fortune live here at every width, never as chips beside the quick prayers; Breathe joins them only on a phone, where its key leaves the dock */
+.quick .quick__chip--ritual, .quick .quick__sep { display: none; }
+.tray__rituals { margin-top: var(--space-3); }
+.tray__item--ritual[data-ritual="btn-breathe"] { display: none; }
 .tray__rituals .tray__grid { grid-template-columns: repeat(3, 1fr); }
 .tray__item--ritual { border-style: dashed; border-color: var(--ember); color: var(--ember-ink); }
 .tray__item--ritual:hover { border-color: var(--ember); background: var(--ember-soft); }
@@ -174,8 +177,7 @@ body[data-state="lit"] .act__burn { opacity: 1; }
 
 /* ---------- Beside the altar: one row, so the altar and the side column get the height ----------
    The field and the keys share the row and the keys are shorter, the shortcut a small badge beside the
-   label. The quick prayers open above the field while it has focus; Burn a blame and Draw a fortune
-   live in the Offer tray, as on a phone. */
+   label. The quick prayers open above the field while it has focus. */
 @media (min-width: 1100px) {
   .dock { grid-template-areas: "pray actions"; padding-block: 10px max(10px, env(safe-area-inset-bottom)); }
   .pray { min-height: 46px; padding: 4px 4px 4px 16px; }
@@ -202,9 +204,6 @@ body[data-state="lit"] .act__burn { opacity: 1; }
     transition: opacity 160ms, translate 160ms;
   }
   .dock:has(.pray:focus-within, .quick:focus-within) .quick { opacity: 1; translate: none; pointer-events: auto; }
-  .quick .quick__chip--ritual, .quick .quick__sep { display: none; }
-  .tray__rituals { display: block; }
-  .tray__item--ritual[data-ritual="btn-breathe"] { display: none; }
 
   .act { grid-template-columns: auto auto auto; gap: 8px; min-width: 0; min-height: 46px; padding: 6px 12px; border-radius: var(--radius-md); }
   .act__icon { grid-row: auto; }

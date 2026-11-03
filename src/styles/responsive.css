@@ -95,10 +95,10 @@
   .plantern-row { height: 56px; }
   .plantern { width: 24px; height: 42px; }
   .plantern-row__more { top: 48px; }
-  /* The dock keeps three rows: quick prayers, the prayer field, four keys. Rituals and Breathe move into the Offer tray. */
-  .quick__chip--ritual, .quick__sep, #btn-breathe { display: none; }
+  /* The dock keeps three rows: quick prayers, the prayer field, four keys. Breathe joins the rituals in the Offer tray. */
+  #btn-breathe { display: none; }
+  .tray__item--ritual[data-ritual="btn-breathe"] { display: flex; }
   .actions { grid-template-columns: 1fr 1fr 1.6fr 1fr; }
-  .tray__rituals { display: block; }
   /* The first screen is the altar, not copy: a shrine's stock subtitle goes, one the room wrote is kept to two lines */
   body[data-mode="room"] .subtitle { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
   body[data-mode="room"]:not([data-subtitle="custom"]):not([data-resolved]) .subtitle { display: none; }
