@@ -1,7 +1,8 @@
 /**
  * The wish board: prayers hang on the altar as small wooden plaques (ema),
  * the way wishes hang at a real shrine. New plaques drop onto the rail and
- * swing for a moment; the oldest fall away when the rail is full.
+ * swing for a moment; the oldest fall away when the rail is full. The rail spans the altar's
+ * free space on the left, and the plaques spread out to fill it.
  *
  * Cheap on purpose: plain DOM, transforms and opacity only, nothing runs
  * once a plaque has settled.
@@ -9,13 +10,54 @@
 import gsap from 'gsap';
 
 const MAX = 6;
-const STEP = 26; // px between plaques on the rail; they overlap like the real thing
+const MIN_STEP = 22; // px between plaques; any closer and they are a stack, not a row, so fewer show
+const MAX_STEP = 0.62; // of a plaque's width: they still overlap like the real thing
+const GAP = 24; // px kept clear between the rail and the censer
+const SMOKE_GAP = 48; // px kept clear of the incense sticks, where the smoke rises
+const MAX_RAIL = 440;
+// Where things stand in the censer's drawing (its viewBox is 520 × 470): the left stick, and the top
+// of the tablet, the tallest thing left of the bowl. Above that the drawing is only sticks and air.
+const STICK_X = 236 / 520;
+const CLEAR_Y = 148 / 470;
 
 export class WishBoard {
-  constructor(host) {
+  constructor(host, censer) {
     this.host = host;
+    this.censer = censer;
     this.plaques = [];
+    this.fit = MAX;
+    this.step = 26;
     this.reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    new ResizeObserver(() => this.layout()).observe(host.parentElement);
+    new MutationObserver(() => this.layout()).observe(censer, { attributes: true, attributeFilter: ['data-level'] }); // a torii may have risen
+  }
+
+  /** How long the rail can be, how many plaques fit on it, and how far apart they hang. */
+  measure() {
+    // Layout boxes within the altar, so the intro's slide and the parallax don't move the numbers
+    const c = { left: this.censer.offsetLeft, top: this.censer.offsetTop, width: this.censer.offsetWidth, height: this.censer.offsetHeight };
+    // The plaques may hang over the censer's box while they clear everything drawn in it except the
+    // sticks; the torii a grown shrine stands under spans that whole space, so then they keep left of it.
+    const bottom = this.host.offsetTop + this.host.offsetHeight;
+    const torii = this.censer.querySelector('.torii');
+    const overBox = bottom < c.top + c.height * CLEAR_Y && !(torii && getComputedStyle(torii).display !== 'none');
+    const room = (overBox ? c.left + c.width * STICK_X - SMOKE_GAP : c.left - GAP) - this.host.offsetLeft;
+    const plaque = this.plaques[0]?.offsetWidth || 104;
+    const rail = Math.max(plaque, Math.min(MAX_RAIL, room));
+    this.host.style.width = `${Math.round(rail)}px`;
+    this.fit = Math.max(1, Math.min(MAX, Math.floor((rail - plaque) / MIN_STEP) + 1));
+    this.step = this.fit > 1 ? Math.min(plaque * MAX_STEP, (rail - plaque) / (this.fit - 1)) : 0;
+  }
+
+  /** Place the newest plaques that fit along the rail; older ones wait out of sight. */
+  layout(animate = false, newcomer = null) {
+    this.measure();
+    const shown = this.plaques.slice(-this.fit);
+    for (const p of this.plaques) p.style.visibility = shown.includes(p) ? '' : 'hidden';
+    shown.forEach((p, k) => {
+      if (animate && p !== newcomer && !this.reduceMotion) gsap.to(p, { x: k * this.step, duration: 0.5, ease: 'power2.out' });
+      else gsap.set(p, { x: k * this.step });
+    });
   }
 
   /** Hang a plaque. `animate` false just places it (restoring a room). */
@@ -29,24 +71,14 @@ export class WishBoard {
     this.host.appendChild(el);
     this.plaques.push(el);
 
-    let dropped = false;
     while (this.plaques.length > MAX) {
       const old = this.plaques.shift();
-      dropped = true;
       gsap.to(old, { opacity: 0, y: 24, rotation: 12, duration: 0.5, ease: 'power2.in', onComplete: () => old.remove() });
     }
-    // When the oldest falls away the rest slide along the rail, so the newcomer takes the free end
-    // rather than hanging on top of the last one.
-    if (dropped) {
-      this.plaques.slice(0, -1).forEach((p, k) => {
-        if (animate && !this.reduceMotion) gsap.to(p, { x: k * STEP, duration: 0.5, ease: 'power2.out' });
-        else gsap.set(p, { x: k * STEP });
-      });
-    }
 
-    const tilt = gsap.utils.random(-6, 6);
-    const i = this.plaques.length - 1;
-    gsap.set(el, { x: i * STEP, rotation: tilt, transformOrigin: '50% 0' });
+    // The rest slide along the rail and the newcomer takes the free end, never on top of the last one.
+    gsap.set(el, { rotation: gsap.utils.random(-6, 6), transformOrigin: '50% 0' });
+    this.layout(animate, el);
     this.plaques.forEach((p, k) => { p.style.zIndex = String(k + 1); });
 
     if (animate && !this.reduceMotion) {

@@ -33,7 +33,7 @@ placeSmoke();
 window.addEventListener('resize', placeSmoke);
 export const congregation = new Congregation($('#congregation'), burner);
 export const vitals = new Vitals($('#ekg'), $('#vitals-bpm'));
-export const wishes = new WishBoard($('#ema'));
+export const wishes = new WishBoard($('#ema'), $('#burner'));
 
 /* ---------- Rack 42's heart rate: flat while cold, faster with more people and more devotion ---------- */
 let devotion = 0;

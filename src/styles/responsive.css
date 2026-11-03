@@ -26,7 +26,6 @@
 }
 
 @media (max-width: 1099px) {
-  .ema { width: 180px; }
   .ema__plaque { width: 90px; }
   .act { min-width: 84px; padding-inline: 10px; }
   .act--primary { min-width: 140px; }
