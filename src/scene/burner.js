@@ -181,7 +181,7 @@ export function buildBurner(host) {
     <text class="d-mono tablet__no" x="124" y="195" text-anchor="middle"></text>
     <path class="d-thin" d="M 115 202 H 133" opacity=".6"/>
     <text class="d-mono tablet__title" x="124" y="217" text-anchor="middle"></text>
-    <text class="d-mono tablet__back" x="124" y="217" text-anchor="middle"><tspan x="124" dy="0">THEY</tspan><tspan x="124" dy="12">ARE</tspan><tspan x="124" dy="12">BACK</tspan></text>
+    <text class="d-mono tablet__back" x="124" y="217" text-anchor="middle"><tspan x="124" dy="0">THEY</tspan><tspan x="124" dy="10">ARE</tspan><tspan x="124" dy="10">BACK</tspan></text>
   </g>
 
   <!-- chrysanthemums -->
@@ -431,7 +431,7 @@ export function buildBurner(host) {
 
     /**
      * Write the memorial tablet: which vigil this is, and what is down, in short upright lines
-     * (the tablet is 30 units wide: six mono characters a line, nine lines).
+     * (the tablet is 30 units wide: six small mono characters a line, nine lines).
      */
     tablet(no, title) {
       tabletNo.textContent = no ? `#${no}` : '';
@@ -442,7 +442,7 @@ export function buildBurner(host) {
         if (last !== undefined && `${last} ${w}`.length <= 6) lines[lines.length - 1] = `${last} ${w}`;
         else lines.push(w.length > 6 ? `${w.slice(0, 5)}.` : w);
       }
-      tabletTitle.innerHTML = lines.slice(0, 9).map((l, i) => `<tspan x="124" dy="${i ? 12 : 0}">${l.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))}</tspan>`).join('');
+      tabletTitle.innerHTML = lines.slice(0, 9).map((l, i) => `<tspan x="124" dy="${i ? 10 : 0}">${l.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))}</tspan>`).join('');
     },
 
     /** Show or hide the two built-in ops-team devotees (rooms show the real people instead). */

@@ -177,6 +177,7 @@ body[data-state="lit"] .mantra__dot { background: var(--flame); }
 .burner__svg > path, .burner__svg > ellipse, .burner__svg .candle, .burner__svg .offering { pointer-events: visiblePainted; cursor: pointer; }
 .burner__svg defs, .burner__svg .altar-table, .burner__svg .tablet, .burner__svg .vase, .burner__svg .cat, .burner__svg .torii, .burner__svg .devotee { pointer-events: none; }
 /* The memorial tablet names the vigil and what is down; for ten minutes after They're back it says so */
+.tablet__title, .tablet__back { font-size: 6.5px; letter-spacing: .02em; } /* six to a line inside the tablet's 30-unit frame */
 .tablet__back { display: none; fill: var(--live); }
 body[data-resolved="1"] .tablet__title { display: none; }
 body[data-resolved="1"] .tablet__back { display: block; }
