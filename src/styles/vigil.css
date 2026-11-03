@@ -37,8 +37,8 @@ body[data-meta-editable="1"]:not([data-resolved]) .title:hover .word, body[data-
 .title-edit:not([hidden]) + .subtitle { display: none; }
 /* The heading floats over the altar (the parallax transform makes it its own layer) */
 .heading { position: relative; z-index: 3; }
-/* The ETA is the pill's first half: it opens the Back at picker under the bar */
-.eta { min-width: 0; }
+/* The ETA is the pill's first half: it opens the Back at picker under the bar. It keeps its width; the room chip gives way first. */
+.eta { flex-shrink: 0; }
 .eta__btn { display: inline-flex; align-items: center; gap: 6px; min-width: 0; min-height: 28px; padding: 4px 8px 4px 12px; border: 0; border-radius: var(--radius-pill); background: none; color: var(--muted); font: inherit; font-size: 13px; white-space: nowrap; cursor: default; transition: background-color 160ms, color 160ms; }
 #eta-text { overflow: hidden; text-overflow: ellipsis; }
 /* Says what it is: when the servers are due back */

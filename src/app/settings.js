@@ -4,7 +4,7 @@ import { sound } from '../audio/index.js';
 import { shareUrl } from '../lib/config.js';
 import { syncPalette } from '../scene/palette.js';
 import { BRAND, applyStrings, t } from '../lib/strings.js';
-import { $, body, fmt, landing, meta, persist, resetSettings, roomName, settings, state, tv, urlParams } from './context.js';
+import { $, body, landing, meta, persist, resetSettings, roomName, settings, state, tv, urlParams } from './context.js';
 import { fog, petals } from './engines.js';
 import { applyFx, lite } from './fx.js';
 import { splitTitle, title } from './stage.js';
@@ -19,12 +19,11 @@ const backdrop = $('#panel-backdrop');
 export function applySettings(animate = false) {
   applyTheme();
   applyFx();
-  if (body.dataset.resolved) applyStrings({ eyebrow: t('resolvedEyebrow'), title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
+  if (body.dataset.resolved) applyStrings({ title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
   else if (landing) applyStrings({ eyebrow: t('landEyebrow'), title: t('landTitle'), subtitle: t('landSubtitle') });
   else applyStrings({ title: meta('title'), subtitle: meta('subtitle') });
   body.dataset.subtitle = meta('subtitle') ? 'custom' : ''; // phones hide a shrine's stock subtitle, never one the room wrote
   document.title = body.dataset.resolved ? `${t('resolvedTitle')} · ${BRAND}` : meta('title') ? `${meta('title')} · ${BRAND}` : landing ? `${BRAND}: ${t('landDocTitle')}` : `${t('title')} · ${BRAND}`;
-  if (roomName) $('#eyebrow').textContent = body.dataset.resolved ? `${t('resolvedEyebrow')} / ${roomName}` : fmt('roomEyebrow', { room: roomName });
   if (animate || !title.querySelector('.word')) splitTitle(animate);
 
   fog.setEnabled(settings.fog && !lite);

@@ -1,7 +1,7 @@
 /* ---------- Responsive ---------- */
-/* Narrower than 1280px: while the incident pill is in the bar, the room chip keeps its dot and state (the eyebrow names the room) */
+/* Narrower than 1280px the incident pill crowds the bar: the room's name gives way to an ellipsis, never to nothing */
 @media (max-width: 1279px) {
-  :is(body[data-vigil], body[data-resolved], body:has(#eta-btn:not([data-value=""]))) .room-chip__name { display: none; }
+  .room-chip__name { min-width: 7ch; }
 }
 
 /* Below 1100px: one column. The altar fills the first screen and every card follows it in a grid. */
@@ -102,13 +102,12 @@
   /* The first screen is the altar, not copy: a shrine's stock subtitle goes, one the room wrote is kept to two lines */
   body[data-mode="room"] .subtitle { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
   body[data-mode="room"]:not([data-subtitle="custom"]):not([data-resolved]) .subtitle { display: none; }
-  /* The clock shrinks onto the eyebrow's line, which leaves it room */
+  /* The clock shrinks to the title's first line, and the title leaves it room */
   .vigil { grid-template-columns: auto auto auto; gap: 6px; }
   .vigil__label, .vigil__meta { display: none; }
   .vigil__time { grid-column: auto; font-size: 18px; letter-spacing: 0; }
-  body:is([data-vigil], [data-resolved]) .eyebrow { display: block; max-width: calc(100% - 6.5rem); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  body:is([data-vigil], [data-resolved]) .eyebrow::before { display: inline-block; vertical-align: 1px; }
-  body:is([data-vigil], [data-resolved]) .title { max-width: none; }
+  .vigil { top: .6em; }
+  body:is([data-vigil], [data-resolved]) .title { max-width: calc(100% - 6.5rem); }
   .tv-join { display: none; }
   .rituals { grid-template-columns: 1fr; }
   .mp__fields { grid-template-columns: minmax(0, 1fr); }

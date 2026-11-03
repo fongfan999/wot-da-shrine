@@ -4,7 +4,7 @@ import { CELEBRATE_FOR, KARMA } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { every } from '../lib/clock.js';
 import { applyStrings, t } from '../lib/strings.js';
-import { $, body, counters, fmt, records, reduceMotion, roomName, state } from './context.js';
+import { $, body, counters, fmt, records, reduceMotion, state } from './context.js';
 import { art, kick, motes, petals, room } from './engines.js';
 import { activity } from './fx.js';
 import { applySettings } from './settings.js';
@@ -99,13 +99,11 @@ export function showResolved(at, quiet = false) {
   renderResolve();
   const mins = minutesPrayed();
   applyStrings({
-    eyebrow: t('resolvedEyebrow'),
     title: t('resolvedTitle'),
     subtitle: mins >= 1 ? fmt('resolvedSubtitle', { minutes: mins, karma: counters.karma }) : t('resolvedSubtitleShort'),
     resolve: t('resolved'),
   });
   resolveBtn.disabled = true;
-  if (roomName) $('#eyebrow').textContent = `${t('resolvedEyebrow')} / ${roomName}`;
   splitTitle(!quiet);
   clearTimeout(resolvedTimer);
   resolvedTimer = setTimeout(clearResolved, Math.max(1000, RESOLVED_FOR - (Date.now() - at)));

@@ -422,7 +422,6 @@ export const STRINGS = {
   resolvedTitle: 'The servers are back',
   resolvedSubtitle: 'Rack 42 heard you. {minutes} minutes of prayer, {karma} karma, and uptime restored. Tell the team.',
   resolvedSubtitleShort: 'Rack 42 heard you. Uptime restored. Tell the team.',
-  resolvedEyebrow: 'Uptime restored',
   fResolve: 'declared the servers back',
   fUnresolve: 'took back They’re back',
   resolvedToast: '{name} says the servers are back! +20 karma.',

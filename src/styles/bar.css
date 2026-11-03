@@ -135,7 +135,7 @@ body[data-conn="closed"] .presence { opacity: .45; }
 .menu__sep { height: 1px; margin: 4px 6px; background: var(--line); }
 @media (max-width: 760px) {
   #btn-share { width: 36px; padding: 0; }
-  /* The chip keeps only its status dot: the room's name is in the eyebrow just below, and the state is still read out */
+  /* The chip keeps only its status dot (the room's name is on the altar's tablet), and the state is still read out */
   .room-chip { flex-shrink: 0; padding: 4px 10px; }
   .room-chip__name { display: none; }
   .room-chip__state { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
