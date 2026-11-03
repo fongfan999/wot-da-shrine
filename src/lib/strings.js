@@ -75,9 +75,9 @@ export const STRINGS = {
     [15, 'the LEDs are dancing'],
     [20, 'enlightenment achieved'],
   ],
-  backAt: 'back at',
-  backIn: 'Back in',
-  anyMoment: 'Back any moment now',
+  etaLabel: 'ETA',
+  etaAny: 'Back any moment now',
+  etaIn: 'Back in {rel} · at {at}',
 
   // Rooms
   together: 'Pray with your team',

@@ -221,14 +221,14 @@ const etaText = $('#eta-text');
 const etaBtn = $('#eta-btn');
 export function updateEta() {
   etaBtn.dataset.value = meta('eta') || ''; // the picker opens on the room's time, not a stale one
-  if (!meta('eta')) { etaText.textContent = t('anyMoment'); return; }
+  if (!meta('eta')) { etaText.textContent = t('etaAny'); return; }
   const d = new Date(meta('eta'));
   const diff = d - Date.now();
-  if (diff <= 0) { etaText.textContent = t('anyMoment'); return; }
+  if (diff <= 0) { etaText.textContent = t('etaAny'); return; }
   const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   const rel = h > 0 ? `${h}h ${m}m` : `${m}m`;
   const abs = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  etaText.textContent = `${t('backIn')} ${rel} · ${t('backAt')} ${abs}`;
+  etaText.textContent = fmt('etaIn', { rel, at: abs });
 }
 every(15000, updateEta);

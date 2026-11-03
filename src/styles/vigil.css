@@ -7,8 +7,9 @@
 .undo__left { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
 .share-undo { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 8px 8px 8px 14px; border: 1px dashed var(--line-strong); border-radius: var(--radius-md); font-size: 14px; color: var(--muted); }
 .records__title { color: var(--ink); font-weight: 600; }
-/* No vigil open: plain status where the timer goes (the altar says how to begin) */
-.vigil[data-idle] { border-color: transparent; background: none; padding-inline: 0; }
+/* No vigil open: the row waits for one (the altar says how to begin), unless the room already has an ETA */
+body:not([data-vigil]):not([data-resolved]) .incident:has(#eta-btn[data-value=""]) { display: none; }
+.vigil[data-idle] { display: none; }
 .vigil[data-idle] .vigil__dot { background: var(--muted); animation: none; }
 .vigil[data-idle] :is(.vigil__label, .vigil__time) { display: none; }
 .vigil[data-idle] .vigil__meta { font-family: var(--font-sans); font-size: 14px; letter-spacing: 0; }
@@ -39,6 +40,10 @@ body[data-meta-editable="1"]:not([data-resolved]) .title:hover .word, body[data-
 .heading { position: relative; z-index: 3; }
 .eta { position: relative; }
 .eta__btn { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: default; }
+/* Says what it is: when the servers are due back */
+.eta__label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; color: var(--ink); }
+.eta__edit { display: none; width: 14px; height: 14px; margin-left: -2px; opacity: .7; }
+body[data-meta-editable="1"] .eta__edit { display: block; }
 /* On a shrine the ETA is a pill anyone can set, so it reads as one */
 body[data-meta-editable="1"] .eta__btn { min-height: 34px; padding: 4px 14px 4px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--paper-raised); cursor: pointer; transition: border-color 160ms, color 160ms; }
 body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { color: var(--ink); border-color: var(--accent); }
