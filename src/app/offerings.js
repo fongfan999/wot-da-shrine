@@ -6,7 +6,7 @@ import { OFFERINGS } from '../scene/burner.js';
 import { icon } from '../lib/icons.js';
 import { t } from '../lib/strings.js';
 import { $, fmt, reduceMotion, state } from './context.js';
-import { art, kick, smoke } from './engines.js';
+import { art, smoke } from './engines.js';
 import { addKarma } from './stats.js';
 import { logMine } from './ui.js';
 
@@ -24,7 +24,6 @@ export function offer(kind = null) {
 
 export function offerFx(kind, by = '') {
   const label = art.offer(kind, by);
-  kick(8);
   sound.whoosh();
   gsap.delayedCall(0.35, () => sound.tick(1046, 0.08));
   smoke.puff(0.6);

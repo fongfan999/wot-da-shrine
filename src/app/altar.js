@@ -121,7 +121,6 @@ export function bowlFx(note) {
   sound.bowl(note * 2 ** (Math.min(combo, 12) / 24));
   room.pulse();
   shockwave();
-  kick(4);
   gsap.fromTo($('#btn-bowl').querySelector('.act__icon'), { rotation: -20 }, { rotation: 0, duration: 1, ease: 'elastic.out(1, 0.3)', overwrite: 'auto' });
   // the whole scene breathes out once; rung again mid-breath, it doesn't jump back (repainting the full screen each ring is what lagged)
   if (!gsap.isTweening(sceneEl)) gsap.fromTo(sceneEl, { scale: 1.012 }, { scale: 1, duration: 1.2, ease: 'power2.out' });
@@ -171,7 +170,6 @@ export function bow() {
 export function bowFx(id) {
   if (id && roomName) congregation.bow(id);
   else art.bow(1);
-  kick(6);
   sound.tick(392, 0.07);
   gsap.delayedCall(0.5, () => sound.bowl(147));
   const heading = $('.heading');
@@ -185,7 +183,6 @@ export function chorusFx(n, bonus) {
   petals.burst(30 + n * 4);
   shockwave();
   room.pulse();
-  kick(16, 1.4);
   logEvent({ what: fmt('chorus', { n, bonus }), quiet: true, avatar: '🙇' });
 }
 
@@ -199,7 +196,6 @@ export function puff() {
 
 export function puffFx() {
   sound.tick(520, 0.08);
-  kick(2, 0.6);
   smoke.puff(1);
   gsap.fromTo('.burner', { rotation: -2 }, { rotation: 0, duration: 0.8, ease: 'elastic.out(1, 0.3)', overwrite: 'auto' });
 }

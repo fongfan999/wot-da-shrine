@@ -80,14 +80,17 @@ export class Vitals {
     return c;
   }
 
+  /** A new rate moves the next beat too, so the gap after the last one already shows it. */
   setBpm(bpm) {
     this.bpm = bpm;
+    if (bpm > 0) this.nextBeat = this.beatAt + 60 / bpm;
   }
 
-  /** An extra beat right now (someone did something). */
+  /** A beat right now (someone did something), and the next one a full beat after it. */
   kick(strength = 1) {
     this.beatAt = this.time;
     this.amp = Math.min(1.25, 0.7 + 0.4 * strength);
+    if (this.bpm > 0) this.nextBeat = this.time + 60 / this.bpm;
   }
 
   frame(time, dt) {

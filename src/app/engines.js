@@ -37,13 +37,16 @@ export const wishes = new WishBoard($('#ema'), $('#burner'));
 
 /* ---------- Prod's heart rate (or whatever the shrine says is down): flat while cold, faster with more people and more devotion ---------- */
 let devotion = 0;
+function pace() {
+  const crowd = Math.max(1, people.size);
+  vitals.setBpm(state.lit ? Math.min(160, 58 + (crowd - 1) * 7 + devotion) : 0);
+}
 export function kick(amount, strength = 1) {
   devotion = Math.min(60, devotion + amount);
   vitals.kick(strength);
+  pace(); // the quicker rate shows from the very next beat, not a second later
 }
 every(1000, () => {
   devotion *= 0.93;
-  const crowd = Math.max(1, people.size);
-  const bpm = state.lit ? Math.min(160, 58 + (crowd - 1) * 7 + devotion) : 0;
-  vitals.setBpm(bpm);
+  pace();
 });

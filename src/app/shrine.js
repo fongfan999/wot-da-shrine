@@ -16,7 +16,7 @@ import { clearResolved, renderResolve, renderUndo, RESOLVED_FOR, resolveFx, show
 import { blameFx, fortuneFx } from './rituals.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
 import { applySettings } from './settings.js';
-import { renderRecords, statKarma, tickVigil, updateStats } from './stats.js';
+import { karmaBeat, renderRecords, statKarma, tickVigil, updateStats } from './stats.js';
 import { bump, logEvent, toast } from './ui.js';
 
 /* ---------- Shared shrine ---------- */
@@ -301,7 +301,7 @@ function remoteAct({ kind, by, note, item, text, level, down }) {
 /** The shrine is the source of truth for the room's counters. */
 function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo }) {
   if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); }
-  if (karma !== undefined && karma !== counters.karma) { counters.karma = karma; updateStats(!state.greeted); bump(statKarma); }
+  if (karma !== undefined && karma !== counters.karma) { if (state.greeted) karmaBeat(karma - counters.karma); counters.karma = karma; updateStats(!state.greeted); bump(statKarma); }
   if (since) state.roomSince = since - state.clockSkew;
   if (prayed !== undefined) state.roomPrayed = prayed;
   if (v !== undefined) {

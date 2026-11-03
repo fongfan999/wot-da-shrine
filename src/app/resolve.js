@@ -5,7 +5,7 @@ import { sound } from '../audio/index.js';
 import { every } from '../lib/clock.js';
 import { applyStrings, t } from '../lib/strings.js';
 import { $, body, counters, fmt, records, reduceMotion, state } from './context.js';
-import { art, kick, motes, petals, room } from './engines.js';
+import { art, motes, petals, room } from './engines.js';
 import { activity } from './fx.js';
 import { applySettings } from './settings.js';
 import { openShare } from './shareSheet.js';
@@ -85,7 +85,6 @@ export function resolveFx() {
   gsap.delayedCall(0.4, shockwave);
   room.pulse();
   gsap.delayedCall(0.8, () => { room.pulse(); room.recover(); });
-  kick(40, 1.6);
   if (!reduceMotion) {
     gsap.delayedCall(0.3, () => art.tips().forEach((tip) => motes.burst(tip.x, tip.y, 40, 1.6)));
     gsap.fromTo('.burner', { scale: 1.05 }, { scale: 1, duration: 1.2, ease: 'elastic.out(1, 0.4)' });

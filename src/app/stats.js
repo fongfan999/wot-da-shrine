@@ -4,7 +4,7 @@ import { sound } from '../audio/index.js';
 import { saveCounters } from '../lib/config.js';
 import { STRINGS, t } from '../lib/strings.js';
 import { $, body, BURN_SECONDS, counters, fmt, meta, people, reduceMotion, roomName, records, state, tv } from './context.js';
-import { art, burner, petals } from './engines.js';
+import { art, burner, kick, petals } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';
 import { every } from '../lib/clock.js';
 
@@ -49,8 +49,14 @@ function updateRank(quiet) {
   if (!reduceMotion) gsap.fromTo('.rank', { scale: 1.06 }, { scale: 1, duration: 0.9, ease: 'elastic.out(1, 0.45)', transformOrigin: '0% 50%' });
 }
 
+/** Every bit of karma earned shows on prod's vitals: a spike as tall as the gain, and a quicker pulse for a while. */
+export function karmaBeat(gain) {
+  if (gain > 0) kick(gain * 4, Math.min(1.6, 0.6 + gain * 0.05));
+}
+
 export function addKarma(n = 1) {
   if (roomName) return; // the room's karma is shared; the shrine sends the new total
+  karmaBeat(n);
   counters.karma += n;
   saveCounters(counters);
   updateStats();

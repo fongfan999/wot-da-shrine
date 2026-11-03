@@ -5,7 +5,7 @@ import { sound } from '../audio/index.js';
 import { LEVELS as FORTUNE_LEVELS, asText as fortuneText, draw as drawFortune } from '../lib/omikuji.js';
 import { t } from '../lib/strings.js';
 import { $, fmt, reduceMotion, roomName, roomUrl, state } from './context.js';
-import { art, burner, kick, motes, petals, smoke, wishes } from './engines.js';
+import { art, burner, motes, petals, smoke, wishes } from './engines.js';
 import { openTray } from './offerings.js';
 import { shareOpen } from './shareSheet.js';
 import { addKarma } from './stats.js';
@@ -49,7 +49,6 @@ $('#blame-form').addEventListener('submit', (e) => {
 
 /** A paper slip flies into the censer and burns. `text` is only ever shown on this screen. */
 export function blameFx(text, fromEl = null) {
-  kick(10);
   sound.whoosh();
   const r = burner.getBoundingClientRect();
   const target = { x: r.left + r.width / 2, y: r.top + r.height * 0.5 };
@@ -107,7 +106,6 @@ function renderFortune(f, flip) {
   if (flip && !reduceMotion) gsap.fromTo(slip, { rotationY: 90, opacity: 0 }, { rotationY: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.25 });
 }
 export function fortuneFx() {
-  kick(4);
   sound.tick(880, 0.07);
   gsap.delayedCall(0.3, () => sound.tick(1175, 0.06));
   petals.burst(6);

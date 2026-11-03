@@ -6,7 +6,7 @@ import { releaseLantern } from '../scene/lanterns.js';
 import { STRINGS, t } from '../lib/strings.js';
 import { puff } from './altar.js';
 import { $, recentPrayers, reduceMotion, roomName, state } from './context.js';
-import { congregation, kick, petals, wishes } from './engines.js';
+import { congregation, petals, wishes } from './engines.js';
 import { addKarma } from './stats.js';
 import { logMine, toast } from './ui.js';
 
@@ -63,7 +63,6 @@ quick.addEventListener('click', (e) => {
 export function prayerFx(text, author, quiet = false, from = null) {
   releaseLantern($('#lanterns'), text, from ?? $('.pray'), author);
   if (quiet) return;
-  kick(8);
   sound.whoosh();
   gsap.delayedCall(0.6, () => sound.bowl(261));
   petals.burst(8);
