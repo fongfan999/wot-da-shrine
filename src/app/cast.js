@@ -7,7 +7,7 @@ import { CODE_ALPHABET } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { t } from '../lib/strings.js';
 import { $, fmt, roomName, state, tv, urlParams } from './context.js';
-import { suggested, toSlug } from './openShrine.js';
+import { claimShrine, suggested } from './openShrine.js';
 import { openRitual } from './rituals.js';
 import { spaced } from './screen.js';
 import { openShare } from './shareSheet.js';
@@ -62,7 +62,10 @@ codeInput.addEventListener('input', () => {
   if (status.dataset.kind === 'error') say('');
 });
 
-async function cast(room) {
+let opened = null; // { name, room }: the shrine a cast that failed already opened, for the retry to reuse
+
+/** Send the TV to `room`; with `open`, `room` is a name to open as a new shrine first. */
+async function cast(room, open = false) {
   const code = clean(codeInput.value);
   if (code.length !== 6) { say(t('castNeedCode'), 'error'); codeInput.focus(); return; }
   if (!room) { say(t('castNeedRoom'), 'error'); roomInput.focus(); return; }
@@ -70,6 +73,10 @@ async function cast(room) {
   say(t('castSending'));
   let res;
   try {
+    if (open) {
+      if (opened?.name !== room) opened = { name: room, room: await claimShrine(room) };
+      room = opened.room;
+    }
     res = await fetch(`/api/tv/${code}/cast`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -98,7 +105,7 @@ async function cast(room) {
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
-  cast(roomName || toSlug(roomInput.value.trim() || roomInput.placeholder || suggested));
+  cast(roomName || roomInput.value.trim() || roomInput.placeholder || suggested, !roomName);
 });
 $('#cast-demo').addEventListener('click', () => cast('demo'));
 $('#cast-url').addEventListener('click', () => copyText(`${location.origin}/tv`, t('castUrlCopied')));

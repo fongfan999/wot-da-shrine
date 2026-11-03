@@ -1,7 +1,8 @@
 /**
- * Generated shrine names, "sleepy-rack-42": shared by the Worker (/new without
+ * Generated shrine names, "sleepy-rack-k7qm": shared by the Worker (/new without
  * a name) and the page (which prefills every name field with one, so what you
- * see is what you open).
+ * see is what you open). Opening one claims it, so the tag is there to make
+ * that name nearly always free, not to keep anyone out.
  */
 /** What a room may be called: the slug in /r/<room>. */
 export const ROOM_RE = /^[a-z0-9-]{3,48}$/;
@@ -9,7 +10,14 @@ export const ROOM_RE = /^[a-z0-9-]{3,48}$/;
 const ADJECTIVES = ['quiet', 'sleepy', 'humble', 'patient', 'serene', 'devout', 'stoic', 'mellow', 'eternal', 'golden', 'gentle', 'lucky'];
 const NOUNS = ['lotus', 'rack', 'kernel', 'daemon', 'uptime', 'pagoda', 'packet', 'monk', 'cache', 'socket', 'shrine', 'pod'];
 
+const TAG = 'abcdefghjkmnpqrstuvwxyz23456789'; // no i, l, o, 0 or 1 to misread off a TV
+
+/** Four random letters and digits, "k7qm": about a million of them. */
+export function roomTag() {
+  return [...crypto.getRandomValues(new Uint8Array(4))].map((b) => TAG[b % TAG.length]).join('');
+}
+
 export function roomName() {
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
-  return `${pick(ADJECTIVES)}-${pick(NOUNS)}-${Math.floor(Math.random() * 90 + 10)}`;
+  return `${pick(ADJECTIVES)}-${pick(NOUNS)}-${roomTag()}`;
 }

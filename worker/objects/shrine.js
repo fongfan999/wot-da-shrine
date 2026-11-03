@@ -65,6 +65,7 @@ export class Shrine extends DurableObject {
     this.state = { ...EMPTY };
     this.buckets = new WeakMap(); // per-socket rate limit; resets after hibernation, which is fine
     this.stored = false; // nothing is written until the first action, so drive-by connects leave no trace
+    this.claimed = false; // opened from /new: the name is taken, though nobody has done anything yet
     this.bows = new Map(); // person → when they last bowed, for the chorus
     this.chorusAt = 0;
     this.leaving = new Map(); // resume token → { person, timer }: dropped, and not yet announced as gone
@@ -72,6 +73,7 @@ export class Shrine extends DurableObject {
     ctx.blockConcurrencyWhile(async () => {
       const saved = await ctx.storage.get('altar');
       this.stored = saved !== undefined;
+      this.claimed = (await ctx.storage.get('claimed')) === true;
       this.alarmAt = (await ctx.storage.getAlarm()) ?? 0;
       this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta } };
     });
@@ -267,11 +269,25 @@ export class Shrine extends DurableObject {
     this.left(ws);
   }
 
+  /**
+   * Opening a shrine by this name: true, and the name is yours, only when nobody has opened,
+   * used or is sitting in it. One call at a time reaches an object, so two openers can't both win.
+   * A name claimed and never used is let go with the rest, after a month.
+   */
+  async claim() {
+    if (this.demo || this.claimed || this.stored || this.ctx.getWebSockets().length) return false;
+    this.claimed = true;
+    await this.ctx.storage.put('claimed', true);
+    await this.touch();
+    return true;
+  }
+
   /** Nobody has visited for a month: let the shrine go. */
   async alarm() {
     if (this.ctx.getWebSockets().length) return this.touch();
     await this.ctx.storage.deleteAll();
     this.stored = false;
+    this.claimed = false;
     this.alarmAt = 0;
   }
 

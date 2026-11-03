@@ -1,6 +1,6 @@
 /** Rooms: open one, its page, and its socket, status and README badge. */
 import { Hono } from 'hono';
-import { ROOM_RE, roomName } from '../../shared/names.js';
+import { ROOM_RE, roomName, roomTag } from '../../shared/names.js';
 import { rateLimit, socketOnly } from '../middleware.js';
 import { badge } from '../views/badge.js';
 import { roomPage } from '../views/roomPage.js';
@@ -22,12 +22,34 @@ const shrine = (c) => c.env.SHRINE.getByName(c.var.room);
 
 const rooms = new Hono();
 
-// /new?name=Prod is down → /r/prod-is-down; without a name, a generated one. Other params ride along.
-rooms.get('/new', rateLimit('NEW_ROOM_LIMIT'), (c) => {
+/**
+ * A new shrine of your own, its room name claimed so nobody else opens it too: the name asked for,
+ * or a generated one, and when that is somebody else's already, the same with a tag on the end.
+ * Null if even the tagged names keep coming up taken.
+ */
+async function openRoom(c, name) {
+  const base = name ? slug(name) : roomName();
+  for (let i = 0, room = base; i < 5; i++, room = `${base.slice(0, 43).replace(/-+$/, '')}-${roomTag()}`) {
+    if (await c.env.SHRINE.getByName(room).claim()) return room;
+  }
+  return null;
+}
+
+// /new?name=Prod is down → /r/prod-is-down, or /r/prod-is-down-k7qm when that one is taken; without a name, a generated one. Other params ride along.
+rooms.get('/new', rateLimit('NEW_ROOM_LIMIT'), async (c) => {
   const url = new URL(c.req.url);
   const name = url.searchParams.get('name');
   url.searchParams.delete('name');
-  return c.redirect(`/r/${name ? slug(name) : roomName()}${url.search}`);
+  const room = await openRoom(c, name);
+  return room ? c.redirect(`/r/${room}${url.search}`) : c.text('Every name we tried was taken. Try another.', 503);
+});
+
+// POST { name }: the same, for a page that opens a shrine without leaving (Cast to TV). Answers { room }.
+rooms.post('/api/rooms', rateLimit('NEW_ROOM_LIMIT'), async (c) => {
+  let body;
+  try { body = await c.req.json(); } catch { return c.json({ error: 'bad json' }, 400); }
+  const room = await openRoom(c, String(body?.name ?? '').slice(0, 200));
+  return room ? c.json({ room }) : c.json({ error: 'every name was taken' }, 503);
 });
 
 // /r/ alone is the room page's file with no room in it: send the visitor to a room instead.

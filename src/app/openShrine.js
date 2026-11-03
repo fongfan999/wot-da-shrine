@@ -4,10 +4,15 @@ import { sound } from '../audio/index.js';
 import { $ } from './context.js';
 import { openRitual } from './rituals.js';
 
-/** "Prod is DOWN!!" → "prod-is-down"; '' when too little is left to be a room name. */
-export function toSlug(raw) {
-  const slug = raw.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48).replace(/-+$/, '');
-  return slug.length >= 3 ? slug : '';
+/** Open a shrine of your own by that name without leaving the page: its room, tagged if the name was taken. */
+export async function claimShrine(name) {
+  const res = await fetch('/api/rooms', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) throw new Error(`open ${res.status}`);
+  return (await res.json()).room;
 }
 
 /* Open a shrine: the buttons with no name field of their own open the same name, in a sheet */
@@ -32,8 +37,8 @@ for (const form of document.querySelectorAll('#name-form, #name-form-2, #name-fo
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     sound.unlock();
+    // Always through /new, which claims the name: one somebody else opened gets a tag on the end.
     const raw = input.value.trim() || input.placeholder;
-    const slug = toSlug(raw);
-    location.href = slug ? `/r/${slug}` : raw ? `/new?name=${encodeURIComponent(raw)}` : '/new';
+    location.href = raw ? `/new?name=${encodeURIComponent(raw)}` : '/new';
   });
 }
