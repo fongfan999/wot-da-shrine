@@ -23,6 +23,20 @@
     <p class="eta">
       <button class="eta__btn" id="eta-btn" type="button" aria-haspopup="dialog" aria-expanded="false" data-value=""><span class="eta__label" data-i18n="etaLabel">ETA</span><span id="eta-text"></span><svg class="ico eta__edit" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
     </p>
+    <!-- No vigil open: say something is down, and the vigil begins. They're back takes its place once it does. -->
+    <button class="btn btn--ember btn--sm incident__down" id="btn-down" type="button" hidden>
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>
+      <span data-i18n="downBtn">Something’s down</span>
+    </button>
+    <form class="eta-pop down-pop" id="down-pop" hidden aria-labelledby="down-pop-label">
+      <label class="eta-pop__label" id="down-pop-label" for="down-title" data-i18n="downWhat">What is down?</label>
+      <input class="down-pop__input" id="down-title" name="down-title" type="text" maxlength="60" autocomplete="off" data-i18n-placeholder="downWhatPh" />
+      <p class="down-pop__note" data-i18n="downWhatNote">Everyone in the shrine sees it, and the vigil’s record keeps it.</p>
+      <div class="down-pop__actions">
+        <button class="btn btn--glass btn--sm" id="down-skip" type="button" data-i18n="downSkip">Skip</button>
+        <button class="btn btn--accent btn--sm" type="submit" data-i18n="downSave">Name it</button>
+      </div>
+    </form>
     <button class="btn btn--live btn--sm incident__resolve" id="btn-resolve" type="button">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4L19 6"/></svg>
       <span data-i18n="resolve">They’re back!</span>

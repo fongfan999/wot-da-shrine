@@ -7,10 +7,26 @@
 .undo__left { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
 .share-undo { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 8px 8px 8px 14px; border: 1px dashed var(--line-strong); border-radius: var(--radius-md); font-size: 14px; color: var(--muted); }
 .records__title { color: var(--ink); font-weight: 600; }
-/* No vigil open: the clock and the pill wait for one (the altar says how to begin), unless the room already has an ETA */
-body:not([data-vigil]):not([data-resolved]) .incident:has(#eta-btn[data-value=""]) { display: none; }
-/* They're back: no more ETA, and the pill only stays while its Undo does */
-body[data-resolved] .incident .eta, body[data-resolved] .incident:has(#btn-unresolve[hidden]) { display: none; }
+/* No vigil open: the pill holds Something's down, and an ETA only if the room set one. Where nobody can say it (a TV, the demo) the pill waits. */
+body:not([data-vigil]) .incident .eta:has(#eta-btn[data-value=""]) { display: none; }
+body:not([data-vigil]):not([data-resolved]) .incident:has(#eta-btn[data-value=""]):has(#btn-down[hidden]) { display: none; }
+/* They're back: no more ETA, and the pill only stays while its Undo or Something's down does */
+body[data-resolved] .incident .eta, body[data-resolved] .incident:has(#btn-unresolve[hidden]):has(#btn-down[hidden]) { display: none; }
+.incident__down { min-height: 28px; gap: 6px; padding: 4px 12px 4px 10px; font-size: 13px; }
+.incident__down .ico { width: 15px; height: 15px; }
+
+/* What is down? Asked under the pill when the vigil opens */
+.down-pop { left: 0; right: auto; gap: 10px; }
+.down-pop__input { width: 100%; padding: 10px 12px; border: 1px solid var(--field-line); border-radius: var(--radius-md); outline: 0; background: var(--paper); color: var(--ink); font: inherit; font-size: 15px; }
+.down-pop__input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.down-pop__note { margin: 0; font-size: 13px; color: var(--muted); }
+.down-pop__actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Is something down? Asked above the dock when the incense is lit in a quiet room */
+.down-ask { position: fixed; z-index: 40; left: 50%; bottom: calc(var(--dock-h, 160px) + 16px); translate: -50% 0; display: flex; flex-direction: column; gap: 10px; width: min(400px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--sheet-line); border-radius: var(--radius-lg); background: var(--paper-raised); box-shadow: var(--shadow-sheet), 0 30px 60px -30px #000c; animation: pane-in .25s var(--ease) both; }
+.down-ask__title { margin: 0; font-size: 18px; font-weight: 600; color: var(--ink); }
+.down-ask__text { margin: 0; font-size: 14px; line-height: 1.4; color: var(--muted); }
+.down-ask__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 4px; }
 .vigil[data-idle] { display: none; }
 
 /* The heading floats over the altar (the parallax transform makes it its own layer) */

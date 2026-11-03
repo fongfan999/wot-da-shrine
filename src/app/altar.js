@@ -8,14 +8,27 @@ import { $, body, BURN_SECONDS, counters, fmt, roomName, state } from './context
 import { art, burner, congregation, kick, motes, petals, room, smoke } from './engines.js';
 import { addKarma, burnBar, tickProgress, updateStats } from './stats.js';
 import { logEvent, logMine, shockwave, toast } from './ui.js';
+import { askDown, askOpen, asksBeforeLighting, lightSaysDown, promptTitle } from './vigilStart.js';
 
 /* ---------- Light the incense ---------- */
 export function light() {
   sound.unlock();
   if (state.lit) { puff(); return; }
+  if (askOpen()) return;
+  // In a quiet shrine, lighting asks first: an incident opens the vigil, a quiet day just burns incense.
+  if (state.shrine && asksBeforeLighting()) {
+    askDown().then((down) => { if (down !== null && !state.lit) lightNow(down && !state.vigil); }); // someone may have said it meanwhile
+    return;
+  }
+  lightNow(lightSaysDown(), false); // a shrine named for the outage has already said what is down
+}
+
+/** `down`: this incense is for an incident, and opens the vigil if none is open; `ask`: then ask what is down. */
+function lightNow(down, ask = true) {
   if (state.shrine) {
     state.pendingLightAt = Date.now();
-    state.shrine.send('light');
+    state.shrine.send('light', { down });
+    if (down && ask) promptTitle();
   } else if (!roomName) {
     counters.incense += 1;
     saveCounters(counters);

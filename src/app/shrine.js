@@ -21,7 +21,7 @@ import { bump, logEvent, toast } from './ui.js';
 
 /* ---------- Shared shrine ---------- */
 const DEFAULT_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader'];
-const ACT_ICONS = { light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense' };
+const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense' };
 export const joinEl = $('#join');
 /** The join sheet is up and waiting: not merely fading out after you joined. */
 export const joinOpen = () => !joinEl.hidden && !joinEl.inert;
@@ -283,9 +283,10 @@ function onShrineMessage(msg) {
   }
 }
 
-function remoteAct({ kind, by, note, item, text, level }) {
+function remoteAct({ kind, by, note, item, text, level, down }) {
   const log = (what, extra = {}) => logEvent({ key: `${by.id}:${kind}${item ? `:${item}` : ''}`, avatar: by.avatar, who: by.name, what, toastText: `${by.name} ${what}.`, ...extra });
-  if (kind === 'light') { congregation.bow(by.id, 3); log(t('fLight')); }
+  if (kind === 'light') { congregation.bow(by.id, 3); log(t(down ? 'fLightDown' : 'fLight')); }
+  else if (kind === 'down') { sound.bowl(174); log(t('fDown'), { toastText: fmt('downRemote', { name: by.name }) }); }
   else if (kind === 'bowl') { bowlFx(note); log(t('fBowl')); }
   else if (kind === 'bow') { bowFx(by.id); log(t('fBow')); }
   else if (kind === 'offer') { const label = offerFx(item, by.name); if (label) log(fmt('fOffer', { item: label })); }

@@ -34,11 +34,14 @@ const DEMO_META = { title: 'The demo rack is down', subtitle: 'This is the publi
 const PRESET = new Set(QUICK_PRAYERS);
 
 /**
- * A vigil is one incident: it begins with the first thing anyone does at the
- * altar, and ends when someone says the servers are back, or when the room has
- * stood empty and untouched for VIGIL_IDLE. For a while after They're back only
- * fresh incense opens the next one, so the celebration's bowls and bows don't.
+ * A vigil is one incident. It begins when someone says something is down: Something's down, lighting
+ * the incense with "yes, something is down", or naming what is down while the room is quiet. Incense,
+ * bows and prayers on a quiet day are only that, and open nothing. It ends when someone says the
+ * servers are back, or when the room has stood empty and untouched for VIGIL_IDLE.
  * The room keeps the last few, and counts the ones it survived.
+ *
+ * The public demo is always down: there the first thing done at the altar opens one, as it always
+ * has, and for a while after They're back only fresh incense opens the next.
  */
 const OPENS_VIGIL = new Set(['light', 'bowl', 'bow', 'offer', 'prayer', 'puff', 'blame', 'omikuji']);
 /** What the vigil counts of each action. */
@@ -143,6 +146,7 @@ export class Shrine extends DurableObject {
     const by = pub(self);
     const s = this.state;
     const out = { t: 'act', kind: msg.t, by };
+    let opens = false; // this action says something is down
 
     switch (msg.t) {
       case 'light':
@@ -150,6 +154,13 @@ export class Shrine extends DurableObject {
         if (s.litAt) { ws.send(JSON.stringify({ t: 'sync', ...this.counters() })); return; } // someone beat you to it
         s.litAt = Date.now();
         s.incense += 1;
+        opens = msg.down === true;
+        if (opens && !s.vigil) out.down = true;
+        break;
+      case 'down':
+        // Something's down: the vigil opens, whatever is or isn't burning.
+        if (s.vigil) return;
+        opens = true;
         break;
       case 'burnout':
         // Every client reports the burn-out; settle() only pays out once.
@@ -189,8 +200,15 @@ export class Shrine extends DurableObject {
         if (meta.eta && Number.isNaN(Date.parse(meta.eta))) meta.eta = '';
         // The music the whole room hears, the TV too. Changing it is not an action: it opens no vigil.
         if ('track' in msg) meta.track = TRACKS.includes(msg.track) ? msg.track : TRACKS[0];
+        // Naming what is down, in a quiet room, says something is down. Not while the room still
+        // celebrates the last one: then it is the old incident being tidied up.
+        const named = meta.title && meta.title !== s.meta.title && !s.vigil && Date.now() - s.resolvedAt > CELEBRATE_FOR;
         s.meta = meta;
         this.broadcast({ t: 'meta', meta, by });
+        if (named) {
+          this.openVigil();
+          this.broadcast({ t: 'act', kind: 'down', by, ...this.counters() });
+        }
         await this.save();
         return;
       }
@@ -250,7 +268,8 @@ export class Shrine extends DurableObject {
 
     if (!s.since) s.since = Date.now();
     s.karma += KARMA[msg.t] ?? 0;
-    if (!s.vigil && OPENS_VIGIL.has(msg.t) && (msg.t === 'light' || Date.now() - s.resolvedAt > CELEBRATE_FOR)) this.openVigil();
+    const demoOpens = this.demo && OPENS_VIGIL.has(msg.t) && (msg.t === 'light' || Date.now() - s.resolvedAt > CELEBRATE_FOR);
+    if (!s.vigil && (opens || demoOpens)) this.openVigil();
     if (s.vigil && VIGIL_FIELD[msg.t]) s.vigil[VIGIL_FIELD[msg.t]] += 1;
     if (s.vigil) {
       s.vigil.lastAt = Date.now();

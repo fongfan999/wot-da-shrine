@@ -58,11 +58,16 @@ shrine.
 
 ## A vigil, not a visit
 
-An incident is a *vigil*. It begins with the first thing anyone does at an
-altar with no open vigil (incense, a bow, a prayer, the bowl), and ends when
-someone presses **They're back!**. For ten minutes after that the room
-celebrates, and only fresh incense opens the next vigil, so the celebration's
-bows don't. Whoever said they're back can take it back for 30 seconds: the
+An incident is a *vigil*, and it begins when someone says something is down:
+**Something's down** in the top bar, or **Yes, start the vigil** when the
+incense is lit in a quiet room (lighting asks "Is something down?"). Naming what
+is down in Customize while the room is quiet opens one too, and so does lighting
+in a shrine whose name says it (`prod-is-down`, `payments-outage`), without
+asking. On a quiet day incense, bows, prayers and music are only that: the
+"All quiet" streak goes on and nothing is filed. A vigil ends when someone
+presses **They're back!**, and for ten minutes after that the room celebrates.
+The public demo shrine is always down: there the first thing done at the altar
+opens a vigil, as it always has. Whoever said they're back can take it back for 30 seconds: the
 vigil reopens as it was. A vigil is never forgotten while anyone is kneeling;
 once the room has stood empty and untouched for 12 hours it is filed as
 forgotten. While it is open the heading counts how long the servers have been
@@ -280,6 +285,7 @@ src/app/                 the shrine
   menus.js               the top bar's Share and More menus
   cast.js, screen.js     Cast to TV, and the TV's own screens
   quiet.js               the TV when nothing is down: how long it has been quiet, the music
+  vigilStart.js          saying something is down: the button, the question on lighting
   etaPicker.js           the Back at picker, in the heading and the builder
   openShrine.js          name fields and the Open sheet
 src/landing/             the home page's sections (pulse, showcase, steps, builder, TV…) and its world line

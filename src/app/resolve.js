@@ -12,6 +12,7 @@ import { openShare } from './shareSheet.js';
 import { splitTitle } from './stage.js';
 import { addKarma, renderRecords, tickVigil, updateTablet } from './stats.js';
 import { logMine, shockwave, toast } from './ui.js';
+import { renderDown } from './vigilStart.js';
 
 /* ---------- They're back: the moment worth sharing ---------- */
 export const RESOLVED_FOR = CELEBRATE_FOR; // the heading celebrates for a while, then the shrine is a shrine again
@@ -20,12 +21,13 @@ let resolvedTimer = 0;
 /** Minutes of prayer: this vigil so far, or the one that just ended. */
 export const minutesPrayed = () => (state.vigil ? Math.max(0, Math.round((Date.now() - state.vigil.startedAt) / 60000)) : state.lastVigil?.minutes ?? 0);
 
-/** The button only works while a vigil is open: anything done at the altar opens one. */
+/** The button only works while a vigil is open; until one is, Something's down stands in its place. */
 export function renderResolve() {
   const open = Boolean(state.vigil) && !body.dataset.resolved;
   resolveBtn.disabled = !open;
   resolveBtn.title = open ? '' : t('resolveHint');
   renderUndo();
+  renderDown();
 }
 
 /* ---------- Not back after all: whoever said They're back can take it back for a moment ---------- */

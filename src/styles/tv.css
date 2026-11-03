@@ -2,7 +2,7 @@
 /* a screen on a wall is never scrolled: exactly one viewport, no scrollbar, whatever falls below stays below */
 html:has(body[data-tv="1"]), body[data-tv="1"] { height: 100dvh; overflow: hidden; scrollbar-width: none; }
 html:has(body[data-tv="1"])::-webkit-scrollbar, body[data-tv="1"]::-webkit-scrollbar { display: none; }
-body[data-tv="1"] .dock, body[data-tv="1"] .side > .credit, body[data-tv="1"] :is(.incident__resolve, .incident__undo), body[data-tv="1"] :is(#share-menu-wrap, #more-menu-wrap, #bar-github) { display: none; }
+body[data-tv="1"] .dock, body[data-tv="1"] .side > .credit, body[data-tv="1"] :is(.incident__resolve, .incident__undo, .incident__down), body[data-tv="1"] :is(#share-menu-wrap, #more-menu-wrap, #bar-github) { display: none; }
 body[data-tv="1"] .stage { grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); }
 body[data-tv="1"] :is(.center, .side) { height: calc(100dvh - var(--bar-h, 70px) - 2 * var(--space-5)); }
 body[data-tv="1"] .title { font-size: clamp(3rem, 6.4vw, 6.2rem); }
