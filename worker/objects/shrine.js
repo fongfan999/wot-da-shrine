@@ -25,6 +25,11 @@ const VIGIL_IDLE = 6 * 3600 * 1000; // a vigil nobody has touched for six hours 
 const MAX_HISTORY = 12;
 export const FORTUNES = ['great', 'good', 'small', 'bad', 'terrible']; // omikuji levels, see src/lib/omikuji.js
 const META_MAX = { title: 60, subtitle: 140, eta: 40 };
+const LEAVE_GRACE = 5000; // a dropped socket gets this long to come back before the room hears it left
+const TOKEN_RE = /^[0-9a-f-]{36}$/;
+
+/** A person as the others see them: never their resume token. */
+const pub = ({ token, replaced, ...person }) => person;
 
 /**
  * The public demo shrine, streamed onto the landing page. Anyone can kneel
@@ -65,6 +70,7 @@ export class Shrine extends DurableObject {
     this.stored = false; // nothing is written until the first action, so drive-by connects leave no trace
     this.bows = new Map(); // person → when they last bowed, for the chorus
     this.chorusAt = 0;
+    this.leaving = new Map(); // resume token → { person, timer }: dropped, and not yet announced as gone
     this.demo = ctx.id.name === DEMO_ROOM;
     ctx.blockConcurrencyWhile(async () => {
       const saved = await ctx.storage.get('altar');
@@ -79,9 +85,13 @@ export class Shrine extends DurableObject {
     if (request.headers.get('Upgrade') !== 'websocket') return new Response('Expected a WebSocket', { status: 426 });
     const person = {
       id: crypto.randomUUID().slice(0, 8),
+      token: crypto.randomUUID(),
       name: clean(url.searchParams.get('name'), 24) || 'Anonymous sysadmin',
       avatar: AVATARS.includes(url.searchParams.get('avatar')) ? url.searchParams.get('avatar') : '🧘',
     };
+    // Coming back after a dropped connection or a refresh: the same person, not a stranger.
+    const was = this.resume(url.searchParams.get('token'));
+    if (was) Object.assign(person, { id: was.id, token: was.token, via: was.via, hello: was.hello });
     if (url.searchParams.get('watch') === '1') person.watcher = true; // a screen on the wall: sees everything, counts as nobody
     // Scanned the code on a TV: the TV makes a fuss of them, and the home page's TV knows its own visitor by `hello`.
     if (url.searchParams.get('via') === 'tv') {
@@ -90,16 +100,23 @@ export class Shrine extends DurableObject {
       if (/^[a-z0-9]{8,24}$/.test(hello)) person.hello = hello;
     }
     if (this.demo) person.name = DEMO_NAMES[parseInt(person.id, 16) % DEMO_NAMES.length];
+    if (was?.watcher) person.watcher = true;
+    for (const k of ['via', 'hello']) if (person[k] === undefined) delete person[k];
 
     const { 0: client, 1: server } = new WebSocketPair();
     this.ctx.acceptWebSocket(server);
     server.serializeAttachment(person);
 
     this.settle();
-    if (this.forget()) await this.save();
+    let dirty = this.forget();
+    // The vigil's peak counts everyone who knelt, not only those who did something.
+    const v = this.state.vigil;
+    if (v && !person.watcher && this.people().length > v.peak) { v.peak = this.people().length; dirty = true; }
+    if (dirty) await this.save();
     server.send(JSON.stringify({
       t: 'state',
       me: person.id,
+      token: person.token,
       now: Date.now(),
       burn: BURN_SECONDS,
       people: this.people(),
@@ -110,7 +127,9 @@ export class Shrine extends DurableObject {
       history: this.state.history,
       longest: this.state.longest,
     }));
-    if (!person.watcher) this.broadcast({ t: 'join', person }, server);
+    if (person.watcher) { /* a screen comes and goes unannounced */ }
+    else if (!was) this.broadcast({ t: 'join', person: pub(person) }, server);
+    else if (was.name !== person.name || was.avatar !== person.avatar) this.broadcast({ t: 'rename', person: pub(person) }, server);
     if (this.stored) await this.touch();
 
     return new Response(null, { status: 101, webSocket: client });
@@ -120,8 +139,9 @@ export class Shrine extends DurableObject {
     if (typeof raw !== 'string' || raw.length > 1024 || !this.allow(ws)) return;
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
-    const by = ws.deserializeAttachment();
-    if (by.watcher) return;
+    const self = ws.deserializeAttachment();
+    if (!self || self.watcher || self.replaced) return; // a screen, or a socket its person has already left behind
+    const by = pub(self);
     const s = this.state;
     const out = { t: 'act', kind: msg.t, by };
 
@@ -206,9 +226,9 @@ export class Shrine extends DurableObject {
         const name = clean(msg.name, 24);
         const avatar = AVATARS.includes(msg.avatar) ? msg.avatar : by.avatar;
         if (!name) return;
-        const person = { ...by, name, avatar };
+        const person = { ...self, name, avatar };
         ws.serializeAttachment(person);
-        this.broadcast({ t: 'rename', person });
+        this.broadcast({ t: 'rename', person: pub(person) });
         return;
       }
       default:
@@ -244,13 +264,47 @@ export class Shrine extends DurableObject {
     this.alarmAt = 0;
   }
 
+  /**
+   * A socket closed. Unless it was replaced by the same person's new one, the room hears about it
+   * after a short grace: a refresh or a blip in the Wi-Fi is not a departure.
+   */
   left(ws) {
     const person = ws.deserializeAttachment();
-    if (person && !person.watcher) this.broadcast({ t: 'leave', id: person.id }, ws);
+    if (!person || person.replaced || person.watcher) return;
+    ws.serializeAttachment({ ...person, replaced: true }); // close and error can both fire: announce once
+    if (!person.token) { this.broadcast({ t: 'leave', id: person.id }, ws); return; }
+    clearTimeout(this.leaving.get(person.token)?.timer);
+    const timer = setTimeout(() => {
+      this.leaving.delete(person.token);
+      this.broadcast({ t: 'leave', id: person.id });
+    }, LEAVE_GRACE);
+    this.leaving.set(person.token, { person, timer });
+  }
+
+  /**
+   * The person a resume token belongs to, if they are still about: dropped within the grace, or
+   * still connected on a socket that has not noticed it is dead (that socket is retired quietly).
+   */
+  resume(token) {
+    if (!token || !TOKEN_RE.test(token)) return null;
+    const gone = this.leaving.get(token);
+    if (gone) {
+      clearTimeout(gone.timer);
+      this.leaving.delete(token);
+      return gone.person;
+    }
+    for (const ws of this.ctx.getWebSockets()) {
+      const p = ws.deserializeAttachment();
+      if (p?.token !== token || p.replaced) continue;
+      ws.serializeAttachment({ ...p, replaced: true });
+      try { ws.close(4000, 'resumed elsewhere'); } catch { /* already closing */ }
+      return p;
+    }
+    return null;
   }
 
   people() {
-    return this.ctx.getWebSockets().map((ws) => ws.deserializeAttachment()).filter((p) => p && !p.watcher);
+    return this.ctx.getWebSockets().map((ws) => ws.deserializeAttachment()).filter((p) => p && !p.watcher && !p.replaced).map(pub);
   }
 
   counters() {

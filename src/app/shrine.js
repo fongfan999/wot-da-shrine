@@ -6,7 +6,7 @@ import { LEVELS as FORTUNE_LEVELS } from '../lib/omikuji.js';
 import { AVATARS, connectRoom, saveMe } from '../lib/room.js';
 import { t } from '../lib/strings.js';
 import { bowFx, bowlFx, burnOut, chorusFx, ignite, puffFx, scheduleBurnOut } from './altar.js';
-import { $, body, counters, fmt, people, recentPrayers, roomName, roomUrl, settings, state, tv, urlParams } from './context.js';
+import { $, body, counters, fmt, people, recentPrayers, reduceMotion, roomName, roomUrl, settings, state, tv, urlParams } from './context.js';
 import { art, congregation, wishes } from './engines.js';
 import { activity } from './fx.js';
 import { offerFx } from './offerings.js';
@@ -68,7 +68,43 @@ function renderTv() {
   $('#tv-join').hidden = false;
 }
 
+/* ---------- The join card: what you are walking into, before you kneel ---------- */
+const joinState = $('#join-state');
+const minutes = (m) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)}h ${m % 60}m`);
+let joinStatus = null; // fetched once: the room as it was when you arrived
+
+async function loadJoinState() {
+  try {
+    const res = await fetch(`/api/rooms/${roomName}/status`);
+    if (!res.ok) return;
+    joinStatus = await res.json();
+  } catch { return; /* offline: the card works without it */ }
+  if (!joinOpen() || state.shrine) return; // already in, or renaming
+  renderJoinState(joinStatus);
+}
+
+function renderJoinState(st) {
+  // Lighting opens a vigil, so a lit altar is down even in its first minute (downFor rounds to 0).
+  const down = Boolean(st.downFor || st.lit);
+  const back = !down && st.resolvedAt && st.now - st.resolvedAt < RESOLVED_FOR;
+  $('#join-what').textContent = st.title || (down ? t('joinDown') : back ? t('joinBack') : '');
+  const facts = [];
+  if (st.downFor) facts.push(fmt('joinDownFor', { t: minutes(st.downFor) }));
+  facts.push(st.lit ? fmt('joinBurning', { n: Math.max(1, Math.ceil(st.burnLeft / 60)) }) : t('joinCold'));
+  const line = facts.join(' · ');
+  $('#join-facts').textContent = line.charAt(0).toUpperCase() + line.slice(1);
+  const faces = $('#join-faces');
+  faces.replaceChildren(...st.avatars.map((a) => Object.assign(document.createElement('span'), { className: 'join__face', textContent: a })));
+  $('#join-people').textContent = st.people === 0 ? t('joinNobody') : st.people === 1 ? t('joinOne') : fmt('joinMany', { n: st.people });
+  joinState.dataset.lit = String(Boolean(st.lit));
+  joinState.hidden = false;
+  if (!reduceMotion) gsap.fromTo(joinState, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
+}
+
 export function openJoin() {
+  // Only a first visit is told about the room: renaming from the More menu is already inside.
+  joinState.hidden = true;
+  if (!state.shrine) { if (joinStatus) renderJoinState(joinStatus); else loadJoinState(); }
   const current = state.me ?? { name: gsap.utils.random(DEFAULT_NAMES), avatar: gsap.utils.random(AVATARS) };
   joinName.value = current.name;
   joinAvatars.innerHTML = '';
@@ -79,6 +115,8 @@ export function openJoin() {
     b.textContent = a;
     b.setAttribute('role', 'radio');
     b.setAttribute('aria-checked', String(a === current.avatar));
+    b.setAttribute('aria-label', a);
+    b.tabIndex = a === current.avatar ? 0 : -1; // one tab stop for the group; arrows move inside it
     joinAvatars.appendChild(b);
   }
   joinEl.hidden = false;
@@ -88,12 +126,33 @@ export function openJoin() {
   setTimeout(() => { joinName.focus(); joinName.select(); }, 50);
 }
 
-joinAvatars.addEventListener('click', (e) => {
-  const b = e.target.closest('.join__avatar');
-  if (!b) return;
-  joinAvatars.querySelectorAll('.join__avatar').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+function pickAvatar(b) {
+  joinAvatars.querySelectorAll('.join__avatar').forEach((x) => {
+    x.setAttribute('aria-checked', String(x === b));
+    x.tabIndex = x === b ? 0 : -1;
+  });
   sound.unlock();
   sound.tick(880, 0.05);
+}
+joinAvatars.addEventListener('click', (e) => {
+  const b = e.target.closest('.join__avatar');
+  if (b) pickAvatar(b);
+});
+// A radio group: arrows choose (left and right by one, up and down by a row), Home and End jump to the ends.
+joinAvatars.addEventListener('keydown', (e) => {
+  const all = [...joinAvatars.querySelectorAll('.join__avatar')];
+  const i = all.indexOf(document.activeElement);
+  if (i < 0) return;
+  const cols = getComputedStyle(joinAvatars).gridTemplateColumns.split(' ').length;
+  const step = { ArrowRight: 1, ArrowDown: cols, ArrowLeft: -1, ArrowUp: -cols }[e.key];
+  let next = null;
+  if (step) next = all[(i + step + all.length) % all.length];
+  else if (e.key === 'Home') next = all[0];
+  else if (e.key === 'End') next = all.at(-1);
+  if (!next) return;
+  e.preventDefault();
+  pickAvatar(next);
+  next.focus();
 });
 
 $('#join-form').addEventListener('submit', (e) => {

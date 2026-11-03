@@ -27,6 +27,18 @@ export function saveMe(me) {
 }
 
 /**
+ * The resume token the shrine gave this tab, so a reconnect or a refresh comes back as the same
+ * person. Per tab (sessionStorage): two tabs are two people kneeling.
+ */
+const tokenKey = (room) => `incense:resume:${room}`;
+function loadToken(room) {
+  try { return sessionStorage.getItem(tokenKey(room)) || ''; } catch { return ''; }
+}
+function saveToken(room, token) {
+  try { if (token) sessionStorage.setItem(tokenKey(room), token); else sessionStorage.removeItem(tokenKey(room)); } catch { /* ignore */ }
+}
+
+/**
  * Connect to a room. `onMessage(msg)` receives every server message;
  * `onStatus('connecting' | 'open' | 'closed')` tracks the connection.
  * `arrival` ({ via, hello }) goes with the first connection only, so a reconnect is not a second entrance.
@@ -36,19 +48,27 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false, arri
   let retry = 0;
   let timer = null;
   let closed = false;
+  let token = loadToken(room);
 
   const open = () => {
     onStatus('connecting');
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     const q = new URLSearchParams({ name: me.name, avatar: me.avatar });
     if (watch) q.set('watch', '1');
+    if (token) q.set('token', token);
     for (const [k, v] of Object.entries(arrival ?? {})) if (v) q.set(k, v);
     ws = new WebSocket(`${proto}//${location.host}/api/rooms/${room}/ws?${q}`);
     ws.addEventListener('open', () => { retry = 0; arrival = null; onStatus('open'); });
     ws.addEventListener('message', (e) => {
-      try { onMessage(JSON.parse(e.data)); } catch (err) { console.error(err); }
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.t === 'state' && msg.token) { token = msg.token; saveToken(room, token); }
+        onMessage(msg);
+      } catch (err) { console.error(err); }
     });
-    ws.addEventListener('close', () => {
+    ws.addEventListener('close', (e) => {
+      // Another tab came back as this person (a duplicated tab carries our token): be someone new.
+      if (e.code === 4000) { token = ''; saveToken(room, ''); }
       onStatus('closed');
       if (closed) return;
       const delay = Math.min(15000, 500 * 2 ** retry++) * (0.75 + Math.random() * 0.5);

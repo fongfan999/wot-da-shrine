@@ -41,6 +41,10 @@ shrine.
   here, incense burn time, karma, the offerings on the table, the last 12
   prayers, the title and ETA, the open vigil and the last 12 vigils. Late
   joiners see the incense mid-burn and the prayers they missed.
+  The name card first shows what the room is going through: what is down,
+  for how long, whether the incense burns and who is kneeling. Each tab gets
+  a resume token, so a refresh or a dropped connection comes back as the same
+  person, and the room only hears someone left after five quiet seconds.
 - `/r/:room?tv=1` is the war-room screen: it watches without kneeling (it is
   not counted as praying), shows the vigil timer big, and a QR code to join.
 - Every shrine reports its actions to one `World` Durable Object, which keeps

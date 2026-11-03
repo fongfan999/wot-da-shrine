@@ -46,3 +46,36 @@
 }
 .join__avatar:hover { border-color: var(--field-line); background: var(--paper-sunk); }
 .join__avatar[aria-checked="true"] { border: 2px solid var(--accent); background: var(--accent-soft); }
+
+/* What the room is going through, before you kneel */
+.join__room {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: -2px 0 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+}
+.join__room[data-lit="true"] { border-color: var(--ember); }
+.join__what { margin: 0; font-weight: 600; font-size: 16px; line-height: 1.3; color: var(--ink); overflow-wrap: anywhere; }
+.join__what:empty { display: none; }
+.join__facts { margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; color: var(--muted); }
+.join__room[data-lit="true"] .join__facts { color: var(--ember-ink); }
+.join__who { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+.join__faces { display: inline-flex; }
+.join__faces:empty { display: none; }
+.join__face {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  margin-right: -7px;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  background: var(--paper-sunk);
+  font-size: .8rem;
+}
+.join__face:last-child { margin-right: 0; }
+.join__avatar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
