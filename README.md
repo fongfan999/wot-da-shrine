@@ -48,7 +48,7 @@ shrine.
   not counted as praying), shows the vigil timer big, and a QR code to join.
   When nothing is down it stays worth leaving on: the heading says how long it
   has been quiet ("4 days without an incident") and what was down last, and a
-  card shows the room's music and how to change it. A TV nobody has touched yet
+  card shows the room's sound mix and how to change it. A TV nobody has touched yet
   may be held silent by the browser; the card says so until someone presses a
   key. The first thing done at the altar turns it back into the incident screen.
 - Every shrine reports its actions to one `World` Durable Object, which keeps
@@ -252,12 +252,17 @@ The shrine is built to travel from one incident channel to the next:
   painted at runtime, and the ambient music is synthesized in the browser.
 - **Light and dark**: paper by day, a night vigil after dark. It follows the
   system setting unless you pick one.
-- **Music for the room**: four synthesized tracks, picked under Customize and
-  heard by everyone in the shrine, the TV too. Vigil (drone, chords, temple
-  bells), Focus (slower and darker, for heads-down work), Chant (a chanting
-  remix: "om" over a hand-drum groove) and Rain (rain on the roof, thunder far
-  away). Changing it opens no vigil, and the room hears who put it on.
-- **Customizable**: title, subtitle, "back at" time, music, theme, toggles for
+- **Sound for the room**: a mixer under Customize, heard by everyone in the
+  shrine, the TV too, so the altar is worth leaving on when nothing is down.
+  Six synthesized layers, each with its own slider: Sacred (drone, slow chords,
+  temple bells), Chant (a voice singing "om" over a hand drum), Rain (on the
+  roof, drops close by, thunder far away), White noise (soft and wide, for deep
+  work), Spa (water in a stone basin, wooden chimes, a singing bowl) and Garden
+  (birds, crickets, a frog, an owl, a dog far away). Presets are a few mixes
+  with names: Vigil, Focus, Chant, Rain, Spa, Garden. Every slider to zero is
+  silence. A layer only runs while its slider is up, nothing is recorded, and
+  mixing opens no vigil; the room hears who put what on.
+- **Customizable**: title, subtitle, "back at" time, sound, theme, toggles for
   music/effects/petals/fog. Open the settings panel or use URL params.
 - **Keyboard**: `L` light · `B` bowl · `P` bow · `O` offer · `Space` breathe ·
   `M` mute · `T` theme.
@@ -275,11 +280,12 @@ The shrine is built to travel from one incident channel to the next:
 | `title`    | any text (rooms only)                    | `?title=Back+in+5+minutes`     |
 | `subtitle` | any text (rooms only)                    | `?subtitle=Deploying+v2.0`     |
 | `eta`      | ISO 8601 date/time (rooms only)          | `?eta=2026-10-14T18:30:00Z`    |
-| `track`    | `vigil` `focus` `chant` `rain` (rooms only) | `?track=focus`              |
+| `track`    | a preset: `vigil` `focus` `chant` `rain` `spa` `garden` (rooms only) | `?track=focus` |
+| `mix`      | layers and levels, `layer:0-100,…` (rooms only) | `?mix=garden:70,noise:30`  |
 | `theme`    | `auto` `light` `dark`                    | `?theme=dark`                  |
 | `music` `sfx` `petals` `fog` | `1` / `0`              | `?petals=0&fog=0`              |
 
-`title`, `subtitle`, `eta` and `track` seed a room that has none yet, e.g.
+`title`, `subtitle`, `eta`, `track` and `mix` seed a room that has none yet, e.g.
 `/r/serene-rack-42?title=Payments+API`. The rest work everywhere.
 
 ## Develop
@@ -364,7 +370,7 @@ src/app/                 the shrine
   shareSheet.js          invite + share card sheet
   menus.js               the top bar's Share and More menus
   cast.js, screen.js     Cast to TV, and the TV's own screens
-  quiet.js               the TV when nothing is down: how long it has been quiet, the music
+  quiet.js               the TV when nothing is down: how long it has been quiet, the sound mix
   vigilStart.js          saying something is down: the button, the question on lighting
   etaPicker.js           the Back at picker, in the heading and the builder
   openShrine.js          name fields and the Open sheet
@@ -381,7 +387,7 @@ src/scene/               what is drawn
   palette.js             theme colours for the canvas layers
 src/audio/
   index.js               Web Audio sound kit (one-shot effects)
-  music.js               generative ambient music: vigil, focus, chant, rain
+  music.js               generative ambient sound: six layers, mixed by the room
 src/lib/
   clock.js               the page's one clock, and the rules for anything timed
   config.js              settings: URL params > localStorage > defaults

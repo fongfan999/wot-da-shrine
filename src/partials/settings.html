@@ -18,15 +18,44 @@
         <span data-i18n="fSubtitle">Subtitle</span>
         <input type="text" name="subtitle" maxlength="140" />
       </label>
-      <div class="field">
-        <span data-i18n="fTrack">Music</span>
-        <div class="seg" id="track-seg" role="radiogroup" aria-label="Music">
-          <button type="button" role="radio" data-track="vigil" aria-checked="true" data-i18n="track_vigil">Vigil</button>
-          <button type="button" role="radio" data-track="focus" aria-checked="false" data-i18n="track_focus">Focus</button>
-          <button type="button" role="radio" data-track="chant" aria-checked="false" data-i18n="track_chant">Chant</button>
-          <button type="button" role="radio" data-track="rain" aria-checked="false" data-i18n="track_rain">Rain</button>
+      <!-- The sound: a mix of six synthesized layers, the whole room's. Presets are a few mixes with names. -->
+      <div class="field mixer" id="mixer">
+        <span data-i18n="fTrack">Sound</span>
+        <div class="mixer__presets" id="mix-presets" role="group" aria-label="Presets">
+          <button class="btn btn--glass btn--sm" type="button" data-preset="vigil" aria-pressed="true" data-i18n="track_vigil">Vigil</button>
+          <button class="btn btn--glass btn--sm" type="button" data-preset="focus" aria-pressed="false" data-i18n="track_focus">Focus</button>
+          <button class="btn btn--glass btn--sm" type="button" data-preset="chant" aria-pressed="false" data-i18n="track_chant">Chant</button>
+          <button class="btn btn--glass btn--sm" type="button" data-preset="rain" aria-pressed="false" data-i18n="track_rain">Rain</button>
+          <button class="btn btn--glass btn--sm" type="button" data-preset="spa" aria-pressed="false" data-i18n="track_spa">Spa</button>
+          <button class="btn btn--glass btn--sm" type="button" data-preset="garden" aria-pressed="false" data-i18n="track_garden">Garden</button>
         </div>
-        <p class="field__note" id="track-note"></p>
+        <div class="mixer__layers" id="mix-layers">
+          <label class="mixer__layer" data-layer="sacred" data-on="1">
+            <span class="mixer__name"><span data-i18n="layer_sacred">Sacred</span><small data-i18n="layerHint_sacred">Drone, chords, temple bells</small></span>
+            <input type="range" min="0" max="100" step="5" value="80" data-layer="sacred" aria-label="Sacred" style="--v: 80%" />
+          </label>
+          <label class="mixer__layer" data-layer="chant" data-on="">
+            <span class="mixer__name"><span data-i18n="layer_chant">Chant</span><small data-i18n="layerHint_chant">Om over a hand drum</small></span>
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="chant" aria-label="Chant" style="--v: 0%" />
+          </label>
+          <label class="mixer__layer" data-layer="rain" data-on="">
+            <span class="mixer__name"><span data-i18n="layer_rain">Rain</span><small data-i18n="layerHint_rain">Roof, drops, far thunder</small></span>
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="rain" aria-label="Rain" style="--v: 0%" />
+          </label>
+          <label class="mixer__layer" data-layer="noise" data-on="">
+            <span class="mixer__name"><span data-i18n="layer_noise">White noise</span><small data-i18n="layerHint_noise">Soft, wide, for deep work</small></span>
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="noise" aria-label="White noise" style="--v: 0%" />
+          </label>
+          <label class="mixer__layer" data-layer="spa" data-on="">
+            <span class="mixer__name"><span data-i18n="layer_spa">Spa</span><small data-i18n="layerHint_spa">Water, chimes, a bowl</small></span>
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="spa" aria-label="Spa" style="--v: 0%" />
+          </label>
+          <label class="mixer__layer" data-layer="garden" data-on="">
+            <span class="mixer__name"><span data-i18n="layer_garden">Garden</span><small data-i18n="layerHint_garden">Birds, crickets, frog, owl</small></span>
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="garden" aria-label="Garden" style="--v: 0%" />
+          </label>
+        </div>
+        <p class="field__note" id="mix-note"></p>
       </div>
       <!-- Every TV showing this shrine: nobody has a keyboard on the wall, so the room sets it -->
       <div class="field screen-set" id="screen-set">

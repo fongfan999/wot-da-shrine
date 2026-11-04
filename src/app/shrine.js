@@ -6,7 +6,7 @@ import { LEVELS as FORTUNE_LEVELS } from '../lib/omikuji.js';
 import { AVATARS, connectRoom, saveMe } from '../lib/room.js';
 import { t } from '../lib/strings.js';
 import { bowFx, bowlFx, burnOut, chorusFx, ignite, puffFx, scheduleBurnOut } from './altar.js';
-import { $, body, counters, fmt, meta, people, recentPrayers, reduceMotion, roomName, roomUrl, records, state, track, tv, urlParams } from './context.js';
+import { $, body, counters, fmt, meta, mix, mixName, people, recentPrayers, reduceMotion, roomName, roomUrl, records, state, tv, urlMix, urlParams } from './context.js';
 import { art, congregation, wishes } from './engines.js';
 import { OFFERINGS } from '../scene/burner.js';
 import { activity } from './fx.js';
@@ -18,7 +18,7 @@ import { blameFx, fortuneFx } from './rituals.js';
 import { blamedFx, remoteDeploy, renderDeploy, showShipped } from './deploy.js';
 import { renderDown } from './vigilStart.js';
 import { renderWatch, watchAct } from './watch.js';
-import { SHIPPED_FOR } from '../../shared/rules.js';
+import { SHIPPED_FOR, layersOn, sameMix } from '../../shared/rules.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
 import { applySettings, onHook } from './settings.js';
 import { karmaBeat, renderRecords, statKarma, tickVigil, updateStats } from './stats.js';
@@ -230,7 +230,8 @@ function onShrineMessage(msg) {
         if (!msg.vigil && !msg.blessing && msg.resolvedAt && msg.now - msg.resolvedAt < RESOLVED_FOR) showResolved(msg.resolvedAt - state.clockSkew, true);
         // Arrived with ?title=… or ?eta=… on a shrine that has none yet: that becomes the room's.
         const seed = {};
-        for (const k of ['title', 'subtitle', 'eta', 'track']) if (meta(k) && urlParams.has(k) && !state.roomMeta[k]) seed[k] = meta(k);
+        for (const k of ['title', 'subtitle', 'eta']) if (meta(k) && urlParams.has(k) && !state.roomMeta[k]) seed[k] = meta(k);
+        if (urlMix() && !state.roomMeta.mix) seed.mix = urlMix(); // ?track=rain or ?mix=…, on a shrine that has not mixed its own
         if (Object.keys(seed).length) state.shrine.send('meta', seed);
         if (tv) renderTv();
         if (arrivedFromTv()) greetFromTv(people.get(msg.me)?.name ?? state.me.name);
@@ -247,14 +248,15 @@ function onShrineMessage(msg) {
       const was = state.roomMeta;
       const changed = (k) => k in msg.meta && (msg.meta[k] || '') !== (was[k] || '');
       const renamed = changed('title') && Boolean(msg.meta.title);
-      const retuned = changed('track');
+      const remixed = 'mix' in msg.meta && !sameMix(msg.meta.mix, was.mix);
       state.roomMeta = { ...state.roomMeta, ...msg.meta };
       for (const k of Object.keys(msg.meta)) urlParams.delete(k);
+      if ('mix' in msg.meta) urlParams.delete('track');
       const theirs = msg.by.id !== state.myId;
       applySettings(theirs && renamed);
       // It broke names the vigil after the deploy, and an alert names the vigil it opens: their own toasts say so.
       if (theirs && renamed && !state.blessing && msg.by.id !== 'hook') toast(fmt('metaChanged', { name: msg.by.name, title: msg.meta.title }));
-      if (theirs && retuned) toast(fmt('trackChanged', { name: msg.by.name, track: t(`track_${track()}`) }));
+      if (theirs && remixed) toast(fmt(layersOn(mix()).length ? 'mixChanged' : 'mixOff', { name: msg.by.name, mix: mixName(mix()) }));
       break;
     }
     case 'join':

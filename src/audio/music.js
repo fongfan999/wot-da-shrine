@@ -1,12 +1,17 @@
 /**
- * Generative ambient music. Nothing is recorded: everything is synthesized live, runs forever and
- * never repeats exactly. A shrine picks one of four tracks (TRACKS in shared/rules.js):
- *   vigil  a low drone, slow pad chords, bells in a pentatonic scale and a breath of wind
- *   focus  the same drone, darker and slower, with a bell every half minute or so: music to work to
- *   chant  a chanting remix: a voice singing "om" over a slow hand-drum groove and the drone
- *   rain   soft rain on the roof, drops close by, thunder far away, the drone underneath
+ * Generative ambient sound, mixed by the room. Nothing is recorded: everything is synthesized live,
+ * runs forever and never repeats exactly. Six layers (LAYERS in shared/rules.js), each a small synth
+ * that runs only while its level is above zero, each at a level from 0 to 100:
+ *   sacred  a low drone, slow pad chords, temple bells in a pentatonic scale and a breath of wind
+ *   chant   a voice singing "om" over a slow hand-drum groove, with a quiet drone underneath
+ *   rain    rain on the roof, drops close by, thunder far away
+ *   noise   white noise, soft and wide, breathing slowly: for sleep, or heads-down work
+ *   spa     water running in a stone basin, wooden chimes, a singing bowl now and then
+ *   garden  birds calling by turns, crickets, a frog in the pond, an owl, a dog far away
+ * Presets (PRESETS) are a few mixes with names.
  */
 import gsap from 'gsap';
+import { LAYERS } from '../../shared/rules.js';
 
 const NOTE = (n) => 440 * 2 ** ((n - 69) / 12); // MIDI -> Hz
 // D major pentatonic around D3: D E F# A B
@@ -19,10 +24,16 @@ const CHORDS = [
   [-5, 2, 12],     // A E D
   [0, 4, 11],      // D F# A (high)
 ];
+const rnd = gsap.utils.random;
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-function noiseBuffer(ctx, seconds) {
+function noiseBuffer(ctx, seconds, white = false) {
   const buf = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * seconds), ctx.sampleRate);
   const d = buf.getChannelData(0);
+  if (white) {
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return buf;
+  }
   // pink-ish noise (Paul Kellet's filter)
   let b0 = 0, b1 = 0, b2 = 0;
   for (let i = 0; i < d.length; i++) {
@@ -35,69 +46,31 @@ function noiseBuffer(ctx, seconds) {
   return buf;
 }
 
-export class AmbientMusic {
-  constructor(ctx, destination) {
-    this.ctx = ctx;
-    this.out = ctx.createGain();
+/* ====================================================================================================
+ * A layer: its own gain into the mix, its own nodes and timers, built when it starts and torn down
+ * when it stops. Subclasses build their sound in build().
+ * ================================================================================================== */
+class Layer {
+  constructor(mixer) {
+    this.ctx = mixer.ctx;
+    this.out = this.ctx.createGain();
     this.out.gain.value = 0;
-    this.out.connect(destination);
+    this.out.connect(mixer.out);
     this.running = false;
-    this.timers = [];
-    this.named = {};
     this.nodes = [];
     this.lfos = [];
-    this.track = 'vigil';
+    this.named = {};
+    this.stopAt = 0;
   }
 
-  /* ---------- lifecycle ---------- */
   start() {
     if (this.running) return;
     this.running = true;
-    const tr = this.track;
-    if (tr === 'focus') {
-      this.buildDrone({ cutoff: 240, level: 0.13 });
-      this.loop('pad', () => this.playChord({ peak: 0.06, cutoff: 600, dur: [16, 22] }), () => gsap.utils.random(15, 21));
-      this.loop('bell', () => this.playBell({ low: true }), () => gsap.utils.random(22, 45));
-      this.timers.push(setTimeout(() => this.playChord({ peak: 0.06, cutoff: 600, dur: [16, 22] }), 600));
-    } else if (tr === 'chant') {
-      this.buildDrone({ cutoff: 280, level: 0.12 });
-      this.groove();
-    } else if (tr === 'rain') {
-      this.buildDrone({ cutoff: 200, level: 0.07 });
-      this.buildRain();
-      this.loop('drop', () => this.playDrop(), () => gsap.utils.random(0.08, 0.6));
-      this.loop('thunder', () => this.playThunder(), () => gsap.utils.random(40, 110));
-      this.loop('bell', () => this.playBell({ low: true }), () => gsap.utils.random(30, 60));
-    } else {
-      this.buildDrone();
-      this.buildWind();
-      this.loop('pad', () => this.playChord(), () => gsap.utils.random(9, 14));
-      this.loop('bell', () => this.playBell(), () => gsap.utils.random(3.5, 8));
-      this.timers.push(setTimeout(() => this.playChord(), 600));
-    }
-  }
-
-  /**
-   * Change track: the one playing fades out, the next fades in. `volume` is where the next one
-   * settles, or 0 when the music is off (it is then only remembered for when it comes back on).
-   */
-  setTrack(track, volume) {
-    if (track === this.track) return;
-    this.track = track;
-    if (!this.running) return;
-    clearTimeout(this.swap);
-    this.fade(0, 1.4);
-    this.swap = setTimeout(() => {
-      this.stop();
-      this.start();
-      if (volume) this.fade(volume, 3);
-    }, 1500);
+    this.build();
   }
 
   stop() {
     this.running = false;
-    this.timers.forEach(clearTimeout);
-    this.timers = [];
     Object.values(this.named).forEach(clearTimeout);
     this.named = {};
     const t = this.ctx.currentTime;
@@ -107,18 +80,19 @@ export class AmbientMusic {
     this.lfos = [];
   }
 
-  fade(to, seconds) {
+  /** Where this layer's level settles, 0 to 1, over `seconds`. */
+  level(to, seconds) {
     gsap.to(this.out.gain, { value: to, duration: seconds, ease: 'power2.inOut', overwrite: true });
   }
 
   /** Run `fn` again and again, `next()` seconds apart. Each loop holds one timer, however long it runs. */
-  loop(name, fn, next) {
+  loop(name, fn, next, first = next) {
     const run = () => {
       if (!this.running) return;
       fn();
       this.after(name, next(), run);
     };
-    this.after(name, next(), run);
+    this.after(name, first(), run);
   }
 
   /** One named timer: setting it again replaces it, and stop() clears them all. */
@@ -127,13 +101,42 @@ export class AmbientMusic {
     this.named[name] = setTimeout(fn, seconds * 1000);
   }
 
-  /* ---------- layers ---------- */
+  /** Remember a node so stop() can silence it; prune the stopped ones now and then. */
+  keep(...nodes) {
+    this.nodes.push(...nodes);
+    if (this.nodes.length > 240) this.nodes = this.nodes.slice(-140);
+  }
+
+  /** A looping noise source, pink unless `white`. One buffer each, shared by every use. */
+  noiseSource(seconds, white = false) {
+    const key = white ? 'white' : 'pink';
+    this[key] ??= noiseBuffer(this.ctx, seconds, white);
+    const src = this.ctx.createBufferSource();
+    src.buffer = this[key];
+    src.loop = true;
+    return src;
+  }
+
+  /** A gain placed somewhere in the room, into this layer. */
+  panned(pan = rnd(-0.7, 0.7)) {
+    const c = this.ctx;
+    const g = c.createGain();
+    if (c.createStereoPanner) {
+      const p = c.createStereoPanner();
+      p.pan.value = pan;
+      g.connect(p).connect(this.out);
+    } else g.connect(this.out);
+    return g;
+  }
+
+  /* ---------- parts more than one layer uses ---------- */
+
+  /** A low drone: four detuned voices through a lowpass that sweeps very slowly. */
   buildDrone({ cutoff = 320, level = 0.16 } = {}) {
     const c = this.ctx;
     const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = cutoff; lp.Q.value = 0.7;
     const g = c.createGain(); g.gain.value = level;
     lp.connect(g).connect(this.out);
-
     const voices = [
       [NOTE(ROOT - 12), 'sine', 1.0, 0],
       [NOTE(ROOT - 12), 'triangle', 0.35, 6],
@@ -145,9 +148,8 @@ export class AmbientMusic {
       const vg = c.createGain(); vg.gain.value = amp;
       o.connect(vg).connect(lp);
       o.start();
-      this.nodes.push(o);
+      this.keep(o);
     }
-    // slow filter sweep
     const lfo = c.createOscillator(); lfo.frequency.value = 0.045;
     const lfoG = c.createGain(); lfoG.gain.value = 140;
     lfo.connect(lfoG).connect(lp.frequency);
@@ -155,9 +157,38 @@ export class AmbientMusic {
     this.lfos.push(lfo);
   }
 
+  /** A temple bell: four inharmonic partials, somewhere in the room. */
+  playBell({ low = false, gain = rnd(0.05, 0.1), decay = 1 } = {}) {
+    const c = this.ctx; const t = c.currentTime;
+    const semi = pick(PENTA) + 12 * (!low && Math.random() < 0.3 ? 2 : 1);
+    const base = NOTE(ROOT + semi);
+    const out = this.panned(rnd(-0.6, 0.6)); out.gain.value = gain;
+    const partials = [[1, 1, 4.5], [2.76, 0.4, 3], [5.4, 0.15, 2], [8.9, 0.06, 1.2]];
+    for (const [ratio, amp, d] of partials) {
+      const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = base * ratio;
+      const g = c.createGain();
+      o.connect(g).connect(out);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(amp, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + d * decay);
+      o.start(t); o.stop(t + d * decay + 0.1);
+      this.keep(o);
+    }
+  }
+}
+
+/* ---------- sacred: drone, slow chords, bells and wind ---------- */
+class Sacred extends Layer {
+  build() {
+    this.buildDrone();
+    this.buildWind();
+    this.loop('pad', () => this.playChord(), () => rnd(9, 14), () => 0.6);
+    this.loop('bell', () => this.playBell(), () => rnd(3.5, 8));
+  }
+
   buildWind() {
     const c = this.ctx;
-    const src = c.createBufferSource(); src.buffer = noiseBuffer(c, 6); src.loop = true;
+    const src = this.noiseSource(6);
     const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 480; bp.Q.value = 0.6;
     const g = c.createGain(); g.gain.value = 0.02;
     src.connect(bp).connect(g).connect(this.out);
@@ -166,14 +197,14 @@ export class AmbientMusic {
     lfo.connect(lfoG).connect(g.gain);
     lfo.start();
     src.start();
-    this.nodes.push(src);
+    this.keep(src);
     this.lfos.push(lfo);
   }
 
   playChord({ peak = 0.09, cutoff = 900, dur: [lo, hi] = [10, 14] } = {}) {
     const c = this.ctx; const t = c.currentTime;
-    const chord = CHORDS[Math.floor(Math.random() * CHORDS.length)];
-    const dur = gsap.utils.random(lo, hi);
+    const chord = pick(CHORDS);
+    const dur = rnd(lo, hi);
     const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = cutoff;
     const g = c.createGain();
     lp.connect(g).connect(this.out);
@@ -181,7 +212,6 @@ export class AmbientMusic {
     g.gain.exponentialRampToValueAtTime(peak, t + dur * 0.35);
     g.gain.setValueAtTime(peak, t + dur * 0.6);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-
     chord.forEach((semi, i) => {
       const f = NOTE(ROOT + semi);
       for (const [type, amp, det] of [['sine', 1, -5], ['triangle', 0.25, 5]]) {
@@ -189,36 +219,18 @@ export class AmbientMusic {
         const vg = c.createGain(); vg.gain.value = amp;
         o.connect(vg).connect(lp);
         o.start(t + i * 0.4); o.stop(t + dur + 0.1);
-        this.nodes.push(o);
+        this.keep(o);
       }
     });
   }
+}
 
-  playBell({ low = false } = {}) {
-    const c = this.ctx; const t = c.currentTime;
-    const semi = PENTA[Math.floor(Math.random() * PENTA.length)] + 12 * (!low && Math.random() < 0.3 ? 2 : 1);
-    const base = NOTE(ROOT + semi);
-    const out = c.createGain(); out.gain.value = gsap.utils.random(0.05, 0.1);
-    // gentle stereo placement
-    const pan = c.createStereoPanner ? c.createStereoPanner() : null;
-    if (pan) { pan.pan.value = gsap.utils.random(-0.6, 0.6); out.connect(pan).connect(this.out); } else out.connect(this.out);
-
-    const partials = [[1, 1, 4.5], [2.76, 0.4, 3], [5.4, 0.15, 2], [8.9, 0.06, 1.2]];
-    for (const [ratio, amp, decay] of partials) {
-      const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = base * ratio;
-      const g = c.createGain();
-      o.connect(g).connect(out);
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(amp, t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
-      o.start(t); o.stop(t + decay + 0.1);
-      this.nodes.push(o);
-    }
-    // prune stopped nodes now and then
-    if (this.nodes.length > 200) this.nodes = this.nodes.slice(-120);
+/* ---------- chant: a slow groove under a voice singing "om" ---------- */
+class Chant extends Layer {
+  build() {
+    this.buildDrone({ cutoff: 280, level: 0.12 });
+    this.groove();
   }
-
-  /* ---------- chant: a slow groove under a voice singing "om" ---------- */
 
   /**
    * Bars are scheduled on the audio clock a little ahead of time, so the beat stays steady however
@@ -234,7 +246,7 @@ export class AmbientMusic {
     const tick = () => {
       if (!this.running) return;
       while (next < this.ctx.currentTime + 1.6) {
-        if (n % 4 === 0) phrase = PHRASES[Math.floor(Math.random() * PHRASES.length)];
+        if (n % 4 === 0) phrase = pick(PHRASES);
         const t0 = next;
         // drum: low on one and three, a slap on the offbeats, a quiet ghost now and then
         this.drum(t0, 'low');
@@ -268,11 +280,11 @@ export class AmbientMusic {
       g.gain.exponentialRampToValueAtTime(0.32 * vel, t + 0.008);
       g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
       o.start(t); o.stop(t + 0.65);
-      this.nodes.push(o);
+      this.keep(o);
       return;
     }
     // a slap or a ghost: a burst of filtered noise, like a palm on a hand drum
-    const src = c.createBufferSource(); src.buffer = this.noise ??= noiseBuffer(c, 2);
+    const src = this.noiseSource(2);
     const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = kind === 'slap' ? 900 : 1400; bp.Q.value = 1.4;
     src.connect(bp).connect(g);
     const peak = kind === 'slap' ? 0.16 : 0.05;
@@ -280,7 +292,7 @@ export class AmbientMusic {
     g.gain.exponentialRampToValueAtTime(peak * vel, t + 0.004);
     g.gain.exponentialRampToValueAtTime(0.0001, t + (kind === 'slap' ? 0.18 : 0.1));
     src.start(t, Math.random()); src.stop(t + 0.2);
-    this.nodes.push(src);
+    this.keep(src);
   }
 
   /** A voice: two buzzing oscillators through vowel formants that close from "o" to "m". */
@@ -310,22 +322,28 @@ export class AmbientMusic {
       for (const bp of formants) o.connect(bp);
       o.start(t); o.stop(t + dur + 0.2);
       vib.start(t); vib.stop(t + dur + 0.2);
-      this.nodes.push(o, vib);
+      this.keep(o, vib);
     }
     const g = out.gain;
     g.setValueAtTime(0.0001, t);
     g.exponentialRampToValueAtTime(0.07 * level, t + Math.min(0.5, dur * 0.25));
     g.setValueAtTime(0.07 * level, t + dur * 0.7);
     g.exponentialRampToValueAtTime(0.0001, t + dur);
-    if (this.nodes.length > 240) this.nodes = this.nodes.slice(-140);
   }
+}
 
-  /* ---------- rain ---------- */
+/* ---------- rain: on the roof, close by, and thunder far away ---------- */
+class Rain extends Layer {
+  build() {
+    this.buildRain();
+    this.loop('drop', () => this.playDrop(), () => rnd(0.08, 0.6));
+    this.loop('thunder', () => this.playThunder(), () => rnd(40, 110), () => rnd(8, 30));
+  }
 
   /** Rain on the roof: noise, band-limited, that swells and settles as the shower comes and goes. */
   buildRain() {
     const c = this.ctx;
-    const src = c.createBufferSource(); src.buffer = noiseBuffer(c, 8); src.loop = true;
+    const src = this.noiseSource(8);
     const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 400;
     const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600;
     const g = c.createGain(); g.gain.value = 0.11;
@@ -335,32 +353,30 @@ export class AmbientMusic {
     lfo.connect(lfoG).connect(g.gain);
     lfo.start();
     src.start();
-    this.nodes.push(src);
+    this.keep(src);
     this.lfos.push(lfo);
   }
 
   /** One drop close by: a short high blip that falls a little, panned somewhere in the room. */
   playDrop() {
     const c = this.ctx; const t = c.currentTime;
-    const f = gsap.utils.random(1800, 4200);
+    const f = rnd(1800, 4200);
     const o = c.createOscillator(); o.type = 'sine';
     o.frequency.setValueAtTime(f, t);
     o.frequency.exponentialRampToValueAtTime(f * 0.55, t + 0.05);
-    const g = c.createGain();
-    const pan = c.createStereoPanner ? c.createStereoPanner() : null;
-    if (pan) { pan.pan.value = gsap.utils.random(-0.9, 0.9); o.connect(g).connect(pan).connect(this.out); } else o.connect(g).connect(this.out);
+    const g = this.panned(rnd(-0.9, 0.9));
+    o.connect(g);
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(gsap.utils.random(0.008, 0.03), t + 0.003);
+    g.gain.exponentialRampToValueAtTime(rnd(0.008, 0.03), t + 0.003);
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
     o.start(t); o.stop(t + 0.08);
-    this.nodes.push(o);
-    if (this.nodes.length > 200) this.nodes = this.nodes.slice(-120);
+    this.keep(o);
   }
 
   /** Thunder, far away: a low rumble that rolls in and takes its time to go. */
   playThunder() {
     const c = this.ctx; const t = c.currentTime;
-    const src = c.createBufferSource(); src.buffer = this.noise ??= noiseBuffer(c, 2); src.loop = true;
+    const src = this.noiseSource(2);
     const lp = c.createBiquadFilter(); lp.type = 'lowpass';
     lp.frequency.setValueAtTime(120, t);
     lp.frequency.linearRampToValueAtTime(260, t + 0.8);
@@ -372,6 +388,309 @@ export class AmbientMusic {
     g.gain.exponentialRampToValueAtTime(0.22, t + 2.5);
     g.gain.exponentialRampToValueAtTime(0.0001, t + 7.5);
     src.start(t); src.stop(t + 7.6);
-    this.nodes.push(src);
+    this.keep(src);
+  }
+}
+
+/* ---------- noise: white, softened at the top, breathing very slowly ---------- */
+class Noise extends Layer {
+  build() {
+    const c = this.ctx;
+    const src = this.noiseSource(6, true);
+    const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 90;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3800; lp.Q.value = 0.4;
+    const g = c.createGain(); g.gain.value = 0.085;
+    src.connect(hp).connect(lp).connect(g).connect(this.out);
+    // the top opens and closes over half a minute, like a slow breath
+    const lfo = c.createOscillator(); lfo.frequency.value = 0.025;
+    const lfoG = c.createGain(); lfoG.gain.value = 1100;
+    lfo.connect(lfoG).connect(lp.frequency);
+    const swell = c.createOscillator(); swell.frequency.value = 0.04;
+    const swellG = c.createGain(); swellG.gain.value = 0.015;
+    swell.connect(swellG).connect(g.gain);
+    lfo.start(); swell.start(); src.start();
+    this.keep(src);
+    this.lfos.push(lfo, swell);
+  }
+}
+
+/* ---------- spa: water in a stone basin, wooden chimes, a bowl now and then ---------- */
+class Spa extends Layer {
+  build() {
+    this.buildWater();
+    this.loop('gurgle', () => this.playGurgle(), () => rnd(0.25, 1.4));
+    this.loop('chimes', () => this.playChimes(), () => rnd(7, 16), () => rnd(1, 4));
+    this.loop('bowl', () => this.playBell({ low: true, gain: 0.07, decay: 2.2 }), () => rnd(28, 55), () => rnd(6, 14));
+  }
+
+  /** Water running: pink noise in the middle of the band, its level rippling at two rates that never line up. */
+  buildWater() {
+    const c = this.ctx;
+    const src = this.noiseSource(7);
+    const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 700;
+    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1500; bp.Q.value = 0.7;
+    const g = c.createGain(); g.gain.value = 0.11;
+    src.connect(hp).connect(bp).connect(g).connect(this.out);
+    for (const [hz, depth] of [[0.9, 0.03], [1.7, 0.02], [0.11, 0.025]]) {
+      const lfo = c.createOscillator(); lfo.frequency.value = hz;
+      const lfoG = c.createGain(); lfoG.gain.value = depth;
+      lfo.connect(lfoG).connect(g.gain);
+      lfo.start();
+      this.lfos.push(lfo);
+    }
+    src.start();
+    this.keep(src);
+  }
+
+  /** A gurgle: a bubble rising, a sine that climbs and bursts, somewhere near. */
+  playGurgle() {
+    const c = this.ctx; const t = c.currentTime;
+    const f = rnd(380, 900);
+    const o = c.createOscillator(); o.type = 'sine';
+    o.frequency.setValueAtTime(f, t);
+    o.frequency.exponentialRampToValueAtTime(f * rnd(1.4, 2.2), t + rnd(0.05, 0.12));
+    const g = this.panned(rnd(-0.5, 0.5));
+    o.connect(g);
+    const dur = rnd(0.06, 0.14);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(rnd(0.006, 0.02), t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.start(t); o.stop(t + dur + 0.02);
+    this.keep(o);
+  }
+
+  /** Wooden chimes: a short cluster of marimba-like notes, high in the scale, that a breeze set going. */
+  playChimes() {
+    const c = this.ctx; const t = c.currentTime;
+    const n = Math.floor(rnd(2, 5));
+    const pan = rnd(-0.6, 0.6);
+    let at = t;
+    for (let i = 0; i < n; i++) {
+      const base = NOTE(ROOT + pick(PENTA) + 24 + (Math.random() < 0.4 ? 12 : 0));
+      const g = this.panned(pan + rnd(-0.15, 0.15)); g.gain.value = rnd(0.04, 0.08);
+      for (const [ratio, amp, d] of [[1, 1, 0.5], [3.9, 0.3, 0.12], [9.2, 0.08, 0.06]]) {
+        const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = base * ratio;
+        const pg = c.createGain();
+        o.connect(pg).connect(g);
+        pg.gain.setValueAtTime(0.0001, at);
+        pg.gain.exponentialRampToValueAtTime(amp, at + 0.004);
+        pg.gain.exponentialRampToValueAtTime(0.0001, at + d);
+        o.start(at); o.stop(at + d + 0.05);
+        this.keep(o);
+      }
+      at += rnd(0.1, 0.28);
+    }
+  }
+}
+
+/* ---------- garden: birds, crickets, a frog, an owl, a dog far away ---------- */
+class Garden extends Layer {
+  build() {
+    this.loop('bird', () => this.playBird(), () => rnd(1.5, 6), () => rnd(0.5, 2));
+    this.loop('cricket', () => this.playCrickets(), () => rnd(1.2, 3.5), () => rnd(1, 3));
+    this.loop('frog', () => this.playFrog(), () => rnd(9, 26), () => rnd(4, 12));
+    this.loop('owl', () => this.playOwl(), () => rnd(35, 90), () => rnd(15, 40));
+    this.loop('dog', () => this.playDog(), () => rnd(70, 170), () => rnd(40, 90));
+  }
+
+  /** A bird: a few chirps, each a sine that sweeps up or down, in that bird's own range and rhythm. */
+  playBird() {
+    const c = this.ctx; const t = c.currentTime;
+    const kind = pick(['sparrow', 'blackbird', 'warbler', 'dove']);
+    const g = this.panned(rnd(-0.9, 0.9));
+    const chirp = (at, f0, f1, dur, vol) => {
+      const o = c.createOscillator(); o.type = 'sine';
+      o.frequency.setValueAtTime(f0, at);
+      o.frequency.exponentialRampToValueAtTime(f1, at + dur);
+      const e = c.createGain();
+      o.connect(e).connect(g);
+      e.gain.setValueAtTime(0.0001, at);
+      e.gain.exponentialRampToValueAtTime(vol, at + dur * 0.25);
+      e.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      o.start(at); o.stop(at + dur + 0.02);
+      this.keep(o);
+    };
+    let at = t;
+    if (kind === 'dove') {
+      // a low "coo-coo-coo"
+      for (let i = 0; i < 3; i++) { chirp(at, 620, 540, 0.22, 0.035); at += 0.3; }
+    } else if (kind === 'blackbird') {
+      // a fluting phrase that climbs, then one note falls
+      const n = Math.floor(rnd(3, 6));
+      let f = rnd(1800, 2400);
+      for (let i = 0; i < n; i++) { chirp(at, f, f * 1.25, rnd(0.09, 0.16), 0.04); f *= rnd(1.05, 1.2); at += rnd(0.14, 0.24); }
+      chirp(at, f, f * 0.7, 0.2, 0.035);
+    } else if (kind === 'warbler') {
+      // a fast trill
+      const n = Math.floor(rnd(5, 10));
+      const f = rnd(3200, 4600);
+      for (let i = 0; i < n; i++) { chirp(at, f, f * 1.4, 0.05, 0.025); at += 0.075; }
+    } else {
+      // sparrow: short chirps, up and down, unevenly
+      const n = Math.floor(rnd(2, 5));
+      for (let i = 0; i < n; i++) {
+        const f = rnd(2600, 4200);
+        chirp(at, f, f * (Math.random() < 0.5 ? 1.5 : 0.65), rnd(0.06, 0.11), 0.035);
+        at += rnd(0.1, 0.25);
+      }
+    }
+  }
+
+  /** Crickets: a bout of chirps, each a high carrier pulsed at 30-odd times a second. */
+  playCrickets() {
+    const c = this.ctx; const t = c.currentTime;
+    const g = this.panned(Math.random() < 0.5 ? rnd(-0.9, -0.5) : rnd(0.5, 0.9));
+    const f = rnd(4100, 4700);
+    const n = Math.floor(rnd(3, 7));
+    const pulse = c.createOscillator(); pulse.type = 'square'; pulse.frequency.value = rnd(28, 36);
+    const pulseG = c.createGain(); pulseG.gain.value = 0.5;
+    const am = c.createGain(); am.gain.value = 0.5; // the pulse swings it between 0 and 1: on and off within each chirp
+    const env = c.createGain(); env.gain.value = 0;
+    const carrier = c.createOscillator(); carrier.type = 'sine'; carrier.frequency.value = f;
+    pulse.connect(pulseG).connect(am.gain);
+    carrier.connect(am).connect(env).connect(g);
+    let at = t;
+    for (let i = 0; i < n; i++) {
+      env.gain.setValueAtTime(0.0001, at);
+      env.gain.linearRampToValueAtTime(0.014, at + 0.03);
+      env.gain.setValueAtTime(0.014, at + 0.16);
+      env.gain.linearRampToValueAtTime(0.0001, at + 0.2);
+      at += rnd(0.3, 0.42);
+    }
+    pulse.start(t); carrier.start(t);
+    pulse.stop(at + 0.1); carrier.stop(at + 0.1);
+    this.keep(pulse, carrier);
+  }
+
+  /** A frog in the pond: a buzzing croak through a throaty filter, pulsed, once or twice. */
+  playFrog() {
+    const c = this.ctx; const t = c.currentTime;
+    const g = this.panned(rnd(-0.5, 0.5));
+    const croak = (at) => {
+      const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(rnd(85, 125), at);
+      o.frequency.linearRampToValueAtTime(70, at + 0.3);
+      const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 420; bp.Q.value = 4;
+      const e = c.createGain();
+      const rib = c.createOscillator(); rib.type = 'square'; rib.frequency.value = 22;
+      const ribG = c.createGain(); ribG.gain.value = 0.5;
+      const am = c.createGain(); am.gain.value = 0.5; // the ribbit: the croak switched on and off 22 times a second
+      rib.connect(ribG).connect(am.gain);
+      o.connect(bp).connect(am).connect(e).connect(g);
+      e.gain.setValueAtTime(0.0001, at);
+      e.gain.linearRampToValueAtTime(0.09, at + 0.04);
+      e.gain.setValueAtTime(0.09, at + 0.22);
+      e.gain.linearRampToValueAtTime(0.0001, at + 0.32);
+      o.start(at); rib.start(at); o.stop(at + 0.35); rib.stop(at + 0.35);
+      this.keep(o, rib);
+    };
+    croak(t);
+    if (Math.random() < 0.5) croak(t + rnd(0.45, 0.7));
+  }
+
+  /** An owl, some way off: two soft hoots, the second longer, each falling a little. */
+  playOwl() {
+    const c = this.ctx; const t = c.currentTime;
+    const g = this.panned(rnd(-0.8, 0.8));
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+    lp.connect(g);
+    const hoot = (at, dur) => {
+      const o = c.createOscillator(); o.type = 'triangle';
+      o.frequency.setValueAtTime(rnd(360, 400), at);
+      o.frequency.linearRampToValueAtTime(330, at + dur);
+      const e = c.createGain();
+      o.connect(e).connect(lp);
+      e.gain.setValueAtTime(0.0001, at);
+      e.gain.exponentialRampToValueAtTime(0.05, at + 0.08);
+      e.gain.setValueAtTime(0.05, at + dur * 0.6);
+      e.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      o.start(at); o.stop(at + dur + 0.05);
+      this.keep(o);
+    };
+    hoot(t, 0.35);
+    hoot(t + 0.65, 0.55);
+  }
+
+  /** A dog, far away: a bark or two, a buzz through a mouth-shaped filter, dulled by the distance. */
+  playDog() {
+    const c = this.ctx; const t = c.currentTime;
+    const g = this.panned(Math.random() < 0.5 ? -0.9 : 0.9);
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400;
+    lp.connect(g);
+    const bark = (at) => {
+      const o = c.createOscillator(); o.type = 'sawtooth';
+      o.frequency.setValueAtTime(rnd(280, 340), at);
+      o.frequency.exponentialRampToValueAtTime(190, at + 0.14);
+      const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 850; bp.Q.value = 2;
+      const e = c.createGain();
+      o.connect(bp).connect(e).connect(lp);
+      e.gain.setValueAtTime(0.0001, at);
+      e.gain.exponentialRampToValueAtTime(0.06, at + 0.015);
+      e.gain.exponentialRampToValueAtTime(0.0001, at + 0.16);
+      o.start(at); o.stop(at + 0.2);
+      this.keep(o);
+    };
+    bark(t);
+    if (Math.random() < 0.6) bark(t + rnd(0.3, 0.5));
+  }
+}
+
+const SYNTHS = { sacred: Sacred, chant: Chant, rain: Rain, noise: Noise, spa: Spa, garden: Garden };
+
+/* ====================================================================================================
+ * The mixer: one gain for the whole mix (what the music switch and the fades drive), and a layer
+ * for each key in the mix, started as its level rises above zero and stopped a moment after it
+ * falls back to it.
+ * ================================================================================================== */
+export class AmbientMusic {
+  constructor(ctx, destination) {
+    this.ctx = ctx;
+    this.out = ctx.createGain();
+    this.out.gain.value = 0;
+    this.out.connect(destination);
+    this.running = false;
+    this.layers = {};
+    this.mix = {};
+  }
+
+  layer(key) {
+    return (this.layers[key] ??= new SYNTHS[key](this));
+  }
+
+  start() {
+    if (this.running) return;
+    this.running = true;
+    this.apply(0.2);
+  }
+
+  stop() {
+    this.running = false;
+    for (const l of Object.values(this.layers)) { clearTimeout(l.stopAt); l.stop(); l.level(0, 0.05); }
+  }
+
+  /** What plays, and how loud each layer is (0 to 100). Layers come and go over a couple of seconds. */
+  setMix(mix) {
+    this.mix = mix || {};
+    if (this.running) this.apply(1.6);
+  }
+
+  apply(seconds) {
+    for (const key of LAYERS) {
+      const v = Math.max(0, Math.min(100, Number(this.mix[key]) || 0));
+      const l = this.layers[key];
+      if (v > 0) {
+        const layer = this.layer(key);
+        clearTimeout(layer.stopAt);
+        layer.start();
+        layer.level((v / 100) ** 1.5, seconds); // closer to how loud it sounds than a straight line
+      } else if (l?.running) {
+        l.level(0, Math.min(seconds, 1.2));
+        clearTimeout(l.stopAt);
+        l.stopAt = setTimeout(() => { if (!(this.mix[key] > 0)) l.stop(); }, 1400);
+      }
+    }
+  }
+
+  fade(to, seconds) {
+    gsap.to(this.out.gain, { value: to, duration: seconds, ease: 'power2.inOut', overwrite: true });
   }
 }

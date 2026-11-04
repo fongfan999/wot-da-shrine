@@ -7,7 +7,7 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
-import { AVATARS, BLESSING_BLAME, cleanScreen, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, TRACKS, VIGIL_IDLE, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
+import { AVATARS, BLESSING_BLAME, cleanScreen, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
@@ -52,7 +52,7 @@ const VIGIL_FIELD = { light: 'lights', prayer: 'prayers', blame: 'blames', omiku
 const EMPTY = {
   incense: 0, karma: 0, litAt: 0, offerings: [], prayers: [], log: [],
   since: 0, prayed: 0, resolved: 0, resolvedAt: 0,
-  meta: { title: '', subtitle: '', eta: '', track: '' }, // what's down and when it's back, shared by the whole room
+  meta: { title: '', subtitle: '', eta: '', mix: null }, // what's down, when it's back and what plays, shared by the whole room
   vigil: null, history: [], survived: 0, longest: 0,
   undo: null, // { id, at, vigil, longest, resolvedAt }: They're back, while whoever said it can still take it back
   blessing: null, // the deploy being prayed over: { startedAt, by, what, bows, prayers, peak }
@@ -89,6 +89,10 @@ export class Shrine extends DurableObject {
       this.hookKey = (await ctx.storage.get('hook')) ?? ''; // the secret in the room's webhook URL; made the first time someone asks
       this.alarmAt = (await ctx.storage.getAlarm()) ?? 0;
       this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys }, watched: { ...EMPTY.watched, ...saved?.watched } };
+      // A room from when the sound was one of four tracks: that track's mix is what it plays now.
+      const { meta } = this.state;
+      if (!meta.mix && meta.track) meta.mix = PRESETS[meta.track] ?? null;
+      delete meta.track;
     });
   }
 
@@ -225,8 +229,8 @@ export class Shrine extends DurableObject {
         const meta = { ...s.meta };
         for (const k of Object.keys(META_MAX)) if (k in msg) meta[k] = clean(msg[k], META_MAX[k]);
         if (meta.eta && Number.isNaN(Date.parse(meta.eta))) meta.eta = '';
-        // The music the whole room hears, the TV too. Changing it is not an action: it opens no vigil.
-        if ('track' in msg) meta.track = TRACKS.includes(msg.track) ? msg.track : TRACKS[0];
+        // The sound the whole room hears, the TV too. Mixing it is not an action: it opens no vigil.
+        if ('mix' in msg) meta.mix = cleanMix(msg.mix);
         // How the TVs showing the shrine look and sound. Not an action either.
         if ('screen' in msg) meta.screen = cleanScreen(msg.screen);
         // Naming what is down, in a quiet room, says something is down. Not while the room still

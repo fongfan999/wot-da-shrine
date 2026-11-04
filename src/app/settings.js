@@ -1,9 +1,10 @@
-/* Settings: theme, effects, title and ETA, applied to the page; the settings panel and sound toggle. */
+/* Settings: theme, effects, title, ETA and the sound mix, applied to the page; the settings panel and sound toggle. */
 import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { syncPalette } from '../scene/palette.js';
 import { BRAND, STRINGS, applyStrings, t } from '../lib/strings.js';
-import { $, body, fmt, landing, meta, persist, resetSettings, roomName, settings, state, track, tv, urlParams } from './context.js';
+import { $, body, fmt, landing, meta, mix, mixName, persist, resetSettings, roomName, settings, state, tv, urlParams } from './context.js';
+import { LAYERS, PRESETS, cleanMix, presetOf, sameMix } from '../../shared/rules.js';
 import { fog, petals } from './engines.js';
 import { applyFx, lite } from './fx.js';
 import { splitTitle, title } from './stage.js';
@@ -43,7 +44,7 @@ export function applySettings(animate = false) {
 
   fog.setEnabled(settings.fog && !lite);
   petals.setEnabled(settings.petals);
-  sound.setTrack(track());
+  sound.setMix(mix());
   sound.setMusic(settings.music);
   sound.setSfx(settings.sfx);
 
@@ -61,8 +62,7 @@ export function applySettings(animate = false) {
   $('#screen-theme').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.screenTheme === sc.theme)));
   $('#screen-fx').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.screenFx === sc.fx)));
   panel.querySelectorAll('[data-screen]').forEach((el) => { el.checked = sc[el.dataset.screen]; });
-  $('#track-seg').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.track === track())));
-  $('#track-note').textContent = `${t(`trackHint_${track()}`)} ${settings.music ? t('trackShared') : t('trackOff')}`;
+  renderMixer();
 
   updateEta();
   updateStats();
@@ -118,21 +118,20 @@ backdrop.addEventListener('click', () => openPanel(false));
 
 
 /**
- * Change a setting, from the panel or from the ETA pill. Title, subtitle and ETA are the room's when
- * there is one: the shrine keeps them and tells everyone (a moment after you stop typing).
+ * Change a setting, from the panel or from the ETA pill. Title, subtitle, ETA and the mix are the
+ * room's when there is one: the shrine keeps them and tells everyone (a moment after you stop
+ * typing, or let go of a slider).
  */
 let metaTimer = 0;
 export function setSetting(name, value) {
-  const isMeta = ['title', 'subtitle', 'eta', 'track'].includes(name);
+  const isMeta = ['title', 'subtitle', 'eta', 'mix'].includes(name);
   if (isMeta) {
     if (!roomName) return; // only a room has a title
     state.roomMeta[name] = value;
     urlParams.delete(name);
-    if (name === 'track') state.shrine?.send('meta', { track: value }); // a click, not typing: no need to wait
-    else {
-      clearTimeout(metaTimer);
-      metaTimer = setTimeout(() => state.shrine?.send('meta', { [name]: value }), 400);
-    }
+    if (name === 'mix') urlParams.delete('track');
+    clearTimeout(metaTimer);
+    metaTimer = setTimeout(() => state.shrine?.send('meta', { [name]: value }), name === 'mix' ? 250 : 400);
   } else {
     settings[name] = value;
     persist();
@@ -173,12 +172,35 @@ panel.querySelectorAll('[data-screen]').forEach((el) => el.addEventListener('cha
   sound.tick(el.checked ? 880 : 440, 0.06);
 }));
 
-$('#track-seg').addEventListener('click', (e) => {
-  const b = e.target.closest('button[data-track]');
-  if (!b || b.dataset.track === track()) return;
+/* ---------- The mixer: a chip per preset, a slider per layer; the whole room hears the result ---------- */
+const sliders = Object.fromEntries(LAYERS.map((k) => [k, $(`#mix-layers input[data-layer=${k}]`)]));
+function renderMixer() {
+  const m = mix();
+  const preset = presetOf(m);
+  $('#mix-presets').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.preset === preset)));
+  for (const k of LAYERS) {
+    const v = m[k] || 0;
+    const el = sliders[k];
+    if (Number(el.value) !== v) el.value = v;
+    el.style.setProperty('--v', `${v}%`);
+    el.closest('.mixer__layer').dataset.on = v ? '1' : '';
+  }
+  $('#mix-note').textContent = `${fmt('mixNow', { mix: mixName(m) })} ${settings.music ? t('trackShared') : t('trackOff')}`;
+}
+/** The whole mix as the sliders stand. */
+const slidersMix = () => cleanMix(Object.fromEntries(LAYERS.map((k) => [k, sliders[k].value])));
+
+$('#mix-presets').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-preset]');
+  if (!b || sameMix(PRESETS[b.dataset.preset], mix())) return;
   sound.unlock();
-  setSetting('track', b.dataset.track);
+  setSetting('mix', { ...PRESETS[b.dataset.preset] });
   sound.tick(740, 0.06);
+});
+$('#mix-layers').addEventListener('input', (e) => {
+  if (!e.target.dataset.layer) return;
+  sound.unlock();
+  setSetting('mix', slidersMix()); // every move plays here at once; the room hears it a moment after the slider rests
 });
 
 $('#btn-reset').addEventListener('click', () => {

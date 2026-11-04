@@ -1,13 +1,13 @@
 /**
  * A TV with nothing down. The war-room screen stays on the wall between incidents, so instead of a
  * frozen "Vigil not started" it says how long it has been quiet, what was down last, and plays the
- * room's music (Focus for heads-down work, Rain, a Chant remix), picked from any phone in the shrine.
+ * room's sound (a chant, rain, a spa, a garden, white noise to work to), mixed from any phone in the shrine.
  * The moment a vigil opens it is the incident screen again.
  */
 import { sound } from '../audio/index.js';
 import { every } from '../lib/clock.js';
 import { t } from '../lib/strings.js';
-import { $, body, embedded, fmt, records, roomName, settings, state, track, tv } from './context.js';
+import { $, body, embedded, fmt, mix, mixName, records, roomName, settings, state, tv } from './context.js';
 import { applySettings } from './settings.js';
 import { quietStreak, shippedShown } from './deploy.js';
 
@@ -42,12 +42,12 @@ export function quietHeading() {
   return { eyebrow: t('quietEyebrow'), title: quietTitle(since), subtitle: [what, survived, streak].filter(Boolean).join(' ') };
 }
 
-/* ---------- Now playing: which track, where to change it, and whether the browser lets it play ---------- */
+/* ---------- Now playing: the mix, where to change it, and whether the browser lets it play ---------- */
 const nowEl = $('#tv-now');
 const nowTrack = $('#tv-now-track');
 const nowHint = $('#tv-now-hint');
 function renderNow() {
-  const name = t(`track_${track()}`);
+  const name = mixName(mix());
   if (nowTrack.textContent !== name) nowTrack.textContent = name;
   // A TV nobody has touched is held silent by the browser: one key or click lets the music in.
   const held = settings.music && !sound.playing;

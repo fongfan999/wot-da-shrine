@@ -5,7 +5,7 @@
 import { loadSettings, saveSettings, clearSettings, loadCounters, DEFAULTS } from '../lib/config.js';
 import { t } from '../lib/strings.js';
 import { roomFromPath, loadMe } from '../lib/room.js';
-import { TRACKS } from '../../shared/rules.js';
+import { DEFAULT_MIX, PRESETS, TRACKS, layersOn, mixFromParam, presetOf } from '../../shared/rules.js';
 
 export const $ = (sel) => document.querySelector(sel);
 export const body = document.body;
@@ -53,7 +53,7 @@ export const state = {
   roomSince: 0,       // a shared shrine's first action (the shrine tells us)
   roomPrayed: 0,      // every prayer ever said in the room
   resolvedAt: 0,      // the last "they're back"
-  roomMeta: { title: '', subtitle: '', eta: '', track: '' }, // what's down, when it's back and what plays, shared by the room
+  roomMeta: { title: '', subtitle: '', eta: '', mix: null }, // what's down, when it's back and what plays, shared by the room
   vigil: null,        // the room's open vigil: { startedAt, lastAt, peak, prayers, karma, blames, fortunes, lights }
   lastVigil: null,    // the record of the vigil that just ended, for the heading and the card
   undo: null,         // { by, until }: They're back, while whoever said it can still take it back
@@ -71,10 +71,19 @@ export const records = { survived: 0, longest: 0, history: [], blessings: [], de
  */
 const fromUrl = (k) => {
   const v = urlParams.get(k);
-  if (k === 'track') return TRACKS.includes(v) ? v : '';
   return k === 'eta' && v && Number.isNaN(Date.parse(v)) ? '' : v;
 };
 export const meta = (k) => (roomName ? (urlParams.has(k) ? fromUrl(k) : state.roomMeta[k]) : '') || '';
 
-/** The music the room plays: its own pick, or the vigil's. */
-export const track = () => (TRACKS.includes(meta('track')) ? meta('track') : TRACKS[0]);
+/** A mix this URL brings: ?mix=sacred:80,rain:40, or a preset's name, ?track=rain. */
+export const urlMix = () => (urlParams.has('mix') ? mixFromParam(urlParams.get('mix')) : PRESETS[urlParams.get('track')] ?? null);
+/** The sound the room plays: its own mix, the one this URL brings while the room has none, or the first preset. */
+export const mix = () => (roomName ? (urlMix() ?? state.roomMeta.mix) : null) ?? DEFAULT_MIX;
+/** A mix by name: the preset it is, the layers it plays (loudest first), or silence. */
+export const mixName = (m) => {
+  const preset = presetOf(m);
+  if (preset) return t(`track_${preset}`);
+  const on = layersOn(m);
+  return on.length ? on.map((k) => t(`layer_${k}`)).join(' · ') : t('mixSilent');
+};
+export { TRACKS };

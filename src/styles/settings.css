@@ -85,6 +85,22 @@
 }
 .seg button:hover { color: var(--ink); }
 .seg button[aria-checked="true"] { background: var(--accent); color: var(--on-accent); }
+/* The sound mixer: a chip per preset, a slider per layer. --v is the slider's value, for the filled part of its track. */
+.mixer__presets { display: flex; flex-wrap: wrap; gap: 5px; }
+.mixer__presets .btn { min-height: 30px; padding: 4px 8px; font-size: 13px; }
+.mixer__presets .btn[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.mixer__layers { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.mixer__layer { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 10px; cursor: pointer; }
+.mixer__name { display: flex; flex-direction: column; gap: 1px; font-size: 11px; transition: color 160ms; }
+.mixer__name small { overflow: hidden; font-family: var(--font-sans); font-size: 11px; line-height: 1.3; letter-spacing: 0; text-transform: none; white-space: nowrap; text-overflow: ellipsis; color: var(--muted); }
+.mixer__layer[data-on="1"] .mixer__name { color: var(--ink); }
+.mixer input[type="range"] { appearance: none; width: 100%; height: 28px; margin: 0; background: transparent; cursor: pointer; }
+.mixer input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--accent) var(--v, 0%), var(--field-line) var(--v, 0%)); }
+.mixer input[type="range"]::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 50%; background: var(--paper-raised); border: 1px solid var(--ink); box-shadow: var(--shadow-float); }
+.mixer input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--field-line); }
+.mixer input[type="range"]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--accent); }
+.mixer input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--paper-raised); border: 1px solid var(--ink); }
+.mixer input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 /* On the TV: the room's settings for every screen, a smaller row each */
 .screen-set__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; }
 .screen-set__label { font-size: 11px; }

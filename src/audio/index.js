@@ -1,6 +1,6 @@
 /**
  * Sound kit. Everything is synthesized with the Web Audio API; there are
- * no audio files. Background music comes from AmbientMusic; effects are
+ * no audio files. The background mix comes from AmbientMusic; effects are
  * small one-shot synths: lighter strike, singing bowl, whoosh, tick, breath.
  */
 import { AmbientMusic } from './music.js';
@@ -18,13 +18,13 @@ class SoundKit {
     this.unlocked = false;
     this.lite = false;
     this.conv = null;
-    this.track = 'vigil';
+    this.mix = {};
   }
 
-  /** The shrine's track (TRACKS in shared/rules.js): crossfades if the music is already playing. */
-  setTrack(track) {
-    this.track = track;
-    this.music?.setTrack(track, this.effectiveMusic ? MUSIC_VOLUME : 0);
+  /** The shrine's mix (LAYERS in shared/rules.js, each 0 to 100): layers fade in and out as it changes. */
+  setMix(mix) {
+    this.mix = mix;
+    this.music?.setMix(mix);
   }
 
   /** Whether the browser is letting us play: a page nobody has touched yet is held silent. */
@@ -53,7 +53,7 @@ class SoundKit {
       this.master.connect(dry).connect(this.ctx.destination);
       this.master.connect(conv).connect(wet).connect(this.ctx.destination);
       this.music = new AmbientMusic(this.ctx, this.master);
-      this.music.track = this.track;
+      this.music.setMix(this.mix);
       this.ctx.addEventListener('statechange', () => document.dispatchEvent(new CustomEvent('soundstate')));
     }
     if (this.ctx.state === 'suspended') this.ctx.resume();
