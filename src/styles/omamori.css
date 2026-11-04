@@ -1,0 +1,50 @@
+/* ---------- Omamori: a charm per service, on its own card ---------- */
+.omamori { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.omamori:empty { display: none; }
+.omamori:not(:empty) + .omamori__empty { display: none; }
+.omamori__empty { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+.omamori__row { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; grid-template-areas: "tag name renew" "tag meter renew" "tag since renew"; align-items: center; column-gap: 10px; row-gap: 3px; padding: 6px 6px 6px 4px; border-radius: var(--radius-sm); font-size: 13px; }
+.omamori__row:hover { background: var(--paper-sunk); }
+/* The charm itself: a little paper bag on a cord, its colour the blessing left */
+.omamori__tag { grid-area: tag; width: 18px; height: 24px; overflow: visible; }
+.omamori__bag { fill: var(--accent-soft); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; transition: fill 600ms; }
+.omamori__cord { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-linecap: round; }
+.omamori__knot { fill: var(--ember); stroke: none; }
+.omamori__cracks { display: none; fill: none; stroke: var(--ember-ink); stroke-width: 1.2; stroke-linecap: round; }
+.omamori__row[data-state="faded"] .omamori__bag { fill: var(--paper-sunk); }
+.omamori__row[data-state="cracked"] .omamori__bag { fill: var(--ember-soft); }
+.omamori__row[data-state="cracked"] .omamori__cracks { display: block; }
+.omamori__name { grid-area: name; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: var(--ink); }
+.omamori__meter { grid-area: meter; height: 5px; border-radius: 3px; background: var(--paper-sunk); overflow: hidden; }
+.omamori__fill { display: block; height: 100%; border-radius: 3px; background: var(--live); transition: width 1s; }
+.omamori__row[data-state="faded"] .omamori__fill { background: var(--flame); }
+.omamori__row[data-state="cracked"] .omamori__fill { background: var(--ember); }
+.omamori__since { grid-area: since; font-family: var(--font-mono); font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.omamori__row[data-state="cracked"] .omamori__since { color: var(--ember-ink); }
+.omamori__renew { grid-area: renew; padding: 3px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: none; color: var(--ink); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.omamori__renew:hover:not(:disabled), .omamori__renew:focus-visible { border-color: var(--ink); background: var(--accent-soft); color: var(--note-ink); outline: 0; }
+.omamori__renew:disabled { opacity: .5; cursor: default; }
+.omamori__row[data-state="cracked"] .omamori__renew:not(:disabled) { border-color: var(--ember); color: var(--ember-ink); }
+/* Taking one down: a small × that shows on hover, at the end of the row */
+.omamori__drop { grid-area: renew; justify-self: end; align-self: start; margin: -4px -2px 0 0; width: 18px; height: 18px; border: 0; border-radius: 50%; background: none; color: var(--muted); font: inherit; font-size: 13px; line-height: 1; cursor: pointer; opacity: 0; }
+.omamori__row:hover .omamori__drop, .omamori__drop:focus-visible { opacity: .8; }
+.omamori__drop:hover { background: var(--paper-sunk); color: var(--ink); opacity: 1; }
+.omamori__row:has(.omamori__drop) .omamori__renew { margin-top: 8px; }
+.omamori__form { display: flex; gap: 6px; margin-top: 8px; }
+.omamori__input { flex: 1; min-width: 0; padding: 7px 10px; border: 1px solid var(--field-line); border-radius: var(--radius-md); outline: 0; background: var(--paper); color: var(--ink); font: inherit; font-size: 13px; }
+.omamori__input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.omamori__input::placeholder { color: var(--muted); }
+/* A cracked charm shakes once when it cracks */
+@keyframes omamori-crack { 0%, 100% { transform: none; } 20% { transform: translateX(-3px) rotate(-4deg); } 40% { transform: translateX(3px) rotate(4deg); } 60% { transform: translateX(-2px); } 80% { transform: translateX(2px); } }
+.omamori__row.is-cracking .omamori__tag { animation: omamori-crack .6s var(--ease, ease); }
+/* On the TV it is a sign: no form, no buttons, larger */
+body[data-tv="1"] .omamori__form, body[data-tv="1"] .omamori__renew, body[data-tv="1"] .omamori__drop { display: none; }
+body[data-tv="1"] .omamori__row { grid-template-columns: 26px minmax(0, 1fr); grid-template-areas: "tag name" "tag meter" "tag since"; font-size: 17px; }
+body[data-tv="1"] .omamori__tag { width: 24px; height: 32px; }
+body[data-tv="1"] .omamori__since { font-size: 13px; }
+/* Beside the altar the column never scrolls: the card keeps to a few rows */
+@media (min-width: 1100px) {
+  .card--omamori .omamori__row:nth-child(n + 5) { display: none; }
+  body[data-tv="1"] .card--omamori .omamori__row:nth-child(n + 5) { display: grid; }
+}
+@media (prefers-reduced-motion: reduce) { .omamori__row.is-cracking .omamori__tag { animation: none; } }

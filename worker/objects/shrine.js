@@ -9,11 +9,11 @@ import { DurableObject } from 'cloudflare:workers';
 import { cleanSub, send as sendPush, topicOf } from '../push.js';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
 import { kamiLine, kamiMood } from '../../shared/kami.js';
-import { AVATARS, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
+import { AVATARS, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, OMAMORI_MAX, OMAMORI_NAME_MAX, OMAMORI_RENEW_GAP, RENEW, MEND, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
-const LOGGED = new Set(['light', 'down', 'bowl', 'bow', 'offer', 'prayer', 'blame', 'omikuji', 'resolve', 'unresolve', 'thank']);
+const LOGGED = new Set(['light', 'down', 'bowl', 'bow', 'offer', 'prayer', 'blame', 'omikuji', 'resolve', 'unresolve', 'thank', 'hang', 'renew', 'unhang']);
 const MAX_OFFERINGS = 4; // the altar table has four slots
 const FORGET_AFTER = 30 * 24 * 3600 * 1000; // rooms nobody visits for 30 days are swept
 const TOUCH_EVERY = 24 * 3600 * 1000; // pushing the sweep back once a day is plenty, and saves a write per action
@@ -87,6 +87,7 @@ const EMPTY = {
   charms: {}, // the charms the room has earned: id → when (0: earned before the shrine kept charms)
   feats: { ...EMPTY_FEATS }, // what the shrine tallies only for charms (see CHARMS in shared/rules.js)
   kami: { fedAt: 0, by: '', avatar: '' }, // the spirit of the shrine: when it last ate, and who fed it (shared/kami.js)
+  omamori: [], // a charm per service the room guards: { id, name, by, avatar, hungAt, blessedAt, renewedBy, paidAt, cracked, cracks, mends }
 };
 
 function clean(text, max) {
@@ -117,7 +118,7 @@ export class Shrine extends DurableObject {
       this.alarmAt = (await ctx.storage.getAlarm()) ?? 0;
       this.sweepAt = (await ctx.storage.get('sweep')) ?? this.alarmAt; // when the shrine is forgotten; the alarm may ring sooner, for a reminder
       this.subs = (await ctx.storage.get('push')) ?? {}; // endpoint → { endpoint, keys, name, avatar, tz, topics, at, reminded }
-      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys }, watched: { ...EMPTY.watched, ...saved?.watched }, daily: { ...EMPTY.daily, ...saved?.daily }, devotees: { ...saved?.devotees }, vowed: { ...EMPTY.vowed, ...saved?.vowed }, charms: { ...saved?.charms }, feats: { ...EMPTY_FEATS, ...saved?.feats }, kami: { ...EMPTY.kami, ...saved?.kami } };
+      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys }, watched: { ...EMPTY.watched, ...saved?.watched }, daily: { ...EMPTY.daily, ...saved?.daily }, devotees: { ...saved?.devotees }, vowed: { ...EMPTY.vowed, ...saved?.vowed }, charms: { ...saved?.charms }, feats: { ...EMPTY_FEATS, ...saved?.feats }, kami: { ...EMPTY.kami, ...saved?.kami }, omamori: saved?.omamori ?? [] };
       // A shrine from before charms were kept: the blames its vigils remember count, and whatever it has
       // already done is on the shelf, quietly, with nothing paid for it.
       if (saved && !saved.feats) {
@@ -295,8 +296,11 @@ export class Shrine extends DurableObject {
         // celebrates the last one: then it is the old incident being tidied up.
         // Nor while a deploy is being blessed: renaming the shrine then is not It broke.
         const named = meta.title && meta.title !== s.meta.title && !s.vigil && !s.blessing && Date.now() - s.resolvedAt > CELEBRATE_FOR;
+        const renamed = meta.title !== s.meta.title;
         s.meta = meta;
         this.broadcast({ t: 'meta', meta, by });
+        // The open vigil has a name now: the charm for that service cracks.
+        if (renamed && s.vigil && this.crack()) this.broadcast({ t: 'sync', ...this.counters() });
         if (named) {
           this.openVigil(by);
           this.remember({ kind: 'down', by });
@@ -472,6 +476,46 @@ export class Shrine extends DurableObject {
         s.vow = { week: weekOf(now), kind: msg.kind, target: VOWS[msg.kind], by: by.name, startedAt: now, progress: 0, helpers: {} };
         break;
       }
+      case 'hang': {
+        // A charm for one service, by name: one per name, OMAMORI_MAX on the rail, none in the demo.
+        if (this.demo) return;
+        const name = clean(msg.name, OMAMORI_NAME_MAX);
+        if (!name) return;
+        if (s.omamori.some((o) => o.name.toLowerCase() === name.toLowerCase())) { ws.send(JSON.stringify({ t: 'nope', why: 'hung', name })); return; }
+        if (s.omamori.length >= OMAMORI_MAX) { ws.send(JSON.stringify({ t: 'nope', why: 'full' })); return; }
+        const now = Date.now();
+        const o = { id: crypto.randomUUID().slice(0, 8), name, by: by.name, avatar: by.avatar, hungAt: now, blessedAt: now, renewedBy: by.name, paidAt: now, cracked: 0, cracks: 0, mends: 0 };
+        s.omamori = [...s.omamori, o];
+        out.item = name;
+        out.omamori = o;
+        break;
+      }
+      case 'renew': {
+        // Its blessing starts over. Paid once in a while per charm; mending a cracked one, once the vigil
+        // that cracked it is over, is worth more.
+        if (this.demo) return;
+        const o = s.omamori.find((x) => x.id === msg.id);
+        if (!o) return;
+        const now = Date.now();
+        if (o.cracked && s.vigil && guards(o.name, s.meta.title)) { ws.send(JSON.stringify({ t: 'nope', why: 'still-down', name: o.name })); return; }
+        out.item = o.name;
+        if (o.cracked) { o.cracked = 0; o.mends += 1; out.mended = true; out.paid = MEND; }
+        else if (now - (o.paidAt ?? 0) >= OMAMORI_RENEW_GAP) out.paid = RENEW;
+        if (out.paid) o.paidAt = now;
+        o.blessedAt = now;
+        o.renewedBy = by.name;
+        out.omamori = o;
+        break;
+      }
+      case 'unhang': {
+        if (this.demo) return;
+        const o = s.omamori.find((x) => x.id === msg.id);
+        if (!o) return;
+        s.omamori = s.omamori.filter((x) => x !== o);
+        out.item = o.name;
+        out.omamori = o;
+        break;
+      }
       case 'rename': {
         if (this.demo) return;
         const name = clean(msg.name, 24);
@@ -507,9 +551,10 @@ export class Shrine extends DurableObject {
     s.karma += KARMA[msg.t] ?? 0;
     const fed = this.feed(by, msg.t);
     if (fed) { out.fed = fed; s.karma += fed.karma ?? 0; }
+    if (out.paid) s.karma += out.paid; // a charm renewed or mended
     const demoOpens = this.demo && OPENS_VIGIL.has(msg.t) && (msg.t === 'light' || Date.now() - s.resolvedAt > CELEBRATE_FOR);
     if (!s.vigil && (opens || demoOpens)) this.openVigil(by);
-    this.credit(by, (KARMA[msg.t] ?? 0) + (out.daily?.bonus ?? 0) + (out.fed?.karma ?? 0)); // after the vigil opens: what opened it is theirs in its cast
+    this.credit(by, (KARMA[msg.t] ?? 0) + (out.daily?.bonus ?? 0) + (out.fed?.karma ?? 0) + (out.paid ?? 0)); // after the vigil opens: what opened it is theirs in its cast
     if (s.vigil && msg.t === 'prayer') { const c = this.castOf(by); if (c) c.prayers += 1; }
     if (s.vigil && VIGIL_FIELD[msg.t]) s.vigil[VIGIL_FIELD[msg.t]] += 1;
     // The room's bows and prayers while a deploy goes out are its blessing.
@@ -517,7 +562,7 @@ export class Shrine extends DurableObject {
     if (s.blessing) s.blessing.peak = Math.max(s.blessing.peak, this.people().length);
     if (s.vigil) {
       s.vigil.lastAt = Date.now();
-      s.vigil.karma += (KARMA[msg.t] ?? 0) + (out.bonus ?? 0) + (out.daily?.bonus ?? 0) + (out.fed?.karma ?? 0);
+      s.vigil.karma += (KARMA[msg.t] ?? 0) + (out.bonus ?? 0) + (out.daily?.bonus ?? 0) + (out.fed?.karma ?? 0) + (out.paid ?? 0);
       s.vigil.peak = Math.max(s.vigil.peak, this.people().length);
     }
     const charmed = this.award(by); // before the counters: what it pays is in them
@@ -569,7 +614,7 @@ export class Shrine extends DurableObject {
     if (state === 'down' && s.vigil) {
       // Already down. The alert can name it, but never renames what the team called it.
       did = 'already-down';
-      if (name && !s.meta.title) { s.meta = { ...s.meta, title: name }; this.broadcast({ t: 'meta', meta: s.meta, by }); }
+      if (name && !s.meta.title) { s.meta = { ...s.meta, title: name }; this.broadcast({ t: 'meta', meta: s.meta, by }); if (this.crack()) this.broadcast({ t: 'sync', ...this.counters() }); }
     } else if (state === 'down') {
       // A new incident: the alert's name is the vigil's, over whatever the last one was called.
       did = 'opened';
@@ -884,7 +929,7 @@ export class Shrine extends DurableObject {
   counters() {
     const s = this.state;
     const undo = s.undo && Date.now() - s.undo.at < RESOLVE_UNDO ? { by: s.undo.id, until: s.undo.at + RESOLVE_UNDO } : null;
-    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo, blessing: s.blessing, deploys: s.deploys, watch: s.watch, watched: s.watched, mornings: s.daily, vow: s.vow, vowed: s.vowed, kami: this.demo ? null : s.kami, ...this.charms() }; // mornings: the room's run; an act's `daily` is one bow's
+    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo, blessing: s.blessing, deploys: s.deploys, watch: s.watch, watched: s.watched, mornings: s.daily, vow: s.vow, vowed: s.vowed, kami: this.demo ? null : s.kami, omamori: this.demo ? [] : s.omamori, ...this.charms() }; // mornings: the room's run; an act's `daily` is one bow's
   }
 
   /**
@@ -900,6 +945,7 @@ export class Shrine extends DurableObject {
     s.undo = null;
     // On someone's watch: the vigil remembers whose, and their watch is no longer quiet.
     if (s.watch) { s.watch.vigils += 1; s.vigil.watch = s.watch.name; }
+    this.crack(); // the charm for whatever is down, when the vigil already has a name
     this.notify('down', { by });
     if (s.blessing) { this.blamed = this.closeBlessing(now, 'broke'); return; }
     const last = s.blessings[0];
@@ -914,6 +960,26 @@ export class Shrine extends DurableObject {
       if (last.vowBy) { this.vowStep('clean', last.vowBy, -1); delete last.vowBy; } // it was not clean after all
       this.blamed = last;
     }
+  }
+
+  /**
+   * The open vigil names a service the room hung a charm for: that charm cracks, once per vigil, and
+   * the vigil remembers which. Returns the names cracked now, [] when none.
+   */
+  crack() {
+    const s = this.state;
+    const v = s.vigil;
+    if (!v || this.demo) return [];
+    const now = Date.now();
+    const names = [];
+    for (const o of s.omamori) {
+      if (o.cracked || !guards(o.name, s.meta.title)) continue;
+      o.cracked = now;
+      o.cracks += 1;
+      names.push(o.name);
+    }
+    if (names.length) v.cracked = [...(v.cracked ?? []), ...names];
+    return names;
   }
 
   /** The deploy a vigil just opened against, for the broadcast that says so; {} when none. */
@@ -993,6 +1059,7 @@ export class Shrine extends DurableObject {
       outcome,
     };
     if (v.watch) record.watch = v.watch; // whose watch it was
+    if (v.cracked?.length) record.cracked = v.cracked; // the charms it cracked
     if (v.alert) record.alert = v.alert; // which alerting system raised it
     // The cast: who was in it, by the karma they earned in it. Who said it was down, and who said it was back
     // (and earned the karma for it, which the vigil's own total already counts).
@@ -1057,6 +1124,8 @@ export class Shrine extends DurableObject {
       streak: s.deploys.streak,
       lastPrayer: s.prayers.at(-1)?.text ?? '',
       kami: this.demo ? '' : kamiMood(s.kami, now), // how the spirit of the shrine feels (shared/kami.js)
+      omamori: s.omamori.length, // charms hung for the room's services, and how many are cracked
+      cracked: s.omamori.filter((o) => o.cracked).length,
       quietFor: s.vigil ? 0 : this.quietSince() ? Math.max(0, Math.round((now - this.quietSince()) / 60000)) : 0, // minutes without an incident
       now,
     };

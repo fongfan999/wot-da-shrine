@@ -88,6 +88,20 @@ hear so (see Notifications). Nothing real hangs on its mood: the servers go
 down when they go down. The rules are `KAMI_*` in `shared/rules.js`, the
 lines in `shared/kami.js`, and the demo shrine has no kami.
 
+### Omamori, a charm per service
+
+The **Omamori** card hangs a charm for each service the team runs, by name
+(payments-api, the DNS, the cron box), up to eight. Hanging one is +2 karma.
+Its blessing fades over a week, as a meter on the card, and **Renew** starts
+it over (+2, once in four hours per charm, so a run of taps pays once). When a
+vigil opens whose title names the service, by a person or an alert through the
+webhook, the charm cracks: the room hears it, the feed says so, and the
+vigil's record keeps which charms it cracked. It stays cracked until someone
+presses **Mend**, which only works once that vigil is over, and pays +5. The
+× on a row takes a charm down. A pasted link counts the charms hung and
+cracked. The TV shows the card as a sign. None in the demo. The rules are
+`OMAMORI_*` in `shared/rules.js`.
+
 ## A vigil, not a visit
 
 An incident is a *vigil*, and it begins when someone says something is down:
@@ -563,6 +577,7 @@ src/app/                 the shrine
   cast.js, screen.js     Cast to TV, and the TV's own screens
   quiet.js               nothing down: the days without an incident, and the TV's sound mix
   kami.js                the kami's mask, meter and line under the heading
+  omamori.js             the Omamori card: hang, renew, mend, and the crack
   vigilStart.js          saying something is down: the button, the question on lighting
   etaPicker.js           the Back at picker, in the heading and the builder
   openShrine.js          name fields and the Open sheet

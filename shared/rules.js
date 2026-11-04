@@ -16,7 +16,7 @@ export const OFFERING_KINDS = ['energy', 'noodles', 'duck', 'coffee', 'keyboard'
 export const FORTUNES = ['great', 'good', 'small', 'bad', 'terrible'];
 
 /** What each action is worth. Lighting is free; its karma comes when the stick burns down. */
-export const KARMA = { light: 0, bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20, blame: 5, omikuji: 2, bless: 2, ship: 5, broke: 0, watch: 2, unwatch: 0, feed: 3 };
+export const KARMA = { light: 0, bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20, blame: 5, omikuji: 2, bless: 2, ship: 5, broke: 0, watch: 2, unwatch: 0, feed: 3, hang: 2, renew: 0, unhang: 0 };
 
 /**
  * A vigil is one incident. It opens with the first thing anyone does at the altar, and closes when
@@ -274,6 +274,29 @@ export const KAMI_MOODS = [['pleased', 2 * HOUR], ['content', 24 * HOUR], ['peck
 export const KAMI_HUNGRY = 48 * HOUR; // the reminder goes out once it has waited this long
 export const KAMI_STARVE = 96 * HOUR; // its protection, as a meter, runs out here
 export const KAMI_THANKS_AFTER = 24 * HOUR;
+
+/**
+ * Omamori: a charm the room hangs for one service it runs (payments-api, the DNS, the cron box), by
+ * name. Its blessing fades over OMAMORI_FADES and anyone renews it with a tap: RENEW karma once in
+ * OMAMORI_RENEW_GAP per charm, so a run of taps pays once. When a vigil opens that names the service
+ * (its title, by a person or an alert) the charm cracks, and stays cracked until someone mends it, a
+ * renewal once that vigil is over, worth MEND. A shrine holds OMAMORI_MAX of them. None in the demo.
+ */
+export const OMAMORI_MAX = 8;
+export const OMAMORI_NAME_MAX = 24;
+export const OMAMORI_FADES = 7 * 24 * 3600 * 1000;
+export const OMAMORI_RENEW_GAP = 4 * 3600 * 1000;
+export const RENEW = 2;
+export const MEND = 5;
+/** What is left of a charm's blessing, 0 to 1: nothing once cracked, nothing after a week. */
+export const omamoriLeft = (o, now = Date.now()) => (o.cracked ? 0 : Math.max(0, 1 - (now - o.blessedAt) / OMAMORI_FADES));
+/** Whether a vigil called `title` is the service this charm guards: one names the other. */
+export function guards(name, title) {
+  const a = String(name ?? '').trim().toLowerCase();
+  const b = String(title ?? '').trim().toLowerCase();
+  if (a.length < 2 || b.length < 2) return false;
+  return b.includes(a) || (b.length >= 3 && a.includes(b));
+}
 
 /** The letters a TV pairing code is made of: no 0/O, 1/I/L, 2/Z, 5/S or 8/B to mix up across a room. */
 export const CODE_ALPHABET = 'ACDEFHJKMNPQRTUVWXY34679';

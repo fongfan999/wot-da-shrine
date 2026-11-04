@@ -1,0 +1,11 @@
+<!-- Omamori: a charm per service the room guards. Its blessing fades over a week, a tap renews it, and a vigil that names the service cracks it (src/app/omamori.js). Only in a shrine of your own. -->
+<section class="card card--omamori" id="omamori-card" hidden>
+  <h2 class="label"><span data-i18n="omamoriLabel">Omamori</span> <span class="label__count" id="omamori-count"></span></h2>
+  <ul class="omamori" id="omamori-list"></ul>
+  <p class="omamori__empty" id="omamori-empty" data-i18n="omamoriEmpty">Hang a charm for each service you run. It fades over a week, a tap renews it, and if that service goes down, it cracks.</p>
+  <form class="omamori__form" id="omamori-form" autocomplete="off">
+    <label class="sr-only" for="omamori-name" data-i18n="omamoriName">Service to guard</label>
+    <input class="omamori__input" id="omamori-name" type="text" maxlength="24" spellcheck="false" data-i18n-placeholder="omamoriPh" />
+    <button class="btn btn--glass btn--sm" type="submit" data-i18n="omamoriHang">Hang one</button>
+  </form>
+</section>
