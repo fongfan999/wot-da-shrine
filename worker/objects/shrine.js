@@ -7,7 +7,7 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
-import { AVATARS, BLESSING_BLAME, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
+import { AVATARS, BLESSING_BLAME, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
@@ -69,6 +69,8 @@ const EMPTY = {
   vow: null, // this week's: { week, kind, target, by, startedAt, progress, helpers: { key: { name, avatar, n } }, done }
   vows: [], // the last few, newest first: the vow as it ended, with outcome 'kept' or 'missed'
   vowed: { kept: 0, missed: 0 },
+  charms: {}, // the charms the room has earned: id → when (0: earned before the shrine kept charms)
+  feats: { ...EMPTY_FEATS }, // what the shrine tallies only for charms (see CHARMS in shared/rules.js)
 };
 
 function clean(text, max) {
@@ -97,7 +99,13 @@ export class Shrine extends DurableObject {
       this.claimed = (await ctx.storage.get('claimed')) === true;
       this.hookKey = (await ctx.storage.get('hook')) ?? ''; // the secret in the room's webhook URL; made the first time someone asks
       this.alarmAt = (await ctx.storage.getAlarm()) ?? 0;
-      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys }, watched: { ...EMPTY.watched, ...saved?.watched }, daily: { ...EMPTY.daily, ...saved?.daily }, devotees: { ...saved?.devotees }, vowed: { ...EMPTY.vowed, ...saved?.vowed } };
+      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys }, watched: { ...EMPTY.watched, ...saved?.watched }, daily: { ...EMPTY.daily, ...saved?.daily }, devotees: { ...saved?.devotees }, vowed: { ...EMPTY.vowed, ...saved?.vowed }, charms: { ...saved?.charms }, feats: { ...EMPTY_FEATS, ...saved?.feats } };
+      // A shrine from before charms were kept: the blames its vigils remember count, and whatever it has
+      // already done is on the shelf, quietly, with nothing paid for it.
+      if (saved && !saved.feats) {
+        this.state.feats.blames = this.state.history.reduce((n, v) => n + (v.blames ?? 0), 0);
+        this.award(null, true);
+      }
       // A room from when the sound was one of four tracks: that track's mix is what it plays now.
       const { meta } = this.state;
       if (!meta.mix && meta.track) meta.mix = PRESETS[meta.track] ?? null;
@@ -229,6 +237,7 @@ export class Shrine extends DurableObject {
           out.bonus = this.bows.size * CHORUS_BONUS;
           s.karma += out.bonus;
           for (const b of this.bows.values()) this.credit(b.person, CHORUS_BONUS);
+          s.feats.chorus = Math.max(s.feats.chorus, out.chorus);
           this.bows.clear();
         }
         // Their first bow of the day is the morning bow.
@@ -243,10 +252,13 @@ export class Shrine extends DurableObject {
         break;
       case 'blame':
         // A confession burned in the censer. The words never reach the server; only the act does.
+        s.feats.blames += 1;
         break;
       case 'omikuji':
         if (!FORTUNES.includes(msg.level)) return;
         out.level = msg.level;
+        if (msg.level === 'great') s.feats.great += 1;
+        if (msg.level === 'terrible') s.feats.curse += 1;
         break;
       case 'meta': {
         // What's down, and when it's back: one title for the whole room.
@@ -276,6 +288,7 @@ export class Shrine extends DurableObject {
         if (!OFFERING_KINDS.includes(msg.kind)) return;
         out.item = msg.kind;
         s.offerings = [...s.offerings, { kind: msg.kind, by: by.name }].slice(-MAX_OFFERINGS);
+        s.feats.table = Math.max(s.feats.table, s.offerings.length);
         break;
       case 'prayer': {
         const text = clean(msg.text, 60);
@@ -402,6 +415,7 @@ export class Shrine extends DurableObject {
         s.karma += THANK;
         const them = this.credit(to, THANK);
         if (them) them.thanked = (them.thanked ?? 0) + 1;
+        s.feats.thanks += 1;
         break;
       }
       case 'vow': {
@@ -453,6 +467,8 @@ export class Shrine extends DurableObject {
       s.vigil.karma += (KARMA[msg.t] ?? 0) + (out.bonus ?? 0) + (out.daily?.bonus ?? 0);
       s.vigil.peak = Math.max(s.vigil.peak, this.people().length);
     }
+    const charmed = this.award(by); // before the counters: what it pays is in them
+    if (charmed) out.charmed = charmed;
     this.remember(out);
     this.broadcast({ ...out, ...this.blame(), ...this.counters(), ...this.standings() });
     const fresh = !this.stored;
@@ -520,6 +536,8 @@ export class Shrine extends DurableObject {
       s.vigil.karma += KARMA.resolve;
       s.karma += KARMA.resolve;
       const out = { t: 'act', kind: 'resolve', by, record: this.closeVigil(now, 'survived', by) };
+      const charmed = this.award(null);
+      if (charmed) out.charmed = charmed;
       this.remember(out);
       this.broadcast({ ...out, ...this.counters(), ...this.standings() }); // the karma may have grown the shrine
       this.report('resolve', { karma: KARMA.resolve });
@@ -760,10 +778,39 @@ export class Shrine extends DurableObject {
     return v.cast[key];
   }
 
+  /* ---------- Charms: what the room earns once and keeps ---------- */
+
+  /**
+   * Hang every charm the room has just reached. Each pays the room CHARM_KARMA, and `by` (whoever's act
+   * reached it, when that was a person) as much. Returns the ids hung, or null when none was. `quiet`:
+   * a shrine from before charms, catching up: they are hung as earned at 0, and nothing is paid.
+   */
+  award(by, quiet = false) {
+    if (this.demo) return null;
+    const s = this.state;
+    const n = charmProgress(s);
+    const fresh = CHARMS.filter((c) => !(c.id in s.charms) && n[c.id] >= c.of).map((c) => c.id);
+    if (!fresh.length) return null;
+    const now = Date.now();
+    for (const id of fresh) s.charms[id] = quiet ? 0 : now;
+    if (quiet) return null;
+    const pay = fresh.length * CHARM_KARMA;
+    s.karma += pay;
+    if (s.vigil) s.vigil.karma += pay;
+    if (by && by.id !== 'hook') this.credit(by, pay);
+    return fresh;
+  }
+
+  /** The shelf, as the room sees it: what is hung and when, and how far it is toward the rest. Nothing in the demo. */
+  charms() {
+    if (this.demo) return {};
+    return { charms: { got: this.state.charms, n: charmProgress(this.state) } };
+  }
+
   counters() {
     const s = this.state;
     const undo = s.undo && Date.now() - s.undo.at < RESOLVE_UNDO ? { by: s.undo.id, until: s.undo.at + RESOLVE_UNDO } : null;
-    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo, blessing: s.blessing, deploys: s.deploys, watch: s.watch, watched: s.watched, mornings: s.daily, vow: s.vow, vowed: s.vowed }; // mornings: the room's run; an act's `daily` is one bow's
+    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo, blessing: s.blessing, deploys: s.deploys, watch: s.watch, watched: s.watched, mornings: s.daily, vow: s.vow, vowed: s.vowed, ...this.charms() }; // mornings: the room's run; an act's `daily` is one bow's
   }
 
   /**
@@ -883,6 +930,8 @@ export class Shrine extends DurableObject {
     }
     s.history = [record, ...s.history].slice(0, MAX_HISTORY);
     if (outcome === 'survived') {
+      const took = endedAt - v.startedAt;
+      if (took >= QUICK_MIN && took <= QUICK_FIX) s.feats.quick += 1;
       s.survived += 1;
       s.longest = Math.max(s.longest, record.minutes);
     }

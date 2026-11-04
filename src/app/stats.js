@@ -10,6 +10,7 @@ import { every } from '../lib/clock.js';
 import { hasStanding, myStanding, rankOf, roomMornings } from './standing.js';
 import { grewText, nameList, renderBoard, renderBuild } from './together.js';
 import { renderVow } from './vow.js';
+import { renderCharms } from './charms.js';
 
 /* ---------- Stats + progress ---------- */
 export const burnBar = $('#burn-bar');
@@ -212,6 +213,7 @@ export function renderRecords() {
   updateTablet();
   renderBuild();
   renderVow();
+  renderCharms();
   renderBoard();
   if (shownLevel !== -1 && i > shownLevel) {
     toast(grewText(name, i)); // and who built it

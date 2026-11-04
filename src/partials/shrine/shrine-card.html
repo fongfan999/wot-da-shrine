@@ -22,6 +22,11 @@
       <div class="stat" id="stat-vows" hidden><dt data-i18n="recVows">Vows kept</dt><dd id="rec-vows">0</dd></div>
       <div class="stat" id="stat-mornings" hidden><dt data-i18n="recMornings">Mornings in a row</dt><dd id="rec-mornings">0</dd></div>
     </dl>
+    <!-- The charm shelf: a slot for every charm, the earned ones in colour; opens the sheet with them all -->
+    <button class="charms" id="charms" type="button" hidden aria-haspopup="dialog">
+      <span class="charms__head"><span class="label" data-i18n="charmsLabel">Charms</span> <span class="charms__count" id="charms-count"></span><span class="charms__next" id="charms-next"></span></span>
+      <span class="charms__row" id="charms-row"></span>
+    </button>
     <!-- The way to the shrine's next level, in one segment for each person who earned it -->
     <div class="build" id="build" hidden>
       <div class="build__head"><span class="build__what" id="build-what"></span><span class="build__left" id="build-left"></span></div>

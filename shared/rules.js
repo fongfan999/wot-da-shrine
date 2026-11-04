@@ -126,6 +126,41 @@ export const levelOf = (karma) => SHRINE_LEVELS.reduce((idx, at, k) => (karma >=
 export const streakAlive = (s, day) => Boolean(s?.streak) && day - s.day <= 1;
 
 /**
+ * Charms: omamori the room earns once and keeps, hung on the shelf in Shrine records. Each counts
+ * one thing the shrine already keeps, or one of its `feats` (what the shrine tallies only for charms),
+ * and is earned the moment that count reaches `of`. A charm is never taken back, not even by an Undo.
+ * Every charm earns the room CHARM_KARMA, and whoever's act earned it the same. None in the demo.
+ * The order here is the shelf's.
+ */
+export const CHARM_KARMA = 10;
+export const CHARMS = [
+  { id: 'light', of: 1, n: (s) => s.incense }, // the first stick lit here
+  { id: 'survivor', of: 1, n: (s) => s.survived }, // the first vigil survived
+  { id: 'quick', of: 1, n: (s) => s.feats.quick }, // back within QUICK_FIX of going down
+  { id: 'table', of: 4, n: (s) => s.feats.table }, // the altar table full at once
+  { id: 'choir', of: 5, n: (s) => s.feats.chorus }, // a chorus of five
+  { id: 'great', of: 1, n: (s) => s.feats.great }, // someone drew a Great blessing
+  { id: 'curse', of: 1, n: (s) => s.feats.curse }, // someone drew a Great curse, and the room carried on
+  { id: 'vow', of: 1, n: (s) => s.vowed.kept }, // the first vow kept
+  { id: 'week', of: 7, n: (s) => s.daily.best }, // a week of mornings in a row
+  { id: 'blameless', of: 10, n: (s) => s.feats.blames }, // ten blames burned
+  { id: 'clean', of: 10, n: (s) => s.deploys.best }, // ten clean deploys in a row
+  { id: 'lantern', of: 10, n: (s) => s.watched.quiet }, // ten quiet watches
+  { id: 'grateful', of: 25, n: (s) => s.feats.thanks }, // twenty-five thanks given
+  { id: 'veteran', of: 10, n: (s) => s.survived }, // ten vigils survived
+  { id: 'night', of: 180, n: (s) => s.longest }, // a vigil of three hours survived (minutes)
+  { id: 'month', of: 30, n: (s) => s.daily.best }, // a month of mornings in a row
+];
+export const CHARM_IDS = CHARMS.map((c) => c.id);
+/** A vigil survived this soon after it opened, and no sooner than QUICK_MIN, is a quick fix. */
+export const QUICK_FIX = 10 * 60 * 1000;
+export const QUICK_MIN = 60 * 1000;
+/** What the shrine tallies only for charms. */
+export const EMPTY_FEATS = { quick: 0, table: 0, chorus: 0, great: 0, curse: 0, blames: 0, thanks: 0 };
+/** How far the room is toward each charm, capped at what it asks: { id: n }. `s` is the shrine's state. */
+export const charmProgress = (s) => Object.fromEntries(CHARMS.map((c) => [c.id, Math.max(0, Math.min(c.of, Math.floor(Number(c.n(s)) || 0)))]));
+
+/**
  * The shrine's sound, mixed by the room: six layers, each a small synth in src/audio/music.js, each
  * at a level from 0 to 100. A mix keeps only the layers that play; {} is silence.
  */

@@ -1,0 +1,15 @@
+<!-- The charm shelf: every charm the room can earn, and how far it has come toward each -->
+<div class="sheet sheet--ritual" id="charms-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="charms-title">
+  <div class="sheet__card charms-sheet">
+    <div class="sheet__head">
+      <h2 class="sheet__title" id="charms-title"><span data-i18n="charmsTitle">The charm</span> <em data-i18n="charmsTitleAccent">shelf</em></h2>
+      <button class="icon-btn" type="button" data-close="charms-sheet" aria-label="Close">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="sheet__body">
+      <p class="sheet__hint" data-i18n="charmsHint">The room earns each charm once, and keeps it.</p>
+      <ol class="charm-grid" id="charms-grid"></ol>
+    </div>
+  </div>
+</div>

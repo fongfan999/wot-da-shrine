@@ -102,3 +102,47 @@ body[data-tv="1"] .credits__role dd { font-size: 20px; }
 .stage:has(.vow-pick__list:not([hidden])) { z-index: 7; }
 /* and the card over its neighbours in the side column (the credit link under it painted on top) */
 .card:has(.vow-pick__list:not([hidden])) { position: relative; z-index: 4; }
+
+/* ---------- Charms: the shelf in Shrine records, and the sheet with them all ---------- */
+.charms {
+  display: block; width: 100%; margin: 0; padding: 6px 0 2px; border: 0; background: none;
+  color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-sm);
+}
+.charms:disabled { cursor: default; }
+.charms:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.charms__head { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.charms__count { font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+.charms__next { margin-left: auto; min-width: 0; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.charms:not(:disabled):hover .charms__next { color: var(--ink); }
+.charms__row { display: flex; justify-content: space-between; gap: 2px; margin-top: 6px; }
+
+.charm { position: relative; display: inline-block; flex: 0 0 auto; width: 15px; height: 21px; }
+.charm svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.charm__body { fill: none; stroke: var(--line-strong); stroke-width: 1.3; stroke-dasharray: 2 2; }
+.charm__cord { fill: none; stroke: var(--line-strong); stroke-width: 1.3; }
+.charm__band { stroke: none; }
+.charm__knot { fill: var(--line-strong); }
+.charm[data-on="1"] .charm__body, .charm-card[data-on="1"] .charm__body { fill: var(--charm); stroke: none; }
+.charm[data-on="1"] .charm__band, .charm-card[data-on="1"] .charm__band { stroke: #ffffff8c; stroke-width: 1.6; }
+.charm[data-on="1"] .charm__cord, .charm-card[data-on="1"] .charm__cord { stroke: var(--charm); }
+.charm[data-on="1"] .charm__knot, .charm-card[data-on="1"] .charm__knot { fill: var(--charm); }
+
+.charm--big { width: 40px; height: 56px; }
+.charm__kanji { position: absolute; inset: 44% 0 auto; text-align: center; font-family: var(--font-serif); font-size: 15px; line-height: 1; color: var(--muted); opacity: .55; }
+.charm-card[data-on="1"] .charm__kanji { color: #fff; opacity: 1; font-weight: 600; }
+
+.sheet--ritual .sheet__card.charms-sheet { width: min(620px, 100%); }
+.charm-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 10px; }
+.charm-card {
+  display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 12px 8px 10px;
+  border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--paper-raised); text-align: center;
+}
+.charm-card[data-on="1"] { border-color: var(--line-strong); }
+.charm-card .charm { margin-bottom: 4px; }
+.charm-card__name { font-size: 13px; color: var(--ink); }
+.charm-card:not([data-on="1"]) .charm-card__name { color: var(--muted); }
+.charm-card__how { font-size: 12px; line-height: 1.3; color: var(--muted); }
+.charm-card__state { width: 100%; margin-top: auto; padding-top: 4px; font-family: var(--font-mono); font-size: 11px; color: var(--sheet-label); }
+.charm-card[data-on="1"] .charm-card__state { color: var(--live); }
+.charm-card__meter { display: block; height: 3px; margin-top: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.charm-card__meter > span { display: block; height: 100%; background: var(--accent); }

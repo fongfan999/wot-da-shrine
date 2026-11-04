@@ -193,6 +193,36 @@ A shrine shows what each person put in, so the team can see it building somethin
   week: it stays until it is kept, or the week ends and it is filed as
   missed. **Vows kept** joins the records once one has ended.
 
+### Charms
+
+A shrine collects charms: sixteen omamori, each earned once by the room and
+kept for good. The shelf in This shrine has a slot for every one, the earned
+ones in colour, and names the charm the room is closest to ("next: Choir, 3 of
+5"). Click it for the sheet with them all, how to earn each, when it was
+earned and how far the room has come toward the rest.
+
+| Charm | Earned by |
+| --- | --- |
+| First light | lighting the first stick |
+| Survivor, Veteran | surviving a vigil, then ten |
+| Quick fix | being back between one and ten minutes after going down |
+| Full table | four offerings on the table at once |
+| Choir | a chorus of five |
+| Great blessing, Brave face | drawing a Great blessing, or a Great curse |
+| Kept word | keeping a weekly vow |
+| Seven mornings, A moon of mornings | the room's morning run reaching 7, then 30 |
+| Blameless | ten blames burned |
+| Clean hands | ten clean deploys in a row |
+| Lantern keeper | ten quiet watches |
+| Grateful | 25 thanks given |
+| Long night | surviving a vigil three hours long |
+
+Each charm pays the room +10 karma, and whoever's act earned it as much; the
+whole room hears it with bells. A charm is never taken back, not even by an
+Undo. The shrine counts and pays (`CHARMS` in `shared/rules.js`), so no tab can
+fake one. A shrine from before charms hangs whatever it had already done the
+first time it wakes, quietly and unpaid. The demo has none.
+
 ## Straight from your alerting
 
 Every shrine has a webhook, so the vigil can open before anyone thinks of
