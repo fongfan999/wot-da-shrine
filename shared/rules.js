@@ -150,13 +150,14 @@ export const CHARMS = [
   { id: 'veteran', of: 10, n: (s) => s.survived }, // ten vigils survived
   { id: 'night', of: 180, n: (s) => s.longest }, // a vigil of three hours survived (minutes)
   { id: 'month', of: 30, n: (s) => s.daily.best }, // a month of mornings in a row
+  { id: 'defiant', of: 1, n: (s) => s.feats.defied }, // shipped clean against three or more omens (shared/omens.js)
 ];
 export const CHARM_IDS = CHARMS.map((c) => c.id);
 /** A vigil survived this soon after it opened, and no sooner than QUICK_MIN, is a quick fix. */
 export const QUICK_FIX = 10 * 60 * 1000;
 export const QUICK_MIN = 60 * 1000;
 /** What the shrine tallies only for charms. */
-export const EMPTY_FEATS = { quick: 0, table: 0, chorus: 0, great: 0, curse: 0, blames: 0, thanks: 0 };
+export const EMPTY_FEATS = { quick: 0, table: 0, chorus: 0, great: 0, curse: 0, blames: 0, thanks: 0, defied: 0 };
 /** How far the room is toward each charm, capped at what it asks: { id: n }. `s` is the shrine's state. */
 export const charmProgress = (s) => Object.fromEntries(CHARMS.map((c) => [c.id, Math.max(0, Math.min(c.of, Math.floor(Number(c.n(s)) || 0)))]));
 

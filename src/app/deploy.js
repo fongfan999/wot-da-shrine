@@ -6,6 +6,7 @@
  */
 import gsap from 'gsap';
 import { BLESSING_MAX, SHIPPED_FOR } from '../../shared/rules.js';
+import { OMEN_DEFY, omenVerdict, readOmens } from '../../shared/omens.js';
 import { sound } from '../audio/index.js';
 import { every } from '../lib/clock.js';
 import { t } from '../lib/strings.js';
@@ -32,14 +33,22 @@ export const shippedShown = () => Boolean(state.shippedAt) && !state.vigil && !s
 const what = () => state.blessing?.what || '';
 const streakLine = (n) => (n === 1 ? t('quietStreakOne') : fmt('quietStreak', { n }));
 
+/** The bad omens a blessing went out against, as a short list: "Friday, after 4 pm and a full moon". */
+const omenList = (ids) => {
+  const names = ids.map((id) => t(`omenShort_${id}`));
+  return names.length > 1 ? `${names.slice(0, -1).join(', ')} ${t('and')} ${names.at(-1)}` : names[0] ?? '';
+};
+
 /** The heading while a deploy goes out, and for a minute after it shipped. */
 export function blessingHeading() {
   const n = records.deploys.streak;
   if (state.blessing) {
+    const bad = state.blessing.omens ?? [];
+    const sub = n ? fmt('blessSub', { n }) : t('blessSubFirst');
     return {
       eyebrow: t('blessEyebrow'),
       title: what() ? fmt('blessTitle', { what: what() }) : t('blessTitleAny'),
-      subtitle: n ? fmt('blessSub', { n }) : t('blessSubFirst'),
+      subtitle: bad.length >= OMEN_DEFY ? `${fmt('blessAgainst', { omens: omenList(bad) })} ${sub}` : sub,
     };
   }
   const last = records.blessings[0];
@@ -106,9 +115,30 @@ export function brokeFx() {
   room.pulse();
 }
 
-/* ---------- Bless a deploy: what is shipping? ---------- */
+/* ---------- Bless a deploy: what is shipping, and what do the omens say? ---------- */
+const myTz = () => -new Date().getTimezoneOffset();
+/** The omens as the shrine will read them when the blessing starts: by this clock, from what the room knows. */
+function omensNow() {
+  const now = Date.now() + state.clockSkew; // the shrine's clock: its times are in it
+  return readOmens({ now, tz: myTz(), kami: state.kami, last: records.blessings[0], lastVigil: records.history[0]?.endedAt, daily: records.daily, streak: records.deploys.streak });
+}
+function renderOmens() {
+  const omens = omensNow();
+  const v = omenVerdict(omens);
+  $('#omens-verdict').textContent = t(`omenVerdict_${v}`);
+  $('#bless-omens').dataset.verdict = String(v);
+  $('#omens-list').replaceChildren(...omens.map((o) => {
+    const li = document.createElement('li');
+    li.className = 'omens__item';
+    li.dataset.bad = o.bad ? '1' : '';
+    li.textContent = t(`omen_${o.id}`);
+    return li;
+  }));
+  $('#bless-go').textContent = t(v >= 3 ? 'blessAnyway' : 'blessGo');
+}
 function openPop() {
   whatInput.value = '';
+  renderOmens();
   pop.hidden = false;
   whatInput.focus({ preventScroll: true });
 }
@@ -122,7 +152,7 @@ pop.addEventListener('submit', (e) => {
   if (state.vigil || state.blessing) { pop.hidden = true; return; }
   const text = whatInput.value.trim().slice(0, 40);
   pop.hidden = true;
-  state.shrine?.send('bless', { what: text });
+  state.shrine?.send('bless', { what: text, tz: myTz() }); // the shrine reads the omens by the deployer's clock
   blessFx();
   logMine('bless', text ? fmt('fBless', { what: text }) : t('fBlessAny'), { toastText: t('blessToast') });
 });
@@ -134,18 +164,20 @@ document.addEventListener('pointerdown', (e) => { if (!pop.hidden && !pop.contai
 shipBtn.addEventListener('click', () => {
   sound.unlock();
   if (!state.blessing) return;
+  const defied = (state.blessing.omens?.length ?? 0) >= OMEN_DEFY;
   state.shrine?.send('ship');
   shipFx();
   // The shrine sends the new run; until it does, this one counts.
-  logMine('ship', t('fShip'), { toastText: fmt('shipToast', { n: records.deploys.streak + 1 }) });
+  logMine('ship', t('fShip'), { toastText: defied ? fmt('shipDefiedToast', { n: state.blessing.omens.length }) : fmt('shipToast', { n: records.deploys.streak + 1 }) });
 });
 brokeBtn.addEventListener('click', () => {
   sound.unlock();
   if (!state.blessing) return;
   const named = Boolean(what()); // the shrine names the vigil after the deploy; without a name, ask what is down
+  const warned = (state.blessing.omens?.length ?? 0) >= OMEN_DEFY;
   state.shrine?.send('broke');
   brokeFx();
-  logMine('broke', t('fBroke'), { toastText: t('brokeToast') });
+  logMine('broke', t('fBroke'), { toastText: t(warned ? 'brokeWarnedToast' : 'brokeToast') });
   if (!named) promptTitle();
 });
 
@@ -154,14 +186,18 @@ export function remoteDeploy({ kind, by, blessing }) {
   if (kind === 'bless') {
     blessFx();
     const w = blessing?.what;
-    return { what: w ? fmt('fBless', { what: w }) : t('fBlessAny'), toastText: w ? fmt('blessRemote', { name: by.name, what: w }) : fmt('blessRemoteAny', { name: by.name }) };
+    const bad = blessing?.omens ?? [];
+    const against = bad.length >= OMEN_DEFY ? ` ${fmt('blessAgainstRemote', { n: bad.length })}` : '';
+    return { what: w ? fmt('fBless', { what: w }) : t('fBlessAny'), toastText: (w ? fmt('blessRemote', { name: by.name, what: w }) : fmt('blessRemoteAny', { name: by.name })) + against };
   }
+  const last = records.blessings[0]; // the shrine sends the filed record with Shipped and It broke
+  const defied = (last?.omens?.length ?? 0) >= OMEN_DEFY;
   if (kind === 'ship') {
     shipFx();
-    return { what: t('fShip'), toastText: fmt('shipRemote', { name: by.name, n: records.deploys.streak }) };
+    return { what: t('fShip'), toastText: defied ? fmt('shipDefiedRemote', { name: by.name, n: last.omens.length }) : fmt('shipRemote', { name: by.name, n: records.deploys.streak }) };
   }
   brokeFx();
-  return { what: t('fBroke'), toastText: fmt('brokeRemote', { name: by.name }) };
+  return { what: t('fBroke'), toastText: fmt(defied ? 'brokeWarnedRemote' : 'brokeRemote', { name: by.name }) };
 }
 
 /** A vigil opened soon after a deploy shipped (or while one was going out): everyone hears which. */

@@ -45,10 +45,15 @@
     <form class="eta-pop down-pop" id="bless-pop" hidden aria-labelledby="bless-pop-label">
       <label class="eta-pop__label" id="bless-pop-label" for="bless-what" data-i18n="blessWhat">What are you shipping?</label>
       <input class="down-pop__input" id="bless-what" name="bless-what" type="text" maxlength="40" autocomplete="off" data-i18n-placeholder="blessWhatPh" />
+      <!-- The omens, read before it goes out (shared/omens.js): the shrine reads the same ones when it starts -->
+      <div class="omens" id="bless-omens" aria-live="polite">
+        <p class="omens__verdict"><span class="omens__label" data-i18n="omensLabel">The omens</span> <b id="omens-verdict"></b></p>
+        <ul class="omens__list" id="omens-list"></ul>
+      </div>
       <p class="down-pop__note" data-i18n="blessWhatNote">The room bows with you. Say Shipped when it is out, or It broke, and the vigil begins.</p>
       <div class="down-pop__actions">
         <button class="btn btn--glass btn--sm" id="bless-cancel" type="button" data-i18n="blessCancel">Cancel</button>
-        <button class="btn btn--accent btn--sm" type="submit" data-i18n="blessGo">Bless it</button>
+        <button class="btn btn--accent btn--sm" id="bless-go" type="submit">Bless it</button>
       </div>
     </form>
     <button class="btn btn--live btn--sm incident__ship" id="btn-ship" type="button" hidden>

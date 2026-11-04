@@ -26,7 +26,7 @@ const LOOK = {
   light: ['var(--flame)', '灯'], survivor: ['var(--tone-2)', '生'], quick: ['var(--accent)', '速'], table: ['var(--tone-3)', '供'],
   choir: ['var(--tone-1)', '和'], great: ['#b38a2c', '吉'], curse: ['#4a4f63', '凶'], vow: ['var(--tone-2)', '誓'],
   week: ['#c9773a', '朝'], blameless: ['var(--tone-2)', '浄'], clean: ['var(--accent)', '清'], lantern: ['var(--flame)', '守'],
-  grateful: ['var(--tone-1)', '謝'], veteran: ['var(--tone-3)', '古'], night: ['#2f3a6b', '夜'], month: ['#b38a2c', '月'],
+  grateful: ['var(--tone-1)', '謝'], veteran: ['var(--tone-3)', '古'], night: ['#2f3a6b', '夜'], month: ['#b38a2c', '月'], defiant: ['var(--ember)', '逆'],
 };
 const POUCH = '<svg viewBox="0 0 24 34" aria-hidden="true"><path class="charm__cord" d="M9 7C9 1.5 15 1.5 15 7"/><path class="charm__body" d="M5 10Q12 6.5 19 10V30a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path class="charm__band" d="M5 13.5h14"/><circle class="charm__knot" cx="12" cy="8.5" r="1.8"/></svg>';
 

@@ -150,3 +150,18 @@ body[data-state="lit"] .plantern__core { opacity: .8; }
 .omikuji__advice { margin: 6px 0 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .omikuji__slip[data-level="great"] .omikuji__kanji, .omikuji__slip[data-level="good"] .omikuji__kanji { color: var(--accent); }
 .omikuji__slip[data-level="bad"] .omikuji__kanji, .omikuji__slip[data-level="terrible"] .omikuji__kanji { color: var(--error); }
+
+/* ---------- The omens, in the Bless a deploy prompt ---------- */
+.omens { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px dashed var(--line-strong); border-radius: var(--radius-md); background: var(--paper-sunk); }
+.omens__verdict { margin: 0; display: flex; align-items: baseline; gap: 8px; font-size: 14px; }
+.omens__label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.omens__verdict b { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 16px; color: var(--live); }
+.omens[data-verdict="2"] .omens__verdict b { color: var(--flame); }
+.omens:is([data-verdict="3"], [data-verdict="4"]) .omens__verdict b { color: var(--ember-ink); }
+.omens:is([data-verdict="3"], [data-verdict="4"]) { border-color: var(--ember); }
+.omens__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.omens__list:empty { display: none; }
+.omens__item { padding: 1px 8px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--live) 16%, transparent); color: var(--ink); font-size: 12px; }
+.omens__item::before { content: "✓ "; color: var(--live); }
+.omens__item[data-bad="1"] { background: var(--ember-soft); }
+.omens__item[data-bad="1"]::before { content: "✗ "; color: var(--ember-ink); }

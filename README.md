@@ -170,6 +170,19 @@ blessed and the clean run once there is one; the quiet TV says how many clean
 deploys in a row, and a pasted link mentions a blessing in progress. The rules
 live in `shared/rules.js` with the vigil's.
 
+**The omens.** Before anything goes out, the Bless a deploy prompt reads
+them: it is Friday, the weekend or after 4 pm (by the deployer's clock),
+nobody has bowed today, the kami is hungry, the last deploy broke, something
+went down in the last day, the moon is full, Mercury is retrograde. Someone
+having bowed today, a pleased kami and a clean run of three weigh against
+them, and a verdict runs from *Auspicious. Ship it.* to *Absolutely not. Well,
+it is your deploy.* At three or more against, Bless it reads **Ship anyway**.
+Nothing is ever stopped. The shrine reads the same omens when the blessing
+starts and keeps the bad ones on it: the heading says what it went out
+against, It broke then says the omens did say, and shipping clean against
+three or more earns the **Defiant** charm. The omens are in `shared/omens.js`;
+the Mercury dates there run to the end of 2027.
+
 ### The watch
 
 Someone is on call every night, so the shrine keeps a lantern for them. Under

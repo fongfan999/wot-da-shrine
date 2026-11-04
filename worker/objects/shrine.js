@@ -9,6 +9,7 @@ import { DurableObject } from 'cloudflare:workers';
 import { cleanSub, send as sendPush, topicOf } from '../push.js';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
 import { kamiLine, kamiMood } from '../../shared/kami.js';
+import { OMEN_DEFY, readOmens } from '../../shared/omens.js';
 import { AVATARS, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, WATCHED_MAX, WATCHED_NAME_MAX, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
@@ -357,6 +358,10 @@ export class Shrine extends DurableObject {
         if (this.demo || s.vigil || s.blessing) return;
         const now = Date.now();
         s.blessing = { startedAt: now, by: by.name, what: clean(msg.what, 40), bows: 0, prayers: 0, peak: this.people().length };
+        // The omens, read by the deployer's clock: the bad ones go out with the blessing and stay on its record.
+        const omens = readOmens({ now, tz: cleanTz(msg.tz), kami: s.kami, last: s.blessings[0], lastVigil: s.history[0]?.endedAt, daily: s.daily, streak: s.deploys.streak });
+        s.blessing.omens = omens.filter((o) => o.bad).map((o) => o.id);
+        s.blessing.good = omens.filter((o) => !o.bad).map((o) => o.id);
         s.deploys.blessed += 1;
         s.undo = null; // They're back can no longer be taken back: a vigil never reopens under a blessing
         break;
@@ -365,6 +370,7 @@ export class Shrine extends DurableObject {
         // Out, and nothing fell over. The streak goes on, until a vigil opens soon after (see openVigil).
         if (!s.blessing) return;
         out.record = this.closeBlessing(Date.now(), 'shipped');
+        if ((out.record.omens?.length ?? 0) >= OMEN_DEFY) { s.feats.defied += 1; out.defied = out.record.omens.length; } // against the omens, and clean
         if (this.vowStep('clean', by)) out.record.vowBy = { name: by.name, avatar: by.avatar }; // so a vigil soon after can take it back
         out.blessings = s.blessings;
         break;
