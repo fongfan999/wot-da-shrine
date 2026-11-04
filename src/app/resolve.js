@@ -69,7 +69,7 @@ for (const b of undoBtns) b.addEventListener('click', unresolve);
 function resolve() {
   sound.unlock();
   if (!state.vigil) { toast(t('resolveHint')); return; }
-  if (Date.now() - state.resolvedAt < 60000) return;
+  if (body.dataset.resolved) return; // already said for this vigil (a double click); a new vigil clears it
   resolveFx();
   showResolved(Date.now());
   addKarma(KARMA.resolve);
