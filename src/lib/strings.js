@@ -704,7 +704,6 @@ export const STRINGS = {
   kamiMood_new: 'unfed', kamiMood_pleased: 'pleased', kamiMood_content: 'content', kamiMood_peckish: 'peckish', kamiMood_hungry: 'hungry', kamiMood_starving: 'starving', kamiMood_vigil: 'not surprised',
   kamiFedAgo: 'fed {t} ago by {name}',
   kamiFedNow: 'just fed by {name}',
-  kamiNeverFed: 'never fed',
   kamiFeed: 'Bow to feed it',
   kamiFedMine: 'You fed the kami. It was {mood}. +{n} karma.',
   kamiFedBy: '{name} fed the kami. It was {mood}. +{n} karma.',

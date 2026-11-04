@@ -60,9 +60,10 @@ export function renderKami() {
   if (!mood) { shownMood = ''; shownPointed = null; return; }
   const k = state.kami ?? {};
   wrap.dataset.mood = mood;
+  wrap.dataset.fed = k.fedAt ? '1' : ''; // never fed: no meter and no "fed …", the line above already says so
   textEl.textContent = t(`kami_${mood}`);
   const when = k.fedAt ? ago(k.fedAt - state.clockSkew) : '';
-  sinceEl.textContent = k.fedAt ? fmt(when === 'now' ? 'kamiFedNow' : 'kamiFedAgo', { t: when, name: k.by || t('someone') }) : t('kamiNeverFed');
+  sinceEl.textContent = k.fedAt ? fmt(when === 'now' ? 'kamiFedNow' : 'kamiFedAgo', { t: when, name: k.by || t('someone') }) : '';
   // What is left of its protection: full at a meal, gone once it starves.
   const left = k.fedAt && mood !== 'vigil' ? Math.max(0, 1 - (serverNow() - k.fedAt) / KAMI_STARVE) : 0;
   fillEl.style.width = `${Math.round(left * 100)}%`;

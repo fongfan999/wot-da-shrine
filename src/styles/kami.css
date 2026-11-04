@@ -3,28 +3,29 @@
 .heading__lines { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px 8px; max-width: 100%; }
 .heading__lines:not(:has(> :not([hidden]))) { display: none; }
 .heading__lines > .watch { margin: 0; }
-.kami { position: relative; z-index: 6; display: inline-flex; align-items: center; gap: 4px; max-width: 100%; } /* its popover hangs over the mantra and the altar below */
+.kami { position: relative; z-index: 6; display: inline-flex; align-items: center; max-width: 100%; min-height: 30px; padding: 3px 4px 3px 0; border: 1px solid var(--field-line); border-radius: var(--radius-pill); background: var(--paper-raised); transition: border-color 160ms; } /* its popover hangs over the mantra and the altar below */
+.kami:hover { border-color: var(--line-strong); }
 .kami__btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
   max-width: 100%;
-  min-height: 30px;
-  padding: 3px 4px 3px 8px;
-  border: 1px solid var(--field-line);
+  padding: 0 10px 0 8px;
+  border: 0;
   border-radius: var(--radius-pill);
-  background: var(--paper-raised);
+  background: none;
   color: var(--muted);
   font: inherit;
   font-size: 13px;
   white-space: nowrap;
-  transition: border-color 160ms, background-color 160ms;
 }
-.kami__btn:hover:not(:disabled) { border-color: var(--line-strong); }
-.kami__btn:disabled { cursor: default; padding-right: 12px; }
-.kami__action { flex: none; min-height: 30px; padding: 3px 12px; border: 1px solid var(--accent); border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--note-ink); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background-color 160ms; }
-.kami__action:hover { background: var(--accent); color: var(--paper); }
+.kami__btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.kami__btn:disabled { cursor: default; }
+.kami:has(.kami__action[hidden]) { padding-right: 2px; }
+/* Bow to feed it: a chip inside the pill, the way Take the watch sits in its own */
+.kami__action { flex: none; padding: 3px 10px; border: 0; border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--note-ink); font: inherit; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color 160ms, color 160ms; }
+.kami__action:hover, .kami__action:focus-visible { background: var(--accent); color: var(--paper); outline: 0; }
 /* What it watches: under the mask */
 .kami-pop { left: 0; right: auto; top: calc(100% + 8px); gap: 10px; width: min(320px, calc(100vw - 2 * var(--gutter))); }
 .kami-pop__line { margin: 0; font-family: var(--font-serif); font-style: italic; font-size: 15px; line-height: 1.4; color: var(--ink); }
@@ -45,7 +46,7 @@
 .kami__fill { display: block; height: 100%; border-radius: 3px; background: var(--live); transition: width 1s, background-color 400ms; }
 .kami[data-mood="peckish"] .kami__fill { background: var(--flame); }
 .kami:is([data-mood="hungry"], [data-mood="starving"]) .kami__fill { background: var(--ember); }
-.kami[data-mood="vigil"] .kami__meter { display: none; }
+.kami:is([data-mood="vigil"], :not([data-fed="1"])) .kami__meter { display: none; }
 
 /* The mask: a fox face whose eyes say how it feels */
 .kami__mask { flex: none; width: 20px; height: 20px; overflow: visible; }
@@ -69,7 +70,8 @@ body[data-mode="room"][data-quiet="1"] .eyebrow { display: inline-flex; color: v
 body[data-mode="room"][data-quiet="1"] .eyebrow::before { background: var(--live); }
 
 /* On the TV it is a sign, not a control, and big enough to read across the room */
-body[data-tv="1"] .kami__btn { min-height: 40px; padding: 6px 18px 6px 12px; font-size: 18px; gap: 12px; }
+body[data-tv="1"] .kami { min-height: 40px; padding: 6px 8px 6px 4px; }
+body[data-tv="1"] .kami__btn { font-size: 18px; gap: 12px; }
 body[data-tv="1"] .kami__action { display: none; }
 body[data-tv="1"] .kami__mask { width: 28px; height: 28px; }
 body[data-tv="1"] .kami__since { font-size: 14px; }
@@ -81,6 +83,7 @@ body[data-tv="1"] .kami__meter { width: 64px; height: 7px; }
 }
 @media (max-width: 640px) {
   .kami__since { display: none; }
-  .kami__btn { font-size: 12px; min-height: 28px; }
+  .kami { min-height: 28px; }
+  .kami__btn { font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .kami[data-mood="starving"] .kami__mask { animation: none; } }
