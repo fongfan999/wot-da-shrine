@@ -8,10 +8,12 @@
 export function describe(st) {
   const bits = [];
   if (st.downFor) bits.push(`down for ${st.downFor < 60 ? `${st.downFor} min` : `${Math.floor(st.downFor / 60)}h ${st.downFor % 60}m`}`);
+  else if (st.blessing) bits.push('blessing a deploy');
   bits.push(st.people === 1 ? '1 praying' : `${st.people} praying`);
   bits.push(st.lit ? `incense burning, ${Math.ceil(st.burnLeft / 60)} min left` : 'incense is cold');
   if (st.karma) bits.push(`${st.karma} karma`);
   if (st.prayers) bits.push(st.prayers === 1 ? '1 prayer' : `${st.prayers} prayers`);
+  if (st.streak >= 2 && !st.downFor) bits.push(`${st.streak} clean deploys in a row`);
   let line = bits.join(' · ') + '.';
   if (st.lastPrayer) line += ` Last prayer: “${st.lastPrayer}”`;
   return line;

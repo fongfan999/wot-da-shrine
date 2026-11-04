@@ -96,6 +96,28 @@ them for everyone.
   a bonus and a peal of bells. The shrine counts it, so no single tab can
   fake it.
 
+### Bless a deploy
+
+Incidents are rare and deploys are daily, so a shrine is worth opening before
+anything breaks. With nothing down, **Bless a deploy** in the top bar asks what
+is shipping (optional) and starts a *blessing*: the heading says "Shipping
+payments-api v2.3", a clock counts up in the corner, and the room's bows and
+prayers count toward it. It ends one of two ways:
+
+- **Shipped**: bells, +5 karma, and the heading says it shipped clean for a
+  minute. The room's clean run goes on.
+- **It broke**: the vigil opens at once, named after the deploy ("Payments-api
+  v2.3 broke"), with the team already kneeling. The clean run starts again.
+
+A vigil that opens within 30 minutes of a Shipped counts against that deploy:
+the shrine marks it broke and the clean run starts again, so a streak means
+something. One blessing at a time, never during a vigil (then the vigil is the
+prayer), and one nobody ends within two hours is filed as never said, which
+neither keeps nor breaks the run. The **Shrine records** card shows deploys
+blessed and the clean run once there is one; the quiet TV says how many clean
+deploys in a row, and a pasted link mentions a blessing in progress. The rules
+live in `shared/rules.js` with the vigil's.
+
 ## Spreading the word
 
 The shrine is built to travel from one incident channel to the next:

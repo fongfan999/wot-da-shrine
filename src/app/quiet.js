@@ -9,12 +9,13 @@ import { every } from '../lib/clock.js';
 import { t } from '../lib/strings.js';
 import { $, body, embedded, fmt, records, roomName, settings, state, track, tv } from './context.js';
 import { applySettings } from './settings.js';
+import { quietStreak, shippedShown } from './deploy.js';
 
 const DAY = 86400000;
 const HOUR = 3600000;
 
 /** Only a shrine's own screen: not the home page's picture of the demo, not before the shrine has said what is going on. */
-const quietNow = () => Boolean(tv && !embedded && roomName && roomName !== 'demo' && state.greeted && !state.vigil && !body.dataset.resolved);
+const quietNow = () => Boolean(tv && !embedded && roomName && roomName !== 'demo' && state.greeted && !state.vigil && !body.dataset.resolved && !state.blessing && !shippedShown());
 
 const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
 
@@ -33,11 +34,12 @@ function quietTitle(since) {
 /** The heading while it is quiet. */
 export function quietHeading() {
   const last = records.history[0];
-  if (!last) return { eyebrow: t('quietEyebrow'), title: t('quietNever'), subtitle: t('quietNeverSub') };
+  const streak = quietStreak(); // the clean run, once the room blesses its deploys
+  if (!last) return { eyebrow: t('quietEyebrow'), title: t('quietNever'), subtitle: streak ? `${streak} ${t('quietNeverSub')}` : t('quietNeverSub') };
   const since = Date.now() - (last.endedAt - state.clockSkew);
   const survived = records.survived === 1 ? t('quietSurvivedOne') : fmt('quietSurvived', { n: records.survived });
   const what = last.title ? fmt('quietLastTitled', { title: last.title, t: minutesText(last.minutes) }) : fmt('quietLast', { t: minutesText(last.minutes) });
-  return { eyebrow: t('quietEyebrow'), title: quietTitle(since), subtitle: `${what} ${survived}` };
+  return { eyebrow: t('quietEyebrow'), title: quietTitle(since), subtitle: [what, survived, streak].filter(Boolean).join(' ') };
 }
 
 /* ---------- Now playing: which track, where to change it, and whether the browser lets it play ---------- */

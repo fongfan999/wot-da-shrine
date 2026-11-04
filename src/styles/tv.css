@@ -11,6 +11,8 @@ body[data-tv="1"] .vigil__label { font-size: 14px; }
 body[data-tv="1"] .vigil__time { font-size: clamp(3rem, 5vw, 5.4rem); }
 /* after They're back the clock is a sentence ("Survived in 1 min"), not digits: a line, not the timer's size */
 body[data-tv="1"]:is([data-resolved="1"], [data-shipped="1"]) .vigil__time { font-size: clamp(22px, 2vw, 34px); }
+/* and that sentence, at a TV's size, is wider than the corner the title leaves the digits */
+body[data-tv="1"]:is([data-resolved="1"], [data-shipped="1"]) .title { max-width: calc(100% - 22rem); }
 body[data-tv="1"] .vigil__meta { font-size: 15px; }
 .tv-join { position: absolute; left: 0; bottom: 6px; z-index: 4; display: flex; align-items: center; gap: 14px; padding: 10px 14px 10px 10px; border: 1px solid var(--ink); border-radius: var(--radius-md); background: var(--paper-raised); box-shadow: var(--shadow-float); }
 .tv-join__qr svg { display: block; width: 96px; height: 96px; }

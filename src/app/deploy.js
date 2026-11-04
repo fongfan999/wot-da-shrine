@@ -5,15 +5,17 @@
  * A vigil that opens soon after a Shipped counts against that deploy: the shrine keeps that rule.
  */
 import gsap from 'gsap';
-import { SHIPPED_FOR } from '../../shared/rules.js';
+import { BLESSING_MAX, SHIPPED_FOR } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
+import { every } from '../lib/clock.js';
 import { t } from '../lib/strings.js';
 import { $, body, fmt, reduceMotion, records, roomName, state, tv } from './context.js';
 import { art, motes, petals, room } from './engines.js';
 import { activity } from './fx.js';
 import { applySettings } from './settings.js';
 import { shockwave, logMine, toast } from './ui.js';
-import { promptTitle } from './vigilStart.js';
+import { tickVigil } from './stats.js';
+import { promptTitle, renderDown } from './vigilStart.js';
 
 const blessBtn = $('#btn-bless');
 const shipBtn = $('#btn-ship');
@@ -166,5 +168,15 @@ export function remoteDeploy({ kind, by, blessing }) {
 export function blamedFx(record) {
   toast(record?.what ? fmt('blamedToast', { what: record.what }) : t('blamedToastAny'));
 }
+
+/* A blessing nobody ended is filed as never said after BLESSING_MAX. The shrine only notices when
+   someone next comes or acts, so a screen on the wall lets it go on its own rather than count forever. */
+every(1000, () => {
+  if (!state.blessing || Date.now() - state.blessing.startedAt < BLESSING_MAX) return;
+  state.blessing = null;
+  renderDeploy();
+  renderDown();
+  tickVigil();
+});
 
 renderDeploy();

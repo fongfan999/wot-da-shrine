@@ -16,7 +16,7 @@ export const OFFERING_KINDS = ['energy', 'noodles', 'duck', 'coffee', 'keyboard'
 export const FORTUNES = ['great', 'good', 'small', 'bad', 'terrible'];
 
 /** What each action is worth. Lighting is free; its karma comes when the stick burns down. */
-export const KARMA = { light: 0, bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20, blame: 5, omikuji: 2 };
+export const KARMA = { light: 0, bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20, blame: 5, omikuji: 2, bless: 2, ship: 5, broke: 0 };
 
 /**
  * A vigil is one incident. It opens with the first thing anyone does at the altar, and closes when
@@ -32,6 +32,22 @@ export const RESOLVE_UNDO = 30 * 1000;
 
 /** Vigils a shrine remembers. */
 export const MAX_HISTORY = 12;
+
+/**
+ * A blessing is a deploy prayed over: someone says what is shipping, the room bows, and it ends with
+ * Shipped or It broke. One at a time, and never during a vigil (then the vigil is the prayer).
+ * It broke opens the vigil. A blessing nobody ends within this long is filed as never said.
+ */
+export const BLESSING_MAX = 2 * 3600 * 1000;
+
+/** A vigil that opens this soon after a Shipped counts against that deploy: the streak was not clean. */
+export const BLESSING_BLAME = 30 * 60 * 1000;
+
+/** After Shipped the heading says so this long. */
+export const SHIPPED_FOR = 60 * 1000;
+
+/** Blessings a shrine remembers. */
+export const MAX_BLESSINGS = 12;
 
 /** The music a shrine can play, all synthesized in src/audio/music.js. The first is the default. */
 export const TRACKS = ['vigil', 'focus', 'chant', 'rain'];

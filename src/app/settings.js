@@ -10,6 +10,7 @@ import { splitTitle, title } from './stage.js';
 import { updateEta, updateStats, updateVitalsLabel } from './stats.js';
 import { toast } from './ui.js';
 import { quietHeading } from './quiet.js';
+import { blessingHeading } from './deploy.js';
 
 /** The stock headline a shrine gets until someone names what is down: picked from its name, so everyone in it reads the same one. */
 function headlineFor(room) {
@@ -31,10 +32,11 @@ export function applySettings(animate = false) {
   applyFx();
   if (body.dataset.resolved) applyStrings({ title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
   else if (landing) applyStrings({ eyebrow: t('landEyebrow'), title: t('landTitle'), subtitle: t('landSubtitle') });
+  else if (body.dataset.blessing || body.dataset.shipped) applyStrings(blessingHeading());
   else if (body.dataset.quiet) applyStrings(quietHeading());
   else applyStrings({ title: meta('title'), subtitle: subtitleShown() });
   body.dataset.subtitle = meta('subtitle') ? 'custom' : ''; // phones hide a shrine's stock subtitle, never one the room wrote
-  document.title = body.dataset.quiet ? `${quietHeading().title} · ${BRAND}` : body.dataset.resolved ? `${t('resolvedTitle')} · ${BRAND}` : meta('title') ? `${meta('title')} · ${BRAND}` : landing ? `${BRAND}: ${t('landDocTitle')}` : `${t('title')} · ${BRAND}`;
+  document.title = body.dataset.blessing || body.dataset.shipped ? `${blessingHeading().title} · ${BRAND}` : body.dataset.quiet ? `${quietHeading().title} · ${BRAND}` : body.dataset.resolved ? `${t('resolvedTitle')} · ${BRAND}` : meta('title') ? `${meta('title')} · ${BRAND}` : landing ? `${BRAND}: ${t('landDocTitle')}` : `${t('title')} · ${BRAND}`;
   if (animate || !title.querySelector('.word')) splitTitle(animate);
 
   fog.setEnabled(settings.fog && !lite);

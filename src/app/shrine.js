@@ -14,6 +14,9 @@ import { pingPerson, presence, renderPeople } from './people.js';
 import { prayerFx, remember, wishInput } from './prayers.js';
 import { clearResolved, renderResolve, renderUndo, RESOLVED_FOR, resolveFx, showResolved, undoneFx } from './resolve.js';
 import { blameFx, fortuneFx } from './rituals.js';
+import { blamedFx, remoteDeploy, renderDeploy, showShipped } from './deploy.js';
+import { renderDown } from './vigilStart.js';
+import { SHIPPED_FOR } from '../../shared/rules.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
 import { applySettings } from './settings.js';
 import { karmaBeat, renderRecords, statKarma, tickVigil, updateStats } from './stats.js';
@@ -21,7 +24,7 @@ import { bump, logEvent, toast } from './ui.js';
 
 /* ---------- Shared shrine ---------- */
 const DEFAULT_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader'];
-const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense' };
+const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense', bless: 'bow', ship: 'check', broke: 'fire' };
 export const joinEl = $('#join');
 /** The join sheet is up and waiting: not merely fading out after you joined. */
 export const joinOpen = () => !joinEl.hidden && !joinEl.inert;
@@ -215,8 +218,13 @@ function onShrineMessage(msg) {
         for (const p of msg.prayers.slice(-6)) recentPrayers.push({ text: p.text, name: p.name });
         records.history = msg.history ?? [];
         records.longest = msg.longest ?? 0;
+        records.blessings = msg.blessings ?? [];
+        // Shipped a moment before you came in: the heading still says so.
+        const shipped = records.blessings[0];
+        if (!msg.vigil && !msg.blessing && shipped?.outcome === 'shipped' && msg.now - shipped.endedAt < SHIPPED_FOR) showShipped(shipped.endedAt - state.clockSkew);
         state.lastVigil = records.history[0]?.outcome === 'survived' ? records.history[0] : null;
-        if (msg.resolvedAt && msg.now - msg.resolvedAt < RESOLVED_FOR) showResolved(msg.resolvedAt - state.clockSkew, true);
+        // Back a moment ago, and nothing has gone down or gone out since: the room is still celebrating.
+        if (!msg.vigil && !msg.blessing && msg.resolvedAt && msg.now - msg.resolvedAt < RESOLVED_FOR) showResolved(msg.resolvedAt - state.clockSkew, true);
         // Arrived with ?title=… or ?eta=… on a shrine that has none yet: that becomes the room's.
         const seed = {};
         for (const k of ['title', 'subtitle', 'eta', 'track']) if (meta(k) && urlParams.has(k) && !state.roomMeta[k]) seed[k] = meta(k);
@@ -241,7 +249,8 @@ function onShrineMessage(msg) {
       for (const k of Object.keys(msg.meta)) urlParams.delete(k);
       const theirs = msg.by.id !== state.myId;
       applySettings(theirs && renamed);
-      if (theirs && renamed) toast(fmt('metaChanged', { name: msg.by.name, title: msg.meta.title }));
+      // It broke names the vigil after the deploy: that toast says so already.
+      if (theirs && renamed && !state.blessing) toast(fmt('metaChanged', { name: msg.by.name, title: msg.meta.title }));
       if (theirs && retuned) toast(fmt('trackChanged', { name: msg.by.name, track: t(`track_${track()}`) }));
       break;
     }
@@ -264,6 +273,7 @@ function onShrineMessage(msg) {
       renderPeople();
       break;
     case 'sync':
+      if (msg.blessings) records.blessings = msg.blessings;
       syncCounters(msg);
       syncAltar(msg.litAt);
       break;
@@ -274,7 +284,12 @@ function onShrineMessage(msg) {
         records.history = [msg.record, ...records.history].slice(0, 12);
       }
       if (msg.kind === 'unresolve') records.history = records.history.filter((r) => r.endedAt !== msg.undone);
+      if (msg.blessings) records.blessings = msg.blessings;
+      if (msg.kind === 'ship') state.shippedAt = Date.now(); // before the counters, so the heading goes straight to Shipped
       syncCounters(msg);
+      if (msg.kind === 'ship') showShipped(state.shippedAt);
+      // A vigil opened soon after a deploy, or while one went out: it counts against that deploy.
+      if (msg.blamed && msg.kind !== 'broke') blamedFx(msg.blamed);
       if (msg.kind === 'light' || msg.by.id === state.myId) syncAltar(msg.litAt);
       if (msg.by.id !== state.myId) remoteAct(msg);
       if (msg.chorus) chorusFx(msg.chorus, msg.bonus);
@@ -283,7 +298,8 @@ function onShrineMessage(msg) {
   }
 }
 
-function remoteAct({ kind, by, note, item, text, level, down }) {
+function remoteAct(msg) {
+  const { kind, by, note, item, text, level, down } = msg;
   const log = (what, extra = {}) => logEvent({ key: `${by.id}:${kind}${item ? `:${item}` : ''}`, avatar: by.avatar, who: by.name, what, toastText: `${by.name} ${what}.`, ...extra });
   if (kind === 'light') { congregation.bow(by.id, 3); log(t(down ? 'fLightDown' : 'fLight')); }
   else if (kind === 'down') { sound.bowl(174); log(t('fDown'), { toastText: fmt('downRemote', { name: by.name }) }); }
@@ -296,10 +312,11 @@ function remoteAct({ kind, by, note, item, text, level, down }) {
   else if (kind === 'omikuji') { fortuneFx(); log(fmt('fOmikuji', { level: FORTUNE_LEVELS[level]?.name ?? level })); }
   else if (kind === 'resolve') { resolveFx(); showResolved(Date.now()); log(t('fResolve'), { toastText: fmt('resolvedToast', { name: by.name }) }); }
   else if (kind === 'unresolve') { undoneFx(); log(t('fUnresolve'), { toastText: fmt('unresolvedToast', { name: by.name }) }); }
+  else if (kind === 'bless' || kind === 'ship' || kind === 'broke') { const { what, toastText } = remoteDeploy(msg); log(what, { toastText }); }
 }
 
 /** The shrine is the source of truth for the room's counters. */
-function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo }) {
+function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo, blessing, deploys }) {
   if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); }
   if (karma !== undefined && karma !== counters.karma) { if (state.greeted) karmaBeat(karma - counters.karma); counters.karma = karma; updateStats(!state.greeted); bump(statKarma); }
   if (since) state.roomSince = since - state.clockSkew;
@@ -311,6 +328,12 @@ function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longe
     tickVigil();
   }
   if (longest !== undefined) records.longest = longest;
+  if (deploys !== undefined) records.deploys = deploys;
+  if (blessing !== undefined) {
+    state.blessing = blessing ? { ...blessing, startedAt: blessing.startedAt - state.clockSkew } : null;
+    if (state.blessing && body.dataset.resolved) clearResolved(); // a deploy going out: the celebration is over
+  }
+  if (blessing !== undefined || v !== undefined || deploys !== undefined) { renderDeploy(); renderDown(); tickVigil(); }
   // They're back can be taken back for a moment, by whoever said it (renderUndo checks who).
   if (undo !== undefined) { state.undo = undo ? { by: undo.by, until: undo.until - state.clockSkew } : null; renderUndo(); }
   if (survived !== undefined && survived !== records.survived) { records.survived = survived; if (state.greeted) renderRecords(); }

@@ -7,7 +7,7 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
-import { AVATARS, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, KARMA, MAX_HISTORY, OFFERING_KINDS, RESOLVE_UNDO, TRACKS, VIGIL_IDLE } from '../../shared/rules.js';
+import { AVATARS, BLESSING_BLAME, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, KARMA, MAX_BLESSINGS, MAX_HISTORY, OFFERING_KINDS, RESOLVE_UNDO, TRACKS, VIGIL_IDLE } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_OFFERINGS = 4; // the altar table has four slots
@@ -52,6 +52,9 @@ const EMPTY = {
   meta: { title: '', subtitle: '', eta: '', track: '' }, // what's down and when it's back, shared by the whole room
   vigil: null, history: [], survived: 0, longest: 0,
   undo: null, // { id, at, vigil, longest, resolvedAt }: They're back, while whoever said it can still take it back
+  blessing: null, // the deploy being prayed over: { startedAt, by, what, bows, prayers, peak }
+  blessings: [], // the last few, newest first: { startedAt, endedAt, by, what, bows, prayers, peak, outcome }
+  deploys: { blessed: 0, shipped: 0, broke: 0, streak: 0, best: 0 }, // streak: shipped in a row, with no vigil after
 };
 
 function clean(text, max) {
@@ -78,7 +81,7 @@ export class Shrine extends DurableObject {
       this.stored = saved !== undefined;
       this.claimed = (await ctx.storage.get('claimed')) === true;
       this.alarmAt = (await ctx.storage.getAlarm()) ?? 0;
-      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta } };
+      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys } };
     });
   }
 
@@ -111,9 +114,12 @@ export class Shrine extends DurableObject {
 
     this.settle();
     let dirty = this.forget();
+    if (this.expireBlessing()) { dirty = true; this.broadcast({ t: 'sync', blessings: this.state.blessings, ...this.counters() }, server); }
     // The vigil's peak counts everyone who knelt, not only those who did something.
     const v = this.state.vigil;
     if (v && !person.watcher && this.people().length > v.peak) { v.peak = this.people().length; dirty = true; }
+    const b = this.state.blessing;
+    if (b && !person.watcher && this.people().length > b.peak) { b.peak = this.people().length; dirty = true; }
     if (dirty) await this.save();
     server.send(JSON.stringify({
       t: 'state',
@@ -128,6 +134,7 @@ export class Shrine extends DurableObject {
       meta: this.state.meta,
       history: this.state.history,
       longest: this.state.longest,
+      blessings: this.state.blessings,
     }));
     if (person.watcher) { /* a screen comes and goes unannounced */ }
     else if (!was) this.broadcast({ t: 'join', person: pub(person) }, server);
@@ -147,6 +154,8 @@ export class Shrine extends DurableObject {
     const s = this.state;
     const out = { t: 'act', kind: msg.t, by };
     let opens = false; // this action says something is down
+    this.blamed = null; // a deploy the vigil this action opens counts against
+    if (this.expireBlessing()) { this.broadcast({ t: 'sync', blessings: s.blessings, ...this.counters() }); await this.save(); }
 
     switch (msg.t) {
       case 'light':
@@ -202,12 +211,13 @@ export class Shrine extends DurableObject {
         if ('track' in msg) meta.track = TRACKS.includes(msg.track) ? msg.track : TRACKS[0];
         // Naming what is down, in a quiet room, says something is down. Not while the room still
         // celebrates the last one: then it is the old incident being tidied up.
-        const named = meta.title && meta.title !== s.meta.title && !s.vigil && Date.now() - s.resolvedAt > CELEBRATE_FOR;
+        // Nor while a deploy is being blessed: renaming the shrine then is not It broke.
+        const named = meta.title && meta.title !== s.meta.title && !s.vigil && !s.blessing && Date.now() - s.resolvedAt > CELEBRATE_FOR;
         s.meta = meta;
         this.broadcast({ t: 'meta', meta, by });
         if (named) {
           this.openVigil();
-          this.broadcast({ t: 'act', kind: 'down', by, ...this.counters() });
+          this.broadcast({ t: 'act', kind: 'down', by, ...this.blame(), ...this.counters() });
         }
         await this.save();
         return;
@@ -252,6 +262,33 @@ export class Shrine extends DurableObject {
         out.undone = u.at;
         break;
       }
+      case 'bless': {
+        // A deploy, prayed over. Not in the demo (always down), not during a vigil, one at a time.
+        if (this.demo || s.vigil || s.blessing) return;
+        const now = Date.now();
+        s.blessing = { startedAt: now, by: by.name, what: clean(msg.what, 40), bows: 0, prayers: 0, peak: this.people().length };
+        s.deploys.blessed += 1;
+        s.undo = null; // They're back can no longer be taken back: a vigil never reopens under a blessing
+        break;
+      }
+      case 'ship':
+        // Out, and nothing fell over. The streak goes on, until a vigil opens soon after (see openVigil).
+        if (!s.blessing) return;
+        out.record = this.closeBlessing(Date.now(), 'shipped');
+        out.blessings = s.blessings;
+        break;
+      case 'broke':
+        // It did not go well: the blessing is filed as broke, and the vigil opens, named for the deploy.
+        if (!s.blessing) return;
+        if (s.blessing.what && !s.vigil) {
+          const w = s.blessing.what;
+          s.meta = { ...s.meta, title: clean(`${w.charAt(0).toUpperCase()}${w.slice(1)} broke`, META_MAX.title) };
+          this.broadcast({ t: 'meta', meta: s.meta, by });
+        }
+        out.record = this.closeBlessing(Date.now(), 'broke');
+        out.blessings = s.blessings;
+        opens = true;
+        break;
       case 'rename': {
         if (this.demo) return;
         const name = clean(msg.name, 24);
@@ -271,12 +308,15 @@ export class Shrine extends DurableObject {
     const demoOpens = this.demo && OPENS_VIGIL.has(msg.t) && (msg.t === 'light' || Date.now() - s.resolvedAt > CELEBRATE_FOR);
     if (!s.vigil && (opens || demoOpens)) this.openVigil();
     if (s.vigil && VIGIL_FIELD[msg.t]) s.vigil[VIGIL_FIELD[msg.t]] += 1;
+    // The room's bows and prayers while a deploy goes out are its blessing.
+    if (s.blessing && (msg.t === 'bow' || msg.t === 'prayer')) s.blessing[`${msg.t}s`] += 1;
+    if (s.blessing) s.blessing.peak = Math.max(s.blessing.peak, this.people().length);
     if (s.vigil) {
       s.vigil.lastAt = Date.now();
       s.vigil.karma += (KARMA[msg.t] ?? 0) + (out.bonus ?? 0);
       s.vigil.peak = Math.max(s.vigil.peak, this.people().length);
     }
-    this.broadcast({ ...out, ...this.counters() });
+    this.broadcast({ ...out, ...this.blame(), ...this.counters() });
     const fresh = !this.stored;
     await this.save();
     this.report(msg.t, { text: out.text, karma: KARMA[msg.t] ?? 0, fresh });
@@ -361,14 +401,66 @@ export class Shrine extends DurableObject {
   counters() {
     const s = this.state;
     const undo = s.undo && Date.now() - s.undo.at < RESOLVE_UNDO ? { by: s.undo.id, until: s.undo.at + RESOLVE_UNDO } : null;
-    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo };
+    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo, blessing: s.blessing, deploys: s.deploys };
   }
 
-  /** A new incident: the vigil starts now, with everyone already kneeling. */
+  /**
+   * A new incident: the vigil starts now, with everyone already kneeling. A deploy still being
+   * blessed broke, and one shipped within BLESSING_BLAME is not clean after all: either way the
+   * streak ends, and blame() tells the room which deploy it was.
+   */
   openVigil() {
+    const s = this.state;
     const now = Date.now();
-    this.state.vigil = { startedAt: now, lastAt: now, seenAt: now, peak: this.people().length, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0 };
-    this.state.undo = null;
+    s.vigil = { startedAt: now, lastAt: now, seenAt: now, peak: this.people().length, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0 };
+    s.undo = null;
+    if (s.blessing) { this.blamed = this.closeBlessing(now, 'broke'); return; }
+    const last = s.blessings[0];
+    if (last?.outcome === 'shipped' && now - last.endedAt < BLESSING_BLAME) {
+      last.outcome = 'broke';
+      last.brokeAt = now;
+      s.deploys.shipped = Math.max(0, s.deploys.shipped - 1);
+      s.deploys.broke += 1;
+      // It was the newest, so the run ends just before it: the best is what it was before this one, or that run.
+      s.deploys.best = Math.max(last.bestBefore ?? 0, s.deploys.streak - 1);
+      s.deploys.streak = 0;
+      this.blamed = last;
+    }
+  }
+
+  /** The deploy a vigil just opened against, for the broadcast that says so; {} when none. */
+  blame() {
+    if (!this.blamed) return {};
+    const out = { blamed: this.blamed, blessings: this.state.blessings };
+    this.blamed = null;
+    return out;
+  }
+
+  /** End the blessing and file it. Returns the record. */
+  closeBlessing(endedAt, outcome) {
+    const s = this.state;
+    const b = s.blessing;
+    const record = { ...b, endedAt, outcome };
+    if (outcome === 'shipped') record.bestBefore = s.deploys.best; // so a vigil soon after can take it back exactly
+    s.blessings = [record, ...s.blessings].slice(0, MAX_BLESSINGS);
+    if (outcome === 'shipped') {
+      s.deploys.shipped += 1;
+      s.deploys.streak += 1;
+      s.deploys.best = Math.max(s.deploys.best, s.deploys.streak);
+    } else if (outcome === 'broke') {
+      s.deploys.broke += 1;
+      s.deploys.streak = 0;
+    }
+    s.blessing = null;
+    return record;
+  }
+
+  /** A blessing nobody ended within BLESSING_MAX is filed as never said: it neither keeps nor breaks the streak. True when it was. */
+  expireBlessing() {
+    const b = this.state.blessing;
+    if (!b || Date.now() - b.startedAt < BLESSING_MAX) return false;
+    this.closeBlessing(b.startedAt + BLESSING_MAX, 'unsaid');
+    return true;
   }
 
   /** End the vigil and file it. Returns the record. */
@@ -413,6 +505,7 @@ export class Shrine extends DurableObject {
   status(room) {
     this.settle();
     this.forget();
+    this.expireBlessing();
     const s = this.state;
     const people = this.people();
     const now = Date.now();
@@ -431,6 +524,8 @@ export class Shrine extends DurableObject {
       downFor: s.vigil ? Math.max(1, Math.round((now - s.vigil.startedAt) / 60000)) : 0, // at least 1: an open vigil is always "down"
       survived: s.survived,
       title: s.meta.title,
+      blessing: Boolean(s.blessing), // a deploy is going out
+      streak: s.deploys.streak,
       lastPrayer: s.prayers.at(-1)?.text ?? '',
       now,
     };

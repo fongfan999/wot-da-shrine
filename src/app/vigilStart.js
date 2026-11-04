@@ -20,14 +20,17 @@ const mayDeclare = () => Boolean(roomName) && !tv && roomName !== 'demo';
 /** A shrine whose name already says it: prod-is-down, payments-outage. Lighting there needs no question. */
 const nameSaysDown = () => /(^|-)(down|outage|incident|broken|dead|offline)(-|$)/.test(roomName);
 
-/** Lighting asks first when no vigil is open, unless the shrine's name has already answered. */
-export const asksBeforeLighting = () => mayDeclare() && !state.vigil && !nameSaysDown();
+/**
+ * Lighting asks first when no vigil is open, unless the shrine's name has already answered. Not while
+ * a deploy is being blessed: incense then is part of the blessing, and It broke is how to say it is down.
+ */
+export const asksBeforeLighting = () => mayDeclare() && !state.vigil && !state.blessing && !nameSaysDown();
 /** What lighting says when it does not ask: down in a shrine named for it. */
-export const lightSaysDown = () => mayDeclare() && !state.vigil && nameSaysDown();
+export const lightSaysDown = () => mayDeclare() && !state.vigil && !state.blessing && nameSaysDown();
 
-/** The button shows whenever there is no vigil to end. */
+/** The button shows whenever there is no vigil to end, and no deploy going out (It broke stands in for it then). */
 export function renderDown() {
-  downBtn.hidden = !mayDeclare() || Boolean(state.vigil);
+  downBtn.hidden = !mayDeclare() || Boolean(state.vigil || state.blessing);
   if (downBtn.hidden && !pop.hidden && !state.vigil) closePrompt();
 }
 

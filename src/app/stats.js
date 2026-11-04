@@ -95,6 +95,7 @@ const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m
 export function tickVigil() {
   // The scene reads this: the down rack's lights go out while a vigil is open.
   if (state.vigil) body.dataset.vigil = '1'; else delete body.dataset.vigil;
+  delete vigilEl.dataset.mode;
   // No vigil open: the altar says how to begin one. Not on a TV, which has no hands, and not while
   // the incense still burns from the last vigil (touching the censer then only stirs the smoke).
   lightCue.hidden = Boolean(state.vigil || body.dataset.resolved || tv || state.lit || !roomName);
@@ -104,6 +105,28 @@ export function tickVigil() {
     vigilTime.textContent = fmt('vigilSurvived', { t: minutesText(state.lastVigil.minutes) });
     vigilMeta.textContent = [fmt('vigilPraying', { n: state.lastVigil.peak }), fmt('vigilPrayers', { n: state.lastVigil.prayers }), fmt('vigilNo', { n: records.survived })].join(' · ');
     vigilEl.title = vigilHint(records.survived);
+    return;
+  }
+  // A deploy going out counts up in the corner; for a minute after Shipped, it says how long it took.
+  if (!state.vigil && (state.blessing || body.dataset.shipped)) {
+    delete vigilEl.dataset.idle;
+    const run = records.deploys.streak ? fmt('vigilCleanRun', { n: records.deploys.streak }) : '';
+    if (state.blessing) {
+      vigilEl.dataset.mode = 'bless';
+      vigilLabel.textContent = t('vigilBlessing');
+      vigilTime.textContent = hhmmss(Date.now() - state.blessing.startedAt);
+      const bits = [fmt('vigilPraying', { n: people.size })];
+      if (state.blessing.bows) bits.push(fmt('vigilBowing', { n: state.blessing.bows }));
+      if (run) bits.push(run);
+      vigilMeta.textContent = bits.join(' · ');
+    } else {
+      const last = records.blessings[0];
+      vigilEl.dataset.mode = 'shipped';
+      vigilLabel.textContent = '';
+      vigilTime.textContent = last ? fmt('vigilShipped', { t: minutesText(Math.max(1, Math.round((last.endedAt - last.startedAt) / 60000))) }) : t('shippedEyebrow');
+      vigilMeta.textContent = run;
+    }
+    vigilEl.title = '';
     return;
   }
   if (!state.vigil) {
@@ -148,6 +171,12 @@ function shrineLevel(karma = counters.karma) {
 export function renderRecords() {
   $('#rec-survived').textContent = records.survived;
   $('#rec-prayers').textContent = state.roomPrayed;
+  // Deploys, once the room has blessed one: how many, and the clean run.
+  const d = records.deploys;
+  $('#stat-deploys').hidden = $('#stat-streak').hidden = !d.blessed;
+  $('#rec-deploys').textContent = d.blessed;
+  $('#rec-streak').textContent = d.streak;
+  $('#stat-deploys').title = $('#stat-streak').title = fmt('recDeploysTip', d);
   const longest = $('#rec-longest');
   longest.hidden = !records.longest;
   longest.textContent = records.longest ? fmt('recLongest', { t: minutesText(records.longest) }) : '';
