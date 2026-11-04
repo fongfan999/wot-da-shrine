@@ -104,11 +104,10 @@ export function renderPeople(newId) {
     a.textContent = p.avatar;
     presence.appendChild(a);
   }
-  const count = document.createElement('span');
-  count.className = 'presence__count';
-  count.textContent = fmt('prayingCount', { n: list.length });
-  presence.appendChild(count);
-  presence.title = list.map((p) => p.name).join(', ');
+  // Only the faces: the count and the names are in the tooltip and read out
+  const count = fmt('prayingCount', { n: list.length });
+  presence.title = `${count}: ${list.map((p) => p.name).join(', ')}`;
+  presence.setAttribute('aria-label', count);
 }
 
 /** Someone did something: their row glows and the action's icon floats off it. */
