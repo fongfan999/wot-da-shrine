@@ -1,4 +1,4 @@
-/* Settings: theme, effects, title, ETA and the sound mix, applied to the page; the settings panel and sound toggle. */
+/* Settings: theme, scene, effects, title, ETA and the sound mix, applied to the page; the settings panel and sound toggle. */
 import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { syncPalette } from '../scene/palette.js';
@@ -13,6 +13,7 @@ import { copyText, toast } from './ui.js';
 import { quietHeading } from './quiet.js';
 import { blessingHeading } from './deploy.js';
 import { cleanScreen } from '../../shared/rules.js';
+import { applyScene, howToOpen, nameOf, nextToOpen, onUnlocks, opened, playable, scene } from './unlocks.js';
 
 /** The stock headline a shrine gets until someone names what is down: picked from its name, so everyone in it reads the same one. */
 function headlineFor(room) {
@@ -32,6 +33,7 @@ const backdrop = $('#panel-backdrop');
 export function applySettings(animate = false) {
   if (tv && roomName) followScreen();
   applyTheme();
+  applyScene();
   applyFx();
   if (body.dataset.resolved) applyStrings({ title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
   else if (landing) applyStrings({ eyebrow: t('landEyebrow'), title: t('landTitle'), subtitle: t('landSubtitle') });
@@ -44,7 +46,7 @@ export function applySettings(animate = false) {
 
   fog.setEnabled(settings.fog && !lite);
   petals.setEnabled(settings.petals);
-  sound.setMix(mix());
+  sound.setMix(playable(mix())); // only what this shrine has opened, whatever a link asked for
   sound.setMusic(settings.music);
   sound.setSfx(settings.sfx);
 
@@ -63,6 +65,7 @@ export function applySettings(animate = false) {
   $('#screen-fx').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.screenFx === sc.fx)));
   panel.querySelectorAll('[data-screen]').forEach((el) => { el.checked = sc[el.dataset.screen]; });
   renderMixer();
+  renderScenes();
 
   updateEta();
   updateStats();
@@ -110,7 +113,7 @@ export function openPanel(open) {
   panel.setAttribute('aria-hidden', String(!open));
   backdrop.classList.toggle('open', open);
   gsap.to(panel, { x: open ? '0%' : '100%', duration: 0.5, ease: open ? 'power3.out' : 'power3.in' });
-  if (open) sound.tick(660, 0.06);
+  if (open) { sound.tick(660, 0.06); for (const id of ['#btn-more', '#btn-settings']) $(id).removeAttribute('data-new'); }
 }
 /* Tabs: the shrine's settings, the TV's, yours. Only yours where the shrine can't be changed (the home page, the demo, a TV). */
 const tabs = [...panel.querySelectorAll('[role=tab]')];
@@ -208,7 +211,7 @@ panel.querySelectorAll('[data-screen]').forEach((el) => el.addEventListener('cha
 /* ---------- The mixer: a chip per preset, a slider per layer; the whole room hears the result ---------- */
 const sliders = Object.fromEntries(LAYERS.map((k) => [k, $(`#mix-layers input[data-layer=${k}]`)]));
 function renderMixer() {
-  const m = mix();
+  const m = playable(mix());
   const preset = presetOf(m);
   $('#mix-presets').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.preset === preset)));
   for (const k of LAYERS) {
@@ -216,7 +219,14 @@ function renderMixer() {
     const el = sliders[k];
     if (Number(el.value) !== v) el.value = v;
     el.style.setProperty('--v', `${v}%`);
-    el.closest('.mixer__layer').dataset.on = v ? '1' : '';
+    const row = el.closest('.mixer__layer');
+    row.dataset.on = v ? '1' : '';
+    // A layer the shrine has not opened yet: shown, with how to open it, and not to be moved.
+    const shut = !opened(k);
+    el.disabled = shut;
+    row.dataset.locked = shut ? '1' : '';
+    row.querySelector('small').textContent = shut ? howToOpen(k) : t(`layerHint_${k}`);
+    row.title = shut ? fmt('lockedTip', { how: howToOpen(k) }) : '';
   }
   $('#mix-note').textContent = `${fmt('mixNow', { mix: mixName(m) })} ${settings.music ? t('trackShared') : t('trackOff')}`;
 }
@@ -234,6 +244,52 @@ $('#mix-layers').addEventListener('input', (e) => {
   if (!e.target.dataset.layer) return;
   sound.unlock();
   setSetting('mix', slidersMix()); // every move plays here at once; the room hears it a moment after the slider rests
+});
+
+/* ---------- The scene: the room's, picked from the ones it has opened ---------- */
+const scenePick = $('#scene-pick');
+function renderScenes() {
+  const now = scene();
+  for (const b of scenePick.querySelectorAll('[data-scene]')) {
+    const k = b.dataset.scene;
+    const shut = !opened(k);
+    b.setAttribute('aria-checked', String(k === now));
+    b.tabIndex = k === now ? 0 : -1;
+    b.disabled = shut;
+    b.dataset.locked = shut ? '1' : '';
+    b.querySelector('small').textContent = shut ? howToOpen(k) : t(`sceneHint_${k}`);
+    b.title = shut ? fmt('lockedTip', { how: howToOpen(k) }) : '';
+  }
+  const next = nextToOpen();
+  $('#unlock-next').textContent = next ? fmt('unlocksNext', { name: nameOf(next), how: howToOpen(next) }) : t('unlocksAll');
+}
+function pickScene(k) {
+  if (!roomName || !opened(k) || k === scene()) return;
+  state.roomMeta.scene = k;
+  state.shrine?.send('meta', { scene: k });
+  applySettings();
+  sound.tick(740, 0.06);
+}
+// The shrine grew, or hung a charm: what it plays and shows, and what the panel offers, may have opened.
+onUnlocks(() => {
+  applyScene();
+  sound.setMix(playable(mix()));
+  renderMixer();
+  renderScenes();
+});
+scenePick.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-scene]');
+  if (b) pickScene(b.dataset.scene);
+});
+scenePick.addEventListener('keydown', (e) => {
+  const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+  if (!step) return;
+  e.preventDefault();
+  const open = [...scenePick.querySelectorAll('[data-scene]')].filter((b) => !b.disabled);
+  const i = open.findIndex((b) => b.dataset.scene === scene());
+  const to = open[(i + step + open.length) % open.length];
+  pickScene(to.dataset.scene);
+  to.focus();
 });
 
 $('#btn-reset').addEventListener('click', () => {

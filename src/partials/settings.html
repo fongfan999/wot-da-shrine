@@ -24,7 +24,7 @@
         <span class="field__label" data-i18n="fSubtitle">Subtitle</span>
         <input type="text" name="subtitle" maxlength="140" />
       </label>
-      <!-- The sound: a mix of six synthesized layers, the whole room's. Presets are a few mixes with names. -->
+      <!-- The sound: a mix of eleven synthesized layers, the whole room's; five open as the shrine grows. Presets are a few mixes with names. -->
       <div class="field mixer" id="mixer">
         <span class="field__label" data-i18n="fTrack">Sound</span>
         <div class="mixer__presets" id="mix-presets" role="group" aria-label="Presets">
@@ -60,8 +60,55 @@
             <span class="mixer__name"><span data-i18n="layer_garden">Garden</span><small data-i18n="layerHint_garden">Birds, crickets, frog, owl</small></span>
             <input type="range" min="0" max="100" step="5" value="0" data-layer="garden" aria-label="Garden" style="--v: 0%" />
           </label>
+          <label class="mixer__layer" data-layer="koto" data-on="">
+            <span class="mixer__name"><span data-i18n="layer_koto">Koto</span><small data-i18n="layerHint_koto">A plucked zither, a few notes</small></span>
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="koto" aria-label="Koto" style="--v: 0%" />
+          </label>
+          <label class="mixer__layer" data-layer="flute" data-on="">
+            <span class="mixer__name"><span data-i18n="layer_flute">Shakuhachi</span><small data-i18n="layerHint_flute">Bamboo flute, long and breathy</small></span>
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="flute" aria-label="Shakuhachi" style="--v: 0%" />
+          </label>
+          <label class="mixer__layer" data-layer="rack" data-on="">
+            <span class="mixer__name"><span data-i18n="layer_rack">The rack</span><small data-i18n="layerHint_rack">Fans, hum, disks, a UPS</small></span>
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="rack" aria-label="The rack" style="--v: 0%" />
+          </label>
+          <label class="mixer__layer" data-layer="bonsho" data-on="">
+            <span class="mixer__name"><span data-i18n="layer_bonsho">Great bell</span><small data-i18n="layerHint_bonsho">Struck every half minute</small></span>
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="bonsho" aria-label="Great bell" style="--v: 0%" />
+          </label>
+          <label class="mixer__layer" data-layer="sho" data-on="">
+            <span class="mixer__name"><span data-i18n="layer_sho">Shō</span><small data-i18n="layerHint_sho">Reed chords that breathe</small></span>
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="sho" aria-label="Shō" style="--v: 0%" />
+          </label>
         </div>
         <p class="field__note" id="mix-note"></p>
+      </div>
+      <!-- The scene: what falls past the altar and the colour of the paper, for everyone. Sakura is every shrine's; the rest come with charms. -->
+      <div class="field scenes">
+        <span class="field__label" id="scene-label" data-i18n="fScene">Scene</span>
+        <div class="scenes__list" id="scene-pick" role="radiogroup" aria-labelledby="scene-label">
+          <button class="scene-pick" type="button" role="radio" aria-checked="true" data-scene="sakura">
+            <span class="scene-pick__swatch" aria-hidden="true"></span>
+            <span class="scene-pick__name"><span data-i18n="scene_sakura">Sakura</span><small data-i18n="sceneHint_sakura">Cherry petals</small></span>
+          </button>
+          <button class="scene-pick" type="button" role="radio" aria-checked="false" data-scene="momiji">
+            <span class="scene-pick__swatch" aria-hidden="true"></span>
+            <span class="scene-pick__name"><span data-i18n="scene_momiji">Momiji</span><small data-i18n="sceneHint_momiji">Maple leaves, warm paper</small></span>
+          </button>
+          <button class="scene-pick" type="button" role="radio" aria-checked="false" data-scene="yuki">
+            <span class="scene-pick__swatch" aria-hidden="true"></span>
+            <span class="scene-pick__name"><span data-i18n="scene_yuki">Yuki</span><small data-i18n="sceneHint_yuki">Snow, cold paper</small></span>
+          </button>
+          <button class="scene-pick" type="button" role="radio" aria-checked="false" data-scene="hotaru">
+            <span class="scene-pick__swatch" aria-hidden="true"></span>
+            <span class="scene-pick__name"><span data-i18n="scene_hotaru">Hotaru</span><small data-i18n="sceneHint_hotaru">Fireflies, a summer night</small></span>
+          </button>
+          <button class="scene-pick" type="button" role="radio" aria-checked="false" data-scene="kin">
+            <span class="scene-pick__swatch" aria-hidden="true"></span>
+            <span class="scene-pick__name"><span data-i18n="scene_kin">Kin</span><small data-i18n="sceneHint_kin">Gold leaf, gilded paper</small></span>
+          </button>
+        </div>
+        <p class="field__note" id="unlock-next"></p>
       </div>
       <!-- The room's webhook: the team's alerting opens and closes vigils. The URL is a secret, fetched only when asked for. -->
       <div class="field hook">

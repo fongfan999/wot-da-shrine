@@ -7,7 +7,7 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
-import { AVATARS, BLESSING_BLAME, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
+import { AVATARS, BLESSING_BLAME, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
@@ -267,7 +267,10 @@ export class Shrine extends DurableObject {
         for (const k of Object.keys(META_MAX)) if (k in msg) meta[k] = clean(msg[k], META_MAX[k]);
         if (meta.eta && Number.isNaN(Date.parse(meta.eta))) meta.eta = '';
         // The sound the whole room hears, the TV too. Mixing it is not an action: it opens no vigil.
-        if ('mix' in msg) meta.mix = cleanMix(msg.mix);
+        // Only the layers this shrine has opened: the rest wait for it to grow.
+        if ('mix' in msg) meta.mix = openMix(cleanMix(msg.mix), s.level, s.charms);
+        // How the shrine looks, for everyone: a scene it has earned, or nothing changes.
+        if ('scene' in msg) meta.scene = cleanScene(msg.scene, s.level, s.charms) ?? meta.scene ?? null;
         // How the TVs showing the shrine look and sound. Not an action either.
         if ('screen' in msg) meta.screen = cleanScreen(msg.screen);
         // Naming what is down, in a quiet room, says something is down. Not while the room still

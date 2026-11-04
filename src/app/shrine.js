@@ -265,6 +265,7 @@ function onShrineMessage(msg) {
       // It broke names the vigil after the deploy, and an alert names the vigil it opens: their own toasts say so.
       if (theirs && renamed && !state.blessing && msg.by.id !== 'hook') toast(fmt('metaChanged', { name: msg.by.name, title: msg.meta.title }));
       if (theirs && remixed) toast(fmt(layersOn(mix()).length ? 'mixChanged' : 'mixOff', { name: msg.by.name, mix: mixName(mix()) }));
+      if (theirs && changed('scene') && msg.meta.scene) toast(fmt('sceneChanged', { name: msg.by.name, scene: t(`scene_${msg.meta.scene}`) }));
       break;
     }
     case 'join':

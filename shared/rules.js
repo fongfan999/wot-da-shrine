@@ -119,7 +119,7 @@ export const VOW_SHARE = 5;
 export const MAX_VOWS = 8;
 
 /** The karma each of the shrine's levels begins at; their names are in STRINGS.shrineLevels. */
-export const SHRINE_LEVELS = [0, 150, 400, 1000];
+export const SHRINE_LEVELS = [0, 150, 400, 1000, 2500, 5000];
 export const levelOf = (karma) => SHRINE_LEVELS.reduce((idx, at, k) => (karma >= at ? k : idx), 0);
 
 /** A run of days still counts on `day` when its last bow was that day or the one before. */
@@ -161,10 +161,45 @@ export const EMPTY_FEATS = { quick: 0, table: 0, chorus: 0, great: 0, curse: 0, 
 export const charmProgress = (s) => Object.fromEntries(CHARMS.map((c) => [c.id, Math.max(0, Math.min(c.of, Math.floor(Number(c.n(s)) || 0)))]));
 
 /**
- * The shrine's sound, mixed by the room: six layers, each a small synth in src/audio/music.js, each
- * at a level from 0 to 100. A mix keeps only the layers that play; {} is silence.
+ * The shrine's sound, mixed by the room: eleven layers, each a small synth in src/audio/music.js, each
+ * at a level from 0 to 100. A mix keeps only the layers that play; {} is silence. The first six every
+ * shrine has; the rest open as it grows (UNLOCKS).
  */
-export const LAYERS = ['sacred', 'chant', 'rain', 'noise', 'spa', 'garden'];
+export const LAYERS = ['sacred', 'chant', 'rain', 'noise', 'spa', 'garden', 'koto', 'flute', 'rack', 'bonsho', 'sho'];
+
+/**
+ * Scenes: how the whole shrine looks, for everyone in it and on every TV: what falls past the altar
+ * and the colour of the paper. Sakura is every shrine's; the rest are earned with charms (UNLOCKS).
+ */
+export const SCENES = ['sakura', 'momiji', 'yuki', 'hotaru', 'kin'];
+export const DEFAULT_SCENE = SCENES[0];
+
+/**
+ * What a shrine opens as it goes: a sound layer at each level it grows to, a scene with some of its
+ * charms. Nothing here is ever locked again: a shrine never shrinks, and a charm is kept for good.
+ */
+export const UNLOCKS = {
+  koto: { level: 1 }, // Village shrine
+  flute: { level: 2 }, // Temple
+  rack: { level: 3 }, // Grand temple
+  bonsho: { level: 4 }, // Mountain monastery
+  sho: { level: 5 }, // Head temple
+  momiji: { charm: 'survivor' }, // the first vigil survived
+  yuki: { charm: 'week' }, // seven mornings in a row
+  hotaru: { charm: 'night' }, // a vigil of three hours survived
+  kin: { charm: 'clean' }, // ten clean deploys in a row
+};
+/** Whether a shrine at `level`, holding `charms` ({ id: at }), has opened `id`. Anything not in UNLOCKS is always open. */
+export const isOpen = (id, level = 0, charms = {}) => {
+  const u = UNLOCKS[id];
+  return !u || (u.level != null ? level >= u.level : Boolean(charms && u.charm in charms));
+};
+/** What a shrine at `level` with `charms` has opened, of the things that open. */
+export const openedBy = (level, charms) => Object.keys(UNLOCKS).filter((id) => isOpen(id, level, charms));
+/** A mix with the layers this shrine has not opened taken out. */
+export const openMix = (mix, level, charms) => (mix ? Object.fromEntries(Object.entries(mix).filter(([k]) => isOpen(k, level, charms))) : mix);
+/** A scene as sent: one of SCENES, and one this shrine has opened; else null. */
+export const cleanScene = (v, level, charms) => (SCENES.includes(v) && isOpen(v, level, charms) ? v : null);
 
 /** A few mixes with names. The first is what a shrine plays until its room mixes its own. */
 export const PRESETS = {

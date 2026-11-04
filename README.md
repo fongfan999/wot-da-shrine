@@ -28,7 +28,7 @@ shrine.
 - There is no solo page: praying alone is a shrine with one person in it.
   For planned downtime the landing page's builder makes a shrine of its own,
   `/r/<slug>?title=…&eta=…`, whose first visit gives the room that title and
-  time. Customize has three tabs: This shrine (title, subtitle, sound, alerts),
+  time. Customize has three tabs: This shrine (title, subtitle, sound, scene, alerts),
   On the TV (how every screen showing the shrine looks and sounds) and Just for
   you (this browser). On the home page, the demo and a TV it is the last only.
 - `/r/demo` is the public demo shrine, streamed onto the landing page in TV
@@ -79,7 +79,9 @@ karma. The rules both sides play by live in `shared/rules.js`. The **Shrine
 records** card shows what the altar has survived, a paper lantern hangs
 above the altar for every vigil survived, and the altar itself grows with the
 room's karma: a torii gate at 150, a lucky cat on the table at 400, a golden
-censer at 1000.
+censer at 1000. Past that it keeps growing, to Mountain monastery at 2500 and
+Head temple at 5000, and every level past the first opens a sound (see
+Sounds and scenes).
 
 Title, subtitle and "back at" are shared by the whole room: click the title
 and type what is down, click "back at" to pick a time, set them in Customize,
@@ -222,6 +224,32 @@ whole room hears it with bells. A charm is never taken back, not even by an
 Undo. The shrine counts and pays (`CHARMS` in `shared/rules.js`), so no tab can
 fake one. A shrine from before charms hangs whatever it had already done the
 first time it wakes, quietly and unpaid. The demo has none.
+
+### Sounds and scenes
+
+A shrine opens more of itself as it goes. Six sound layers and the Sakura
+scene are every shrine's; the rest are earned, and once open they stay open.
+
+| Opens | at |
+| --- | --- |
+| Koto: a plucked zither, a few notes at a time | Village shrine, 150 karma |
+| Shakuhachi: a bamboo flute, long and breathy | Temple, 400 |
+| The rack: fans, mains hum, disks seeking, a UPS down the aisle | Grand temple, 1000 |
+| Great bell: the temple's bonshō, struck every half minute | Mountain monastery, 2500 |
+| Shō: reed chords that swell like breathing | Head temple, 5000 |
+| Momiji scene: maple leaves, warm paper | the Survivor charm |
+| Yuki scene: snow, cold paper | the Seven mornings charm |
+| Hotaru scene: fireflies rising, a summer night | the Long night charm |
+| Kin scene: gold leaf, gilded paper | the Clean hands charm |
+
+A scene is the room's, like its sound: everyone in the shrine and every TV
+showing it sees what falls past the altar and the tint of the paper. Customize
+→ This shrine shows every layer and scene, the locked ones with how far the
+room has to go, and names the one that opens next. When something opens, the
+feed and a toast say so, and a dot on More waits until someone opens
+Customize. The shrine refuses a layer or scene it has not opened, so a mix in a
+link (`?mix=koto:60`) plays only what the room has earned. The rules live in
+`UNLOCKS` in `shared/rules.js`.
 
 ## Straight from your alerting
 
@@ -435,9 +463,11 @@ src/styles/              the pages' styles, in cascade order
   landing.css, landing/  the home page's sections
   overrides.css          modes.css, responsive.css, ink.css: overrides by mode and screen width
   tokens.css             design tokens, light and dark themes
+  scenes.css             each scene's paper, light and dark
 src/app/                 the shrine
   context.js             where we are (room, TV, home page), settings, shared state, records
   engines.js             builds the drawing engines (room, burner, smoke, fog, petals…)
+  unlocks.js             what the shrine has opened: locked layers and scenes, the scene shown, the moment one opens
   stage.js               layout, split title, intro, parallax, mantras
   fx.js                  lite/full effects, frame budget, TV sleep
   settings.js            applying settings, the settings panel, sound toggle
@@ -461,7 +491,7 @@ src/scene/               what is drawn
   burner.js              inline-SVG incense burner (burn-down, embers, offerings)
   serverRoom.js          procedural SVG server room with blinking LEDs
   smoke.js               incense smoke particles (runtime sprite)
-  fog.js, petals.js, motes.js   ambient fog, falling petals, dust and sparks
+  fog.js, petals.js, motes.js   ambient fog, what falls in the scene (petals, leaves, snow, gold, fireflies), dust and sparks
   lanterns.js            prayer lanterns
   ema.js                 prayers hung on the altar as plaques
   congregation.js        teammates kneeling at the altar
@@ -469,7 +499,7 @@ src/scene/               what is drawn
   palette.js             theme colours for the canvas layers
 src/audio/
   index.js               Web Audio sound kit (one-shot effects)
-  music.js               generative ambient sound: six layers, mixed by the room
+  music.js               generative ambient sound: eleven layers, mixed by the room
 src/lib/
   clock.js               the page's one clock, and the rules for anything timed
   config.js              settings: URL params > localStorage > defaults

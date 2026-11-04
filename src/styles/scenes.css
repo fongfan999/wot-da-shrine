@@ -1,0 +1,11 @@
+/* ---------- Scenes: the shrine's paper, tinted for the scene the room picked (UNLOCKS in shared/rules.js) ----------
+ * Only the paper moves, and only a little, so every ink and accent keeps its contrast. data-scheme is
+ * the light or dark the page settled on, so each scene needs one rule for each. Sakura is the tokens as they are. */
+body[data-scene="momiji"][data-scheme="light"] { --paper: #f8f1e6; --paper-raised: #fdf8f0; --paper-sunk: #f1e8da; }
+body[data-scene="momiji"][data-scheme="dark"] { --paper: #19150f; --paper-raised: #201b14; --paper-sunk: #241e16; }
+body[data-scene="yuki"][data-scheme="light"] { --paper: #f2f5f6; --paper-raised: #f9fbfc; --paper-sunk: #e8edf0; }
+body[data-scene="yuki"][data-scheme="dark"] { --paper: #12161a; --paper-raised: #181d22; --paper-sunk: #1c2228; }
+body[data-scene="hotaru"][data-scheme="light"] { --paper: #eef2ea; --paper-raised: #f6f9f2; --paper-sunk: #e5eadf; }
+body[data-scene="hotaru"][data-scheme="dark"] { --paper: #0f1418; --paper-raised: #151b20; --paper-sunk: #192026; }
+body[data-scene="kin"][data-scheme="light"] { --paper: #f8f3e3; --paper-raised: #fdf9ec; --paper-sunk: #f0e9d3; }
+body[data-scene="kin"][data-scheme="dark"] { --paper: #17150e; --paper-raised: #1e1b12; --paper-sunk: #222015; }

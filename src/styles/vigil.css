@@ -107,10 +107,10 @@ body[data-state="lit"] .plantern__core { opacity: .8; }
 
 /* The altar grows with the room's karma */
 .burner__svg .torii, .burner__svg .cat { display: none; }
-.burner[data-level="1"] .torii, .burner[data-level="2"] .torii, .burner[data-level="3"] .torii { display: block; }
-.burner[data-level="2"] .cat, .burner[data-level="3"] .cat { display: block; }
-.burner[data-level="3"] .censer-body { fill: var(--ember-soft); }
-.burner[data-level="3"] .censer-rim { fill: var(--ember-soft); }
+/* Each level keeps what the ones before it put up; past Grand temple the altar is whole and the shrine opens sounds instead */
+.burner:not([data-level="0"]) .torii { display: block; }
+.burner:is([data-level="2"], [data-level="3"], [data-level="4"], [data-level="5"]) .cat { display: block; }
+.burner:is([data-level="3"], [data-level="4"], [data-level="5"]) :is(.censer-body, .censer-rim) { fill: var(--ember-soft); }
 
 /* Quick row: rituals first, then the dealt prayers */
 .quick__chip--ritual { display: inline-flex; align-items: center; gap: 6px; border-style: dashed; color: var(--ember-ink); border-color: var(--ember); }

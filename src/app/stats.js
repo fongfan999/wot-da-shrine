@@ -8,6 +8,7 @@ import { art, burner, kick, petals } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';
 import { every } from '../lib/clock.js';
 import { hasStanding, myStanding, rankOf, roomMornings } from './standing.js';
+import { checkUnlocks } from './unlocks.js';
 import { grewText, nameList, renderBoard, renderBuild } from './together.js';
 import { renderVow } from './vow.js';
 import { renderCharms } from './charms.js';
@@ -215,6 +216,7 @@ export function renderRecords() {
   renderVow();
   renderCharms();
   renderBoard();
+  checkUnlocks(); // a level or a charm may have opened a sound or a scene
   if (shownLevel !== -1 && i > shownLevel) {
     toast(grewText(name, i)); // and who built it
     sound.bowl(392);

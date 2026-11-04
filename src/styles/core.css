@@ -3,6 +3,7 @@
  * shrine. home.css and room.css put this first; overrides.css always comes last.
  */
 @import './tokens.css';
+@import './scenes.css';
 @import './base.css';
 @import './scene.css';
 @import './buttons.css';
