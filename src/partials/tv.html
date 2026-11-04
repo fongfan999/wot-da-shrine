@@ -24,24 +24,5 @@
   </div>
 </section>
 
-<!-- On the TV: a shrine was just cast here -->
-<div class="tv-casting" id="tv-casting" hidden role="status">
-  <div class="tv-casting__card">
-    <span class="tv-casting__icon" aria-hidden="true">📺</span>
-    <p class="tv-casting__label" data-i18n="castIncoming">Casting</p>
-    <p class="tv-casting__room" id="tv-casting-room"></p>
-    <p class="tv-casting__by" id="tv-casting-by"></p>
-  </div>
-</div>
-
-<!-- On the TV: someone knelt from their phone -->
-<div class="tv-arrival" id="tv-arrival" hidden role="status">
-  <span class="tv-arrival__path" aria-hidden="true">📱<span class="tv-arrival__beam"></span>📺</span>
-  <span class="tv-arrival__text"><b id="tv-arrival-who"></b> <span data-i18n="tvArrived">just knelt from their phone</span></span>
-</div>
-
-<!-- On the phone: you scanned the TV, and there you are -->
-<div class="on-tv" id="on-tv" hidden role="status">
-  <span class="on-tv__icon" aria-hidden="true">📺</span>
-  <span class="on-tv__text"><b data-i18n="onTvTitle">You’re on the TV.</b> <span data-i18n="onTvLook">Look up:</span> <span id="on-tv-name"></span></span>
-</div>
+<!-- The cards a TV and the phone that scanned it show while pairing: on a room page too -->
+<include src="tv-cards.html">
