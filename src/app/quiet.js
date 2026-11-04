@@ -11,7 +11,7 @@ import { t } from '../lib/strings.js';
 import { $, body, embedded, fmt, mix, mixName, records, roomName, settings, state, tv } from './context.js';
 import { applySettings } from './settings.js';
 import { quietStreak, shippedShown } from './deploy.js';
-import { kamiHeadline } from './kami.js';
+import { forecastHeadline, kamiHeadline } from './kami.js';
 import { roomMornings } from './standing.js';
 import { vowHeadline } from './vow.js';
 
@@ -51,6 +51,7 @@ export function quietHeading() {
   const mornings = roomMornings() > 1 ? fmt('quietMornings', { n: roomMornings() }) : '';
   const runs = [quietStreak(), mornings, vowHeadline()].filter(Boolean).join(' '); // the clean run, once the room blesses its deploys, and its mornings
   const bits = [kamiHeadline()];
+  if (tv) bits.push(forecastHeadline()); // the wall has no hands to open the kami: it reads the forecast out
   if (last) {
     bits.push(last.title ? fmt('quietLastTitled', { title: last.title, t: minutesText(last.minutes) }) : fmt('quietLast', { t: minutesText(last.minutes) }));
     bits.push(records.survived === 1 ? t('quietSurvivedOne') : fmt('quietSurvived', { n: records.survived }));

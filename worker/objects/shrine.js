@@ -359,7 +359,7 @@ export class Shrine extends DurableObject {
         const now = Date.now();
         s.blessing = { startedAt: now, by: by.name, what: clean(msg.what, 40), bows: 0, prayers: 0, peak: this.people().length };
         // The omens, read by the deployer's clock: the bad ones go out with the blessing and stay on its record.
-        const omens = readOmens({ now, tz: cleanTz(msg.tz), kami: s.kami, last: s.blessings[0], lastVigil: s.history[0]?.endedAt, daily: s.daily, streak: s.deploys.streak });
+        const omens = readOmens({ now, tz: cleanTz(msg.tz), kami: s.kami, last: s.blessings[0], lastVigil: s.history[0]?.endedAt, daily: s.daily, streak: s.deploys.streak, room: this.ctx.id.name });
         s.blessing.omens = omens.filter((o) => o.bad).map((o) => o.id);
         s.blessing.good = omens.filter((o) => !o.bad).map((o) => o.id);
         s.deploys.blessed += 1;

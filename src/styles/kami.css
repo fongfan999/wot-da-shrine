@@ -33,7 +33,7 @@
 .kami[data-mood="unclean"] .kami__eyes--narrow { display: block; }
 .kami[data-mood="unclean"] .kami__face { fill: color-mix(in srgb, var(--flame) 14%, var(--paper-raised)); }
 /* What it watches: under the mask */
-.kami-pop { left: 0; right: auto; top: calc(100% + 8px); gap: 10px; width: min(320px, calc(100vw - 2 * var(--gutter))); }
+.kami-pop { left: 0; right: auto; top: calc(100% + 8px); gap: 10px; width: min(320px, calc(100vw - 2 * var(--gutter))); max-height: calc(100dvh - var(--dock-h, 160px) - 220px); min-height: 0; overflow-y: auto; overscroll-behavior: contain; } /* taller than the space above the dock: it scrolls */
 .kami-pop__line { margin: 0; font-family: var(--font-serif); font-style: italic; font-size: 15px; line-height: 1.4; color: var(--ink); }
 .kami-pop__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-height: 200px; overflow-y: auto; }
 .kami-pop__item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 4px 8px; border-radius: var(--radius-sm); font-size: 14px; color: var(--ink); }
@@ -93,3 +93,15 @@ body[data-tv="1"] .kami__meter { width: 64px; height: 7px; }
   .kami__btn { font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .kami[data-mood="starving"] .kami__mask { animation: none; } }
+
+/* Today's forecast, in the kami's popover: a sky, a line, what is lucky, and a way to paste it */
+.kami-forecast { display: flex; flex-direction: column; gap: 4px; padding: 10px 0 2px; border-top: 1px solid var(--line); }
+.kami-forecast__sky { margin: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 6px; font-size: 15px; color: var(--ink); }
+.kami-forecast__glyph { font-size: 18px; }
+.kami-forecast__why { font-size: 12px; color: var(--muted); }
+.kami-forecast[data-sky="storm"] .kami-forecast__sky b, .kami-forecast[data-sky="typhoon"] .kami-forecast__sky b { color: var(--ember-ink); }
+.kami-forecast[data-sky="clear"] .kami-forecast__sky b { color: var(--live); }
+.kami-forecast__line { margin: 0; font-size: 14px; line-height: 1.4; color: var(--ink); }
+.kami-forecast__meta { margin: 0; font-family: var(--font-mono); font-size: 11px; line-height: 1.5; color: var(--muted); }
+.kami-forecast__copy { align-self: flex-start; margin-top: 4px; }
+.kami-forecast + .eta-pop__label { padding-top: 10px; border-top: 1px solid var(--line); }

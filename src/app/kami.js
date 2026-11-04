@@ -10,13 +10,14 @@
 import gsap from 'gsap';
 import { KAMI_STARVE, WATCHED_MAX, devoteeKey, purifiable } from '../../shared/rules.js';
 import { kamiLine, kamiMood } from '../../shared/kami.js';
+import { forecast } from '../../shared/forecast.js';
 import { sound } from '../audio/index.js';
 import { every } from '../lib/clock.js';
 import { t } from '../lib/strings.js';
-import { $, fmt, people, records, reduceMotion, roomName, state, tv } from './context.js';
+import { $, fmt, people, records, reduceMotion, roomName, roomUrl, state, tv } from './context.js';
 import { art, motes, petals, smoke } from './engines.js';
 import { activity } from './fx.js';
-import { ago, logEvent, toast } from './ui.js';
+import { ago, copyText, logEvent, toast } from './ui.js';
 
 const wrap = $('#kami');
 const btn = $('#kami-btn');
@@ -68,6 +69,35 @@ export function kamiHeadline() {
   return mood ? kamiLine(mood, state.kami, roomName, { now: serverNow(), tz: myTz(), things: watched().map((o) => o.name), at: pointedAt() }) : '';
 }
 
+/* ---------- Today's forecast: the kami's word on the day, the same for the whole room ---------- */
+/** Today's forecast for this shrine, for the services it watches; null where there is no kami. */
+export const todaysForecast = () => (hasKami() ? forecast(roomName, serverNow(), watched().map((o) => o.name)) : null);
+const whyText = (why) => why.map((w) => t(`forecastWhy_${w}`)).join(', ');
+/** The forecast as one line, for the TV's heading: "Storm warning: heavy alerts expected near payments-api." */
+export function forecastHeadline() {
+  const f = todaysForecast();
+  return f ? fmt('forecastHeadline', { glyph: t(`forecastGlyph_${f.sky}`), sky: t(`forecastSky_${f.sky}`), line: f.line }) : '';
+}
+/** The forecast as a few lines to paste in the team channel, with the link. */
+function forecastText(f) {
+  const lines = [fmt('forecastCopyHead', { room: roomName }), `${t(`forecastGlyph_${f.sky}`)} ${t(`forecastSky_${f.sky}`)}${f.why.length ? ` (${whyText(f.why)})` : ''}. ${f.line}`, fmt('forecastMeta', { lucky: f.lucky.name, hour: f.hour, avoid: f.avoid }), roomUrl()];
+  return lines.join('\n');
+}
+function renderForecast() {
+  const f = todaysForecast();
+  if (!f) return;
+  $('#kami-forecast').dataset.sky = f.sky;
+  $('#forecast-glyph').textContent = t(`forecastGlyph_${f.sky}`);
+  $('#forecast-sky').textContent = t(`forecastSky_${f.sky}`);
+  $('#forecast-why').textContent = f.why.length ? fmt('forecastWhy', { why: whyText(f.why) }) : '';
+  $('#forecast-line').textContent = f.line;
+  $('#forecast-meta').textContent = fmt('forecastMeta', { lucky: f.lucky.name, hour: f.hour, avoid: f.avoid });
+}
+$('#forecast-copy').addEventListener('click', () => {
+  const f = todaysForecast();
+  if (f) copyText(forecastText(f), t('forecastCopied'));
+});
+
 /* ---------- The line under the heading ---------- */
 let shownMood = '';
 let shownPointed = null; // the ids it pointed at as last drawn: a new one is announced
@@ -114,6 +144,7 @@ actionBtn.addEventListener('click', () => {
 /* ---------- What it watches: a popover under the mask ---------- */
 function renderPop() {
   popLine.textContent = kamiHeadline();
+  renderForecast();
   const all = watched();
   list.replaceChildren(...all.map((o) => {
     const li = document.createElement('li');

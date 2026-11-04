@@ -44,6 +44,14 @@
   <button class="kami__action" id="kami-action" type="button" data-i18n="kamiFeed">Bow to feed it</button>
   <div class="eta-pop kami-pop" id="kami-pop" role="dialog" tabindex="-1" aria-labelledby="kami-pop-label" hidden>
     <p class="kami-pop__line" id="kami-pop-line"></p>
+    <!-- Today's forecast: the same for the whole room until midnight UTC (shared/forecast.js) -->
+    <div class="kami-forecast" id="kami-forecast">
+      <p class="eta-pop__label" data-i18n="forecastLabel">Today’s forecast</p>
+      <p class="kami-forecast__sky"><span class="kami-forecast__glyph" id="forecast-glyph" aria-hidden="true"></span> <b id="forecast-sky"></b> <span class="kami-forecast__why" id="forecast-why"></span></p>
+      <p class="kami-forecast__line" id="forecast-line"></p>
+      <p class="kami-forecast__meta" id="forecast-meta"></p>
+      <button class="btn btn--glass btn--sm kami-forecast__copy" id="forecast-copy" type="button" data-i18n="forecastCopy">Copy the forecast</button>
+    </div>
     <p class="eta-pop__label" id="kami-pop-label" data-i18n="kamiWatchesLabel">What it watches</p>
     <ul class="kami-pop__list" id="kami-watched"></ul>
     <p class="down-pop__note" id="kami-pop-empty" data-i18n="kamiWatchesEmpty">Name the services you run and its lines will look at those. When a vigil names one, it points at it.</p>

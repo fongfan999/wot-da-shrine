@@ -120,7 +120,7 @@ const myTz = () => -new Date().getTimezoneOffset();
 /** The omens as the shrine will read them when the blessing starts: by this clock, from what the room knows. */
 function omensNow() {
   const now = Date.now() + state.clockSkew; // the shrine's clock: its times are in it
-  return readOmens({ now, tz: myTz(), kami: state.kami, last: records.blessings[0], lastVigil: records.history[0]?.endedAt, daily: records.daily, streak: records.deploys.streak });
+  return readOmens({ now, tz: myTz(), kami: state.kami, last: records.blessings[0], lastVigil: records.history[0]?.endedAt, daily: records.daily, streak: records.deploys.streak, room: roomName });
 }
 function renderOmens() {
   const omens = omensNow();

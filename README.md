@@ -109,6 +109,18 @@ lights the lantern; its tooltip names who purified. Vigils from before
 purifying was kept keep their lanterns lit. The rule is `PURIFY_FOR` and
 `purifiable()` in `shared/rules.js`.
 
+### Today's forecast
+
+The kami's popover opens with **today's forecast** for the shrine: a sky from
+Clear skies to Typhoon watch, a line about something it watches ("A front of
+retries is moving toward payments-api. Keep the runbook dry."), a lucky
+offering, a lucky hour and one thing to avoid. Everyone in the room reads the
+same one until midnight UTC. The sky is chance, made one worse on a Friday,
+while Mercury is retrograde and under a full moon, and it says which. The TV
+reads it out in its quiet heading, **Copy the forecast** puts it in the team
+channel with the link, and the omens before a deploy count a storm against it
+and clear skies for it. Nothing real is in it. It lives in `shared/forecast.js`.
+
 ### The column beside the altar
 
 On every screen but a TV the column holds three things: who is here, the

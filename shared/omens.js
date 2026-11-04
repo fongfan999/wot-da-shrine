@@ -7,6 +7,7 @@
  * there. Shipping clean against OMEN_DEFY or more earns the Defiant charm (CHARMS in rules.js).
  */
 import { kamiMood } from './kami.js';
+import { forecast } from './forecast.js';
 import { dayOf } from './rules.js';
 
 const DAY = 86400000;
@@ -20,19 +21,19 @@ const MERCURY = [
   ['2026-02-26', '2026-03-20'], ['2026-06-29', '2026-07-23'], ['2026-10-24', '2026-11-13'],
   ['2027-02-09', '2027-03-03'], ['2027-06-10', '2027-07-04'], ['2027-10-07', '2027-10-28'],
 ].map(([a, b]) => [Date.parse(`${a}T00:00:00Z`), Date.parse(`${b}T00:00:00Z`) + DAY]);
-const mercury = (now) => MERCURY.some(([a, b]) => now >= a && now < b);
+export const mercury = (now) => MERCURY.some(([a, b]) => now >= a && now < b);
 
 /** The moon's age in days, 0 at new and about 14.8 at full: a mean synodic month from a known new moon. */
 const SYNODIC = 29.530588853;
 const NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
 const moonAge = (now) => ((((now - NEW_MOON) / DAY) % SYNODIC) + SYNODIC) % SYNODIC;
-const fullMoon = (now) => Math.abs(moonAge(now) - SYNODIC / 2) < 1.2;
+export const fullMoon = (now) => Math.abs(moonAge(now) - SYNODIC / 2) < 1.2;
 
 /**
  * Every omen, in the order the prompt lists them: `bad` counts against the deploy, a good one for it.
  * `test` reads what the shrine knows: `now`, the deployer's `tz` (minutes ahead of UTC), the `kami`,
- * the `last` blessing, when the `lastVigil` ended, the room's `daily` run of morning bows, and its
- * clean `streak`.
+ * the `last` blessing, when the `lastVigil` ended, the room's `daily` run of morning bows, its
+ * clean `streak`, and the `room`, whose forecast for the day (shared/forecast.js) is an omen too.
  */
 export const OMENS = [
   { id: 'friday', bad: true, test: ({ now, tz }) => new Date(now + tz * 60000).getUTCDay() === 5 },
@@ -44,9 +45,11 @@ export const OMENS = [
   { id: 'recent', bad: true, test: ({ now, lastVigil }) => Boolean(lastVigil) && now - lastVigil < DAY },
   { id: 'moon', bad: true, test: ({ now }) => fullMoon(now) },
   { id: 'mercury', bad: true, test: ({ now }) => mercury(now) },
+  { id: 'storm', bad: true, test: ({ now, room }) => Boolean(room) && forecast(room, now).level >= 3 },
   { id: 'bowed', bad: false, test: ({ now, tz, daily }) => Boolean(daily?.day) && daily.day >= dayOf(now, tz) },
   { id: 'pleased', bad: false, test: ({ now, kami }) => kamiMood(kami, now) === 'pleased' },
   { id: 'run', bad: false, test: ({ streak }) => streak >= 3 },
+  { id: 'clear', bad: false, test: ({ now, room }) => Boolean(room) && forecast(room, now).level === 0 },
 ];
 export const OMEN_IDS = OMENS.map((o) => o.id);
 
