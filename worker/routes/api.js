@@ -1,5 +1,6 @@
-/** The site's own API: a health check, a status to poll, and the world's totals. */
+/** The site's own API: a health check, a status to poll, the world's totals and the push key. */
 import { Hono } from 'hono';
+import { vapid } from '../push.js';
 
 const MANTRAS = [
   'Clearing cache and karma…',
@@ -25,6 +26,12 @@ api.get('/api/status', (c) => {
     country: c.req.raw.cf?.country ?? null,
     namaste: true,
   });
+});
+
+// The key a browser subscribes to notifications with. 404 when this deployment has no VAPID_KEY: push is off.
+api.get('/api/push/key', async (c) => {
+  const k = await vapid(c.env);
+  return k ? c.json({ key: k.key }) : c.json({ error: 'push is off' }, 404);
 });
 
 api.get('/api/world', async (c) => c.json(await c.env.WORLD.getByName('world').snapshot()));

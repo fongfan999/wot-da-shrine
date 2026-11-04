@@ -3,7 +3,8 @@
  * wrangler.jsonc); the page and bundles come straight from the asset store, with headers
  * from public/_headers.
  *
- * routes/api.js    /api/health, /api/status, /api/world
+ * routes/api.js    /api/health, /api/status, /api/world, /api/push/key
+ * push.js          Web Push by hand: encrypting a notification and signing for the push service
  * routes/rooms.js  /new, /r/:room, /api/rooms/:room/{ws,status,badge.svg,hook/:key}
  * alerts.js        what an alert posted to a room's webhook says: down or up
  * routes/tv.js     /api/tv/ws, /api/tv/:code/cast

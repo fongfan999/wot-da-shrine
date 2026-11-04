@@ -6,6 +6,7 @@
  * WebSockets. Uses the hibernation API, so an idle room costs nothing.
  */
 import { DurableObject } from 'cloudflare:workers';
+import { cleanSub, send as sendPush, topicOf } from '../push.js';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
 import { AVATARS, BLESSING_BLAME, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
@@ -22,6 +23,19 @@ const META_MAX = { title: 60, subtitle: 140, eta: 40 };
 const LEAVE_GRACE = 5000; // a dropped socket gets this long to come back before the room hears it left
 const TOKEN_RE = /^[0-9a-f-]{36}$/;
 const HOOK_AVATAR = '🔔'; // the alerting system, as the feed shows it
+
+/**
+ * Notifications: browsers that asked to hear from this shrine while nobody has it open. Each is kept
+ * under its push endpoint, with whose it is (name and avatar, as the ledger knows them), what they
+ * want to hear about and their clock, for the evening reminder.
+ */
+const MAX_SUBS = 100;
+const PUSH_TOPICS = ['down', 'watch', 'morning'];
+const PUSH_COOLDOWN = 10 * 60 * 1000; // a flapping monitor opens vigil after vigil: phones hear the first
+const REMIND_AT = 19 * 3600 * 1000; // a run waiting on today's bow is mentioned at 7 in the evening, their time
+const DAY = 86400000;
+const cleanTopics = (raw) => Object.fromEntries(PUSH_TOPICS.map((k) => [k, raw?.[k] !== false]));
+const minutes = (m) => (m < 60 ? `${m} min` : m < 1440 ? `${Math.floor(m / 60)}h ${m % 60 ? `${m % 60}m` : ''}`.trim() : `${Math.floor(m / 1440)}d ${Math.floor((m % 1440) / 60)}h`);
 
 /** A person as the others see them: never their resume token. */
 const pub = ({ token, replaced, ...person }) => person;
@@ -99,6 +113,8 @@ export class Shrine extends DurableObject {
       this.claimed = (await ctx.storage.get('claimed')) === true;
       this.hookKey = (await ctx.storage.get('hook')) ?? ''; // the secret in the room's webhook URL; made the first time someone asks
       this.alarmAt = (await ctx.storage.getAlarm()) ?? 0;
+      this.sweepAt = (await ctx.storage.get('sweep')) ?? this.alarmAt; // when the shrine is forgotten; the alarm may ring sooner, for a reminder
+      this.subs = (await ctx.storage.get('push')) ?? {}; // endpoint → { endpoint, keys, name, avatar, tz, topics, at, reminded }
       this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys }, watched: { ...EMPTY.watched, ...saved?.watched }, daily: { ...EMPTY.daily, ...saved?.daily }, devotees: { ...saved?.devotees }, vowed: { ...EMPTY.vowed, ...saved?.vowed }, charms: { ...saved?.charms }, feats: { ...EMPTY_FEATS, ...saved?.feats } };
       // A shrine from before charms were kept: the blames its vigils remember count, and whatever it has
       // already done is on the shelf, quietly, with nothing paid for it.
@@ -327,6 +343,7 @@ export class Shrine extends DurableObject {
         s.vigil = u.vigil;
         s.undo = null;
         out.undone = u.at;
+        if (s.vigil.pushed) this.notify('unback', { by });
         break;
       }
       case 'bless': {
@@ -374,6 +391,7 @@ export class Shrine extends DurableObject {
         // Taken during an incident, the watch is not quiet: the new holder inherits the vigil.
         s.watch = { startedAt: now, id: to.id, name: to.name, avatar: to.avatar, by: by.name, vigils: s.vigil ? 1 : 0 };
         out.watches = s.watches;
+        if (to.id !== by.id) this.notify('watch', { by, to });
         break;
       }
       case 'unwatch':
@@ -395,6 +413,30 @@ export class Shrine extends DurableObject {
           if (fresh) this.broadcast({ t: 'hook', stale: true, by }, ws);
         }
         ws.send(JSON.stringify({ t: 'hook', key: this.hookKey }));
+        return;
+      }
+      case 'push': {
+        // This browser wants to hear from the shrine (or no longer does). Its owner is whoever is
+        // kneeling on this socket. Never in the demo, where nobody is anybody.
+        if (this.demo) return;
+        if (msg.off === true) {
+          const endpoint = String(msg.endpoint ?? '');
+          if (this.subs[endpoint]) { delete this.subs[endpoint]; await this.savePush(); }
+          ws.send(JSON.stringify({ t: 'push', on: false }));
+          return;
+        }
+        const sub = cleanSub(msg.sub);
+        if (!sub) { ws.send(JSON.stringify({ t: 'push', error: 'bad-subscription' })); return; }
+        const was = this.subs[sub.endpoint];
+        this.subs[sub.endpoint] = { ...sub, name: self.name, avatar: self.avatar, tz: cleanTz(msg.tz), topics: cleanTopics(msg.topics), at: Date.now(), reminded: was?.reminded ?? 0 };
+        // A full list lets go of whoever subscribed, or last came back, longest ago.
+        const all = Object.values(this.subs);
+        if (all.length > MAX_SUBS) delete this.subs[all.reduce((a, b) => (a.at <= b.at ? a : b)).endpoint];
+        if (!this.stored) await this.save(); // a shrine nobody has used yet: it is in use now
+        await this.savePush();
+        ws.send(JSON.stringify({ t: 'push', on: true, topics: this.subs[sub.endpoint].topics }));
+        // The first time: one right away, so they know it works.
+        if (!was && msg.hello === true) this.pushTo([this.subs[sub.endpoint]], { title: 'Notifications are on', body: `You'll hear from ${this.ctx.id.name} when it needs you.`, tag: `${this.ctx.id.name}:hello`, url: `/r/${this.ctx.id.name}` });
         return;
       }
       case 'thank': {
@@ -443,6 +485,10 @@ export class Shrine extends DurableObject {
         if (moved) { d[to] = { ...d[from], name, avatar }; delete d[from]; }
         this.broadcast({ t: 'rename', person: this.face(person) });
         if (moved) await this.save();
+        // Their notifications are theirs under the new name too: the reminder reads their run by it.
+        let resubbed = false;
+        for (const sub of Object.values(this.subs)) if (devoteeKey(sub) === from && from !== to) { Object.assign(sub, { name, avatar }); resubbed = true; }
+        if (resubbed) await this.savePush();
         // The holder renamed: the watch goes by the new name, so their next visit still holds it.
         if (s.watch?.id === self.id) {
           s.watch = { ...s.watch, name, avatar };
@@ -553,13 +599,17 @@ export class Shrine extends DurableObject {
     return { did, down: Boolean(v), title: s.meta.title, downFor: v ? Math.max(1, Math.round((Date.now() - v.startedAt) / 60000)) : 0, people: this.people().length };
   }
 
-  /** Nobody has visited for a month: let the shrine go. */
+  /** Time for the evening reminder, or nobody has visited for a month: let the shrine go. */
   async alarm() {
+    const now = Date.now();
+    if (now < this.sweepAt) { await this.remind(now); return this.schedule(); }
     if (this.ctx.getWebSockets().length) return this.touch();
     await this.ctx.storage.deleteAll();
     this.stored = false;
     this.claimed = false;
     this.alarmAt = 0;
+    this.sweepAt = 0;
+    this.subs = {};
   }
 
   /**
@@ -829,6 +879,7 @@ export class Shrine extends DurableObject {
     s.undo = null;
     // On someone's watch: the vigil remembers whose, and their watch is no longer quiet.
     if (s.watch) { s.watch.vigils += 1; s.vigil.watch = s.watch.name; }
+    this.notify('down', { by });
     if (s.blessing) { this.blamed = this.closeBlessing(now, 'broke'); return; }
     const last = s.blessings[0];
     if (last?.outcome === 'shipped' && now - last.endedAt < BLESSING_BLAME) {
@@ -937,6 +988,7 @@ export class Shrine extends DurableObject {
       if (took >= QUICK_MIN && took <= QUICK_FIX) s.feats.quick += 1;
       s.survived += 1;
       s.longest = Math.max(s.longest, record.minutes);
+      if (v.pushed) this.notify('back', { by: back, record });
     }
     s.vigil = null;
     return record;
@@ -1043,8 +1095,116 @@ export class Shrine extends DurableObject {
 
   async touch() {
     const at = Date.now() + FORGET_AFTER;
-    if (at - this.alarmAt < TOUCH_EVERY) return;
+    if (at - this.sweepAt < TOUCH_EVERY) return;
+    this.sweepAt = at;
+    await this.ctx.storage.put('sweep', at);
+    await this.schedule();
+  }
+
+  /** The alarm rings for whichever comes first: the next evening reminder, or forgetting the shrine. */
+  async schedule() {
+    const at = Math.min(this.sweepAt || Infinity, this.nextReminder(Date.now()));
+    if (!Number.isFinite(at) || at === this.alarmAt) return;
     this.alarmAt = at;
     await this.ctx.storage.setAlarm(at);
+  }
+
+  /* ---------- Notifications ---------- */
+
+  async savePush() {
+    await this.ctx.storage.put('push', this.subs);
+    await this.touch();
+    await this.schedule();
+  }
+
+  /**
+   * Tell the browsers that asked, for one of:
+   * 'down'   a vigil opened: everyone who wants to know and is not already kneeling here
+   * 'back'   it closed, survived: the same people, if they heard it go down
+   * 'unback' not back after all: the same again
+   * 'watch'  the watch was handed to `to`: their browsers, wherever they are
+   */
+  notify(kind, { by, to, record } = {}) {
+    if (this.demo || !this.env.VAPID_KEY) return;
+    const room = this.ctx.id.name;
+    const subs = Object.values(this.subs);
+    if (!room || !subs.length) return;
+    const s = this.state;
+    const here = new Set(this.people().map(devoteeKey));
+    const url = `/r/${room}`;
+    const away = (sub) => sub.topics.down && !here.has(devoteeKey(sub)) && (!by || devoteeKey(sub) !== devoteeKey(by));
+    const n = this.people().length;
+    if (kind === 'down') {
+      const now = Date.now();
+      if (now - (s.pushedAt ?? 0) < PUSH_COOLDOWN) return;
+      s.pushedAt = now;
+      s.vigil.pushed = true;
+      const alert = by?.id === 'hook';
+      const kneeling = n ? `${n} praying.` : alert ? 'Nobody is kneeling yet.' : '';
+      const body = `${by?.name ?? 'Someone'} ${alert ? 'raised the alarm' : 'opened the vigil'} in ${room}. ${kneeling} Come kneel.`.replace(/\s+/g, ' ');
+      this.pushTo(subs.filter(away), { title: s.meta.title || 'Something is down', body, tag: `${room}:vigil`, url, urgent: true }, { urgency: 'high', topic: topicOf('vigil', room) });
+    } else if (kind === 'back') {
+      // The title is whatever the room called it ("Payments API", "Payments API is down"): quoted, it reads either way.
+      const what = record?.title ? `The vigil for “${record.title}”` : 'The vigil';
+      const who = by?.name ? ` ${by.id === 'hook' ? `${by.name} says it cleared.` : `${by.name} said so.`}` : '';
+      this.pushTo(subs.filter(away), { title: "They're back!", body: `${what} ended after ${minutes(record?.minutes ?? 1)}.${who}`, tag: `${room}:vigil`, url }, { topic: topicOf('vigil', room) });
+    } else if (kind === 'unback') {
+      this.pushTo(subs.filter(away), { title: 'Not back after all', body: `${by?.name ?? 'Someone'} took it back: ${s.meta.title || 'the servers'} still down in ${room}.`, tag: `${room}:vigil`, url, urgent: true }, { urgency: 'high', topic: topicOf('vigil', room) });
+    } else if (kind === 'watch') {
+      const mine = subs.filter((sub) => sub.topics.watch && devoteeKey(sub) === devoteeKey(to));
+      this.pushTo(mine, { title: 'You hold the watch', body: `${by.name} handed you the watch in ${room}. Sleep lightly.`, tag: `${room}:watch`, url }, { topic: topicOf('watch', room) });
+    }
+  }
+
+  /** Send one message to these subscriptions, in the background, forgetting any the browser has dropped. */
+  pushTo(list, msg, opts = {}) {
+    if (!list.length) return;
+    const ttl = opts.ttl ?? (msg.urgent ? 6 * 3600 : 12 * 3600);
+    const p = Promise.all(list.map(async (sub) => [sub.endpoint, await sendPush(this.env, sub, msg, { ...opts, ttl })])).then(async (results) => {
+      const gone = results.filter(([, r]) => r === 'gone');
+      if (!gone.length) return;
+      for (const [endpoint] of gone) delete this.subs[endpoint];
+      await this.ctx.storage.put('push', this.subs);
+    });
+    this.ctx.waitUntil(p.catch(() => {}));
+    return p;
+  }
+
+  /** The next time any subscriber's evening reminder could be due, after `now`. */
+  nextReminder(now) {
+    let next = Infinity;
+    for (const sub of Object.values(this.subs)) {
+      if (!sub.topics?.morning) continue;
+      const shift = sub.tz * 60000;
+      let at = Math.floor((now + shift) / DAY) * DAY + REMIND_AT - shift;
+      if (at <= now) at += DAY;
+      next = Math.min(next, at);
+    }
+    return next;
+  }
+
+  /**
+   * The evening reminder: someone whose run of morning bows (two or more) is waiting on today's,
+   * who is not here and has not been told today, hears that it ends at midnight.
+   */
+  async remind(now) {
+    const room = this.ctx.id.name;
+    if (this.demo || !room) return;
+    const here = new Set(this.people().map(devoteeKey));
+    const due = [];
+    for (const sub of Object.values(this.subs)) {
+      if (!sub.topics?.morning) continue;
+      const shift = sub.tz * 60000;
+      const day = dayOf(now, sub.tz);
+      if (sub.reminded === day || now + 1000 < day * DAY + REMIND_AT - shift) continue;
+      sub.reminded = day;
+      const d = this.state.devotees[devoteeKey(sub)];
+      if (!d || d.streak < 2 || d.day !== day - 1 || here.has(devoteeKey(sub))) continue;
+      due.push([sub, d.streak]);
+    }
+    await this.ctx.storage.put('push', this.subs);
+    for (const [sub, n] of due) {
+      this.pushTo([sub], { title: `Keep your ${n}-morning run`, body: `You haven't bowed at ${room} today. One bow before midnight keeps it going.`, tag: `${room}:morning`, url: `/r/${room}` }, { ttl: 4 * 3600, topic: topicOf('morning', room) });
+    }
   }
 }

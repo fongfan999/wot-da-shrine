@@ -247,3 +247,9 @@
 .tv-unlock__text { display: flex; flex-direction: column; gap: 2px; }
 .tv-unlock__text small { font: 600 14px/1.2 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ember-ink); }
 .tv-unlock__text b { font-size: 28px; font-weight: 600; }
+
+/* Notifications, in Just for you: the button sits under its note, the topics under it once they are on */
+.push { gap: 10px; }
+.push .btn { align-self: flex-start; }
+/* The offer: the unlock card's look, its question allowed to wrap */
+.push-ask .unlock-card__text b { font-size: 14px; font-weight: 500; line-height: 1.4; max-width: 42ch; white-space: normal; }

@@ -20,3 +20,9 @@
   Cache-Control: public, max-age=86400
 /og-back.png
   Cache-Control: public, max-age=86400
+
+# The service worker is checked for a new version on every visit; it must never be stale for a day.
+/sw.js
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: public, max-age=3600

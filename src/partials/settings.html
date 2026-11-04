@@ -183,6 +183,18 @@
         <label class="toggle"><span data-i18n="fPetals">Falling petals</span><input type="checkbox" name="petals" checked /></label>
         <label class="toggle"><span data-i18n="fFog">Ambient fog</span><input type="checkbox" name="fog" checked /></label>
       </div>
+      <!-- Notifications from this shrine, on this device (src/app/push.js). Hidden where there are none to offer. -->
+      <div class="field push" id="push-field" hidden>
+        <span class="field__label" data-i18n="fPush">Notifications</span>
+        <p class="field__note" id="push-note"></p>
+        <button class="btn btn--accent btn--sm push__on" type="button" id="btn-push" data-i18n="pushOn">Turn on notifications</button>
+        <div class="toggles" id="push-topics" hidden>
+          <label class="toggle"><span data-i18n="pushDown">Something’s down, and back up</span><input type="checkbox" data-push="down" checked /></label>
+          <label class="toggle"><span data-i18n="pushWatch">I’m handed the watch</span><input type="checkbox" data-push="watch" checked /></label>
+          <label class="toggle"><span data-i18n="pushMorning">Before my morning run breaks</span><input type="checkbox" data-push="morning" checked /></label>
+        </div>
+        <button class="btn btn--glass btn--sm push__off" type="button" id="btn-push-off" data-i18n="pushOff" hidden>Turn them off</button>
+      </div>
       <div class="panel__actions">
         <button class="btn btn--glass btn--sm" type="button" id="btn-reset">
           <span data-i18n="reset">Reset my preferences</span>
@@ -199,6 +211,15 @@
   <span class="unlock-card__text"><small id="unlock-card-kind"></small><b id="unlock-card-name"></b></span>
   <span class="unlock-card__actions" id="unlock-card-actions"></span>
   <button class="icon-btn unlock-card__close" id="unlock-card-close" type="button" aria-label="Not now">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+</div>
+<!-- Notifications, offered once at a moment they matter: the watch, a run of mornings, a vigil survived (src/app/push.js) -->
+<div class="unlock-card push-ask" id="push-ask" hidden role="status" aria-live="polite">
+  <span class="unlock-card__icon" aria-hidden="true">🔔</span>
+  <span class="unlock-card__text"><small data-i18n="pushAskKicker">Notifications</small><b id="push-ask-text"></b></span>
+  <span class="unlock-card__actions"><button class="btn btn--accent btn--sm" type="button" id="push-ask-yes" data-i18n="pushAskYes">Notify me</button></span>
+  <button class="icon-btn unlock-card__close" id="push-ask-close" type="button" aria-label="Not now">
     <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
   </button>
 </div>

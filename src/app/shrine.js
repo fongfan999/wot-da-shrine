@@ -26,6 +26,7 @@ import { openShare } from './shareSheet.js';
 import { SHIPPED_FOR, layersOn, sameMix } from '../../shared/rules.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
 import { applySettings, onHook } from './settings.js';
+import { askPush, onPush, syncPush } from './push.js';
 import { karmaBeat, renderRecords, statKarma, tickVigil, updateStats } from './stats.js';
 import { bump, logEvent, toast } from './ui.js';
 
@@ -215,6 +216,7 @@ function onShrineMessage(msg) {
       takeTogether(msg);
       syncCounters(msg);
       syncAltar(msg.litAt);
+      syncPush(); // every connect: this browser's notifications go by who is kneeling now
       if (!state.greeted) {
         state.greeted = true;
         // Restore what is already on the altar, and the prayers said before we arrived.
@@ -286,6 +288,9 @@ function onShrineMessage(msg) {
       people.set(msg.person.id, msg.person);
       renderWatch(); // a new name may hold the watch, or no longer
       break;
+    case 'push':
+      onPush(msg);
+      break;
     case 'hook':
       onHook(msg);
       break;
@@ -326,6 +331,12 @@ function onShrineMessage(msg) {
       if (msg.daily) dailyFx(msg);
       // The servers are back: the cast rolls for everyone, and whoever said so gets the share sheet after it.
       if (msg.kind === 'resolve' && msg.record) creditsFx(msg.record, msg.by.id === state.myId ? () => { if (body.dataset.resolved) openShare(true, true); } : null);
+      // A vigil you sat through, over: the next one could reach you with the shrine closed. Not for whoever said so: they get the share sheet.
+      if (msg.kind === 'resolve' && msg.record && msg.by.id !== state.myId) setTimeout(() => askPush('vigil'), 12000);
+      // You took the watch, or were handed it: this is when a buzz at night is worth having.
+      if (msg.kind === 'watch' && state.watch?.id === state.myId) setTimeout(() => askPush('watch'), 2500);
+      // A run of mornings that has begun to mean something.
+      if (msg.daily && msg.by.id === state.myId && msg.daily.streak >= 2) setTimeout(() => askPush('morning', { n: msg.daily.streak }), 4000);
       applyStandings(msg.standings); // after the act's own news: a promotion reads as what it earned
       if (msg.vowKept) vowFx({ ...msg.vowKept, kept: true });
       if (msg.charmed) charmFx(msg.charmed, msg.by);

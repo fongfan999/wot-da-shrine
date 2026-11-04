@@ -20,3 +20,7 @@
 <!-- Until the script has set the heading for this page and started the intro, what the intro reveals stays hidden (never longer than 4s). -->
 <script>document.documentElement.classList.add('booting'); setTimeout(() => document.documentElement.classList.remove('booting'), 4000);</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<!-- An app on the home screen, for phones: iPhones only let a web page notify once it is added there. -->
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="Shrine" />

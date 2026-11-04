@@ -31,6 +31,9 @@
     // A room's webhook: alerting systems batch, but a flapping monitor should not drown the shrine.
     { "name": "HOOK_LIMIT", "namespace_id": "1005", "simple": { "limit": 30, "period": 60 } }
   ],
+  // Web Push: who the push services can contact about this deployment. The key itself is the
+  // VAPID_KEY secret (npm run vapid); without it notifications are simply off.
+  "vars": { "VAPID_SUBJECT": "https://shrine.wotdafong.dev" },
   "observability": {
     "enabled": true
   },

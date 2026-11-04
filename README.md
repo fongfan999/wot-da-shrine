@@ -293,7 +293,46 @@ keeps out people who don't know the room's name, and Replace the link cuts
 off a tool you stopped using; everyone who had the old one open hears so. The demo shrine has no webhook. Each IP
 gets 30 calls a minute.
 
-## Spreading the word
+## Notifications
+
+A shrine can call people back while it is closed. In a shrine, Customize →
+Just for you → **Turn on notifications** subscribes this browser to this
+shrine, and the shrine offers it once at the moments it matters: when you
+take the watch, when your morning bows reach two in a row, and when a vigil
+you sat through ends. It sends:
+
+- **Something's down**: a vigil opened, by a person or an alert ("Grafana
+  raised the alarm in payments-war-room. Come kneel."). Urgent, and it stays on
+  screen until it is tapped. A flapping monitor is heard once in ten minutes.
+- **They're back**: the same vigil ended, replacing the down message, to those
+  who heard it go down. "Not back after all" if it is taken back.
+- **You hold the watch**: someone handed it to you.
+- **Keep your run**: at 7 pm on your clock, if your run of two or more morning
+  bows is waiting on today's.
+
+The down, back and reminder messages skip whoever is kneeling in that shrine; tapping one opens it.
+Each of the three kinds can be switched off, per shrine and per device. iPhones
+and iPads deliver web notifications only to a page added to the Home Screen,
+so there the panel says to do that first; the shrine has a manifest and icons
+for it.
+
+It is Web Push with nothing in between: the Worker encrypts each message
+(RFC 8291) and signs it with VAPID (RFC 8292) itself, in `worker/push.js`, so
+Google's, Mozilla's, Apple's or Microsoft's push service only ever carries
+ciphertext. The shrine keeps up to 100 subscriptions, by push endpoint, with
+the name and avatar they belong to, and forgets one when its push service says
+it is gone. Only those services' hosts are accepted as endpoints. The demo
+shrine and TVs never subscribe.
+
+Notifications need a key, one secret. Without it the panel shows nothing:
+
+```bash
+npm run vapid --silent | npx wrangler secret put VAPID_KEY
+```
+
+For local dev, `npm run vapid --silent -- --dev >> .dev.vars`. A new key cuts
+off every browser subscribed with the old one until they visit again.
+
 
 The shrine is built to travel from one incident channel to the next:
 
