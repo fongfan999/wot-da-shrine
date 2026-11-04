@@ -2,6 +2,7 @@
   "name": "wot-da-shrine",
   "version": "2.0.0",
   "private": true,
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "description": "Wot Da Shrine: when the servers are down, the team prays together in real time.",
   "scripts": {

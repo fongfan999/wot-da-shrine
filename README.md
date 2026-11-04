@@ -463,3 +463,7 @@ worker/objects/world.js    World Durable Object: totals across every shrine
 worker/objects/pairing.js  Pairing Durable Object: one per TV code
 wrangler.jsonc           Worker + Durable Object config
 ```
+
+## License
+
+[O'Saasy](https://osaasy.dev/): MIT-style, except you may not offer this software as a competing hosted or SaaS service. See [LICENSE](LICENSE).
