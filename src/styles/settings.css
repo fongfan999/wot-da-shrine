@@ -95,8 +95,6 @@
 .field .linkbox .linkbox__input { min-height: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; font-family: var(--font-mono); font-size: 16px; text-overflow: ellipsis; }
 .hook .linkbox:focus-within { border-color: var(--accent); }
 .hook__how { margin: 0; padding-left: 18px; font-family: var(--font-sans); font-size: 13px; line-height: 1.5; letter-spacing: 0; text-transform: none; color: var(--ink); }
-.panel__link { padding: 0; border: 0; background: none; font: inherit; color: var(--ink); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
-.panel__link:hover { color: var(--accent); }
 .panel__hint { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
 
 /* Two groups: what the whole shrine sees, then what only this browser keeps */
