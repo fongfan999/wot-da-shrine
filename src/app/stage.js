@@ -137,11 +137,22 @@ export function startMantras() {
     if (!deck.length) deck = gsap.utils.shuffle([...STRINGS.mantras]);
     return deck.pop();
   };
+  let line = mantra;
+  let roll; // the swap in flight; GSAP sleeps in a background tab while the clock keeps swapping, so finish it first
   const swap = () => {
     const next = draw();
-    gsap.timeline()
-      .to(mantra, { y: -8, opacity: 0, duration: 0.35, ease: 'power2.in', onComplete: () => { mantra.textContent = next; } })
-      .fromTo(mantra, { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power2.out' });
+    if (reduceMotion) { line.textContent = next; return; }
+    roll?.progress(1);
+    const out = line;
+    line = document.createElement('span');
+    line.textContent = next;
+    out.after(line);
+    out.removeAttribute('id');
+    out.setAttribute('aria-hidden', 'true');
+    line.id = 'mantra';
+    roll = gsap.timeline({ onComplete: () => out.remove() })
+      .to(out, { yPercent: -100, opacity: 0, duration: 0.55, ease: 'power3.inOut' }, 0)
+      .fromTo(line, { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.55, ease: 'power3.inOut' }, 0);
   };
   swap();
   every(4200, swap);

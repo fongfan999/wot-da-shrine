@@ -42,7 +42,9 @@ body[data-mode="room"] .eyebrow { display: none; }
 body[data-state="lit"] .mantra__dot { background: var(--flame); }
 /* One line at every size: a long mantra wrapping would grow the heading and shrink the altar under it */
 .mantra { max-width: 100%; }
-#mantra { display: inline-block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* The reel clips one line; a new mantra rolls up from below as the old one rolls out the top, both in the same cell */
+.mantra__reel { display: inline-grid; grid-template-columns: minmax(0, 1fr); min-width: 0; overflow: hidden; }
+.mantra__reel > span { grid-area: 1 / 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------- Altar ---------- */
 .altar {
