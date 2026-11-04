@@ -1,0 +1,5 @@
+# /new claims a room name on every visit, so a crawler following the "open a shrine" links would
+# leave rooms behind that nobody uses. The API is for the pages, not for indexing.
+User-agent: *
+Disallow: /new
+Disallow: /api/
