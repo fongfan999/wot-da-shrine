@@ -85,7 +85,6 @@
   .bar { padding: 8px 16px; gap: 8px; }
   .brand__word { display: none; }
   .brand__mark { width: 28px; height: 32px; translate: none; }
-  .presence__avatar:nth-child(n+4) { display: none; }
   .room-chip__name { max-width: 28vw; }
   .stage { padding: 12px 16px var(--space-4); }
   .kneeler__name { display: none; }

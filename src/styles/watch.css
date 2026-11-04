@@ -41,7 +41,6 @@
 .watch-pop__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* The holder, in the list and at the altar */
-.person__watch { font-size: 13px; line-height: 1; }
 .kneeler--watch .kneeler__tag::before { content: "🏮"; font-size: 11px; line-height: 1; margin-left: 4px; order: -1; }
 
 /* On the TV it is a sign, not a control, and big enough to read across the room */

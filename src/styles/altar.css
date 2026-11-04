@@ -192,13 +192,12 @@ body[data-resolved="1"] .tablet__back { display: block; }
 [data-tone="1"] .robe { fill: var(--tone-1-soft); }
 [data-tone="2"] .robe { fill: var(--tone-2-soft); }
 [data-tone="3"] .robe { fill: var(--tone-3-soft); }
-.kneeler[data-tone="1"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="1"]:not(.person--me) .person__avatar { border-color: var(--tone-1); }
-.kneeler[data-tone="2"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="2"]:not(.person--me) .person__avatar { border-color: var(--tone-2); }
-.kneeler[data-tone="3"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="3"]:not(.person--me) .person__avatar { border-color: var(--tone-3); }
-.kneeler[data-tone="1"] .kneeler__avatar, .person[data-tone="1"] .person__avatar { background: var(--tone-1-soft); }
-.kneeler[data-tone="2"] .kneeler__avatar, .person[data-tone="2"] .person__avatar { background: var(--tone-2-soft); }
-.kneeler[data-tone="3"] .kneeler__avatar, .person[data-tone="3"] .person__avatar { background: var(--tone-3-soft); }
-.person__avatar { border: 1.5px solid transparent; }
+.kneeler[data-tone="1"]:not(.kneeler--me) .kneeler__tag { border-color: var(--tone-1); }
+.kneeler[data-tone="2"]:not(.kneeler--me) .kneeler__tag { border-color: var(--tone-2); }
+.kneeler[data-tone="3"]:not(.kneeler--me) .kneeler__tag { border-color: var(--tone-3); }
+.kneeler[data-tone="1"] .kneeler__avatar { background: var(--tone-1-soft); }
+.kneeler[data-tone="2"] .kneeler__avatar { background: var(--tone-2-soft); }
+.kneeler[data-tone="3"] .kneeler__avatar { background: var(--tone-3-soft); }
 
 .stick__body { fill: var(--muted); }
 /* Where a burning stick began: a faint outline of the part already burned, so the time left reads at a glance */

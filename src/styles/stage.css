@@ -43,11 +43,9 @@
 }
 .card__text { margin: 0 0 14px; font-size: 15px; color: var(--muted); }
 
-/* Live: who is here, then what they did, in one card */
+/* Live: what everyone did */
 .card--live { display: flex; flex-direction: column; min-height: 0; }
-.live__people { margin-bottom: var(--space-3); }
 .card--live .live__feed-label { margin-bottom: 4px; }
-.live__people:not([hidden]) + .live__feed-label { padding-bottom: 6px; }
 
 /* This shrine: one line, which opens the sheet; the TV shows the body under it */
 .card--shrine { flex: none; padding-bottom: 14px; }
@@ -87,16 +85,8 @@ body[data-tv="1"] .shrine-sum__chev { display: none; }
     gap: var(--space-3);
   }
   .card--live { flex: 1 1 0; min-height: 0; overflow: hidden; }
-  /* Who is here: the label and one row of people side by side */
-  .live__people { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .live__people > .label { flex: none; margin: 0; padding: 0; border: 0; }
-  .card--live .people { flex: 1; min-width: 0; max-height: 28px; overflow: hidden; }
-  /* Names go by their first word here (the full name is in the tooltip), and your chip says it is you by its colour */
-  .card--live .name__rest, .card--live .person__tag { display: none; }
-  .card--live .person { gap: 6px; padding: 2px 10px 2px 2px; font-size: 13px; }
-  .card--live .person__avatar { width: 22px; height: 22px; font-size: .8rem; }
-  .card--live .person__name { max-width: 10ch; }
-  .people__more { display: grid; place-items: center; min-width: 28px; height: 28px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); font-family: var(--font-mono); font-size: 12px; color: var(--muted); cursor: default; }
+  /* Names go by their first word here (the full name is in the tooltip) */
+  .card--live .name__rest { display: none; }
   .card--live .feed { flex: 1 1 0; max-height: none; overflow: hidden; flex-wrap: wrap; align-content: flex-start; }
   /* Before anything happens, the note sits in the middle of the column's empty card */
   .card--live .feed__empty:not([hidden]) { flex: 1; display: grid; place-items: center; padding: 0 var(--space-3) var(--space-5); text-align: center; text-wrap: balance; }
@@ -144,38 +134,9 @@ body[data-tv="1"] .shrine-sum__chev { display: none; }
   .card--shrine .vitals .burn__row:first-child { margin-bottom: 0; }
 }
 
-/* People */
-.people { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; max-height: 22vh; overflow-y: auto; }
-.person {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  max-width: 100%;
-  padding: 3px 12px 3px 3px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--ink);
-  text-align: left;
-  font-size: 14px;
-  transition: background-color 160ms;
-}
-.person__avatar {
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--paper-sunk);
-  font-size: 1rem;
-}
-.person__name { min-width: 0; max-width: 16ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.person--me { border-color: var(--accent); background: var(--accent-soft); color: var(--note-ink); }
-.person--me:hover { background: var(--accent-soft); border-color: var(--accent-strong); }
-.person__tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
-.person, .presence__avatar { transition: background-color .8s; }
-.person.is-ping, .presence__avatar.is-ping { background: var(--accent-soft); transition: none; }
+/* Who is here: the stack in the top bar glows when they do something */
+.presence__avatar { transition: background-color .8s; }
+.presence__avatar.is-ping { background: var(--accent-soft); transition: none; }
 
 /* Activity feed */
 .feed {
@@ -217,11 +178,3 @@ body[data-tv="1"] .shrine-sum__chev { display: none; }
 .feed__empty { margin: 0; font-size: 14px; color: var(--muted); }
 .feed:empty { display: none; }
 
-/* Mornings in a row, beside the name */
-.person__streak { font-family: var(--font-mono); font-size: 11px; line-height: 1; color: var(--ember-ink); white-space: nowrap; }
-.card--live .person__streak { font-size: 10px; }
-/* Someone else: a click thanks them */
-button.person:not(.person--me):hover, button.person:not(.person--me):focus-visible { border-color: var(--ink); background: var(--paper-sunk); }
-/* The 🙏 says so before anyone hovers */
-.person__thank { font-size: 11px; line-height: 1; opacity: .7; }
-button.person:hover .person__thank, button.person:focus-visible .person__thank { opacity: 1; }

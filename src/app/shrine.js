@@ -49,7 +49,6 @@ export function enterRoom() {
   $('#btn-invite').hidden = false;
   $('#room-chip').hidden = false;
   $('#room-name').textContent = roomName;
-  $('#people-card').hidden = false;
   $('#menu-rename').hidden = false;
   presence.hidden = false;
   $('#join-room').textContent = fmt('roomEyebrow', { room: roomName });
