@@ -100,7 +100,10 @@
 .mixer input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--field-line); }
 .mixer input[type="range"]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--accent); }
 .mixer input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--paper-raised); border: 1px solid var(--ink); }
-.mixer input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+/* Keyboard focus rings the thumb, not the slider's box */
+.mixer input[type="range"]:focus, .mixer input[type="range"]:focus-visible { outline: none; box-shadow: none; } /* not the text fields' box */
+.mixer input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--paper-raised), 0 0 0 5px var(--accent); }
+.mixer input[type="range"]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--paper-raised), 0 0 0 5px var(--accent); }
 /* On the TV: the room's settings for every screen, a smaller row each */
 .screen-set__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; }
 .screen-set__label { font-size: 11px; }
