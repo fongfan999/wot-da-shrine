@@ -1,5 +1,7 @@
 /* ---------- The incident, in the top bar: when it is due back and the button that ends it, one pill ---------- */
-.incident { position: relative; display: flex; align-items: center; gap: 2px; min-width: 0; padding: 2px; border: 1px solid var(--field-line); border-radius: var(--radius-pill); background: var(--paper-raised); }
+.incident { position: relative; display: flex; flex-shrink: 0; align-items: center; gap: 2px; min-width: 0; padding: 2px; border: 1px solid var(--field-line); border-radius: var(--radius-pill); background: var(--paper-raised); }
+/* The pill's buttons keep their full label: squeezed, a nowrap label spills out past the pill's edge. The room's name gives way instead. */
+.incident > .btn { flex-shrink: 0; }
 .incident__resolve, .incident__undo { min-height: 28px; gap: 6px; padding: 4px 12px 4px 10px; font-size: 13px; }
 .incident__resolve .ico, .incident__undo .ico { width: 15px; height: 15px; }
 /* They're back waits until there is a vigil to end */
