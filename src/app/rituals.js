@@ -99,7 +99,7 @@ function renderFortune(f, flip) {
   slip.dataset.level = f.level;
   $('#omikuji-kanji').textContent = l.kanji;
   $('#omikuji-level').textContent = l.name;
-  $('#omikuji-advice').textContent = l.advice;
+  $('#omikuji-advice').textContent = f.advice ?? l.advice; // a slip kept from before advice had a pool says its level's
   const ul = $('#omikuji-lines');
   ul.innerHTML = '';
   for (const line of f.lines) { const li = document.createElement('li'); li.textContent = line; ul.appendChild(li); }
