@@ -1,0 +1,56 @@
+/* ---------- The watch: who holds the pager, a line under the heading ---------- */
+.watch { position: relative; z-index: 6; align-self: flex-start; display: inline-flex; margin: 4px 0 0; } /* its popover hangs over the mantra and the altar below */
+.watch__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 30px;
+  padding: 3px 4px 3px 10px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-pill);
+  background: var(--paper-raised);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: border-color 160ms, background-color 160ms;
+}
+.watch__btn:hover:not(:disabled) { border-color: var(--line-strong); }
+.watch__btn:disabled { cursor: default; padding-right: 12px; }
+.watch__lantern { flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+/* Someone holds it: the lantern is lit */
+.watch:not([data-state="none"]) .watch__lantern { color: var(--ember); fill: color-mix(in srgb, var(--ember) 22%, transparent); filter: drop-shadow(0 0 4px color-mix(in srgb, var(--ember) 55%, transparent)); }
+.watch__avatar { flex: none; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: var(--paper-sunk); font-size: .78rem; }
+.watch__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--ink); font-weight: 600; }
+.watch[data-state="none"] .watch__text { color: var(--muted); font-weight: 400; }
+.watch__since { font-family: var(--font-mono); font-size: 11px; letter-spacing: .02em; }
+.watch__since:empty, .watch__action:empty { display: none; }
+.watch__action { padding: 3px 10px; border-radius: var(--radius-pill); background: var(--paper-sunk); color: var(--ink); font-size: 12px; font-weight: 600; }
+.watch[data-state="none"] .watch__action, .watch[data-state="mine"] .watch__action { background: var(--accent-soft); color: var(--note-ink); }
+.watch[data-state="mine"] .watch__btn { border-color: var(--accent); }
+
+/* Hand over: everyone kneeling here but you */
+.watch-pop { left: 0; right: auto; top: calc(100% + 8px); gap: 10px; width: min(300px, calc(100vw - 2 * var(--gutter))); }
+.watch-pop__people { display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; }
+.watch-pop__people[hidden], .watch-pop .eta-pop__label[hidden] { display: none; }
+.watch-pop__person { display: flex; align-items: center; gap: 10px; padding: 6px 10px 6px 6px; border: 1px solid transparent; border-radius: var(--radius-md); background: none; color: var(--ink); font: inherit; font-size: 14px; text-align: left; }
+.watch-pop__person:hover, .watch-pop__person:focus-visible { border-color: var(--field-line); background: var(--paper-sunk); outline: 0; }
+.watch-pop__avatar { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: var(--paper-sunk); font-size: 1rem; }
+.watch-pop__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The holder, in the list and at the altar */
+.person__watch { font-size: 13px; line-height: 1; }
+.kneeler--watch .kneeler__tag::before { content: "🏮"; font-size: 11px; line-height: 1; margin-left: 4px; order: -1; }
+
+/* On the TV it is a sign, not a control, and big enough to read across the room */
+body[data-tv="1"] .watch__btn { min-height: 40px; padding: 6px 18px 6px 14px; font-size: 18px; gap: 12px; }
+body[data-tv="1"] .watch__lantern { width: 22px; height: 22px; }
+body[data-tv="1"] .watch__avatar { width: 28px; height: 28px; font-size: 1rem; }
+body[data-tv="1"] .watch__since { font-size: 14px; }
+
+@media (max-width: 640px) {
+  .watch__since { display: none; }
+  .watch__btn { font-size: 12px; min-height: 28px; }
+}

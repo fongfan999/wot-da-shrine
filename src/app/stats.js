@@ -144,6 +144,7 @@ export function tickVigil() {
   if (roomName) bits.push(fmt('vigilPraying', { n: people.size }));
   if (state.vigil.prayers) bits.push(fmt('vigilPrayers', { n: state.vigil.prayers }));
   bits.push(fmt('vigilNo', { n: records.survived + 1 }));
+  if (state.vigil.watch) bits.push(fmt('vigilWatch', { name: state.vigil.watch }));
   vigilMeta.textContent = bits.join(' · ');
   vigilEl.title = vigilHint(records.survived + 1);
 }
@@ -177,6 +178,11 @@ export function renderRecords() {
   $('#rec-deploys').textContent = d.blessed;
   $('#rec-streak').textContent = d.streak;
   $('#stat-deploys').title = $('#stat-streak').title = fmt('recDeploysTip', d);
+  // Watches, once one has ended: how many of them nothing went down on.
+  const w = records.watched;
+  $('#stat-watches').hidden = !w.kept;
+  $('#rec-watches').textContent = w.quiet;
+  $('#stat-watches').title = fmt('recWatchesTip', w);
   const longest = $('#rec-longest');
   longest.hidden = !records.longest;
   longest.textContent = records.longest ? fmt('recLongest', { t: minutesText(records.longest) }) : '';
@@ -204,6 +210,7 @@ export function renderRecords() {
     const facts = document.createElement('span');
     facts.className = 'records__facts';
     const bits = r.outcome === 'forgotten' ? [t('recForgotten')] : [fmt('recPeople', { n: r.peak }), fmt('vigilPrayers', { n: r.prayers }), `${r.karma} karma`];
+    if (r.watch) bits.push(fmt('vigilWatch', { name: r.watch }));
     if (r.title) { // what was down, as it was called then
       const name = document.createElement('b');
       name.className = 'records__title';

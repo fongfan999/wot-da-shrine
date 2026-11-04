@@ -7,7 +7,7 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
-import { AVATARS, BLESSING_BLAME, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, KARMA, MAX_BLESSINGS, MAX_HISTORY, OFFERING_KINDS, RESOLVE_UNDO, TRACKS, VIGIL_IDLE } from '../../shared/rules.js';
+import { AVATARS, BLESSING_BLAME, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, TRACKS, VIGIL_IDLE, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_OFFERINGS = 4; // the altar table has four slots
@@ -55,6 +55,9 @@ const EMPTY = {
   blessing: null, // the deploy being prayed over: { startedAt, by, what, bows, prayers, peak }
   blessings: [], // the last few, newest first: { startedAt, endedAt, by, what, bows, prayers, peak, outcome }
   deploys: { blessed: 0, shipped: 0, broke: 0, streak: 0, best: 0 }, // streak: shipped in a row, with no vigil after
+  watch: null, // who holds the pager: { startedAt, id, name, avatar, by, vigils }
+  watches: [], // the last few, newest first: { startedAt, endedAt, name, avatar, vigils, outcome, to }
+  watched: { kept: 0, quiet: 0 }, // watches ended, and how many of them saw no vigil
 };
 
 function clean(text, max) {
@@ -81,7 +84,7 @@ export class Shrine extends DurableObject {
       this.stored = saved !== undefined;
       this.claimed = (await ctx.storage.get('claimed')) === true;
       this.alarmAt = (await ctx.storage.getAlarm()) ?? 0;
-      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys } };
+      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys }, watched: { ...EMPTY.watched, ...saved?.watched } };
     });
   }
 
@@ -115,6 +118,7 @@ export class Shrine extends DurableObject {
     this.settle();
     let dirty = this.forget();
     if (this.expireBlessing()) { dirty = true; this.broadcast({ t: 'sync', blessings: this.state.blessings, ...this.counters() }, server); }
+    if (this.expireWatch()) { dirty = true; this.broadcast({ t: 'sync', watches: this.state.watches, ...this.counters() }, server); }
     // The vigil's peak counts everyone who knelt, not only those who did something.
     const v = this.state.vigil;
     if (v && !person.watcher && this.people().length > v.peak) { v.peak = this.people().length; dirty = true; }
@@ -135,7 +139,15 @@ export class Shrine extends DurableObject {
       history: this.state.history,
       longest: this.state.longest,
       blessings: this.state.blessings,
+      watches: this.state.watches,
     }));
+    // The holder came back under a new name or avatar: the watch goes by it.
+    const w = this.state.watch;
+    if (w && w.id === person.id && !person.watcher && (w.name !== person.name || w.avatar !== person.avatar)) {
+      this.state.watch = { ...w, name: person.name, avatar: person.avatar };
+      this.broadcast({ t: 'sync', ...this.counters() });
+      await this.save();
+    }
     if (person.watcher) { /* a screen comes and goes unannounced */ }
     else if (!was) this.broadcast({ t: 'join', person: pub(person) }, server);
     else if (was.name !== person.name || was.avatar !== person.avatar) this.broadcast({ t: 'rename', person: pub(person) }, server);
@@ -156,6 +168,7 @@ export class Shrine extends DurableObject {
     let opens = false; // this action says something is down
     this.blamed = null; // a deploy the vigil this action opens counts against
     if (this.expireBlessing()) { this.broadcast({ t: 'sync', blessings: s.blessings, ...this.counters() }); await this.save(); }
+    if (this.expireWatch()) { this.broadcast({ t: 'sync', watches: s.watches, ...this.counters() }); await this.save(); }
 
     switch (msg.t) {
       case 'light':
@@ -289,6 +302,32 @@ export class Shrine extends DurableObject {
         out.blessings = s.blessings;
         opens = true;
         break;
+      case 'watch': {
+        // Taking the pager, or handing it to someone kneeling here. Not in the demo, where nobody is on call.
+        if (this.demo) return;
+        let to = by;
+        if (msg.to !== undefined) {
+          to = this.people().find((p) => p.id === msg.to);
+          if (!to) return;
+        }
+        if (holdsWatch(s.watch, to)) return;
+        const now = Date.now();
+        if (s.watch) {
+          out.record = this.closeWatch(now, to);
+          if (out.record.outcome === 'quiet') out.quiet = QUIET_WATCH;
+        }
+        // Taken during an incident, the watch is not quiet: the new holder inherits the vigil.
+        s.watch = { startedAt: now, id: to.id, name: to.name, avatar: to.avatar, by: by.name, vigils: s.vigil ? 1 : 0 };
+        out.watches = s.watches;
+        break;
+      }
+      case 'unwatch':
+        // The shift is over, and nobody takes it on. Only the holder ends their own watch; anyone else takes it over.
+        if (!holdsWatch(s.watch, by)) return;
+        out.record = this.closeWatch(Date.now(), null);
+        if (out.record.outcome === 'quiet') out.quiet = QUIET_WATCH;
+        out.watches = s.watches;
+        break;
       case 'rename': {
         if (this.demo) return;
         const name = clean(msg.name, 24);
@@ -297,6 +336,12 @@ export class Shrine extends DurableObject {
         const person = { ...self, name, avatar };
         ws.serializeAttachment(person);
         this.broadcast({ t: 'rename', person: pub(person) });
+        // The holder renamed: the watch goes by the new name, so their next visit still holds it.
+        if (s.watch?.id === self.id) {
+          s.watch = { ...s.watch, name, avatar };
+          this.broadcast({ t: 'sync', ...this.counters() });
+          await this.save();
+        }
         return;
       }
       default:
@@ -401,7 +446,7 @@ export class Shrine extends DurableObject {
   counters() {
     const s = this.state;
     const undo = s.undo && Date.now() - s.undo.at < RESOLVE_UNDO ? { by: s.undo.id, until: s.undo.at + RESOLVE_UNDO } : null;
-    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo, blessing: s.blessing, deploys: s.deploys };
+    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo, blessing: s.blessing, deploys: s.deploys, watch: s.watch, watched: s.watched };
   }
 
   /**
@@ -414,6 +459,8 @@ export class Shrine extends DurableObject {
     const now = Date.now();
     s.vigil = { startedAt: now, lastAt: now, seenAt: now, peak: this.people().length, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0 };
     s.undo = null;
+    // On someone's watch: the vigil remembers whose, and their watch is no longer quiet.
+    if (s.watch) { s.watch.vigils += 1; s.vigil.watch = s.watch.name; }
     if (s.blessing) { this.blamed = this.closeBlessing(now, 'broke'); return; }
     const last = s.blessings[0];
     if (last?.outcome === 'shipped' && now - last.endedAt < BLESSING_BLAME) {
@@ -463,6 +510,31 @@ export class Shrine extends DurableObject {
     return true;
   }
 
+  /**
+   * End the watch and file it, handed on to `to` or simply ended (null). A watch that saw no vigil
+   * and lasted WATCH_QUIET_MIN is quiet, and the room earns QUIET_WATCH karma. Returns the record.
+   */
+  closeWatch(endedAt, to) {
+    const s = this.state;
+    const w = s.watch;
+    const quiet = !w.vigils && endedAt - w.startedAt >= WATCH_QUIET_MIN;
+    const record = { startedAt: w.startedAt, endedAt, name: w.name, avatar: w.avatar, vigils: w.vigils, outcome: quiet ? 'quiet' : w.vigils ? 'eventful' : 'short' };
+    if (to) record.to = to.name;
+    s.watches = [record, ...s.watches].slice(0, MAX_WATCHES);
+    s.watched.kept += 1;
+    if (quiet) { s.watched.quiet += 1; s.karma += QUIET_WATCH; }
+    s.watch = null;
+    return record;
+  }
+
+  /** A watch nobody handed on within WATCH_MAX is let go, as if its holder had ended it then. True when it was. */
+  expireWatch() {
+    const w = this.state.watch;
+    if (!w || Date.now() - w.startedAt < WATCH_MAX) return false;
+    this.closeWatch(w.startedAt + WATCH_MAX, null);
+    return true;
+  }
+
   /** End the vigil and file it. Returns the record. */
   closeVigil(endedAt, outcome) {
     const s = this.state;
@@ -479,6 +551,7 @@ export class Shrine extends DurableObject {
       title: s.meta.title, // what was down, as it was called then: the room's title moves on to the next incident
       outcome,
     };
+    if (v.watch) record.watch = v.watch; // whose watch it was
     s.history = [record, ...s.history].slice(0, MAX_HISTORY);
     if (outcome === 'survived') {
       s.survived += 1;
@@ -506,6 +579,7 @@ export class Shrine extends DurableObject {
     this.settle();
     this.forget();
     this.expireBlessing();
+    this.expireWatch();
     const s = this.state;
     const people = this.people();
     const now = Date.now();

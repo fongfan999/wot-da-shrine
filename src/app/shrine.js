@@ -16,6 +16,7 @@ import { clearResolved, renderResolve, renderUndo, RESOLVED_FOR, resolveFx, show
 import { blameFx, fortuneFx } from './rituals.js';
 import { blamedFx, remoteDeploy, renderDeploy, showShipped } from './deploy.js';
 import { renderDown } from './vigilStart.js';
+import { renderWatch, watchAct } from './watch.js';
 import { SHIPPED_FOR } from '../../shared/rules.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
 import { applySettings } from './settings.js';
@@ -24,7 +25,7 @@ import { bump, logEvent, toast } from './ui.js';
 
 /* ---------- Shared shrine ---------- */
 const DEFAULT_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader'];
-const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense', bless: 'bow', ship: 'check', broke: 'fire' };
+const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense', bless: 'bow', ship: 'check', broke: 'fire', watch: 'lantern', unwatch: 'lantern' };
 export const joinEl = $('#join');
 /** The join sheet is up and waiting: not merely fading out after you joined. */
 export const joinOpen = () => !joinEl.hidden && !joinEl.inert;
@@ -219,6 +220,7 @@ function onShrineMessage(msg) {
         records.history = msg.history ?? [];
         records.longest = msg.longest ?? 0;
         records.blessings = msg.blessings ?? [];
+        records.watches = msg.watches ?? [];
         // Shipped a moment before you came in: the heading still says so.
         const shipped = records.blessings[0];
         if (!msg.vigil && !msg.blessing && shipped?.outcome === 'shipped' && msg.now - shipped.endedAt < SHIPPED_FOR) showShipped(shipped.endedAt - state.clockSkew);
@@ -256,7 +258,7 @@ function onShrineMessage(msg) {
     }
     case 'join':
       people.set(msg.person.id, msg.person);
-      renderPeople(msg.person.id);
+      renderWatch(msg.person.id); // and the people, with the newcomer; the hand-over list grows
       if (tv && msg.person.via === 'tv') announceArrival(msg.person);
       logEvent({ avatar: msg.person.avatar, who: msg.person.name, what: t('fJoin'), quiet: true, toastText: `${msg.person.name} ${t('fJoin')}.` });
       sound.tick(660, 0.05);
@@ -264,16 +266,17 @@ function onShrineMessage(msg) {
     case 'leave': {
       const p = people.get(msg.id);
       people.delete(msg.id);
-      renderPeople();
+      renderWatch();
       if (p) logEvent({ avatar: p.avatar, who: p.name, what: t('fLeave'), quiet: true });
       break;
     }
     case 'rename':
       people.set(msg.person.id, msg.person);
-      renderPeople();
+      renderWatch(); // a new name may hold the watch, or no longer
       break;
     case 'sync':
       if (msg.blessings) records.blessings = msg.blessings;
+      if (msg.watches) records.watches = msg.watches;
       syncCounters(msg);
       syncAltar(msg.litAt);
       break;
@@ -285,13 +288,15 @@ function onShrineMessage(msg) {
       }
       if (msg.kind === 'unresolve') records.history = records.history.filter((r) => r.endedAt !== msg.undone);
       if (msg.blessings) records.blessings = msg.blessings;
+      if (msg.watches) records.watches = msg.watches;
       if (msg.kind === 'ship') state.shippedAt = Date.now(); // before the counters, so the heading goes straight to Shipped
       syncCounters(msg);
       if (msg.kind === 'ship') showShipped(state.shippedAt);
       // A vigil opened soon after a deploy, or while one went out: it counts against that deploy.
       if (msg.blamed && msg.kind !== 'broke') blamedFx(msg.blamed);
       if (msg.kind === 'light' || msg.by.id === state.myId) syncAltar(msg.litAt);
-      if (msg.by.id !== state.myId) remoteAct(msg);
+      if (msg.kind === 'watch' || msg.kind === 'unwatch') watchAct(msg); // yours too: only the shrine knows how it went
+      else if (msg.by.id !== state.myId) remoteAct(msg);
       if (msg.chorus) chorusFx(msg.chorus, msg.bonus);
       pingPerson(msg.by.id, ACT_ICONS[msg.kind]);
       break;
@@ -316,7 +321,7 @@ function remoteAct(msg) {
 }
 
 /** The shrine is the source of truth for the room's counters. */
-function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo, blessing, deploys }) {
+function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo, blessing, deploys, watch, watched }) {
   if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); }
   if (karma !== undefined && karma !== counters.karma) { if (state.greeted) karmaBeat(karma - counters.karma); counters.karma = karma; updateStats(!state.greeted); bump(statKarma); }
   if (since) state.roomSince = since - state.clockSkew;
@@ -329,6 +334,11 @@ function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longe
   }
   if (longest !== undefined) records.longest = longest;
   if (deploys !== undefined) records.deploys = deploys;
+  if (watched !== undefined) records.watched = watched;
+  if (watch !== undefined) {
+    state.watch = watch ? { ...watch, startedAt: watch.startedAt - state.clockSkew } : null;
+    renderWatch();
+  }
   if (blessing !== undefined) {
     state.blessing = blessing ? { ...blessing, startedAt: blessing.startedAt - state.clockSkew } : null;
     if (state.blessing && body.dataset.resolved) clearResolved(); // a deploy going out: the celebration is over

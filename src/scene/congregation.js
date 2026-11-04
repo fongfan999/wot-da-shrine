@@ -93,6 +93,11 @@ export class Congregation {
     item.el.querySelector('.kneeler__name').textContent = person.name;
   }
 
+  /** The one holding the pager kneels with a lantern on their name tag. */
+  markWatch(id) {
+    for (const [pid, item] of this.items) item.el.classList.toggle('kneeler--watch', pid === id);
+  }
+
   layout() {
     const unit = this.burner.clientHeight / VB_H;
     if (!unit) return;

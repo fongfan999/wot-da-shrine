@@ -59,10 +59,11 @@ export const state = {
   undo: null,         // { by, until }: They're back, while whoever said it can still take it back
   blessing: null,     // the deploy being blessed: { startedAt, by, what, bows, prayers, peak }
   shippedAt: 0,       // the last Shipped, while the heading still says so
+  watch: null,        // who holds the pager: { startedAt, id, name, avatar, by, vigils }
 };
 
 /** What this room's shrine has survived: its past vigils, kept by the shrine. */
-export const records = { survived: 0, longest: 0, history: [], blessings: [], deploys: { blessed: 0, shipped: 0, broke: 0, streak: 0, best: 0 } };
+export const records = { survived: 0, longest: 0, history: [], blessings: [], deploys: { blessed: 0, shipped: 0, broke: 0, streak: 0, best: 0 }, watches: [], watched: { kept: 0, quiet: 0 } };
 
 /**
  * Title, subtitle and ETA: the room's shared ones, unless this URL brings its own (the maintenance

@@ -6,6 +6,7 @@ import { t } from '../lib/strings.js';
 import { $, fmt, people, reduceMotion, roomName, state } from './context.js';
 import { congregation } from './engines.js';
 import { openJoin } from './shrine.js';
+import { onWatch } from './watch.js';
 import { feedVisible, nameParts, toast } from './ui.js';
 
 const peopleList = $('#people');
@@ -55,6 +56,14 @@ export function renderPeople(newId) {
     name.className = 'person__name';
     nameParts(name, p.name);
     row.append(avatar, name);
+    if (onWatch(p)) { // holds the pager
+      row.dataset.watch = '1';
+      const lantern = document.createElement('span');
+      lantern.className = 'person__watch';
+      lantern.textContent = '🏮';
+      lantern.title = t('watchTip');
+      row.appendChild(lantern);
+    }
     if (mine) {
       const tag = document.createElement('span');
       tag.className = 'person__tag';
@@ -68,6 +77,7 @@ export function renderPeople(newId) {
   peopleCount.textContent = list.length;
   fitPeople();
   congregation.set(list, state.myId);
+  congregation.markWatch(list.find(onWatch)?.id);
 
   // Compact stack in the top bar.
   presence.innerHTML = '';

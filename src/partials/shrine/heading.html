@@ -9,4 +9,20 @@
   <b class="vigil__time" id="vigil-time">00:00</b>
   <span class="vigil__meta" id="vigil-meta"></span>
 </p>
+<!-- The watch: who holds the pager. Take it, hand it to someone kneeling here, or end it. Waits until the room is joined. -->
+<div class="watch" id="watch" hidden>
+  <button class="watch__btn" id="watch-btn" type="button">
+    <svg class="watch__lantern" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v2"/><rect x="9" y="4" width="6" height="2" rx=".5"/><path d="M12 6c4.5 0 6 3 6 7s-1.5 7-6 7-6-3-6-7 1.5-7 6-7z"/><path d="M7 10h10M7 16h10"/><rect x="9" y="20" width="6" height="2" rx=".5"/></svg>
+    <span class="watch__avatar" id="watch-avatar" hidden></span>
+    <span class="watch__text" id="watch-text"></span>
+    <span class="watch__since" id="watch-since"></span>
+    <span class="watch__action" id="watch-action"></span>
+  </button>
+  <div class="eta-pop watch-pop" id="watch-pop" role="dialog" tabindex="-1" aria-labelledby="watch-pop-label" hidden>
+    <p class="eta-pop__label" id="watch-pop-label" data-i18n="watchPopLabel">Hand the watch to</p>
+    <div class="watch-pop__people" id="watch-people"></div>
+    <p class="down-pop__note" id="watch-alone" data-i18n="watchAlone" hidden>Nobody else is kneeling here. Send them the link, and hand it over when they come.</p>
+    <div class="down-pop__actions"><button class="btn btn--glass btn--sm" id="watch-end" type="button" data-i18n="watchEnd">End my watch</button></div>
+  </div>
+</div>
 <p class="mantra" aria-live="polite"><span class="mantra__dot" aria-hidden="true"></span><span id="mantra">Clearing cache and karma…</span></p>

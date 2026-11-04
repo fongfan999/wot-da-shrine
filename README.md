@@ -118,6 +118,29 @@ blessed and the clean run once there is one; the quiet TV says how many clean
 deploys in a row, and a pasted link mentions a blessing in progress. The rules
 live in `shared/rules.js` with the vigil's.
 
+### The watch
+
+Someone is on call every night, so the shrine keeps a lantern for them. Under
+the heading, **Take the watch** makes you the one holding the pager; whoever
+holds it sees **Hand over**, which lists everyone kneeling in the shrine and
+passes it to them ("An handed you the watch. Sleep lightly."), or ends the
+watch. Anyone else can **Take over**. One holder at a time, and the holder
+kneels at the altar with a lantern on their name tag.
+
+- **A quiet watch**: a watch that saw no vigil and lasted an hour or more
+  earns the room +10 karma and a peal of bells when it is handed on or ended.
+  Taking the watch during an incident inherits it, so that watch is not quiet.
+- **On whose watch**: a vigil that opens while someone holds the pager says so
+  in its corner ("on Linh's watch"), and its record keeps the name.
+- **On the TV**: the war-room screen shows who is on call and since when, and
+  shows nothing when nobody is.
+
+The holder is matched by connection, or by name and avatar, so the same person
+on their phone the next morning still holds it. A watch nobody hands on is let
+go after a week. **Shrine records** counts the quiet watches once one has
+ended. Holders' names stay in the room: link previews and badges never show
+them.
+
 ## Spreading the word
 
 The shrine is built to travel from one incident channel to the next:
