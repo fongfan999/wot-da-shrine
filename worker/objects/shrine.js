@@ -7,11 +7,11 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
-import { AVATARS, BLESSING_BLAME, BOARD_SIZE, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
+import { AVATARS, BLESSING_BLAME, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
-const LOGGED = new Set(['light', 'down', 'bowl', 'bow', 'offer', 'prayer', 'blame', 'omikuji', 'resolve', 'unresolve']);
+const LOGGED = new Set(['light', 'down', 'bowl', 'bow', 'offer', 'prayer', 'blame', 'omikuji', 'resolve', 'unresolve', 'thank']);
 const MAX_OFFERINGS = 4; // the altar table has four slots
 const FORGET_AFTER = 30 * 24 * 3600 * 1000; // rooms nobody visits for 30 days are swept
 const TOUCH_EVERY = 24 * 3600 * 1000; // pushing the sweep back once a day is plenty, and saves a write per action
@@ -65,6 +65,10 @@ const EMPTY = {
   devotees: {}, // what each person has earned here, by devoteeKey: { name, avatar, karma, streak, best, day, at, seen }
   daily: { day: 0, streak: 0, best: 0 }, // the days in a row someone made a morning bow here
   level: -1, // the shrine's level, as last grown to (-1: not yet worked out, see the constructor)
+  thanks: {}, // who thanked whom today: "from>to" (devotee keys) → the UTC day
+  vow: null, // this week's: { week, kind, target, by, startedAt, progress, helpers: { key: { name, avatar, n } }, done }
+  vows: [], // the last few, newest first: the vow as it ended, with outcome 'kept' or 'missed'
+  vowed: { kept: 0, missed: 0 },
 };
 
 function clean(text, max) {
@@ -93,7 +97,7 @@ export class Shrine extends DurableObject {
       this.claimed = (await ctx.storage.get('claimed')) === true;
       this.hookKey = (await ctx.storage.get('hook')) ?? ''; // the secret in the room's webhook URL; made the first time someone asks
       this.alarmAt = (await ctx.storage.getAlarm()) ?? 0;
-      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys }, watched: { ...EMPTY.watched, ...saved?.watched }, daily: { ...EMPTY.daily, ...saved?.daily }, devotees: { ...saved?.devotees } };
+      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys }, watched: { ...EMPTY.watched, ...saved?.watched }, daily: { ...EMPTY.daily, ...saved?.daily }, devotees: { ...saved?.devotees }, vowed: { ...EMPTY.vowed, ...saved?.vowed } };
       // A room from when the sound was one of four tracks: that track's mix is what it plays now.
       const { meta } = this.state;
       if (!meta.mix && meta.track) meta.mix = PRESETS[meta.track] ?? null;
@@ -134,6 +138,7 @@ export class Shrine extends DurableObject {
     let dirty = this.forget();
     if (this.expireBlessing()) { dirty = true; this.broadcast({ t: 'sync', blessings: this.state.blessings, ...this.counters() }, server); }
     if (this.expireWatch()) { dirty = true; this.broadcast({ t: 'sync', watches: this.state.watches, ...this.counters() }, server); }
+    if (this.expireVow()) { dirty = true; this.broadcast({ t: 'sync', vows: this.state.vows, ...this.counters() }, server); }
     // The vigil's peak counts everyone who knelt, not only those who did something.
     const v = this.state.vigil;
     if (v && !person.watcher && this.people().length > v.peak) { v.peak = this.people().length; dirty = true; }
@@ -156,6 +161,7 @@ export class Shrine extends DurableObject {
       longest: this.state.longest,
       blessings: this.state.blessings,
       watches: this.state.watches,
+      vows: this.state.vows,
       ...this.together(),
     }));
     // The incense burned down while nobody was looking: whoever lit it earned that, and the room hears so.
@@ -188,6 +194,7 @@ export class Shrine extends DurableObject {
     this.blamed = null; // a deploy the vigil this action opens counts against
     if (this.expireBlessing()) { this.broadcast({ t: 'sync', blessings: s.blessings, ...this.counters() }); await this.save(); }
     if (this.expireWatch()) { this.broadcast({ t: 'sync', watches: s.watches, ...this.counters() }); await this.save(); }
+    if (this.expireVow()) { this.broadcast({ t: 'sync', vows: s.vows, ...this.counters() }); await this.save(); }
 
     switch (msg.t) {
       case 'light':
@@ -319,6 +326,7 @@ export class Shrine extends DurableObject {
         // Out, and nothing fell over. The streak goes on, until a vigil opens soon after (see openVigil).
         if (!s.blessing) return;
         out.record = this.closeBlessing(Date.now(), 'shipped');
+        if (this.vowStep('clean', by)) out.record.vowBy = { name: by.name, avatar: by.avatar }; // so a vigil soon after can take it back
         out.blessings = s.blessings;
         break;
       case 'broke':
@@ -372,6 +380,36 @@ export class Shrine extends DurableObject {
         }
         ws.send(JSON.stringify({ t: 'hook', key: this.hookKey }));
         return;
+      }
+      case 'thank': {
+        // Thanking someone: someone kneeling here (by id), or someone the shrine remembers (by name and
+        // avatar, from a vigil's cast). Never yourself, and once a day for each pair.
+        if (this.demo) return;
+        let to = null;
+        if (typeof msg.to === 'string') to = this.people().find((p) => p.id === msg.to) ?? null;
+        else if (msg.to && typeof msg.to === 'object') {
+          const d = s.devotees[devoteeKey({ name: clean(msg.to.name, 24), avatar: msg.to.avatar })];
+          if (d) to = { name: d.name, avatar: d.avatar };
+        }
+        if (!to || devoteeKey(to) === devoteeKey(by)) return;
+        const day = dayOf(Date.now());
+        const pair = `${devoteeKey(by)}>${devoteeKey(to)}`;
+        if (s.thanks[pair] === day) { ws.send(JSON.stringify({ t: 'nope', why: 'thanked', name: to.name })); return; }
+        s.thanks = Object.fromEntries(Object.entries(s.thanks).filter(([, d]) => d === day)); // only today's matter
+        s.thanks[pair] = day;
+        out.to = { id: to.id, name: to.name, avatar: to.avatar };
+        out.gift = THANK;
+        s.karma += THANK;
+        const them = this.credit(to, THANK);
+        if (them) them.thanked = (them.thanked ?? 0) + 1;
+        break;
+      }
+      case 'vow': {
+        // This week's goal, for the whole room. One a week: set, it stays until it is kept or the week ends.
+        if (this.demo || !VOWS[msg.kind] || s.vow) return;
+        const now = Date.now();
+        s.vow = { week: weekOf(now), kind: msg.kind, target: VOWS[msg.kind], by: by.name, startedAt: now, progress: 0, helpers: {} };
+        break;
       }
       case 'rename': {
         if (this.demo) return;
@@ -456,6 +494,7 @@ export class Shrine extends DurableObject {
     this.forget();
     if (this.expireBlessing()) this.broadcast({ t: 'sync', blessings: s.blessings, ...this.counters() });
     if (this.expireWatch()) this.broadcast({ t: 'sync', watches: s.watches, ...this.counters() });
+    if (this.expireVow()) this.broadcast({ t: 'sync', vows: s.vows, ...this.counters() });
     const name = clean(title, META_MAX.title);
     let did = 'ignored';
     if (state === 'down' && s.vigil) {
@@ -578,6 +617,7 @@ export class Shrine extends DurableObject {
     // And their part in the vigil, if one is open.
     const c = this.castOf(person);
     if (c) c.karma = Math.max(0, c.karma + n);
+    if (n > 0) this.vowStep('karma', person, n);
     d[key] = me;
     this.credited.add(key);
     // A full ledger lets go of whoever earned nothing for longest.
@@ -610,6 +650,7 @@ export class Shrine extends DurableObject {
       r.best = Math.max(r.best, r.streak);
       r.day = day;
     }
+    this.vowStep('mornings', person);
     return { streak: me.streak, bonus: dailyBonus(me.streak), room: r.streak };
   }
 
@@ -623,7 +664,9 @@ export class Shrine extends DurableObject {
   /** The people whose standing changed, for the broadcast that says so; {} when nobody's did. */
   standings() {
     const grew = this.grow();
-    if (!this.credited.size && !grew) return {};
+    const kept = this.vowKept;
+    this.vowKept = null;
+    if (!this.credited.size && !grew && !kept) return {};
     const d = this.state.devotees;
     const wk = weekOf(Date.now());
     const list = [...this.credited].map((k) => d[k]).filter(Boolean).map(({ name, avatar, karma, streak, day, wk: w, wkKarma }) => ({ name, avatar, karma, streak, day, week: w === wk ? wkKarma : 0 }));
@@ -631,7 +674,46 @@ export class Shrine extends DurableObject {
     const out = this.together();
     if (list.length) out.standings = list;
     if (grew) out.grew = grew;
+    if (kept) out.vowKept = kept;
     return out;
+  }
+
+  /* ---------- The weekly vow ---------- */
+
+  /**
+   * Something this week's vow counts happened: `n` more (or fewer, a clean deploy that broke after
+   * all), thanks to `person`. The vow is kept when it gets there: everyone who helped earns
+   * VOW_SHARE, and so does the room for each of them. True when it counted.
+   */
+  vowStep(kind, person, n = 1) {
+    const s = this.state;
+    const v = s.vow;
+    if (this.demo || !v || v.done || v.kind !== kind || v.week !== weekOf(Date.now())) return false;
+    v.progress = Math.max(0, v.progress + n);
+    if (person?.name) {
+      const key = devoteeKey(person);
+      const h = (v.helpers[key] ??= { name: person.name, avatar: person.avatar, n: 0 });
+      h.n = Math.max(0, h.n + n);
+    }
+    if (v.progress < v.target) return true;
+    v.done = Date.now(); // first: what it pays out must not count toward it again
+    s.vowed.kept += 1;
+    const helpers = Object.values(v.helpers).filter((h) => h.n > 0).sort((a, b) => b.n - a.n);
+    for (const h of helpers) { this.credit(h, VOW_SHARE); s.karma += VOW_SHARE; }
+    this.vowKept = { kind: v.kind, target: v.target, by: helpers.map(({ name, avatar, n: m }) => ({ name, avatar, n: m })), share: VOW_SHARE };
+    return true;
+  }
+
+  /** Last week's vow, filed: kept if the room got there, missed if not. True when there was one to file. */
+  expireVow() {
+    const s = this.state;
+    const v = s.vow;
+    if (!v || v.week === weekOf(Date.now())) return false;
+    if (!v.done) s.vowed.missed += 1;
+    const { helpers, ...rest } = v;
+    s.vows = [{ ...rest, outcome: v.done ? 'kept' : 'missed', helpers: Object.values(helpers).filter((h) => h.n > 0) }, ...s.vows].slice(0, MAX_VOWS);
+    s.vow = null;
+    return true;
   }
 
   /**
@@ -681,7 +763,7 @@ export class Shrine extends DurableObject {
   counters() {
     const s = this.state;
     const undo = s.undo && Date.now() - s.undo.at < RESOLVE_UNDO ? { by: s.undo.id, until: s.undo.at + RESOLVE_UNDO } : null;
-    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo, blessing: s.blessing, deploys: s.deploys, watch: s.watch, watched: s.watched, mornings: s.daily }; // mornings: the room's run; an act's `daily` is one bow's
+    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo, blessing: s.blessing, deploys: s.deploys, watch: s.watch, watched: s.watched, mornings: s.daily, vow: s.vow, vowed: s.vowed }; // mornings: the room's run; an act's `daily` is one bow's
   }
 
   /**
@@ -707,6 +789,7 @@ export class Shrine extends DurableObject {
       // It was the newest, so the run ends just before it: the best is what it was before this one, or that run.
       s.deploys.best = Math.max(last.bestBefore ?? 0, s.deploys.streak - 1);
       s.deploys.streak = 0;
+      if (last.vowBy) { this.vowStep('clean', last.vowBy, -1); delete last.vowBy; } // it was not clean after all
       this.blamed = last;
     }
   }
@@ -758,7 +841,7 @@ export class Shrine extends DurableObject {
     if (to) record.to = to.name;
     s.watches = [record, ...s.watches].slice(0, MAX_WATCHES);
     s.watched.kept += 1;
-    if (quiet) { s.watched.quiet += 1; s.karma += QUIET_WATCH; this.credit(w, QUIET_WATCH); }
+    if (quiet) { s.watched.quiet += 1; s.karma += QUIET_WATCH; this.credit(w, QUIET_WATCH); this.vowStep('quiet', w); }
     s.watch = null;
     return record;
   }
@@ -826,6 +909,7 @@ export class Shrine extends DurableObject {
     this.forget();
     this.expireBlessing();
     this.expireWatch();
+    this.expireVow();
     const s = this.state;
     const people = this.people();
     const now = Date.now();
@@ -872,9 +956,10 @@ export class Shrine extends DurableObject {
   }
 
   /** Keep an action for whoever arrives later: their activity feed starts from these. */
-  remember({ kind, by, item, text, level, down }) {
+  remember({ kind, by, item, text, level, down, to }) {
     if (!LOGGED.has(kind)) return;
     const entry = { kind, by: { id: by.id, name: by.name, avatar: by.avatar }, at: Date.now(), item, text, level, down };
+    if (to) entry.to = { name: to.name, avatar: to.avatar };
     this.state.log = [...(this.state.log ?? []), entry].slice(-MAX_LOG);
   }
 

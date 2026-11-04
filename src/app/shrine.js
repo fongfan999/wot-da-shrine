@@ -19,7 +19,8 @@ import { blamedFx, remoteDeploy, renderDeploy, showShipped } from './deploy.js';
 import { renderDown } from './vigilStart.js';
 import { renderWatch, watchAct } from './watch.js';
 import { applyStandings, dailyFx, renderBowBadge } from './standing.js';
-import { creditsFx, takeTogether } from './together.js';
+import { creditsFx, nope, takeTogether, thankFx } from './together.js';
+import { vowFx } from './vow.js';
 import { openShare } from './shareSheet.js';
 import { SHIPPED_FOR, layersOn, sameMix } from '../../shared/rules.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
@@ -29,7 +30,7 @@ import { bump, logEvent, toast } from './ui.js';
 
 /* ---------- Shared shrine ---------- */
 const DEFAULT_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader'];
-const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense', bless: 'bow', ship: 'check', broke: 'fire', watch: 'lantern', unwatch: 'lantern' };
+const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense', bless: 'bow', ship: 'check', broke: 'fire', watch: 'lantern', unwatch: 'lantern', thank: 'bow', vow: 'lantern' };
 export const joinEl = $('#join');
 /** The join sheet is up and waiting: not merely fading out after you joined. */
 export const joinOpen = () => !joinEl.hidden && !joinEl.inert;
@@ -227,6 +228,7 @@ function onShrineMessage(msg) {
         records.longest = msg.longest ?? 0;
         records.blessings = msg.blessings ?? [];
         records.watches = msg.watches ?? [];
+        records.vows = msg.vows ?? [];
         // Shipped a moment before you came in: the heading still says so.
         const shipped = records.blessings[0];
         if (!msg.vigil && !msg.blessing && shipped?.outcome === 'shipped' && msg.now - shipped.endedAt < SHIPPED_FOR) showShipped(shipped.endedAt - state.clockSkew);
@@ -285,13 +287,18 @@ function onShrineMessage(msg) {
     case 'hook':
       onHook(msg);
       break;
+    case 'nope':
+      nope(msg);
+      break;
     case 'sync':
       if (msg.blessings) records.blessings = msg.blessings;
       if (msg.watches) records.watches = msg.watches;
+      if (msg.vows) records.vows = msg.vows;
       takeTogether(msg);
       syncCounters(msg);
       syncAltar(msg.litAt);
       applyStandings(msg.standings);
+      if (msg.vowKept) vowFx({ ...msg.vowKept, kept: true });
       break;
     case 'act':
       activity(); // the room is alive even if this person is just watching
@@ -310,19 +317,22 @@ function onShrineMessage(msg) {
       if (msg.blamed && msg.kind !== 'broke') blamedFx(msg.blamed);
       if (msg.kind === 'light' || msg.by.id === state.myId) syncAltar(msg.litAt);
       if (msg.kind === 'watch' || msg.kind === 'unwatch') watchAct(msg); // yours too: only the shrine knows how it went
+      else if (msg.kind === 'thank') thankFx(msg); // yours too: only the shrine knows whether it counted
+      else if (msg.kind === 'vow') vowFx(msg);
       else if (msg.by.id !== state.myId) remoteAct(msg);
       if (msg.chorus) chorusFx(msg.chorus, msg.bonus);
       if (msg.daily) dailyFx(msg);
       // The servers are back: the cast rolls for everyone, and whoever said so gets the share sheet after it.
       if (msg.kind === 'resolve' && msg.record) creditsFx(msg.record, msg.by.id === state.myId ? () => { if (body.dataset.resolved) openShare(true, true); } : null);
       applyStandings(msg.standings); // after the act's own news: a promotion reads as what it earned
+      if (msg.vowKept) vowFx({ ...msg.vowKept, kept: true });
       pingPerson(msg.by.id, ACT_ICONS[msg.kind]);
       break;
   }
 }
 
 /** What a past action reads as in the feed: the same words a live one gets. */
-function pastLine({ kind, item, text, level, down }) {
+function pastLine({ kind, item, text, level, down, to }) {
   if (kind === 'light') return { what: t(down ? 'fLightDown' : 'fLight') };
   if (kind === 'down') return { what: t('fDown') };
   if (kind === 'bowl') return { what: t('fBowl') };
@@ -333,6 +343,7 @@ function pastLine({ kind, item, text, level, down }) {
   if (kind === 'omikuji') return { what: fmt('fOmikuji', { level: FORTUNE_LEVELS[level]?.name ?? level }) };
   if (kind === 'resolve') return { what: t('fResolve') };
   if (kind === 'unresolve') return { what: t('fUnresolve') };
+  if (kind === 'thank' && to) return { what: fmt('fThank', { name: to.name }) };
   return null;
 }
 
@@ -372,7 +383,7 @@ function remoteAct(msg) {
 }
 
 /** The shrine is the source of truth for the room's counters. */
-function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo, blessing, deploys, watch, watched, mornings }) {
+function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo, blessing, deploys, watch, watched, mornings, vow, vowed }) {
   if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); }
   if (karma !== undefined && karma !== counters.karma) { if (state.greeted) karmaBeat(karma - counters.karma); counters.karma = karma; updateStats(!state.greeted); bump(statKarma); }
   if (since) state.roomSince = since - state.clockSkew;
@@ -387,6 +398,8 @@ function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longe
   if (deploys !== undefined) records.deploys = deploys;
   if (watched !== undefined) records.watched = watched;
   if (mornings !== undefined) records.daily = mornings;
+  if (vowed !== undefined) records.vowed = vowed;
+  if (vow !== undefined) records.vow = vow;
   if (watch !== undefined) {
     state.watch = watch ? { ...watch, startedAt: watch.startedAt - state.clockSkew } : null;
     renderWatch();

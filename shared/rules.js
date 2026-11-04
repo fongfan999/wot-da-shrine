@@ -103,6 +103,21 @@ export const BOARD_SIZE = 5;
 export const CAST_SIZE = 8; // the cast a vigil's record keeps, by karma; the rest are counted
 export const weekOf = (at) => Math.floor((Math.floor(at / 86400000) + 3) / 7); // day 0 was a Thursday
 
+/**
+ * Thanks: anyone may thank someone else in the shrine, for the watch they kept or the vigil they
+ * stayed up for. The thanked earn THANK karma. Once a day (UTC) for each pair, so it stays worth saying.
+ */
+export const THANK = 3;
+
+/**
+ * The weekly vow: the room sets itself one goal for the week, and only one. It ends kept, when the
+ * room gets there, or missed, when the week is over first. Keeping it pays everyone who helped VOW_SHARE.
+ */
+export const VOWS = { mornings: 10, quiet: 3, clean: 5, karma: 300 }; // what each vow counts, and how many
+export const VOW_KINDS = Object.keys(VOWS);
+export const VOW_SHARE = 5;
+export const MAX_VOWS = 8;
+
 /** The karma each of the shrine's levels begins at; their names are in STRINGS.shrineLevels. */
 export const SHRINE_LEVELS = [0, 150, 400, 1000];
 export const levelOf = (karma) => SHRINE_LEVELS.reduce((idx, at, k) => (karma >= at ? k : idx), 0);

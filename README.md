@@ -182,6 +182,16 @@ A shrine shows what each person put in, so the team can see it building somethin
   everyone who earned karma in it, most first. Whoever said they're back gets
   the share sheet after the credits. The vigil's record keeps the cast, its
   row in the records names them, and the retro Markdown says who kept it.
+- **Thanks**: click someone else's name in the shrine, or Thank beside them
+  in a vigil's credits, and they earn +3 karma; the room sees who thanked
+  whom. Once a day for each pair, and never yourself.
+- **The weekly vow**: anyone can make the room's one goal for the week from
+  This shrine: 10 morning bows, 3 quiet watches, 5 clean deploys or 300 karma
+  together. Its bar fills in a segment for each person who moved it (a clean
+  deploy that breaks within half an hour comes back off), the quiet TV says
+  how far it has come, and keeping it pays everyone who helped +5. One vow a
+  week: it stays until it is kept, or the week ends and it is filed as
+  missed. **Vows kept** joins the records once one has ended.
 
 ## Straight from your alerting
 

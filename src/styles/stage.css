@@ -165,8 +165,8 @@
   font-size: 1rem;
 }
 .person__name { min-width: 0; max-width: 16ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-button.person { border-color: var(--accent); background: var(--accent-soft); color: var(--note-ink); }
-button.person:hover { background: var(--accent-soft); border-color: var(--accent-strong); }
+.person--me { border-color: var(--accent); background: var(--accent-soft); color: var(--note-ink); }
+.person--me:hover { background: var(--accent-soft); border-color: var(--accent-strong); }
 .person__tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
 .person, .presence__avatar { transition: background-color .8s; }
 .person.is-ping, .presence__avatar.is-ping { background: var(--accent-soft); transition: none; }
@@ -214,3 +214,8 @@ button.person:hover { background: var(--accent-soft); border-color: var(--accent
 /* Mornings in a row, beside the name */
 .person__streak { font-family: var(--font-mono); font-size: 11px; line-height: 1; color: var(--ember-ink); white-space: nowrap; }
 .card--live .person__streak { font-size: 10px; }
+/* Someone else: a click thanks them */
+button.person:not(.person--me):hover, button.person:not(.person--me):focus-visible { border-color: var(--ink); background: var(--paper-sunk); }
+/* The 🙏 says so before anyone hovers */
+.person__thank { font-size: 11px; line-height: 1; opacity: .7; }
+button.person:hover .person__thank, button.person:focus-visible .person__thank { opacity: 1; }

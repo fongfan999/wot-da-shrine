@@ -109,6 +109,10 @@ body[data-state="lit"] .mantra__dot { background: var(--flame); }
   height: calc(6px + var(--lift, 0px));
   background: var(--line-strong);
 }
+.kneeler--thanks .kneeler__tag { pointer-events: auto; cursor: pointer; }
+.kneeler--thanks .kneeler__tag:hover { border-color: var(--ink); background: var(--paper-sunk); }
+.kneeler__thank { font-size: 11px; line-height: 1; opacity: .7; flex-shrink: 0; }
+.kneeler__tag:hover .kneeler__thank { opacity: 1; }
 .kneeler--me .kneeler__tag { border-color: var(--accent); background: var(--accent-soft); color: var(--note-ink); }
 .kneeler__avatar { width: 20px; height: 20px; display: grid; place-items: center; flex-shrink: 0; border-radius: 50%; background: var(--paper-sunk); font-size: .78rem; }
 .kneeler__name { overflow: hidden; text-overflow: ellipsis; }
@@ -188,9 +192,9 @@ body[data-resolved="1"] .tablet__back { display: block; }
 [data-tone="1"] .robe { fill: var(--tone-1-soft); }
 [data-tone="2"] .robe { fill: var(--tone-2-soft); }
 [data-tone="3"] .robe { fill: var(--tone-3-soft); }
-.kneeler[data-tone="1"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="1"]:not(button) .person__avatar { border-color: var(--tone-1); }
-.kneeler[data-tone="2"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="2"]:not(button) .person__avatar { border-color: var(--tone-2); }
-.kneeler[data-tone="3"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="3"]:not(button) .person__avatar { border-color: var(--tone-3); }
+.kneeler[data-tone="1"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="1"]:not(.person--me) .person__avatar { border-color: var(--tone-1); }
+.kneeler[data-tone="2"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="2"]:not(.person--me) .person__avatar { border-color: var(--tone-2); }
+.kneeler[data-tone="3"]:not(.kneeler--me) .kneeler__tag, .person[data-tone="3"]:not(.person--me) .person__avatar { border-color: var(--tone-3); }
 .kneeler[data-tone="1"] .kneeler__avatar, .person[data-tone="1"] .person__avatar { background: var(--tone-1-soft); }
 .kneeler[data-tone="2"] .kneeler__avatar, .person[data-tone="2"] .person__avatar { background: var(--tone-2-soft); }
 .kneeler[data-tone="3"] .kneeler__avatar, .person[data-tone="3"] .person__avatar { background: var(--tone-3-soft); }

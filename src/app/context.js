@@ -63,7 +63,7 @@ export const state = {
 };
 
 /** What this room's shrine has survived: its past vigils, kept by the shrine. */
-export const records = { survived: 0, longest: 0, history: [], blessings: [], deploys: { blessed: 0, shipped: 0, broke: 0, streak: 0, best: 0 }, watches: [], watched: { kept: 0, quiet: 0 }, daily: { day: 0, streak: 0, best: 0 }, board: [], build: null, grew: null };
+export const records = { survived: 0, longest: 0, history: [], blessings: [], deploys: { blessed: 0, shipped: 0, broke: 0, streak: 0, best: 0 }, watches: [], watched: { kept: 0, quiet: 0 }, daily: { day: 0, streak: 0, best: 0 }, board: [], build: null, grew: null, vow: null, vows: [], vowed: { kept: 0, missed: 0 } };
 
 /**
  * Title, subtitle and ETA: the room's shared ones, unless this URL brings its own (the maintenance

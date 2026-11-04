@@ -3,11 +3,12 @@ import gsap from 'gsap';
 import { icon } from '../lib/icons.js';
 import { look } from '../scene/burner.js';
 import { t } from '../lib/strings.js';
-import { $, fmt, people, reduceMotion, roomName, state } from './context.js';
+import { $, fmt, people, reduceMotion, roomName, state, tv } from './context.js';
 import { congregation } from './engines.js';
 import { openJoin } from './shrine.js';
 import { onWatch } from './watch.js';
 import { hasStanding, liveStreak, rankName } from './standing.js';
+import { thank } from './together.js';
 import { feedVisible, nameParts, toast } from './ui.js';
 
 const peopleList = $('#people');
@@ -43,15 +44,17 @@ export function renderPeople(newId) {
   for (const p of list) {
     const mine = p.id === state.myId;
     const li = document.createElement('li');
-    const row = document.createElement(mine ? 'button' : 'div');
-    row.className = 'person';
+    // Yours renames you; anyone else's thanks them, where there is anyone to thank.
+    const thanks = !mine && hasStanding() && !tv;
+    const row = document.createElement(mine || thanks ? 'button' : 'div');
+    row.className = mine ? 'person person--me' : 'person';
     row.dataset.id = p.id;
     row.dataset.tone = String(look(p.id).tone); // the robe they kneel in
     row.dataset.name = p.name;
     // Their title here, earned by their own karma, and their mornings in a row.
     const standing = hasStanding() ? ` · ${rankName(p.karma)}${p.karma ? ` · ${fmt('karmaN', { n: p.karma })}` : ''}` : '';
-    row.title = mine ? `${p.name}${standing} · ${t('rename')}` : `${p.name}${standing}`;
-    if (mine) row.type = 'button';
+    row.title = mine ? `${p.name}${standing} · ${t('rename')}` : thanks ? `${p.name}${standing} · ${fmt('thankTip', { name: p.name })}` : `${p.name}${standing}`;
+    if (mine || thanks) row.type = 'button';
     const avatar = document.createElement('span');
     avatar.className = 'person__avatar';
     avatar.textContent = p.avatar;
@@ -59,6 +62,7 @@ export function renderPeople(newId) {
     name.className = 'person__name';
     nameParts(name, p.name);
     row.append(avatar, name);
+    if (thanks) row.appendChild(Object.assign(document.createElement('span'), { className: 'person__thank', textContent: '🙏' }));
     if (onWatch(p)) { // holds the pager
       row.dataset.watch = '1';
       const lantern = document.createElement('span');
@@ -89,6 +93,7 @@ export function renderPeople(newId) {
   fitPeople();
   congregation.set(list, state.myId);
   congregation.markWatch(list.find(onWatch)?.id);
+  congregation.markThanks(hasStanding() && !tv, state.myId);
 
   // Compact stack in the top bar.
   presence.innerHTML = '';
@@ -124,7 +129,17 @@ export function pingPerson(id, iconName) {
 }
 
 peopleList.addEventListener('click', (e) => {
-  if (e.target.closest('button.person') && roomName !== 'demo') openJoin();
+  const row = e.target.closest('button.person');
+  if (!row || roomName === 'demo') return;
+  if (row.dataset.id === state.myId) openJoin();
+  else thank(row.dataset.id);
+});
+// The name tags over the kneelers: a click on anyone else's thanks them.
+congregation.thankTip = (p) => fmt('thankTip', { name: p.name });
+$('#congregation').addEventListener('click', (e) => {
+  const kneeler = e.target.closest('.kneeler--thanks');
+  if (!kneeler || !e.target.closest('.kneeler__tag') || roomName === 'demo') return;
+  thank(kneeler.dataset.id);
 });
 presence.addEventListener('click', () => {
   if (feedVisible() && roomName !== 'demo') { openJoin(); return; }

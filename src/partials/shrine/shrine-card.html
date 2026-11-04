@@ -19,12 +19,22 @@
       <div class="stat" id="stat-deploys" hidden><dt data-i18n="recDeploys">Deploys</dt><dd id="rec-deploys">0</dd></div>
       <div class="stat" id="stat-streak" hidden><dt data-i18n="recStreak">Clean in a row</dt><dd id="rec-streak">0</dd></div>
       <div class="stat" id="stat-watches" hidden><dt data-i18n="recWatches">Quiet watches</dt><dd id="rec-watches">0</dd></div>
+      <div class="stat" id="stat-vows" hidden><dt data-i18n="recVows">Vows kept</dt><dd id="rec-vows">0</dd></div>
       <div class="stat" id="stat-mornings" hidden><dt data-i18n="recMornings">Mornings in a row</dt><dd id="rec-mornings">0</dd></div>
     </dl>
     <!-- The way to the shrine's next level, in one segment for each person who earned it -->
     <div class="build" id="build" hidden>
       <div class="build__head"><span class="build__what" id="build-what"></span><span class="build__left" id="build-left"></span></div>
       <div class="build__bar" id="build-bar" role="img"></div>
+    </div>
+    <!-- This week's vow: the room's one goal, in a segment for each person who moved it; or the way to make one -->
+    <div class="vow" id="vow" hidden>
+      <div class="build__head"><span class="vow__what" id="vow-what"></span><span class="build__left" id="vow-left"></span></div>
+      <div class="build__bar" id="vow-bar" role="img"></div>
+    </div>
+    <div class="vow-pick" id="vow-pick" hidden>
+      <button class="vow-pick__open" id="vow-open" type="button" aria-expanded="false" aria-controls="vow-list"><span class="vow-pick__plus" aria-hidden="true">＋</span><span class="vow-pick__label" data-i18n="vowMake">Make this week’s vow</span><span class="vow-pick__chev" aria-hidden="true">▾</span></button>
+      <div class="vow-pick__list" id="vow-list" hidden></div>
     </div>
     <div class="rank" id="rank">
       <span class="rank__badge" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M3 5.5c3 .8 15 .8 18 0M5 9h14M7 5.8V20M17 5.8V20M12 9V6.2"/></svg></span>

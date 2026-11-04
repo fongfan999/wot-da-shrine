@@ -9,6 +9,7 @@ import { ago, bump, shockwave, toast } from './ui.js';
 import { every } from '../lib/clock.js';
 import { hasStanding, myStanding, rankOf, roomMornings } from './standing.js';
 import { grewText, nameList, renderBoard, renderBuild } from './together.js';
+import { renderVow } from './vow.js';
 
 /* ---------- Stats + progress ---------- */
 export const burnBar = $('#burn-bar');
@@ -193,6 +194,11 @@ export function renderRecords() {
   $('#stat-mornings').hidden = !dly.best || !hasStanding();
   $('#rec-mornings').textContent = roomMornings();
   $('#stat-mornings').title = fmt('recMorningsTip', { best: dly.best });
+  // Vows, once the room has made one that ended.
+  const vw = records.vowed;
+  $('#stat-vows').hidden = !(vw.kept + vw.missed) || !hasStanding();
+  $('#rec-vows').textContent = vw.kept;
+  $('#stat-vows').title = fmt('recVowsTip', vw);
   const longest = $('#rec-longest');
   longest.hidden = !records.longest;
   longest.textContent = records.longest ? fmt('recLongest', { t: minutesText(records.longest) }) : '';
@@ -205,6 +211,7 @@ export function renderRecords() {
   burner.dataset.level = String(i);
   updateTablet();
   renderBuild();
+  renderVow();
   renderBoard();
   if (shownLevel !== -1 && i > shownLevel) {
     toast(grewText(name, i)); // and who built it

@@ -8,8 +8,10 @@ import gsap from 'gsap';
 import { devoteeKey } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { STRINGS, t } from '../lib/strings.js';
-import { $, counters, fmt, people, records, reduceMotion, state, tv } from './context.js';
+import { $, counters, fmt, people, records, reduceMotion, roomName, state, tv } from './context.js';
+import { congregation, petals } from './engines.js';
 import { hasStanding, liveStreak, myStanding, rankName } from './standing.js';
+import { logEvent, toast } from './ui.js';
 
 /** "Linh", "Linh and An", "Linh, An and Huy", "Linh, An and 3 more". */
 export function nameList(names, total = names.length, max = 3) {
@@ -50,12 +52,25 @@ export function renderBoard() {
     const run = liveStreak(b);
     if (run > 1) li.append(Object.assign(document.createElement('span'), { className: 'board__streak', textContent: `🔥${run}` }));
     li.append(karma);
+    // Anyone but you: a Thank right on their row.
+    if (!tv && roomName !== 'demo' && devoteeKey(b) !== myKey) {
+      const btn = Object.assign(document.createElement('button'), { type: 'button', className: 'board__thank', textContent: '🙏' });
+      btn.title = fmt('thankTip', { name: b.name });
+      btn.setAttribute('aria-label', fmt('thankTip', { name: b.name }));
+      btn.addEventListener('click', () => thank(here(b) ?? { name: b.name, avatar: b.avatar }));
+      li.append(btn);
+    }
     return li;
   }));
   // Not on it yet: how far you have come this week.
   const mine = board.some((b) => devoteeKey(b) === myKey);
   boardMe.hidden = tv || !me || mine || !me.week;
   if (!boardMe.hidden) boardMe.textContent = fmt('boardMe', { n: me.week });
+}
+/** Their id, when they are kneeling here now. */
+function here(b) {
+  for (const p of people.values()) if (devoteeKey(p) === devoteeKey(b)) return p.id;
+  return null;
 }
 /** All-time karma for someone on the board, when they are here to ask; else what they earned this week. */
 function kept(b) {
@@ -156,15 +171,34 @@ export function creditsFx(record, then = null) {
   for (const c of cast.top) {
     const li = document.createElement('li');
     li.className = 'credits__member';
+    const karma = Object.assign(document.createElement('span'), { className: 'credits__karma', textContent: fmt('karmaN', { n: c.karma }) });
     li.append(
       Object.assign(document.createElement('span'), { className: 'credits__avatar', textContent: c.avatar }),
       Object.assign(document.createElement('span'), { className: 'credits__name', textContent: c.name }),
-      Object.assign(document.createElement('span'), { className: 'credits__karma', textContent: fmt('karmaN', { n: c.karma }) }),
+      karma,
     );
+    // Anyone but you can be thanked for the night they put in. Not from a wall.
+    const me = myStanding();
+    if (!tv && state.shrine && !(me && devoteeKey(me) === devoteeKey(c))) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'credits__thank';
+      b.textContent = t('thank');
+      b.title = fmt('thankTip', { name: c.name });
+      b.addEventListener('click', (e) => {
+        e.stopPropagation(); // a click anywhere else closes the credits
+        thank({ name: c.name, avatar: c.avatar });
+        b.disabled = true;
+        b.textContent = t('thanked');
+        clearTimeout(creditsTimer);
+        creditsTimer = setTimeout(() => closeCredits(), 6000); // time to thank the others too
+      });
+      karma.after(b);
+    }
     list.appendChild(li);
   }
   if (cast.n > cast.top.length) add('p', 'credits__more', fmt('andMore', { n: cast.n - cast.top.length }));
-  if (!tv) add('p', 'credits__hint', t('credHint'));
+  if (!tv) add('p', 'credits__hint', t(state.shrine ? 'credHintThank' : 'credHint'));
   el.appendChild(card);
   el.addEventListener('click', () => closeCredits());
   document.body.appendChild(el);
@@ -195,3 +229,31 @@ export function closeCredits(finish = true) {
   if (finish) done?.();
 }
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && creditsEl) { e.preventDefault(); closeCredits(); } });
+
+/* ---------- Thanks: for the watch someone kept, the vigil they stayed up for ---------- */
+/** Thank someone: kneeling here (`to` is their id), or remembered by the shrine ({ name, avatar }). */
+export function thank(to) {
+  sound.unlock();
+  if (!state.shrine || !hasStanding()) return;
+  state.shrine.send('thank', { to });
+  sound.bowl(330);
+}
+
+/** The shrine says someone thanked someone: the room sees it, and the thanked hears it most. */
+export function thankFx({ by, to, gift }) {
+  const mine = by.id === state.myId;
+  const me = myStanding();
+  const toMe = me && devoteeKey(me) === devoteeKey(to);
+  logEvent({ key: `${by.id}:thank:${to.name}`, avatar: by.avatar, who: mine ? t('you') : by.name, what: fmt('fThank', { name: toMe ? t('youLower') : to.name }) });
+  if (toMe) toast(fmt('thankedYou', { name: by.name, n: gift }));
+  else if (mine) toast(fmt('thankedThem', { name: to.name, n: gift }));
+  if (to.id) congregation.nudge(to.id);
+  if (!mine) sound.bowl(330);
+  gsap.delayedCall(0.2, () => sound.bowl(440));
+  if (toMe && !reduceMotion) petals.burst(18);
+}
+
+/** The shrine turned something down that only the sender needs to hear about. */
+export function nope({ why, name }) {
+  if (why === 'thanked') toast(fmt('thankedAlready', { name }));
+}

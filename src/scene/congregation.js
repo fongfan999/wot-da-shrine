@@ -89,8 +89,24 @@ export class Congregation {
   label(item, person, mine) {
     item.person = person;
     item.el.classList.toggle('kneeler--me', mine);
+    item.el.dataset.id = person.id;
     item.el.querySelector('.kneeler__avatar').textContent = person.avatar;
     item.el.querySelector('.kneeler__name').textContent = person.name;
+  }
+
+  /** Everyone but you wears a 🙏 on their name tag where a click thanks them. */
+  markThanks(on, meId) {
+    for (const [pid, item] of this.items) {
+      const tag = item.el.querySelector('.kneeler__tag');
+      const can = on && pid !== meId;
+      item.el.classList.toggle('kneeler--thanks', can);
+      let mark = tag.querySelector('.kneeler__thank');
+      if (can && !mark) {
+        mark = Object.assign(document.createElement('span'), { className: 'kneeler__thank', textContent: '🙏' });
+        tag.appendChild(mark);
+      } else if (!can && mark) mark.remove();
+      tag.title = can ? (this.thankTip?.(item.person) ?? '') : '';
+    }
   }
 
   /** The one holding the pager kneels with a lantern on their name tag. */

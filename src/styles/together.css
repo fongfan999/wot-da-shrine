@@ -12,7 +12,7 @@
 
 /* Keepers this week */
 .board__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
-.board__row { display: grid; grid-template-columns: 16px 22px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 3px 6px; border-radius: var(--radius-sm); font-size: 13px; }
+.board__row { display: grid; grid-template-columns: 16px 22px minmax(0, 1fr); grid-auto-flow: column; grid-auto-columns: auto; align-items: center; gap: 8px; padding: 3px 6px; border-radius: var(--radius-sm); font-size: 13px; }
 .board__row[data-me] { background: var(--accent-soft); color: var(--note-ink); }
 .board__place { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-align: right; }
 .board__row:first-child .board__place { color: var(--ember); font-weight: 600; }
@@ -21,6 +21,8 @@
 .board__streak, .board__karma { font-family: var(--font-mono); font-size: 11px; }
 .board__streak { color: var(--ember-ink); }
 .board__karma { min-width: 3ch; text-align: right; color: var(--ink); font-weight: 600; }
+.board__thank { padding: 0 6px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: none; font: inherit; font-size: 11px; line-height: 18px; cursor: pointer; opacity: .75; }
+.board__thank:hover, .board__thank:focus-visible { opacity: 1; border-color: var(--ink); background: var(--paper-sunk); outline: 0; }
 .board__me { margin: 4px 6px 0; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
 
 /* Beside the altar the column never scrolls: the top three keepers, one row each. A TV, read from across
@@ -28,9 +30,11 @@
 @media (min-width: 1100px) {
   .card--shrine .board__label { margin-bottom: 4px; }
   .card--shrine .board__row { padding: 2px 6px; }
-  .card--shrine .board__row:nth-child(n + 4), .card--shrine .board__me { display: none; }
+  .card--shrine .board__row:nth-child(n + 4), .card--shrine .board__thank { padding: 0 6px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: none; font: inherit; font-size: 11px; line-height: 18px; cursor: pointer; opacity: .75; }
+.board__thank:hover, .board__thank:focus-visible { opacity: 1; border-color: var(--ink); background: var(--paper-sunk); outline: 0; }
+.board__me { display: none; }
   body[data-tv="1"] .card--shrine .board__row:nth-child(n + 4) { display: grid; }
-  body[data-tv="1"] .card--shrine .board__row { grid-template-columns: 20px 28px minmax(0, 1fr) auto auto; gap: 10px; padding: 4px 8px; font-size: 17px; }
+  body[data-tv="1"] .card--shrine .board__row { grid-template-columns: 20px 28px minmax(0, 1fr); gap: 10px; padding: 4px 8px; font-size: 17px; }
   body[data-tv="1"] .card--shrine .board__avatar { font-size: 1.15rem; }
   body[data-tv="1"] .card--shrine .board__place, body[data-tv="1"] .card--shrine .board__streak { font-size: 13px; }
   body[data-tv="1"] .card--shrine .board__karma { font-size: 15px; }
@@ -59,3 +63,42 @@ body[data-tv="1"] .credits__title { font-size: 44px; }
 body[data-tv="1"] .credits__member { font-size: 22px; }
 body[data-tv="1"] .credits__name { font-size: 28px; }
 body[data-tv="1"] .credits__role dd { font-size: 20px; }
+
+/* Thanking someone in the credits */
+.credits__member:has(.credits__thank) { grid-template-columns: 1fr auto auto 1fr; }
+.credits__thank { justify-self: start; padding: 2px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: none; color: var(--ink); font: inherit; font-size: 12px; cursor: pointer; }
+.credits__thank:hover, .credits__thank:focus-visible { border-color: var(--ink); background: var(--paper-sunk); outline: 0; }
+.credits__thank:disabled { border-color: transparent; color: var(--muted); cursor: default; }
+.credits__member:has(.credits__thank) .credits__karma { text-align: right; }
+
+/* The weekly vow: the build bar's look, in the ember of a kept promise once it is kept */
+.vow__what { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--ink); }
+.vow[data-done="1"] .build__left { color: var(--ember); font-weight: 600; }
+.vow[data-done="1"] .build__bar { border-color: var(--ember); }
+/* A button, and looks it: the room's one invitation to act in this card */
+.vow-pick__open { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 12px; border: 1px solid var(--accent); border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--note-ink); font: inherit; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; transition: background .15s, transform .15s; }
+.vow-pick__open:hover, .vow-pick__open:focus-visible, .vow-pick__open[aria-expanded="true"] { background: var(--accent); color: var(--paper); outline: 0; }
+.vow-pick__open:active { transform: scale(.98); }
+.vow-pick__plus { font-weight: 700; line-height: 1; }
+.vow-pick__label { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.vow-pick__chev { font-size: 11px; line-height: 1; transition: transform .15s; }
+.vow-pick__open[aria-expanded="true"] .vow-pick__chev { transform: rotate(180deg); }
+.vow-pick__list { display: grid; gap: 4px; margin-top: 6px; }
+.vow-pick__list[hidden] { display: none; }
+.vow-pick__kind { display: grid; gap: 1px; padding: 6px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--paper); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.vow-pick__kind:hover, .vow-pick__kind:focus-visible { border-color: var(--ink); background: var(--paper-sunk); outline: 0; }
+.vow-pick__kind b { font-size: 13px; font-weight: 600; }
+.vow-pick__kind span { font-size: 12px; color: var(--muted); }
+/* Beside the altar the picker opens over the card's lower half rather than pushing the column longer */
+@media (min-width: 1100px) {
+  .card--shrine .vow-pick { position: relative; }
+  .card--shrine .vow-pick__open { padding: 4px 12px; font-size: 12px; }
+  .card--shrine .vow-pick__list[data-up] { top: auto; bottom: 100%; margin: 0 0 6px; }
+  .card--shrine .vow-pick__list { position: absolute; z-index: 5; left: 0; right: 0; top: 100%; padding: 6px; border: 1px solid var(--ink); border-radius: var(--radius-sm); background: var(--paper-raised); box-shadow: var(--shadow-sheet); }
+}
+
+/* The stage stacks under the dock (z-index 3 vs 6), so a picker opened near the bottom slid behind the
+   dock's keys; while it is open, the stage comes up over the dock */
+.stage:has(.vow-pick__list:not([hidden])) { z-index: 7; }
+/* and the card over its neighbours in the side column (the credit link under it painted on top) */
+.card:has(.vow-pick__list:not([hidden])) { position: relative; z-index: 4; }
