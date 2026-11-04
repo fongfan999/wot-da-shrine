@@ -248,8 +248,16 @@
 .tv-unlock__text small { font: 600 14px/1.2 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ember-ink); }
 .tv-unlock__text b { font-size: 28px; font-weight: 600; }
 
-/* Notifications, in Just for you: the button sits under its note, the topics under it once they are on */
-.push { gap: 10px; }
-.push .btn { align-self: flex-start; }
+/* Notifications, in Just for you: one switch with its note, and once it is on, what to hear about, nested under it */
+.toggle__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.toggle__text small { font-size: 13px; line-height: 1.4; color: var(--muted); }
+.push__main { padding: 8px 0; }
+.push[data-state="blocked"] .push__main { cursor: default; }
+.push[data-state="blocked"] .push__main > .toggle__text > span:first-child { color: var(--muted); }
+.push__main input:disabled { opacity: .45; cursor: default; }
+.push__topics { margin: 2px 0 0 2px; padding-left: 14px; border-left: 2px solid var(--line); }
+.push__topics .toggle { min-height: 42px; font-size: 14px; }
+/* The last thing in the tab: set apart from the settings it resets */
+.panel__actions--end { margin-top: 8px; padding-top: 18px; border-top: 1px solid var(--line); }
 /* The offer: the unlock card's look, its question allowed to wrap */
 .push-ask .unlock-card__text b { font-size: 14px; font-weight: 500; line-height: 1.4; max-width: 42ch; white-space: normal; }

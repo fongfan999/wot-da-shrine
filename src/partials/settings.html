@@ -186,16 +186,17 @@
       <!-- Notifications from this shrine, on this device (src/app/push.js). Hidden where there are none to offer. -->
       <div class="field push" id="push-field" hidden>
         <span class="field__label" data-i18n="fPush">Notifications</span>
-        <p class="field__note" id="push-note"></p>
-        <button class="btn btn--accent btn--sm push__on" type="button" id="btn-push" data-i18n="pushOn">Turn on notifications</button>
-        <div class="toggles" id="push-topics" hidden>
+        <label class="toggle push__main">
+          <span class="toggle__text"><span data-i18n="pushMain">This shrine, on this device</span><small id="push-note"></small></span>
+          <input type="checkbox" id="push-on" />
+        </label>
+        <div class="toggles push__topics" id="push-topics" hidden>
           <label class="toggle"><span data-i18n="pushDown">Something’s down, and back up</span><input type="checkbox" data-push="down" checked /></label>
           <label class="toggle"><span data-i18n="pushWatch">I’m handed the watch</span><input type="checkbox" data-push="watch" checked /></label>
           <label class="toggle"><span data-i18n="pushMorning">Before my morning run breaks</span><input type="checkbox" data-push="morning" checked /></label>
         </div>
-        <button class="btn btn--glass btn--sm push__off" type="button" id="btn-push-off" data-i18n="pushOff" hidden>Turn them off</button>
       </div>
-      <div class="panel__actions">
+      <div class="panel__actions panel__actions--end">
         <button class="btn btn--glass btn--sm" type="button" id="btn-reset">
           <span data-i18n="reset">Reset my preferences</span>
         </button>

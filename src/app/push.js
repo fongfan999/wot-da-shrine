@@ -119,11 +119,10 @@ export function onPush(msg) {
   render();
 }
 
-/* ---------- In Customize, Just for you ---------- */
+/* ---------- In Customize, Just for you: one switch, and what to hear about under it ---------- */
 const field = $('#push-field');
 const note = $('#push-note');
-const onBtn = $('#btn-push');
-const offBtn = $('#btn-push-off');
+const toggle = $('#push-on');
 const topicsEl = $('#push-topics');
 
 export async function render() {
@@ -133,22 +132,30 @@ export async function render() {
   if (!k) { field.hidden = true; return; } // this deployment has no key: no notifications to offer
   field.hidden = false;
   const on = Boolean(mine()) && permission() === 'granted';
+  const blocked = !capable || permission() === 'denied';
   let line = t('pushNote');
   if (!capable) line = ios && !standalone ? t('pushIos') : t('pushNone');
   else if (permission() === 'denied') line = t('pushDenied');
+  else if (busy) line = t('pushWorking');
   else if (on) line = t('pushIsOn');
   note.textContent = line;
-  onBtn.hidden = on || !capable || permission() === 'denied';
-  offBtn.hidden = !on;
+  field.dataset.state = blocked ? 'blocked' : on ? 'on' : 'off';
+  toggle.checked = on || busy;
+  toggle.disabled = blocked || busy;
   topicsEl.hidden = !on;
   const topics = mine() ?? {};
   topicsEl.querySelectorAll('[data-push]').forEach((el) => { el.checked = topics[el.dataset.push] !== false; });
 }
 
-onBtn?.addEventListener('click', () => enablePush());
-offBtn?.addEventListener('click', async () => { await disablePush(); toast(t('pushStopped')); });
+toggle?.addEventListener('change', async () => {
+  if (toggle.checked) { enablePush(); render(); return; }
+  await disablePush();
+  toast(t('pushStopped'));
+});
 topicsEl?.addEventListener('change', async () => {
   const topics = Object.fromEntries([...topicsEl.querySelectorAll('[data-push]')].map((el) => [el.dataset.push, el.checked]));
+  // Nothing left to hear about is the same as off.
+  if (!Object.values(topics).some(Boolean)) { await disablePush(); toast(t('pushStopped')); return; }
   write(KEY, { ...read(KEY), [roomName]: topics });
   try { const sub = await subscription(false); if (sub) tell(sub, topics); } catch { /* next visit */ }
 });
