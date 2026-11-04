@@ -29,7 +29,7 @@ export function describe(st) {
   if (st.karma) bits.push(`${st.karma} karma`);
   if (st.prayers) bits.push(st.prayers === 1 ? '1 prayer' : `${st.prayers} prayers`);
   if (st.streak >= 2 && !st.downFor) bits.push(`${st.streak} clean deploys in a row`);
-  if (st.omamori) bits.push(`${st.omamori} omamori hung${st.cracked ? `, ${st.cracked} cracked` : ''}`);
+  if (st.guarded) bits.push(`the kami watches ${st.guarded} service${st.guarded === 1 ? '' : 's'}`);
   let line = bits.join(' · ') + '.';
   if (st.lastPrayer) line += ` Last prayer: “${st.lastPrayer}”`;
   return line;

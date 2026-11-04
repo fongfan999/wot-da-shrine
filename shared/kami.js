@@ -50,6 +50,12 @@ export const LINES = {
     'The kami told you so.',
     'The kami saw this coming from {thing}.',
   ],
+  // A vigil that names a service the kami was asked to watch
+  pointed: [
+    'The kami told you about {thing}.',
+    'The kami is pointing at {thing}. It has been for a while.',
+    'The kami watched {thing}. {Thing} did not watch back.',
+  ],
 };
 
 /** The kami's mood, from when it was last fed: 'new' before its first meal, else one of KAMI_MOODS, in order. */
@@ -62,8 +68,11 @@ export function kamiMood(kami, now = Date.now()) {
 const hash = (str) => { let h = 2166136261; for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0; return h; };
 const utcDay = (at) => Math.floor(at / 86400000);
 
-/** What the kami is watching today, in this room: the same for everyone in it until midnight UTC. */
-export const thingFor = (room, now = Date.now()) => THINGS[hash(`${room}:${utcDay(now)}`) % THINGS.length];
+/**
+ * What the kami is watching today, in this room: one of the services the room named for it, else one
+ * of the stock THINGS; the same for everyone in it until midnight UTC.
+ */
+export const thingFor = (room, now = Date.now(), things = []) => { const list = things.length ? things : THINGS; return list[hash(`${room}:${utcDay(now)}`) % list.length]; };
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -84,13 +93,14 @@ export function whenFed(fedAt, now = Date.now(), tz = 0) {
 }
 
 /**
- * The kami's line for `mood` in `room`, filled in. `tz` is the reader's clock. The line is picked by
- * the day too, so it stays the same all day and changes tomorrow.
+ * The kami's line for `mood` in `room`, filled in. `tz` is the reader's clock; `things` the services
+ * the room named for it, and `at` the one that is down right now, during a vigil. The line is picked
+ * by the day too, so it stays the same all day and changes tomorrow.
  */
-export function kamiLine(mood, kami, room, { now = Date.now(), tz = 0 } = {}) {
-  const lines = LINES[mood] ?? LINES.content;
+export function kamiLine(mood, kami, room, { now = Date.now(), tz = 0, things = [], at = '' } = {}) {
+  const lines = mood === 'vigil' && at ? LINES.pointed : LINES[mood] ?? LINES.content;
   const line = lines[hash(`${room}:${mood}:${utcDay(now)}`) % lines.length];
-  const thing = thingFor(room, now);
+  const thing = at || thingFor(room, now, things);
   const when = kami?.fedAt ? whenFed(kami.fedAt, now, tz) : 'ever';
   return line
     .replaceAll('{Thing}', thing.charAt(0).toUpperCase() + thing.slice(1))

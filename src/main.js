@@ -37,6 +37,8 @@ document.addEventListener('keydown', (e) => {
   openRitual('fortune', false);
   openRitual('open-shrine', false);
   openRitual('cast', false);
+  openRitual('charms-sheet', false);
+  openRitual('shrine-sheet', false);
   openTray(false);
 });
 document.addEventListener('keydown', (e) => {

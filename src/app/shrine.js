@@ -23,7 +23,7 @@ import { creditsFx, nope, takeTogether, thankFx } from './together.js';
 import { vowFx } from './vow.js';
 import { charmFx } from './charms.js';
 import { fedFx, renderKami } from './kami.js';
-import { omamoriAct, omamoriNope, renderOmamori } from './omamori.js';
+import { kamiAct, kamiNope } from './kami.js';
 import { openShare } from './shareSheet.js';
 import { SHIPPED_FOR, layersOn, sameMix } from '../../shared/rules.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
@@ -34,7 +34,7 @@ import { bump, logEvent, toast } from './ui.js';
 
 /* ---------- Shared shrine ---------- */
 const DEFAULT_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader'];
-const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense', bless: 'bow', ship: 'check', broke: 'fire', watch: 'lantern', unwatch: 'lantern', thank: 'bow', vow: 'lantern', hang: 'lantern', renew: 'lantern', unhang: 'lantern' };
+const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense', bless: 'bow', ship: 'check', broke: 'fire', watch: 'lantern', unwatch: 'lantern', thank: 'bow', vow: 'lantern', hang: 'lantern', unhang: 'lantern' };
 export const joinEl = $('#join');
 /** The join sheet is up and waiting: not merely fading out after you joined. */
 export const joinOpen = () => !joinEl.hidden && !joinEl.inert;
@@ -249,7 +249,6 @@ function onShrineMessage(msg) {
         if (arrivedFromTv()) greetFromTv(people.get(msg.me)?.name ?? state.me.name);
         renderRecords();
         renderKami(); // now that the room has said where it stands, the kami has a mood
-        renderOmamori();
         msg.prayers.slice(-6).forEach((p, i) => gsap.delayedCall(1.2 + i * 0.12, () => wishes.hang(p.text, p.name, false)));
         msg.prayers.slice(-3).forEach((p, i) => gsap.delayedCall(2.4 + i * 1.8, () => prayerFx(p.text, `${p.avatar} ${p.name}`, true)));
       } else {
@@ -300,7 +299,7 @@ function onShrineMessage(msg) {
       break;
     case 'nope':
       nope(msg);
-      omamoriNope(msg);
+      kamiNope(msg);
       break;
     case 'sync':
       if (msg.blessings) records.blessings = msg.blessings;
@@ -330,7 +329,7 @@ function onShrineMessage(msg) {
       if (msg.kind === 'light' || msg.by.id === state.myId) syncAltar(msg.litAt);
       if (msg.kind === 'watch' || msg.kind === 'unwatch') watchAct(msg); // yours too: only the shrine knows how it went
       else if (msg.kind === 'thank') thankFx(msg); // yours too: only the shrine knows whether it counted
-      else if (msg.kind === 'hang' || msg.kind === 'renew' || msg.kind === 'unhang') omamoriAct(msg); // yours too: the shrine says what it paid
+      else if (msg.kind === 'hang' || msg.kind === 'unhang') kamiAct(msg); // yours too: the whole room hears what the kami watches
       else if (msg.kind === 'vow') vowFx(msg);
       else if (msg.by.id !== state.myId) remoteAct(msg);
       if (msg.chorus) chorusFx(msg.chorus, msg.bonus);
@@ -366,7 +365,6 @@ function pastLine({ kind, item, text, level, down, to }) {
   if (kind === 'unresolve') return { what: t('fUnresolve') };
   if (kind === 'thank' && to) return { what: fmt('fThank', { name: to.name }) };
   if (kind === 'hang' && item) return { what: fmt('fHang', { name: item }) };
-  if (kind === 'renew' && item) return { what: fmt('fRenew', { name: item }) };
   if (kind === 'unhang' && item) return { what: fmt('fUnhang', { name: item }) };
   return null;
 }
@@ -407,7 +405,7 @@ function remoteAct(msg) {
 }
 
 /** The shrine is the source of truth for the room's counters. */
-function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo, blessing, deploys, watch, watched, mornings, vow, vowed, charms, kami, omamori }) {
+function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo, blessing, deploys, watch, watched, mornings, vow, vowed, charms, kami, guarded }) {
   if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); }
   if (karma !== undefined && karma !== counters.karma) { if (state.greeted) karmaBeat(karma - counters.karma); counters.karma = karma; updateStats(!state.greeted); bump(statKarma); }
   if (since) state.roomSince = since - state.clockSkew;
@@ -438,9 +436,8 @@ function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longe
   if (undo !== undefined) { state.undo = undo ? { by: undo.by, until: undo.until - state.clockSkew } : null; renderUndo(); }
   if (survived !== undefined && survived !== records.survived) { records.survived = survived; if (state.greeted) renderRecords(); }
   if (kami !== undefined) state.kami = kami;
-  if (kami !== undefined || v !== undefined) renderKami(); // its mood follows its meals, and the vigil
-  if (omamori !== undefined) records.omamori = omamori;
-  if (omamori !== undefined || v !== undefined) renderOmamori(); // a charm cracks with the vigil, and mends after it
+  if (guarded !== undefined) records.guarded = guarded;
+  if (kami !== undefined || guarded !== undefined || v !== undefined) renderKami(); // its mood follows its meals, the vigil, and what it points at
   if (state.greeted) renderRecords();
 }
 

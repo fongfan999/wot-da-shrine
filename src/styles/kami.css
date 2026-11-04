@@ -3,7 +3,7 @@
 .heading__lines { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px 8px; max-width: 100%; }
 .heading__lines:not(:has(> :not([hidden]))) { display: none; }
 .heading__lines > .watch { margin: 0; }
-.kami { position: relative; z-index: 5; display: inline-flex; max-width: 100%; }
+.kami { position: relative; z-index: 6; display: inline-flex; align-items: center; gap: 4px; max-width: 100%; } /* its popover hangs over the mantra and the altar below */
 .kami__btn {
   display: inline-flex;
   align-items: center;
@@ -23,10 +23,23 @@
 }
 .kami__btn:hover:not(:disabled) { border-color: var(--line-strong); }
 .kami__btn:disabled { cursor: default; padding-right: 12px; }
+.kami__action { flex: none; min-height: 30px; padding: 3px 12px; border: 1px solid var(--accent); border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--note-ink); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background-color 160ms; }
+.kami__action:hover { background: var(--accent); color: var(--paper); }
+/* What it watches: under the mask */
+.kami-pop { left: 0; right: auto; top: calc(100% + 8px); gap: 10px; width: min(320px, calc(100vw - 2 * var(--gutter))); }
+.kami-pop__line { margin: 0; font-family: var(--font-serif); font-style: italic; font-size: 15px; line-height: 1.4; color: var(--ink); }
+.kami-pop__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-height: 200px; overflow-y: auto; }
+.kami-pop__item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 4px 8px; border-radius: var(--radius-sm); font-size: 14px; color: var(--ink); }
+.kami-pop__item[data-pointed] { background: var(--ember-soft); color: var(--ember-ink); font-weight: 600; }
+.kami-pop__item[data-pointed] .kami-pop__name::before { content: "👉 "; }
+.kami-pop__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kami-pop__drop { flex: none; width: 22px; height: 22px; border: 0; border-radius: 50%; background: none; color: var(--muted); font: inherit; font-size: 15px; line-height: 1; cursor: pointer; }
+.kami-pop__drop:hover, .kami-pop__drop:focus-visible { background: var(--paper-sunk); color: var(--ink); outline: 0; }
+.kami-pop__form { display: flex; gap: 6px; }
+.kami-pop__form .down-pop__input { flex: 1; padding: 7px 10px; font-size: 14px; }
 .kami__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--ink); font-weight: 600; }
 .kami__since { font-family: var(--font-mono); font-size: 11px; letter-spacing: .02em; }
-.kami__since:empty, .kami__action:empty { display: none; }
-.kami__action { padding: 3px 10px; border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--note-ink); font-size: 12px; font-weight: 600; }
+.kami__since:empty { display: none; }
 /* What is left of its protection: a sliver that drains over four days */
 .kami__meter { flex: none; width: 44px; height: 5px; border-radius: 3px; background: var(--paper-sunk); overflow: hidden; }
 .kami__fill { display: block; height: 100%; border-radius: 3px; background: var(--live); transition: width 1s, background-color 400ms; }
@@ -57,6 +70,7 @@ body[data-mode="room"][data-quiet="1"] .eyebrow::before { background: var(--live
 
 /* On the TV it is a sign, not a control, and big enough to read across the room */
 body[data-tv="1"] .kami__btn { min-height: 40px; padding: 6px 18px 6px 12px; font-size: 18px; gap: 12px; }
+body[data-tv="1"] .kami__action { display: none; }
 body[data-tv="1"] .kami__mask { width: 28px; height: 28px; }
 body[data-tv="1"] .kami__since { font-size: 14px; }
 body[data-tv="1"] .kami__meter { width: 64px; height: 7px; }

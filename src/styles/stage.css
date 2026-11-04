@@ -49,17 +49,23 @@
 .card--live .live__feed-label { margin-bottom: 4px; }
 .live__people:not([hidden]) + .live__feed-label { padding-bottom: 6px; }
 
-/* This shrine: folded to one line until opened */
-.card--shrine { padding-bottom: 14px; }
-.card--shrine[open] { padding-bottom: var(--space-4); }
-.shrine-sum { display: flex; align-items: center; gap: var(--space-2); list-style: none; cursor: pointer; }
-.shrine-sum::-webkit-details-marker { display: none; }
+/* This shrine: one line, which opens the sheet; the TV shows the body under it */
+.card--shrine { flex: none; padding-bottom: 14px; }
+.shrine-sum { display: flex; align-items: center; gap: var(--space-2); width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.shrine-sum:disabled { cursor: default; }
+.shrine-sum:hover:not(:disabled) .shrine-sum__chev { transform: translateX(2px); color: var(--ink); }
+.card--shrine > .shrine-card__body { display: none; }
+body[data-tv="1"] .card--shrine { padding-bottom: var(--space-4); }
+body[data-tv="1"] .card--shrine > .shrine-sum { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--sheet-line); }
+body[data-tv="1"] .card--shrine > .shrine-card__body { display: flex; }
+body[data-tv="1"] .shrine-sum__chev { display: none; }
+.sheet--ritual .sheet__card.shrine-sheet { width: min(560px, 100%); }
+#shrine-sheet-body { padding-top: 10px; }
 .card--shrine > .shrine-sum .label { flex: 1; min-width: 0; margin: 0; padding: 0; border: 0; white-space: nowrap; }
 .shrine-sum .label__count { overflow: hidden; text-overflow: ellipsis; }
 .shrine-sum__karma { font-family: var(--font-mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
 .shrine-sum__karma b { font-weight: 600; color: var(--ink); }
 .shrine-sum__chev { width: 16px; height: 16px; color: var(--muted); transition: transform 200ms var(--ease); }
-.card--shrine[open] .shrine-sum__chev { transform: rotate(180deg); }
 .shrine-sum:hover .shrine-sum__chev, .shrine-sum:focus-visible .shrine-sum__chev { color: var(--ink); }
 .card--shrine[open] > .shrine-sum { margin-bottom: var(--space-3); padding-bottom: 10px; border-bottom: 1px solid var(--sheet-line); }
 .shrine-card__body { display: flex; flex-direction: column; gap: 14px; }
@@ -104,11 +110,8 @@
   .card--live .feed__quote { flex: 0 1 auto; min-width: 0; margin: 0; font-size: 15px; overflow: hidden; text-overflow: ellipsis; }
   .card--live .feed__time { margin: 0; }
 
-  .card--shrine { flex: none; padding-bottom: 14px; }
-  .card--shrine .shrine-sum { cursor: default; }
-  .card--shrine .shrine-sum__chev { display: none; }
-  .card--shrine[open] > .shrine-sum { margin-bottom: 10px; padding-bottom: 8px; }
-  .shrine-card__body { gap: 10px; }
+  /* On the TV the body sits under the line, kept compact to fit the column */
+  .card--shrine .shrine-card__body { gap: 10px; }
   .card--shrine .vitals__ekg { height: 40px; }
   .card--shrine .vitals .burn__row:first-child { margin-bottom: 6px; padding-bottom: 0; border-bottom: 0; }
   /* The numbers on one line: 81 karma · 0 survived · 6 prayers */

@@ -56,7 +56,7 @@ export function quietHeading() {
     bits.push(records.survived === 1 ? t('quietSurvivedOne') : fmt('quietSurvived', { n: records.survived }));
   }
   bits.push(runs);
-  if (!last) bits.push(t(tv ? 'quietNeverSub' : 'quietKeepSub'));
+  if (!last && tv) bits.push(t('quietNeverSub')); // the wall says how to begin; a phone has the kami's own pill for that
   return { eyebrow: t('quietEyebrow'), title: since ? quietTitle(Date.now() - since) : t('quietNever'), subtitle: bits.filter(Boolean).join(' ') };
 }
 

@@ -26,9 +26,9 @@
     <div class="down-pop__actions"><button class="btn btn--glass btn--sm" id="watch-end" type="button" data-i18n="watchEnd">End my watch</button></div>
   </div>
 </div>
-<!-- The kami: the spirit of the shrine, fed by anything done at the altar (src/app/kami.js). Its eyes follow its mood; the button bows. Waits until the room is joined. -->
+<!-- The kami: the spirit of the shrine, fed by anything done at the altar (src/app/kami.js). Its eyes follow its mood; the mask opens what it watches, the pill bows. Waits until the room is joined. -->
 <div class="kami" id="kami" hidden>
-  <button class="kami__btn" id="kami-btn" type="button">
+  <button class="kami__btn" id="kami-btn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="kami-pop">
     <svg class="kami__mask" viewBox="0 0 24 24" aria-hidden="true">
       <path class="kami__face" d="M4 3.5l3.2 5.5h9.6L20 3.5V13c0 4.5-3.6 8-8 8s-8-3.5-8-8z"/>
       <g class="kami__eyes kami__eyes--happy"><path d="M7.5 13.5q1.5-2.2 3 0"/><path d="M13.5 13.5q1.5-2.2 3 0"/></g>
@@ -40,8 +40,19 @@
     <span class="kami__text" id="kami-text"></span>
     <span class="kami__meter" aria-hidden="true"><i class="kami__fill" id="kami-fill"></i></span>
     <span class="kami__since" id="kami-since"></span>
-    <span class="kami__action" id="kami-action"></span>
   </button>
+  <button class="kami__action" id="kami-action" type="button" data-i18n="kamiFeed">Bow to feed it</button>
+  <div class="eta-pop kami-pop" id="kami-pop" role="dialog" tabindex="-1" aria-labelledby="kami-pop-label" hidden>
+    <p class="kami-pop__line" id="kami-pop-line"></p>
+    <p class="eta-pop__label" id="kami-pop-label" data-i18n="kamiWatchesLabel">What it watches</p>
+    <ul class="kami-pop__list" id="kami-watched"></ul>
+    <p class="down-pop__note" id="kami-pop-empty" data-i18n="kamiWatchesEmpty">Name the services you run and its lines will look at those. When a vigil names one, it points at it.</p>
+    <form class="kami-pop__form" id="kami-form" autocomplete="off">
+      <label class="sr-only" for="kami-name" data-i18n="kamiWatchName">A service to watch</label>
+      <input class="down-pop__input" id="kami-name" type="text" maxlength="24" spellcheck="false" data-i18n-placeholder="kamiWatchPh" />
+      <button class="btn btn--accent btn--sm" type="submit" data-i18n="kamiWatchAdd">Watch it</button>
+    </form>
+  </div>
 </div>
 </div>
 <p class="mantra" aria-live="polite"><span class="mantra__dot" aria-hidden="true"></span><span class="mantra__reel"><span id="mantra">Clearing cache and karma…</span></span></p>

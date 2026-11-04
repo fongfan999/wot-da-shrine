@@ -1,11 +1,11 @@
-<!-- The shrine's own numbers, folded away: vitals, karma, rank, the vigils it survived -->
-<details class="card card--shrine" id="shrine-card">
-  <summary class="shrine-sum">
+<!-- The shrine's own numbers, one line in the column: its level and karma. The rest (vitals, charms, the next level, the vow, your rank, the keepers, the vigils) opens in a sheet; a TV on the wall shows it under the line (src/app/stats.js). -->
+<section class="card card--shrine" id="shrine-card">
+  <button class="shrine-sum" id="shrine-open" type="button" aria-haspopup="dialog" aria-controls="shrine-sheet">
     <h2 class="label"><span data-i18n="thisShrine">This shrine</span> <span class="label__count" id="records-level"></span></h2>
     <span class="shrine-sum__karma"><b id="sum-karma">0</b> <span data-i18n="karmaUnit">karma</span></span>
-    <svg class="ico shrine-sum__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-  </summary>
-  <div class="shrine-card__body">
+    <svg class="ico shrine-sum__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+  </button>
+  <div class="shrine-card__body" id="shrine-body">
     <div class="vitals">
       <div class="burn__row">
         <h3 class="label vitals__label"><span class="vitals__of" id="vitals-of">Prod</span> <span data-i18n="vitalsWord">vitals</span></h3>
@@ -64,4 +64,4 @@
       <p class="records__empty" id="records-empty" data-i18n="recEmpty">No vigil survived yet. Light the incense, and when they’re back, say so.</p>
     </div>
   </div>
-</details>
+</section>

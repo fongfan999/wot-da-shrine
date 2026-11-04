@@ -4,7 +4,7 @@ import { KARMA } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { LEVELS as FORTUNE_LEVELS, asText as fortuneText, draw as drawFortune } from '../lib/omikuji.js';
 import { t } from '../lib/strings.js';
-import { $, fmt, reduceMotion, roomName, roomUrl, state } from './context.js';
+import { $, fmt, reduceMotion, roomName, roomUrl, state, tv } from './context.js';
 import { art, burner, motes, petals, smoke, wishes } from './engines.js';
 import { openTray } from './offerings.js';
 import { shareOpen } from './shareSheet.js';
@@ -13,12 +13,14 @@ import { copyText, logMine, toast } from './ui.js';
 
 /* ---------- Rituals ---------- */
 /** A small dialog: `#blame`, `#fortune`. */
-const ritualOpen = { blame: false, fortune: false, 'open-shrine': false, cast: false, 'charms-sheet': false };
+const ritualOpen = { blame: false, fortune: false, 'open-shrine': false, cast: false, 'charms-sheet': false, 'shrine-sheet': false };
+const onClose = {}; // what to do once a sheet is closed, by id
+export function onRitualClose(id, fn) { onClose[id] = fn; }
 export function openRitual(id, open) {
   if (ritualOpen[id] === open) return;
   ritualOpen[id] = open;
   const el = $(`#${id}`);
-  if (!open) { gsap.to(el, { opacity: 0, duration: 0.25, onComplete: () => { el.hidden = true; } }); return; }
+  if (!open) { gsap.to(el, { opacity: 0, duration: 0.25, onComplete: () => { el.hidden = true; onClose[id]?.(); } }); return; }
   openTray(false);
   el.hidden = false;
   gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.3 });
@@ -26,8 +28,22 @@ export function openRitual(id, open) {
   sound.tick(660, 0.06);
 }
 document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => openRitual(b.dataset.close, false)));
-for (const id of ['blame', 'fortune', 'open-shrine', 'cast', 'charms-sheet']) $(`#${id}`).addEventListener('click', (e) => { if (e.target.id === id) openRitual(id, false); });
-export const anySheetOpen = () => shareOpen || ritualOpen.blame || ritualOpen.fortune || ritualOpen['open-shrine'] || ritualOpen.cast || ritualOpen['charms-sheet'];
+for (const id of ['blame', 'fortune', 'open-shrine', 'cast', 'charms-sheet', 'shrine-sheet']) $(`#${id}`).addEventListener('click', (e) => { if (e.target.id === id) openRitual(id, false); });
+/* This shrine: one line in the column; its body moves into the sheet while that is up, and back after (the same
+   elements, so everything that draws into them goes on drawing). A TV shows the body under the line instead. */
+const shrineCard = $('#shrine-card');
+const shrineBody = $('#shrine-body');
+const shrineOpen = $('#shrine-open');
+shrineOpen.disabled = tv;
+shrineOpen.addEventListener('click', () => {
+  if (tv) return;
+  sound.unlock();
+  $('#shrine-sheet-body').append(shrineBody);
+  openRitual('shrine-sheet', true);
+});
+onRitualClose('shrine-sheet', () => shrineCard.append(shrineBody));
+
+export const anySheetOpen = () => shareOpen || ritualOpen.blame || ritualOpen.fortune || ritualOpen['open-shrine'] || ritualOpen.cast || ritualOpen['charms-sheet'] || ritualOpen['shrine-sheet'];
 
 /* Burn a blame: the words go into the censer and nowhere else */
 const blameText = $('#blame-text');
