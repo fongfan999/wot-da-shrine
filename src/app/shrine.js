@@ -20,7 +20,7 @@ import { renderDown } from './vigilStart.js';
 import { renderWatch, watchAct } from './watch.js';
 import { SHIPPED_FOR } from '../../shared/rules.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
-import { applySettings } from './settings.js';
+import { applySettings, onHook } from './settings.js';
 import { karmaBeat, renderRecords, statKarma, tickVigil, updateStats } from './stats.js';
 import { bump, logEvent, toast } from './ui.js';
 
@@ -252,8 +252,8 @@ function onShrineMessage(msg) {
       for (const k of Object.keys(msg.meta)) urlParams.delete(k);
       const theirs = msg.by.id !== state.myId;
       applySettings(theirs && renamed);
-      // It broke names the vigil after the deploy: that toast says so already.
-      if (theirs && renamed && !state.blessing) toast(fmt('metaChanged', { name: msg.by.name, title: msg.meta.title }));
+      // It broke names the vigil after the deploy, and an alert names the vigil it opens: their own toasts say so.
+      if (theirs && renamed && !state.blessing && msg.by.id !== 'hook') toast(fmt('metaChanged', { name: msg.by.name, title: msg.meta.title }));
       if (theirs && retuned) toast(fmt('trackChanged', { name: msg.by.name, track: t(`track_${track()}`) }));
       break;
     }
@@ -274,6 +274,9 @@ function onShrineMessage(msg) {
     case 'rename':
       people.set(msg.person.id, msg.person);
       renderWatch(); // a new name may hold the watch, or no longer
+      break;
+    case 'hook':
+      onHook(msg);
       break;
     case 'sync':
       if (msg.blessings) records.blessings = msg.blessings;

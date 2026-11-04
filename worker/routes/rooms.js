@@ -1,6 +1,7 @@
 /** Rooms: open one, its page, and its socket, status and README badge. */
 import { Hono } from 'hono';
 import { ROOM_RE, roomName, roomTag } from '../../shared/names.js';
+import { readAlert } from '../alerts.js';
 import { rateLimit, socketOnly } from '../middleware.js';
 import { badge } from '../views/badge.js';
 import { roomPage } from '../views/roomPage.js';
@@ -70,6 +71,25 @@ rooms.use('/api/rooms/:room/*', async (c, next) => {
 rooms.get('/api/rooms/:room/ws', socketOnly, rateLimit('SOCKET_LIMIT'), (c) => shrine(c).fetch(c.req.raw));
 
 rooms.get('/api/rooms/:room/status', async (c) => c.json(await shrine(c).status(c.var.room)));
+
+/**
+ * The room's webhook, for the team's alerting: a firing alert opens the vigil, a resolved one says
+ * they're back. The key is the room's secret (Customize, in the shrine, hands it out); a wrong one is
+ * a plain 404. Answers what it did and the link to send people to.
+ */
+rooms.post('/api/rooms/:room/hook/:key', rateLimit('HOOK_LIMIT'), async (c) => {
+  const key = c.req.param('key');
+  if (!/^[0-9a-f]{24}$/.test(key)) return c.json({ error: 'no such webhook' }, 404);
+  const body = await c.req.text();
+  if (body.length > 64 * 1024) return c.json({ error: 'too long' }, 413);
+  const alert = readAlert(body, c.req.header('Content-Type'), new URL(c.req.url).searchParams);
+  if (!alert) {
+    return c.json({ error: 'could not tell whether this is down or up', hint: 'send {"status":"down","title":"Payments API"} or {"status":"up"}, or add ?status=down or ?status=up to the URL' }, 422);
+  }
+  const done = await shrine(c).hook(key, alert);
+  if (!done) return c.json({ error: 'no such webhook' }, 404);
+  return c.json({ ok: true, room: c.var.room, ...done, link: `${new URL(c.req.url).origin}/r/${c.var.room}` });
+});
 
 rooms.get('/api/rooms/:room/badge.svg', async (c) => c.body(badge(await shrine(c).status(c.var.room)), 200, {
   'Content-Type': 'image/svg+xml; charset=utf-8',

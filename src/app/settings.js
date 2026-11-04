@@ -3,12 +3,12 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { syncPalette } from '../scene/palette.js';
 import { BRAND, STRINGS, applyStrings, t } from '../lib/strings.js';
-import { $, body, landing, meta, persist, resetSettings, roomName, settings, state, track, tv, urlParams } from './context.js';
+import { $, body, fmt, landing, meta, persist, resetSettings, roomName, settings, state, track, tv, urlParams } from './context.js';
 import { fog, petals } from './engines.js';
 import { applyFx, lite } from './fx.js';
 import { splitTitle, title } from './stage.js';
 import { updateEta, updateStats, updateVitalsLabel } from './stats.js';
-import { toast } from './ui.js';
+import { copyText, toast } from './ui.js';
 import { quietHeading } from './quiet.js';
 import { blessingHeading } from './deploy.js';
 
@@ -153,3 +153,46 @@ $('#btn-reset').addEventListener('click', () => {
   toast(t('resetDone'));
   sound.tick(330, 0.06);
 });
+
+/* ---------- Alerts webhook: the room's secret URL, asked for only when someone wants it ---------- */
+const hookField = $('#hook-url');
+const hookBtn = $('#btn-hook');
+let hookUrl = '';
+let hookAsked = false; // a reset answers the asker with the new URL; anyone else hears theirs went stale
+
+function renderHook() {
+  hookField.value = hookUrl;
+  hookBtn.hidden = Boolean(hookUrl);
+  $('#hook-ready').hidden = !hookUrl;
+}
+
+/** The shrine answered with the URL's key, or said the one shown is no longer it. */
+export function onHook(msg) {
+  if (msg.stale) {
+    if (hookUrl && msg.by?.id !== state.myId) toast(fmt('hookStale', { name: msg.by.name }));
+    hookUrl = '';
+  } else if (msg.key) {
+    const was = hookUrl;
+    hookUrl = `${location.origin}/api/rooms/${roomName}/hook/${msg.key}`;
+    if (was && was !== hookUrl) toast(t('hookResetDone'));
+  }
+  hookAsked = false;
+  renderHook();
+}
+
+$('#btn-hook-copy').addEventListener('click', () => copyText(hookUrl, t('hookCopied')));
+hookBtn.addEventListener('click', () => {
+  if (hookAsked) return;
+  hookAsked = true;
+  state.shrine?.send('hook');
+  sound.tick(740, 0.06);
+});
+hookField.addEventListener('focus', () => hookField.select());
+$('#btn-hook-test').addEventListener('click', () => {
+  copyText(`curl -X POST '${hookUrl}' -H 'Content-Type: application/json' -d '{"status":"down","title":"Testing the alerts webhook"}'`, t('hookTestCopied'));
+});
+$('#btn-hook-reset').addEventListener('click', () => {
+  if (!confirm(t('hookResetAsk'))) return;
+  state.shrine?.send('hook', { reset: true });
+});
+renderHook();
