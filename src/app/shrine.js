@@ -18,6 +18,7 @@ import { blameFx, fortuneFx } from './rituals.js';
 import { blamedFx, remoteDeploy, renderDeploy, showShipped } from './deploy.js';
 import { renderDown } from './vigilStart.js';
 import { renderWatch, watchAct } from './watch.js';
+import { applyStandings, dailyFx, renderBowBadge } from './standing.js';
 import { SHIPPED_FOR, layersOn, sameMix } from '../../shared/rules.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
 import { applySettings, onHook } from './settings.js';
@@ -205,6 +206,7 @@ function onShrineMessage(msg) {
       people.clear();
       for (const p of msg.people) people.set(p.id, p);
       renderPeople();
+      renderBowBadge();
       if (msg.meta) { state.roomMeta = { ...state.roomMeta, ...msg.meta }; applySettings(); }
       syncCounters(msg);
       syncAltar(msg.litAt);
@@ -285,6 +287,7 @@ function onShrineMessage(msg) {
       if (msg.watches) records.watches = msg.watches;
       syncCounters(msg);
       syncAltar(msg.litAt);
+      applyStandings(msg.standings);
       break;
     case 'act':
       activity(); // the room is alive even if this person is just watching
@@ -304,6 +307,8 @@ function onShrineMessage(msg) {
       if (msg.kind === 'watch' || msg.kind === 'unwatch') watchAct(msg); // yours too: only the shrine knows how it went
       else if (msg.by.id !== state.myId) remoteAct(msg);
       if (msg.chorus) chorusFx(msg.chorus, msg.bonus);
+      if (msg.daily) dailyFx(msg);
+      applyStandings(msg.standings); // after the act's own news: a promotion reads as what it earned
       pingPerson(msg.by.id, ACT_ICONS[msg.kind]);
       break;
   }
@@ -360,7 +365,7 @@ function remoteAct(msg) {
 }
 
 /** The shrine is the source of truth for the room's counters. */
-function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo, blessing, deploys, watch, watched }) {
+function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo, blessing, deploys, watch, watched, mornings }) {
   if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); }
   if (karma !== undefined && karma !== counters.karma) { if (state.greeted) karmaBeat(karma - counters.karma); counters.karma = karma; updateStats(!state.greeted); bump(statKarma); }
   if (since) state.roomSince = since - state.clockSkew;
@@ -374,6 +379,7 @@ function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longe
   if (longest !== undefined) records.longest = longest;
   if (deploys !== undefined) records.deploys = deploys;
   if (watched !== undefined) records.watched = watched;
+  if (mornings !== undefined) records.daily = mornings;
   if (watch !== undefined) {
     state.watch = watch ? { ...watch, startedAt: watch.startedAt - state.clockSkew } : null;
     renderWatch();

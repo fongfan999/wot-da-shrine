@@ -210,3 +210,7 @@ button.person:hover { background: var(--accent-soft); border-color: var(--accent
 .feed__item--quiet .feed__line { color: var(--muted); }
 .feed__empty { margin: 0; font-size: 14px; color: var(--muted); }
 .feed:empty { display: none; }
+
+/* Mornings in a row, beside the name */
+.person__streak { font-family: var(--font-mono); font-size: 11px; line-height: 1; color: var(--ember-ink); white-space: nowrap; }
+.card--live .person__streak { font-size: 10px; }

@@ -69,6 +69,35 @@ export const MAX_WATCHES = 12;
 export const holdsWatch = (watch, person) => Boolean(watch && person && (watch.id === person.id || (watch.name === person.name && watch.avatar === person.avatar)));
 
 /**
+ * Standing: what each person has earned in a shrine, kept by the shrine under their name and avatar
+ * (the same person on their phone tomorrow is the same person, as with the watch). Their karma gives
+ * them a title in this shrine; the room's karma is still what grows the altar. Never in the demo.
+ */
+export const MAX_DEVOTEES = 100; // the people a shrine remembers; whoever earned nothing for longest is let go first
+
+/**
+ * The morning bow: a person's first bow of their day earns DAILY_BOW on top of the bow, and every
+ * seventh day in a row DAILY_WEEK more. A day is the bower's own (their clock's offset from UTC), and
+ * two morning bows are at least DAILY_GAP apart, so moving the clock buys no extra mornings.
+ * Days in a row are kept per person, and for the room: the days in a row someone in it bowed.
+ */
+export const DAILY_BOW = 5;
+export const DAILY_WEEK = 15;
+export const DAILY_GAP = 4 * 3600 * 1000;
+export const dailyBonus = (streak) => DAILY_BOW + (streak > 0 && streak % 7 === 0 ? DAILY_WEEK : 0);
+
+/** The day number of `at` for a clock `tz` minutes ahead of UTC. */
+export const dayOf = (at, tz = 0) => Math.floor((at + tz * 60000) / 86400000);
+/** Today, by this browser's clock. */
+export const today = (at = Date.now()) => dayOf(at, -new Date(at).getTimezoneOffset());
+/** A clock offset as sent: whole minutes, within the ones the world uses. */
+export const cleanTz = (tz) => (Number.isFinite(tz) ? Math.max(-840, Math.min(840, Math.round(tz))) : 0);
+/** Who someone is to the ledger: their name and avatar. */
+export const devoteeKey = (p) => `${p.name}\n${p.avatar}`;
+/** A run of days still counts on `day` when its last bow was that day or the one before. */
+export const streakAlive = (s, day) => Boolean(s?.streak) && day - s.day <= 1;
+
+/**
  * The shrine's sound, mixed by the room: six layers, each a small synth in src/audio/music.js, each
  * at a level from 0 to 100. A mix keeps only the layers that play; {} is silence.
  */

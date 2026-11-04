@@ -212,3 +212,22 @@ body[data-state="lit"] .act__burn { opacity: 1; }
   .act--primary { min-width: 0; }
   .act__burn { bottom: 4px; }
 }
+
+/* Today's morning bow, still to make: a little seal on the Bow key's corner */
+.act__daily {
+  position: absolute;
+  top: -7px;
+  right: -6px;
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  box-shadow: var(--shadow-key);
+  pointer-events: none;
+}

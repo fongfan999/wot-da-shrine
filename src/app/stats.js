@@ -7,6 +7,7 @@ import { $, body, BURN_SECONDS, counters, fmt, meta, people, reduceMotion, roomN
 import { art, burner, kick, petals } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';
 import { every } from '../lib/clock.js';
+import { hasStanding, myStanding, rankOf, roomMornings } from './standing.js';
 
 /* ---------- Stats + progress ---------- */
 export const burnBar = $('#burn-bar');
@@ -19,28 +20,31 @@ export function updateStats(quiet = false) {
 }
 
 /* ---------- Ranks: karma turns a lurker into an enlightened SRE ----------
-   The rank is a title; its bar tracks the one ladder that keeps going, the shrine's growth
-   (what the altar shows), so it is never full while there is still a temple to reach. */
+   The rank is yours: in a shrine, a title earned by your own karma there (the shrine keeps it under
+   your name and avatar); on the home page, by the demo's. Its bar is the way to the next title. The
+   shrine's own growth, what the altar shows, is the level in the card's header. */
 const rankName = $('#rank-name');
 const rankNext = $('#rank-next');
 const rankRow = $('#rank');
 const rankBar = $('#rank-bar');
 let shownRank = -1;
+const myKarma = () => (roomName ? myStanding()?.karma ?? 0 : counters.karma);
 function updateRank(quiet) {
+  // A screen on the wall is nobody, and nobody has a title in the public demo.
+  rankRow.hidden = tv || (Boolean(roomName) && !hasStanding());
+  if (rankRow.hidden) return;
+  const karma = myKarma();
   const ranks = STRINGS.ranks;
-  const i = ranks.reduce((idx, [at], k) => (counters.karma >= at ? k : idx), 0);
-  const [, name] = ranks[i];
+  const i = rankOf(karma);
+  const [at, name] = ranks[i];
   rankName.textContent = name;
   const up = ranks[i + 1];
-  rankRow.title = fmt(up ? 'rankTip' : 'rankTipTop', { k: i + 1, of: ranks.length, next: up?.[1], at: up?.[0] });
-  const levels = STRINGS.shrineLevels;
-  const lv = shrineLevel();
-  const [at] = levels[lv];
-  const next = levels[lv + 1];
-  rankNext.textContent = next ? fmt('shrineNext', { n: next[0] - counters.karma, name: next[1] }) : t('maxRank');
-  rankBar.style.width = next ? `${((counters.karma - at) / (next[0] - at)) * 100}%` : '100%';
-  const promoted = shownRank !== -1 && i > shownRank && !quiet;
-  shownRank = i;
+  rankRow.title = fmt(up ? 'rankTip' : 'rankTipTop', { k: i + 1, of: ranks.length, next: up?.[1], at: up?.[0], karma });
+  rankNext.textContent = up ? fmt('rankNextText', { n: up[0] - karma, name: up[1] }) : t('maxRank');
+  rankBar.style.width = up ? `${((karma - at) / (up[0] - at)) * 100}%` : '100%';
+  // Joining is not a promotion: the first standing the shrine sends is where you already were.
+  const promoted = shownRank !== -1 && i > shownRank && !quiet && Boolean(state.myId);
+  shownRank = roomName && !state.myId ? -1 : i;
   if (!promoted) return;
   toast(fmt('promoted', { rank: name }));
   sound.bowl(329);
@@ -183,12 +187,19 @@ export function renderRecords() {
   $('#stat-watches').hidden = !w.kept;
   $('#rec-watches').textContent = w.quiet;
   $('#stat-watches').title = fmt('recWatchesTip', w);
+  // Mornings: the days in a row someone here made their morning bow, once anyone has.
+  const dly = records.daily;
+  $('#stat-mornings').hidden = !dly.best || !hasStanding();
+  $('#rec-mornings').textContent = roomMornings();
+  $('#stat-mornings').title = fmt('recMorningsTip', { best: dly.best });
   const longest = $('#rec-longest');
   longest.hidden = !records.longest;
   longest.textContent = records.longest ? fmt('recLongest', { t: minutesText(records.longest) }) : '';
   const i = shrineLevel();
   const [, name] = STRINGS.shrineLevels[i];
   $('#records-level').textContent = name;
+  const up = STRINGS.shrineLevels[i + 1];
+  $('#records-level').title = up ? fmt('shrineNext', { n: up[0] - counters.karma, name: up[1] }) : name;
   updateRank(true); // its bar tracks the shrine's next level
   burner.dataset.level = String(i);
   updateTablet();

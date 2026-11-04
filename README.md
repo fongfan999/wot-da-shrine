@@ -143,6 +143,26 @@ go after a week. **Shrine records** counts the quiet watches once one has
 ended. Holders' names stay in the room: link previews and badges never show
 them.
 
+### Your standing, and the morning bow
+
+The room's karma grows the altar; your own gives you a title in that shrine.
+The shrine keeps what each person earned, under their name and avatar like
+the watch, so the same person on their phone tomorrow keeps it: what you do
+at the altar, your share of a chorus, a quiet watch you kept, the incense you
+lit when it burns down. **This shrine** shows your title and how far to the
+next (Lurker in #incidents up to Patron saint of prod at 2000), hovering a
+name shows theirs, and the room hears when someone earns a new one. Renaming
+takes it with you, unless the new name is someone's already.
+
+Your first bow of the day is the **morning bow**: +5 karma on top of the bow,
+and every seventh morning in a row +15 more. Until you make it the Bow key
+wears a seal (+5, or 🔥3 when a run is waiting on today), and a run of two or
+more shows as a flame beside your name. The shrine counts days by your own
+clock, and two morning bows are at least four hours apart, so moving the
+clock buys nothing. The room keeps a run too, the days in a row someone in it
+bowed: **Mornings in a row** in the records, and on the quiet TV. A shrine
+remembers its hundred most recent people. Not in the demo.
+
 ## Straight from your alerting
 
 Every shrine has a webhook, so the vigil can open before anyone thinks of

@@ -10,6 +10,7 @@ import { t } from '../lib/strings.js';
 import { $, body, embedded, fmt, mix, mixName, records, roomName, settings, state, tv } from './context.js';
 import { applySettings } from './settings.js';
 import { quietStreak, shippedShown } from './deploy.js';
+import { roomMornings } from './standing.js';
 
 const DAY = 86400000;
 const HOUR = 3600000;
@@ -34,7 +35,8 @@ function quietTitle(since) {
 /** The heading while it is quiet. */
 export function quietHeading() {
   const last = records.history[0];
-  const streak = quietStreak(); // the clean run, once the room blesses its deploys
+  const mornings = roomMornings() > 1 ? fmt('quietMornings', { n: roomMornings() }) : '';
+  const streak = [quietStreak(), mornings].filter(Boolean).join(' '); // the clean run, once the room blesses its deploys, and its mornings
   if (!last) return { eyebrow: t('quietEyebrow'), title: t('quietNever'), subtitle: streak ? `${streak} ${t('quietNeverSub')}` : t('quietNeverSub') };
   const since = Date.now() - (last.endedAt - state.clockSkew);
   const survived = records.survived === 1 ? t('quietSurvivedOne') : fmt('quietSurvived', { n: records.survived });

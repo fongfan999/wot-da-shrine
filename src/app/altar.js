@@ -8,6 +8,7 @@ import { $, body, BURN_SECONDS, counters, fmt, roomName, state } from './context
 import { art, burner, congregation, kick, motes, petals, room, smoke } from './engines.js';
 import { addKarma, burnBar, tickProgress, updateStats } from './stats.js';
 import { logEvent, logMine, shockwave, toast } from './ui.js';
+import { myTz } from './standing.js';
 import { askDown, askOpen, asksBeforeLighting, lightSaysDown, promptTitle } from './vigilStart.js';
 
 /* ---------- Light the incense ---------- */
@@ -163,7 +164,7 @@ export function bow() {
   bowFx(state.myId);
   addKarma(KARMA.bow);
   logMine('bow', t('fBow'), { toastText: t('bowed') });
-  state.shrine?.send('bow');
+  state.shrine?.send('bow', { tz: myTz() }); // the shrine counts the morning bow by my day
 }
 
 /** Someone bows: their figure if they kneel in the room, otherwise the ops team. */

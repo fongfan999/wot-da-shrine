@@ -7,6 +7,7 @@ import { $, fmt, people, reduceMotion, roomName, state } from './context.js';
 import { congregation } from './engines.js';
 import { openJoin } from './shrine.js';
 import { onWatch } from './watch.js';
+import { hasStanding, liveStreak, rankName } from './standing.js';
 import { feedVisible, nameParts, toast } from './ui.js';
 
 const peopleList = $('#people');
@@ -47,7 +48,9 @@ export function renderPeople(newId) {
     row.dataset.id = p.id;
     row.dataset.tone = String(look(p.id).tone); // the robe they kneel in
     row.dataset.name = p.name;
-    row.title = mine ? `${p.name} · ${t('rename')}` : p.name;
+    // Their title here, earned by their own karma, and their mornings in a row.
+    const standing = hasStanding() ? ` · ${rankName(p.karma)}${p.karma ? ` · ${fmt('karmaN', { n: p.karma })}` : ''}` : '';
+    row.title = mine ? `${p.name}${standing} · ${t('rename')}` : `${p.name}${standing}`;
     if (mine) row.type = 'button';
     const avatar = document.createElement('span');
     avatar.className = 'person__avatar';
@@ -63,6 +66,14 @@ export function renderPeople(newId) {
       lantern.textContent = '🏮';
       lantern.title = t('watchTip');
       row.appendChild(lantern);
+    }
+    const run = hasStanding() ? liveStreak(p) : 0;
+    if (run > 1) {
+      const flame = document.createElement('span');
+      flame.className = 'person__streak';
+      flame.textContent = `🔥${run}`;
+      flame.title = fmt('streakTip', { n: run });
+      row.appendChild(flame);
     }
     if (mine) {
       const tag = document.createElement('span');
