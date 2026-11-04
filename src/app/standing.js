@@ -42,7 +42,7 @@ export function applyStandings(list) {
     for (const p of people.values()) {
       if (devoteeKey(p) !== key) continue;
       const before = rankOf(p.karma);
-      Object.assign(p, { karma: s.karma, streak: s.streak, day: s.day });
+      Object.assign(p, { karma: s.karma, streak: s.streak, day: s.day, ...(s.week !== undefined && { week: s.week }) });
       if (p.id !== state.myId && rankOf(s.karma) > before) promotedFx(p);
     }
   }

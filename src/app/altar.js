@@ -36,7 +36,7 @@ function lightNow(down, ask = true) {
     updateStats();
   }
   ignite(Date.now());
-  if (state.myId) congregation.bow(state.myId, 3);
+  if (state.myId && !congregation.walk(state.myId)) congregation.bow(state.myId, 3); // you carry it up to the censer
   logMine('light', t('fLight'), { toastText: t('litToast') });
 }
 

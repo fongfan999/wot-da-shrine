@@ -395,11 +395,11 @@ function replayFeed(log, prayers) {
 function remoteAct(msg) {
   const { kind, by, note, item, text, level, down } = msg;
   const log = (what, extra = {}) => logEvent({ key: `${by.id}:${kind}${item ? `:${item}` : ''}`, avatar: by.avatar, who: by.name, what, toastText: `${by.name} ${what}.`, ...extra });
-  if (kind === 'light') { congregation.bow(by.id, 3); log(t(down ? 'fLightDown' : 'fLight')); }
+  if (kind === 'light') { if (!congregation.walk(by.id)) congregation.bow(by.id, 3); log(t(down ? 'fLightDown' : 'fLight')); }
   else if (kind === 'down') { sound.bowl(174); log(t('fDown'), { toastText: fmt('downRemote', { name: by.name }) }); }
   else if (kind === 'bowl') { bowlFx(note); log(t('fBowl')); }
   else if (kind === 'bow') { bowFx(by.id); log(t('fBow')); }
-  else if (kind === 'offer') { const label = offerFx(item, by.name); if (label) log(fmt('fOffer', { item: label })); }
+  else if (kind === 'offer') { const label = offerFx(item, by.name); if (label) { congregation.walk(by.id, { sticks: false }); log(fmt('fOffer', { item: label })); } }
   else if (kind === 'prayer') { prayerFx(text, `${by.avatar} ${by.name}`, false, congregation.element(by.id)); wishes.hang(text, by.name); remember(text, by.name); log(t('fPrayer'), { quote: text, toastText: `${by.name}: “${text}”` }); }
   else if (kind === 'puff') puffFx();
   else if (kind === 'blame') { blameFx(null); log(t('fBlame')); }

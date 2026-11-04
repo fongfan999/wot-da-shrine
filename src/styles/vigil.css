@@ -120,10 +120,10 @@ body[data-state="lit"] .plantern__core { opacity: .8; }
 @keyframes plantern-sway { 0%, 100% { rotate: -3deg; } 50% { rotate: 3deg; } }
 @media (prefers-reduced-motion: reduce) { .plantern[data-purify="1"] { animation: none; } }
 
-/* The altar grows with the room's karma */
+/* The altar grows with the room's karma. The building around it is the temple layer (temple.js);
+   the torii the censer used to stand under is part of that now. On the table: a lucky cat from the
+   village shrine, a golden censer from the temple. */
 .burner__svg .torii, .burner__svg .cat { display: none; }
-/* Each level keeps what the ones before it put up; past Grand temple the altar is whole and the shrine opens sounds instead */
-.burner:not([data-level="0"]) .torii { display: block; }
 .burner:is([data-level="2"], [data-level="3"], [data-level="4"], [data-level="5"]) .cat { display: block; }
 .burner:is([data-level="3"], [data-level="4"], [data-level="5"]) :is(.censer-body, .censer-rim) { fill: var(--ember-soft); }
 

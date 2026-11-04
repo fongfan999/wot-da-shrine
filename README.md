@@ -165,11 +165,26 @@ down, who is praying and how many prayers were said. When it ends the shrine
 files it: what was down (the title at the time), minutes, people, prayers,
 karma. The rules both sides play by live in `shared/rules.js`. The **Shrine
 records** card shows what the altar has survived, a paper lantern hangs
-above the altar for every vigil survived, and the altar itself grows with the
-room's karma: a torii gate at 150, a lucky cat on the table at 400, a golden
-censer at 1000. Past that it keeps growing, to Mountain monastery at 2500 and
-Head temple at 5000, and every level past the first opens a sound (see
-Sounds and scenes).
+above the altar for every vigil survived, and the shrine itself grows with the
+room's karma, drawn in ink behind the censer (`src/scene/temple.js`): The altar
+(a moving-box altar, a DO NOT REBOOT note, a cord to the coffee machine),
+Roadside shrine at 150 (a roof on two posts, a shimenawa of Cat6), Village
+shrine at 400 (a torii, a small hall, stone lanterns), Temple at 1000 (a bell
+on a patch cable), Grand temple at 2500 (two storeys, banners, fox guardians)
+and Head temple at 5000 (a pagoda, a cherry tree, a vending machine that sells
+Hope). The home page and the demo show the Head temple. Every level past the
+first opens a sound (see Sounds and scenes).
+
+**Mats.** Each level lays more mats in front of the altar (1, 3, 5, 7, 10, 12;
+`MATS` in `shared/rules.js`). The closest go to whoever earned the most karma
+this week (the board's week, Monday 00:00 UTC), then the longer run of
+mornings; everyone past the mats stands, a step back. Overtaking someone swaps
+your mats in full view and the feed says so; the status card's place row says
+which mat is yours and how much karma it takes to pass the one ahead. Lighting
+incense or bringing an offering is a walk: your figure gets up, carries it to
+the censer, bows and walks back. **Upkeep** is the kami's mood drawn on the
+shrine: dust when it is peckish, cobwebs when hungry, weeds when starving (they
+take the last two mats), and after a week unfed a tanuki moves in.
 
 Title, subtitle and "back at" are shared by the whole room: click the title
 and type what is down, click "back at" to pick a time, set them in Customize,
@@ -274,8 +289,8 @@ A shrine shows what each person put in, so the team can see it building somethin
   with their morning runs, in This shrine and on the TV. It starts over every
   Monday at 00:00 UTC, so a newcomer can top it by Friday. Not on it yet, you
   see your own week under it.
-- **Building the next level**: the way to the shrine's next level (Village
-  shrine at 150, Temple at 400, Grand temple at 1000) is a bar in one segment
+- **Building the next level**: the way to the shrine's next level (Roadside
+  shrine at 150, Village shrine at 400, Temple at 1000) is a bar in one segment
   per person who earned it, with their faces beside it. When the shrine grows,
   the room hears who built it. Karma from before anyone kept count is the
   grey at the start.
@@ -333,10 +348,10 @@ scene are every shrine's; the rest are earned, and once open they stay open.
 
 | Opens | at |
 | --- | --- |
-| Koto: a plucked zither, a few notes at a time | Village shrine, 150 karma |
-| Shakuhachi: a bamboo flute, long and breathy | Temple, 400 |
-| The rack: fans, mains hum, disks seeking, a UPS down the aisle | Grand temple, 1000 |
-| Great bell: the temple's bonshō, struck every half minute | Mountain monastery, 2500 |
+| Koto: a plucked zither, a few notes at a time | Roadside shrine, 150 karma |
+| Shakuhachi: a bamboo flute, long and breathy | Village shrine, 400 |
+| The rack: fans, mains hum, disks seeking, a UPS down the aisle | Temple, 1000 |
+| Great bell: the temple's bonshō, struck every half minute | Grand temple, 2500 |
 | Shō: reed chords that swell like breathing | Head temple, 5000 |
 | Momiji scene: maple leaves, warm paper | the Survivor charm |
 | Yuki scene: snow, cold paper | the Seven mornings charm |

@@ -95,6 +95,17 @@ export const STRINGS = {
   rankNextText: '{n} karma to {name}',
   karmaN: '{n} karma',
   fPromoted: 'is now {rank}',
+  // The mats: who kneels where (MATS in shared/rules.js)
+  fMovedUp: 'moved up to mat {n}. {other} shuffled over',
+  fMovedUpAlone: 'moved up to mat {n}',
+  movedUpMine: 'You moved up to mat {n}.',
+  placeMat: 'Mat {n} of {of}',
+  placeStanding: 'Standing · all {of} mats taken',
+  placeStandingOne: 'Standing · the one mat is taken',
+  placeBehind: '{k} karma to pass {name}',
+  atGate: '+{n} at the gate',
+  placeFirst: 'closest to the altar',
+  placeTip: 'The mats go by karma earned this week: the most kneels closest to the altar. It starts over on Monday.',
   promotedRemote: '{name} is now {rank}.',
   // The morning bow: your first bow of the day
   streakTip: '{n} mornings in a row',
@@ -339,7 +350,7 @@ export const STRINGS = {
   landChorus: 'Bow in chorus',
   landChorusText: 'Three or more people bowing within four seconds earn the room a peal of bells and bonus karma. The shrine counts it, so nobody can fake it alone.',
   landRemembers: 'A shrine that remembers',
-  landRemembersText: 'Every vigil survived hangs a paper lantern above the altar. Karma grows the shrine itself: a torii gate, a lucky cat on the table, a golden censer.',
+  landRemembersText: 'Every vigil survived hangs a paper lantern above the altar. Karma grows the shrine itself, from a bare altar to a roadside shrine, a torii and a village hall, a temple, and one day a head temple with a pagoda. Every tier lays more mats, so more of the team gets to kneel.',
   landChannelEyebrow: 'Made for the incident channel',
   landChannelTitle: 'The link does the',
   landChannelAccent: 'inviting.',
@@ -486,7 +497,7 @@ export const STRINGS = {
   shrineLevel: '{name} · {next}',
   shrineLevelMax: '{name}',
   shrineNext: '{n} karma to {name}',
-  shrineLevels: ['Roadside shrine', 'Village shrine', 'Temple', 'Grand temple', 'Mountain monastery', 'Head temple'].map((name, i) => [SHRINE_LEVELS[i], name]), // the karma each starts at is the shrine's rule
+  shrineLevels: ['The altar', 'Roadside shrine', 'Village shrine', 'Temple', 'Grand temple', 'Head temple'].map((name, i) => [SHRINE_LEVELS[i], name]), // the karma each starts at is the shrine's rule
   shrineUnlocked: 'The shrine grew: {name}.',
   lanternsTitle: 'A lantern for each of the {n} vigils this shrine survived',
   lanternsTitleOne: 'A lantern for the vigil this shrine survived',

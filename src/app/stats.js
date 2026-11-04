@@ -4,11 +4,12 @@ import { sound } from '../audio/index.js';
 import { saveCounters } from '../lib/config.js';
 import { STRINGS, t } from '../lib/strings.js';
 import { $, body, BURN_SECONDS, counters, fmt, meta, people, reduceMotion, roomName, records, state, tv } from './context.js';
-import { art, burner, kick, petals } from './engines.js';
+import { art, burner, congregation, kick, petals, temple } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';
 import { every } from '../lib/clock.js';
 import { hasStanding, myStanding, rankOf, roomMornings } from './standing.js';
-import { checkUnlocks, opensAtLevel, withReward } from './unlocks.js';
+import { checkUnlocks, opensAtLevel, shrineAt, withReward } from './unlocks.js';
+import { renderPeople } from './people.js';
 import { grewText, nameList, renderBoard, renderBuild } from './together.js';
 import { renderVow } from './vow.js';
 import { renderCharms } from './charms.js';
@@ -24,6 +25,24 @@ export const statKarma = $('#sum-karma'); // the karma in the card's header, the
 export function updateStats(quiet = false) {
   statKarma.textContent = counters.karma;
   updateRank(quiet);
+}
+
+/* ---------- Your mat: which one, of how many, and who to pass for a closer one ---------- */
+const rankPlace = $('#rank-place');
+export function renderPlace() {
+  const place = !tv && hasStanding() && state.myId ? congregation.placeOf(state.myId) : null;
+  rankPlace.hidden = !place?.mats;
+  if (rankPlace.hidden) return;
+  const { i, mats, usable, me, ahead } = place;
+  const where = i < usable ? fmt('placeMat', { n: i + 1, of: mats }) : mats === 1 ? t('placeStandingOne') : fmt('placeStanding', { of: mats });
+  // The one to pass: whoever is a place ahead, while passing them gets you a mat (or a closer one).
+  const pass = ahead && i <= usable ? fmt('placeBehind', { k: Math.max(1, (ahead.week ?? 0) - (me?.week ?? 0) + 1), name: ahead.name }) : '';
+  rankPlace.innerHTML = '';
+  rankPlace.append(Object.assign(document.createElement('b'), { textContent: where }));
+  const note = i === 0 && i < usable ? t('placeFirst') : pass;
+  if (note) rankPlace.append(` · ${note}`);
+  rankPlace.title = t('placeTip');
+  rankPlace.dataset.standing = i < usable ? '' : '1';
 }
 
 /* ---------- Ranks: karma turns a lurker into an enlightened SRE ----------
@@ -163,6 +182,7 @@ export function tickVigil() {
 /* ---------- Shrine records: what this altar has survived, and how far it has grown ---------- */
 const recordsList = $('#records');
 let shownLevel = -1;
+let drawnLevel = -1;
 function shrineLevel(karma = counters.karma) {
   return STRINGS.shrineLevels.reduce((idx, [at], k) => (karma >= at ? k : idx), 0);
 }
@@ -199,7 +219,11 @@ export function renderRecords() {
   const up = STRINGS.shrineLevels[i + 1];
   $('#records-level').title = up ? withReward(fmt('shrineNext', { n: up[0] - counters.karma, name: up[1] }), opensAtLevel(i + 1)) : name;
   updateRank(true); // its bar tracks the shrine's next level
-  burner.dataset.level = String(i);
+  // The shrine drawn around the altar: this one's own, or on the home page and the demo the biggest there is.
+  const drawn = roomName && roomName !== 'demo' ? shrineAt() : 5;
+  burner.dataset.level = String(drawn);
+  temple.setLevel(drawn);
+  if (drawn !== drawnLevel) { drawnLevel = drawn; renderPeople(); } // a new level lays more mats
   updateTablet();
   renderBuild();
   renderVow();

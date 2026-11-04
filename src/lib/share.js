@@ -65,9 +65,9 @@ function drawingCss(c) {
     [data-tone="2"] .robe { fill: ${c['tone-2-soft']}; }
     [data-tone="3"] .robe { fill: ${c['tone-3-soft']}; }
     .torii, .cat { display: none; }
-    [data-level="1"] .torii, [data-level="2"] .torii, [data-level="3"] .torii { display: block; }
-    [data-level="2"] .cat, [data-level="3"] .cat { display: block; }
-    [data-level="3"] .censer-body, [data-level="3"] .censer-rim { fill: ${c['ember-soft']}; }
+    [data-level="2"] .cat, [data-level="3"] .cat, [data-level="4"] .cat, [data-level="5"] .cat { display: block; }
+    [data-level="3"] .censer-body, [data-level="3"] .censer-rim, [data-level="4"] .censer-body, [data-level="4"] .censer-rim, [data-level="5"] .censer-body, [data-level="5"] .censer-rim { fill: ${c['ember-soft']}; }
+    .lv0-note .d-mono { font-size: 7.5px; font-weight: 700; }
     .brand__wot { fill: ${c.ink}; }
     .brand__shrine { color: ${c.accent}; }
     .brand__bowl, .brand__sticks { stroke: ${c.ink}; }

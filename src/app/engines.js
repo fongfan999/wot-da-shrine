@@ -7,9 +7,10 @@ import { Motes } from '../scene/motes.js';
 import { syncPalette } from '../scene/palette.js';
 import { Petals } from '../scene/petals.js';
 import { buildServerRoom } from '../scene/serverRoom.js';
+import { buildTemple } from '../scene/temple.js';
 import { IncenseSmoke } from '../scene/smoke.js';
 import { Vitals } from '../scene/vitals.js';
-import { $, body, people, state } from './context.js';
+import { $, body, people, roomName, state } from './context.js';
 import { every } from '../lib/clock.js';
 
 /* ---------- Engines ---------- */
@@ -17,6 +18,9 @@ export const burner = $('#burner');
 syncPalette(); // the canvas layers read their colours from the tokens; applyTheme() refreshes them
 export const room = buildServerRoom($('#server-room'));
 export const art = buildBurner($('#burner-art'));
+/** The shrine around the altar. The home page and the demo show the biggest there is; a shrine shows its own (stats.js). */
+export const temple = buildTemple($('#temple'));
+temple.setLevel(roomName && roomName !== 'demo' ? 0 : 5);
 export const smoke = new IncenseSmoke($('#smoke'), () => art.tips());
 export const fog = new Fog($('#fog'));
 export const petals = new Petals($('#petals'));

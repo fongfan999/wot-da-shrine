@@ -8,14 +8,15 @@
  * real hangs on it: the servers go down when they go down.
  */
 import gsap from 'gsap';
-import { KAMI_STARVE, WATCHED_MAX, devoteeKey, purifiable } from '../../shared/rules.js';
+import { KAMI_STARVE, TANUKI_AFTER, UPKEEP, WATCHED_MAX, WEEDS_TAKE, devoteeKey, purifiable } from '../../shared/rules.js';
 import { kamiLine, kamiMood } from '../../shared/kami.js';
 import { forecast } from '../../shared/forecast.js';
 import { sound } from '../audio/index.js';
 import { every } from '../lib/clock.js';
 import { t } from '../lib/strings.js';
 import { $, fmt, people, records, reduceMotion, roomName, roomUrl, state, tv } from './context.js';
-import { art, motes, petals, smoke } from './engines.js';
+import { art, congregation, motes, petals, smoke, temple } from './engines.js';
+import { renderPlace } from './stats.js';
 import { activity } from './fx.js';
 import { ago, copyText, logEvent, toast } from './ui.js';
 
@@ -101,7 +102,27 @@ $('#forecast-copy').addEventListener('click', () => {
 /* ---------- The line under the heading ---------- */
 let shownMood = '';
 let shownPointed = null; // the ids it pointed at as last drawn: a new one is announced
+/**
+ * How the shrine looks after the kami's last meal: kept (0), dusty (1, peckish), cobwebs (2, hungry),
+ * weeds over the last mats (3, starving), and a tanuki moved in (4, a week unfed).
+ */
+export function upkeepNow() {
+  const mood = kamiMoodNow();
+  if (!UPKEEP[mood]) return 0;
+  return mood === 'starving' && serverNow() - (state.kami?.fedAt ?? 0) >= TANUKI_AFTER ? 4 : UPKEEP[mood];
+}
+let shownUpkeep = -1;
+function renderUpkeep() {
+  const n = upkeepNow();
+  if (n === shownUpkeep) return;
+  shownUpkeep = n;
+  temple.setUpkeep(n);
+  congregation.setLost(n >= 3 ? WEEDS_TAKE : 0); // weeds take the last mats: whoever knelt there stands
+  renderPlace();
+}
+
 export function renderKami() {
+  renderUpkeep();
   const mood = kamiMoodNow();
   wrap.hidden = !mood;
   if (!mood) { shownMood = ''; shownPointed = null; return; }

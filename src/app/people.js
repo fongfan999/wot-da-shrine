@@ -1,14 +1,17 @@
 /* Who is kneeling: the presence stack in the top bar, the kneelers at the altar, pings. */
 import gsap from 'gsap';
 import { icon } from '../lib/icons.js';
+import { MATS } from '../../shared/rules.js';
 import { t } from '../lib/strings.js';
 import { $, fmt, people, reduceMotion, roomName, state, tv } from './context.js';
 import { congregation } from './engines.js';
 import { openJoin } from './shrine.js';
 import { onWatch } from './watch.js';
 import { hasStanding, liveStreak } from './standing.js';
+import { renderPlace } from './stats.js';
+import { shrineAt } from './unlocks.js';
 import { thank } from './together.js';
-import { toast } from './ui.js';
+import { logEvent, toast } from './ui.js';
 
 export const presence = $('#presence');
 
@@ -17,9 +20,45 @@ export const presence = $('#presence');
 const phone = matchMedia('(max-width: 760px)');
 const faces = () => (phone.matches ? 3 : 4);
 
+/**
+ * The order the mats go in: the most karma this week closest to the altar, then the longer run of
+ * mornings, then the most karma here; a tie keeps whoever was there first. Where nobody has standing
+ * (the demo), you kneel closest.
+ */
+export function ranked() {
+  const list = [...people.values()];
+  if (!hasStanding()) return list.sort((a, b) => (b.id === state.myId) - (a.id === state.myId));
+  return list.sort((a, b) => (b.week ?? 0) - (a.week ?? 0) || liveStreak(b) - liveStreak(a) || (b.karma ?? 0) - (a.karma ?? 0));
+}
+
+/** The mats this shrine lays: by its level; the demo lays a head temple's; the home page none (its two devotees bring cushions). */
+export const matsHere = () => (!roomName ? 0 : roomName === 'demo' ? MATS[MATS.length - 1] : MATS[shrineAt()]);
+
+/** Someone passed someone still here, and now kneels closer: the room hears it (you, in a toast). */
+let lastOrder = null;
+function announceMoves(order) {
+  const ids = order.map((p) => p.id);
+  const before = lastOrder && new Map(lastOrder.map((id, i) => [id, i]));
+  lastOrder = ids;
+  if (!before || !hasStanding() || tv) return;
+  const usable = congregation.usable();
+  ids.forEach((id, i) => {
+    if (i >= usable || !before.has(id) || before.get(id) <= i) return;
+    const passed = ids.slice(i + 1).find((o) => before.has(o) && before.get(o) < before.get(id));
+    if (!passed) return;
+    const p = people.get(id);
+    const other = passed === state.myId ? t('you') : people.get(passed)?.name;
+    const what = fmt('fMovedUp', { n: i + 1, other });
+    if (id === state.myId) logEvent({ key: `${id}:mat`, avatar: p.avatar, who: t('you'), what, toastText: fmt('movedUpMine', { n: i + 1 }) });
+    else logEvent({ key: `${id}:mat`, avatar: p.avatar, who: p.name, what, quiet: true });
+  });
+}
+
 export function renderPeople(newId) {
-  const list = [...people.values()].sort((a, b) => (b.id === state.myId) - (a.id === state.myId));
-  congregation.set(list, state.myId);
+  const order = ranked();
+  congregation.set(order, state.myId, matsHere());
+  announceMoves(order);
+  const list = [...order].sort((a, b) => (b.id === state.myId) - (a.id === state.myId)); // the stack: you first
   congregation.markWatch(list.find(onWatch)?.id);
   congregation.markThanks(hasStanding() && !tv, state.myId);
 
@@ -46,6 +85,7 @@ export function renderPeople(newId) {
   const named = (p) => { const run = hasStanding() ? liveStreak(p) : 0; return run > 1 ? `${p.name} 🔥${run}` : p.name; };
   presence.title = `${count}: ${list.map(named).join(', ')}`;
   presence.setAttribute('aria-label', count);
+  renderPlace();
 }
 phone.addEventListener('change', () => renderPeople());
 
@@ -69,6 +109,7 @@ export function pingPerson(id, iconName) {
 
 // The name tags over the kneelers: a click on anyone else's thanks them.
 congregation.thankTip = (p) => fmt('thankTip', { name: p.name });
+congregation.atGate = (n) => fmt('atGate', { n });
 $('#congregation').addEventListener('click', (e) => {
   const kneeler = e.target.closest('.kneeler--thanks');
   if (!kneeler || !e.target.closest('.kneeler__tag') || roomName === 'demo') return;

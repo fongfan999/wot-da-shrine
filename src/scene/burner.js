@@ -79,10 +79,10 @@ const HAIR = [
       <path class="d-strand" d="M -10 -118 Q -5 -122 0 -122 M 5 -122 Q 9 -121 12 -116 M 0 -108 Q -2 -92 1 -80"/>`,
 ];
 
-export const FIGURE = (cls, { hair = 0 } = {}) => `
-    <ellipse class="d-shade" cx="0" cy="4" rx="44" ry="4"/>
+export const FIGURE = (cls, { hair = 0, cushion = true } = {}) => `
+    <ellipse class="d-shade" cx="0" cy="4" rx="44" ry="4"/>${cushion ? `
     <path class="d-sunk" d="M -40 -4 Q 0 -14 40 -4 L 40 0 Q 0 8 -40 0 Z"/>
-    <path class="d-thin" d="M -40 -4 Q 0 6 40 -4"/>
+    <path class="d-thin" d="M -40 -4 Q 0 6 40 -4"/>` : ''}
     <path class="d-paper robe" d="M -30 0 Q -33 -24 -14 -32 L 14 -32 Q 33 -24 30 0 Q 0 4 -30 0 Z"/>
     <path class="d-h2" d="M -17 -26 Q -21 -14 -18 -2 M -6 -30 Q -8 -16 -5 0 M 6 -30 Q 8 -16 5 0 M 17 -26 Q 21 -14 18 -2"/>
     <ellipse class="d-paper" cx="-13" cy="1" rx="8" ry="4"/>
@@ -108,6 +108,61 @@ export const FIGURE = (cls, { hair = 0 } = {}) => `
       <circle class="${cls}__halo" cx="0" cy="-182" r="7" opacity="0"/>
       <circle class="${cls}__ember" cx="0" cy="-182" r="2.6" opacity="0"/>
     </g>`;
+
+/**
+ * The same person standing, from behind: no mat to kneel on. The upper body is the kneeling one's,
+ * raised onto legs (hips at −84 rather than −30); its group is `${cls}__upper`, its ember `${cls}__ember`.
+ */
+export const STANDING = (cls, { hair = 0 } = {}) => {
+  const upper = FIGURE(cls, { hair, cushion: false }).split(`<g class="${cls}__upper"`)[1];
+  return `
+    <ellipse class="d-shade" cx="0" cy="3" rx="30" ry="4"/>
+    <ellipse class="d-sunk" cx="-9" cy="0" rx="8" ry="3.5"/>
+    <ellipse class="d-sunk" cx="9" cy="0" rx="8" ry="3.5"/>
+    <path class="d-paper robe" d="M -19 -88 L -25 -3 Q 0 2 25 -3 L 19 -88 Z"/>
+    <path class="d-h2" d="M -8 -84 L -11 -6 M 8 -84 L 11 -6 M 0 -84 V -4"/>
+    <g transform="translate(0 -54)"><g class="${cls}__upper"${upper}</g>`;
+};
+
+/** Their hair from the side, facing left: the bun, the crop, the tail (as HAIR). */
+const SIDE_HAIR = [
+  `<path class="d-ink" d="M -16 -166 Q -12 -178 2 -176 Q 15 -173 13 -158 Q 12 -150 9 -147 Q 6 -156 2 -160 Q -6 -168 -16 -166 Z"/><circle class="d-ink" cx="11" cy="-172" r="4.5"/>`,
+  `<path class="d-ink" d="M -16 -166 Q -12 -178 2 -176 Q 15 -173 13 -158 Q 12 -150 9 -147 Q 6 -156 2 -160 Q -6 -168 -16 -166 Z"/>`,
+  `<path class="d-ink" d="M -16 -166 Q -12 -178 2 -176 Q 15 -173 13 -158 Q 12 -150 9 -147 Q 6 -156 2 -160 Q -6 -168 -16 -166 Z"/><path class="d-ink" d="M 9 -160 Q 18 -140 12 -122 Q 8 -118 6 -124 Q 10 -140 3 -156 Z"/>`,
+];
+
+/** The body from the hips up, from the side and facing left, hips at (0, −88): hands out in front, maybe holding three lit sticks. */
+const SIDE_UPPER = (hair, sticks) => `
+    <path class="d-paper robe" d="M -12 -86 L -14 -136 Q 0 -146 12 -134 L 14 -86 Z"/>
+    <path class="d-thin" d="M -13 -96 L 13 -96 M -13 -91 L 13 -91"/>
+    <path class="d-tube-out" stroke-width="11" d="M 0 -128 Q -6 -104 -24 -110"/>
+    <path class="d-tube-in" stroke-width="7.5" d="M 0 -128 Q -6 -104 -24 -110"/>
+    <path class="d-paper robe" d="M -6 -134 L -14 -104 Q -4 -98 6 -106 L 8 -130 Z"/>
+    <circle class="d-paper" cx="-26" cy="-111" r="4.5"/>
+    <rect class="d-paper" x="-7" y="-152" width="10" height="14" rx="2.5"/>
+    <circle class="d-paper" cx="-2" cy="-160" r="15"/>
+    ${SIDE_HAIR[hair % SIDE_HAIR.length]}
+    <circle class="d-ink" cx="-10" cy="-161" r="1.4"/>
+    <path class="d-thin" d="M -17 -160 q -2.5 2.5 0 4 M 3 -160 q 3 1 2 5"/>${sticks ? `
+    <path class="kneeler__stick" d="M -26 -114 L -29 -166 M -24 -114 L -22 -164 M -28 -114 L -35 -162"/>
+    <circle class="d-ember-soft" cx="-29" cy="-166" r="5"/><circle class="d-ember-soft" cx="-22" cy="-164" r="5"/><circle class="d-ember-soft" cx="-35" cy="-162" r="5"/>
+    <circle class="d-flame" cx="-29" cy="-166" r="2.4"/><circle class="d-flame" cx="-22" cy="-164" r="2.4"/><circle class="d-flame" cx="-35" cy="-162" r="2.4"/>` : ''}`;
+
+/** Walking, from the side and facing left (mirror it to face right), feet at (0, 0): incense in hand, or empty-handed on the way back. */
+export const WALKING = ({ hair = 0, sticks = true } = {}) => `
+    <ellipse class="d-shade" cx="0" cy="3" rx="32" ry="4"/>
+    <path class="d-sunk" d="M 16 -1 Q 18 -8 26 -6 L 30 -2 L 22 1 Z"/>
+    <path class="d-sunk" d="M -32 -1 Q -32 -6 -24 -6 L -14 -5 L -14 0 Z"/>
+    <path class="d-paper robe" d="M -10 -88 L -26 -4 Q -18 -1 -10 -3 L 0 -42 L 12 -3 Q 20 -1 28 -4 L 12 -88 Z"/>
+    <path class="d-h2" d="M -2 -84 L -16 -8 M 4 -84 L 18 -8"/>${SIDE_UPPER(hair, sticks)}`;
+
+/** At the censer, facing left: the sticks are planted, and they bow over it. */
+export const PLANTING = ({ hair = 0 } = {}) => `
+    <ellipse class="d-shade" cx="0" cy="3" rx="28" ry="4"/>
+    <path class="d-sunk" d="M -26 -1 Q -26 -6 -18 -6 L -8 -5 L -8 0 Z"/>
+    <path class="d-paper robe" d="M -12 -88 L -18 -3 Q 0 1 18 -3 L 14 -88 Z"/>
+    <path class="d-h2" d="M -4 -84 L -6 -4 M 6 -84 L 8 -4"/>
+    <g transform="rotate(-28 0 -88)">${SIDE_UPPER(hair, false)}</g>`;
 
 /** A person's look, from their id: one of four robe tones and three hair styles, the same every time they kneel. */
 export function look(id) {
@@ -277,6 +332,48 @@ export function buildBurner(host) {
   <ellipse class="d-cav" cx="260" cy="${RIM_Y}" rx="108" ry="18"/>
   <ellipse class="d-ash" cx="260" cy="${RIM_Y + 3}" rx="98" ry="12"/>
   <ellipse fill="url(#bStipple)" cx="260" cy="${RIM_Y + 3}" rx="98" ry="12"/>
+
+  <!-- the altar before it grows: someone left a note (temple.js shows it, by data-max) -->
+  <g class="lv0-note" data-max="0" transform="rotate(-5 420 416)">
+    <rect class="d-raised" x="396" y="401" width="50" height="32"/>
+    <text class="d-mono" x="421" y="414" text-anchor="middle">DO NOT</text>
+    <text class="d-mono" x="421" y="425" text-anchor="middle">REBOOT</text>
+  </g>
+
+  <!-- upkeep, from the kami's mood (temple.js shows them, by data-upkeep): dust, a cobweb, a vine, a tanuki -->
+  <g class="upkeep" data-upkeep="1">
+    <g class="d-st"><circle cx="40" cy="388" r="1.6"/><circle cx="58" cy="390" r="1.3"/><circle cx="92" cy="387" r="1.7"/><circle cx="168" cy="389" r="1.4"/><circle cx="204" cy="388" r="1.6"/><circle cx="330" cy="389" r="1.5"/><circle cx="392" cy="387" r="1.3"/><circle cx="468" cy="390" r="1.7"/><circle cx="486" cy="388" r="1.4"/><circle cx="160" cy="232" r="1.5"/><circle cx="182" cy="226" r="1.3"/><circle cx="340" cy="227" r="1.6"/><circle cx="364" cy="232" r="1.4"/><circle cx="114" cy="160" r="1.4"/><circle cx="134" cy="158" r="1.2"/></g>
+    <path class="d-sunk" stroke-width="1.6" d="M 456 466 q -3 -11 8 -14 q 3 -10 14 -7 q 10 -6 16 4 q 11 1 9 12 q 3 8 -8 10 q -9 5 -17 0 q -11 4 -17 -3 q -7 -1 -5 -2 Z"/>
+    <circle class="d-ink" cx="471" cy="458" r="1.8"/><circle class="d-ink" cx="481" cy="458" r="1.8"/>
+  </g>
+  <g class="upkeep" data-upkeep="2">
+    <path class="d-thin" d="M 64 430 L 64 456 M 64 430 L 104 430 M 64 430 L 98 448 M 64 430 L 84 456 M 64 440 Q 72 440 74 430 M 64 449 Q 82 447 86 430 M 70 456 Q 90 448 98 434"/>
+    <path class="d-thin" d="M 140 428 V 446"/>
+    <circle class="d-ink" cx="140" cy="450" r="4"/>
+    <path class="d-thin" d="M 136 448 l -6 -4 M 136 451 l -7 0 M 136 454 l -6 4 M 144 448 l 6 -4 M 144 451 l 7 0 M 144 454 l 6 4"/>
+  </g>
+  <g class="upkeep" data-upkeep="3">
+    <path class="d-thin" d="M 474 456 C 462 444 484 436 470 424 C 460 414 480 406 472 396"/>
+    <ellipse class="d-paper" stroke-width="1.2" cx="466" cy="441" rx="6" ry="2.6" transform="rotate(-30 466 441)"/>
+    <ellipse class="d-paper" stroke-width="1.2" cx="478" cy="420" rx="6" ry="2.6" transform="rotate(30 478 420)"/>
+    <ellipse class="d-paper" stroke-width="1.2" cx="466" cy="403" rx="6" ry="2.6" transform="rotate(-30 466 403)"/>
+    <path class="d-line" d="M 24 470 q -1 -12 -7 -18 M 27 470 q 1 -14 4 -22 M 40 470 q -1 -10 -6 -16 M 496 470 q -1 -12 -7 -18 M 499 470 q 1 -14 5 -22"/>
+  </g>
+  <g class="upkeep upkeep--tanuki" data-upkeep="4">
+    <title>A tanuki has moved in. It is eating the offerings.</title>
+    <path class="d-paper" d="M 129.2 463.6 Q 170.8 460.4 167.6 428.4 Q 164.4 412.4 148.4 415.6 Q 158 434.8 132.4 447.6 Z"/>
+    <path class="d-line" stroke-width="3.5" d="M 158 418.8 l 9.6 3.2 M 164.4 431.6 l 8 -1.6 M 161.2 444.4 l 6.4 -4.8"/>
+    <path class="d-paper" d="M 84.4 470 Q 78 422 110 415.6 Q 142 422 135.6 470 Z"/>
+    <path class="d-sunk" stroke-width="1.2" d="M 97.2 466.8 Q 94 438 110 434.8 Q 126 438 122.8 466.8"/>
+    <path class="d-paper" d="M 95.6 394.8 L 92.4 377.2 L 105.2 388.4 Z M 124.4 394.8 L 127.6 377.2 L 114.8 388.4 Z"/>
+    <circle class="d-paper" cx="110" cy="402.8" r="17.6"/>
+    <path class="d-ink" d="M 92.4 404.4 Q 100.4 393.2 108.4 402.8 Q 100.4 414 92.4 404.4 Z M 127.6 404.4 Q 119.6 393.2 111.6 402.8 Q 119.6 414 127.6 404.4 Z"/>
+    <circle class="d-core" cx="100.4" cy="402.8" r="2"/><circle class="d-core" cx="119.6" cy="402.8" r="2"/>
+    <circle class="d-ink" cx="110" cy="411.6" r="2.6"/>
+    <path class="d-paper" d="M 98.8 447.6 L 110 428.4 L 121.2 447.6 Z"/>
+    <rect class="d-ink" x="103.6" y="439.6" width="12.8" height="8"/>
+    <circle class="d-paper" cx="100.4" cy="444.4" r="4.5"/><circle class="d-paper" cx="119.6" cy="444.4" r="4.5"/>
+  </g>
 </svg>
 
 <!-- Everything that moves lives here, so the censer above is painted once. Same viewBox, same box. -->

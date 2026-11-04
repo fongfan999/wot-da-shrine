@@ -55,6 +55,7 @@ export function intro() {
   gsap.set('.side .card', { y: 20, opacity: 0 });
   gsap.set(dock, { y: 24, opacity: 0 });
   gsap.set('.burner', { y: 60, opacity: 0, scale: 0.92 });
+  gsap.set('.temple', { opacity: 0 });
   gsap.set('.layer--bg', { scale: 1.35, opacity: 0 });
   // The letters get their layers now, while nothing moves, rather than in the intro's first frames.
   gsap.set('.title .ch', { willChange: 'transform, opacity' });
@@ -68,6 +69,7 @@ export function intro() {
     .to('.title .ch', { y: 0, opacity: 1, rotateX: 0, duration: 1, stagger: 0.022, onComplete: () => gsap.set('.title .ch', { clearProps: 'willChange' }) }, 0.35)
     .to(['.vigil', '.subtitle', '.mantra'], { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }, 0.8)
     .to('.burner', { y: 0, opacity: 1, scale: 1, duration: 1.3, ease: 'elastic.out(1, 0.7)' }, 0.5)
+    .to('.temple', { opacity: 1, duration: 1.6, ease: 'power2.out' }, 0.6)
     .to('.plantern-row', { opacity: 1, duration: 1, ease: 'power2.out' }, 1.2)
     .to('.side .card', { y: 0, opacity: 1, duration: 0.8, stagger: 0.08 }, 0.9)
     .to(dock, { y: 0, opacity: 1, duration: 0.8, stagger: 0.08, clearProps: 'transform,translate,rotate,scale,opacity' }, 1.0); // the dock's own CSS takes over (beside the altar the quick prayers wait hidden)

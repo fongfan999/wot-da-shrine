@@ -40,5 +40,9 @@
 .rank__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .rank__name { font-size: 15px; font-weight: 650; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rank__next { font-family: var(--font-mono); font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Your mat in front of the altar, and who to pass for a closer one */
+.rank__place { font-family: var(--font-mono); font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank__place b { color: var(--ink); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.rank__place[data-standing="1"] b { color: var(--muted); }
 .meter--thin { height: 6px; margin-top: 4px; }
 .eta { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; color: var(--muted); white-space: nowrap; }

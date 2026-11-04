@@ -35,7 +35,9 @@
   body[data-landing="1"] .center { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 8px; padding: 16px 0 32px; min-height: 0; }
   /* sized by width here: a height-based aspect ratio would make the altar wider than the phone */
   body[data-landing="1"] .altar { height: auto; min-width: 0; }
-  body[data-landing="1"] .burner { width: min(100%, 400px); height: auto; margin: 0 auto; }
+  body[data-landing="1"] .burner { width: min(72%, 320px); height: auto; margin: 0 auto; }
+  body[data-landing="1"] .altar { padding-top: 26vw; } /* room above the censer for the head temple's roofs */
+  body[data-landing="1"] .temple { left: calc(-1 * var(--gutter)); right: calc(-1 * var(--gutter)); }
   body[data-landing="1"] .title { font-size: clamp(2.3rem, 11vw, 3rem); }
   body[data-landing="1"] .subtitle { font-size: 17px; }
   body[data-landing="1"] .center { grid-template-rows: none; }

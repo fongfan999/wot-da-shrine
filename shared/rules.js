@@ -122,6 +122,13 @@ export const MAX_VOWS = 8;
 export const SHRINE_LEVELS = [0, 150, 400, 1000, 2500, 5000];
 export const levelOf = (karma) => SHRINE_LEVELS.reduce((idx, at, k) => (karma >= at ? k : idx), 0);
 
+/**
+ * The mats laid in front of each level: that many people kneel, the closest and the middle going to
+ * whoever earned the most karma this week (the board's week). Everyone past the mats stands, at the
+ * sides and behind. Standing earns the same karma; it is just colder.
+ */
+export const MATS = [1, 3, 5, 7, 10, 12];
+
 /** A run of days still counts on `day` when its last bow was that day or the one before. */
 export const streakAlive = (s, day) => Boolean(s?.streak) && day - s.day <= 1;
 
@@ -180,10 +187,10 @@ export const DEFAULT_SCENE = SCENES[0];
  * charms. Nothing here is ever locked again: a shrine never shrinks, and a charm is kept for good.
  */
 export const UNLOCKS = {
-  koto: { level: 1 }, // Village shrine
-  flute: { level: 2 }, // Temple
-  rack: { level: 3 }, // Grand temple
-  bonsho: { level: 4 }, // Mountain monastery
+  koto: { level: 1 }, // Roadside shrine
+  flute: { level: 2 }, // Village shrine
+  rack: { level: 3 }, // Temple
+  bonsho: { level: 4 }, // Grand temple
   sho: { level: 5 }, // Head temple
   momiji: { charm: 'survivor' }, // the first vigil survived
   yuki: { charm: 'week' }, // seven mornings in a row
@@ -275,6 +282,13 @@ export const KAMI_MOODS = [['pleased', 2 * HOUR], ['content', 24 * HOUR], ['peck
 export const KAMI_HUNGRY = 48 * HOUR; // the reminder goes out once it has waited this long
 export const KAMI_STARVE = 96 * HOUR; // its protection, as a meter, runs out here
 export const KAMI_THANKS_AFTER = 24 * HOUR;
+/**
+ * The shrine shows how long the kami has gone unfed: peckish, dust on the altar; hungry, cobwebs;
+ * starving, weeds, and they take the last two mats (those two stand); a week, and a tanuki moves in.
+ */
+export const TANUKI_AFTER = 7 * 24 * HOUR;
+export const UPKEEP = { peckish: 1, hungry: 2, starving: 3 }; // 4: the tanuki
+export const WEEDS_TAKE = 2;
 
 /**
  * What the kami watches: the services the room names for it (payments-api, the DNS, the cron box),

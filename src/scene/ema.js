@@ -29,7 +29,7 @@ export class WishBoard {
     this.step = 26;
     this.reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     new ResizeObserver(() => this.layout()).observe(host.parentElement);
-    new MutationObserver(() => this.layout()).observe(censer, { attributes: true, attributeFilter: ['data-level'] }); // a torii may have risen
+    new MutationObserver(() => this.layout()).observe(censer, { attributes: true, attributeFilter: ['data-level'] }); // a roof may have risen
   }
 
   /** How long the rail can be, how many plaques fit on it, and how far apart they hang. */
@@ -37,10 +37,10 @@ export class WishBoard {
     // Layout boxes within the altar, so the intro's slide and the parallax don't move the numbers
     const c = { left: this.censer.offsetLeft, top: this.censer.offsetTop, width: this.censer.offsetWidth, height: this.censer.offsetHeight };
     // The plaques may hang over the censer's box while they clear everything drawn in it except the
-    // sticks; the torii a grown shrine stands under spans that whole space, so then they keep left of it.
+    // sticks; once the shrine has grown a roof over the altar (temple.js), they keep left of it.
     const bottom = this.host.offsetTop + this.host.offsetHeight;
-    const torii = this.censer.querySelector('.torii');
-    const overBox = bottom < c.top + c.height * CLEAR_Y && !(torii && getComputedStyle(torii).display !== 'none');
+    const grown = Number(this.censer.dataset.level) > 0;
+    const overBox = bottom < c.top + c.height * CLEAR_Y && !grown;
     const room = (overBox ? c.left + c.width * STICK_X - SMOKE_GAP : c.left - GAP) - this.host.offsetLeft;
     const plaque = this.plaques[0]?.offsetWidth || 104;
     const rail = Math.max(plaque, Math.min(MAX_RAIL, room));
