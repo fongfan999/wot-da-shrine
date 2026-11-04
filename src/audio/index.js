@@ -11,6 +11,7 @@ class SoundKit {
   constructor() {
     this.ctx = null;
     this.master = null;
+    this.out = null;
     this.music = null;
     this.sfxEnabled = true;
     this.musicEnabled = true;
@@ -50,8 +51,11 @@ class SoundKit {
       const conv = this.ctx.createConvolver();
       this.conv = conv;
       conv.buffer = this._impulse(this.lite ? 1.2 : 2.8, 2.2);
-      this.master.connect(dry).connect(this.ctx.destination);
-      this.master.connect(conv).connect(wet).connect(this.ctx.destination);
+      // one last gain after the reverb, so leaving the page can fade the tail too
+      this.out = this.ctx.createGain();
+      this.out.connect(this.ctx.destination);
+      this.master.connect(dry).connect(this.out);
+      this.master.connect(conv).connect(wet).connect(this.out);
       this.music = new AmbientMusic(this.ctx, this.master);
       this.music.setMix(this.mix);
       this.ctx.addEventListener('statechange', () => document.dispatchEvent(new CustomEvent('soundstate')));
@@ -59,6 +63,32 @@ class SoundKit {
     if (this.ctx.state === 'suspended') this.ctx.resume();
     this.unlocked = true;
     this.syncMusic();
+  }
+
+  /**
+   * Leaving the page (a link, a reload, closing the tab): the browser tears the graph down
+   * mid-waveform, and a sound cut off at full level pops. Fade the whole output to nothing on the
+   * audio thread, which keeps running while the next page loads, so the teardown lands on silence.
+   */
+  hush() {
+    if (!this.out) return;
+    const g = this.out.gain; const t = this.ctx.currentTime;
+    g.cancelScheduledValues(t);
+    g.setValueAtTime(g.value, t);
+    g.setTargetAtTime(0, t, 0.012);
+    clearTimeout(this.unhushAt);
+    // a navigation that never happens (a cancelled leave, a download): bring the sound back
+    this.unhushAt = setTimeout(() => this.unhush(), 2500);
+  }
+
+  unhush() {
+    if (!this.out) return;
+    clearTimeout(this.unhushAt);
+    const g = this.out.gain; const t = this.ctx.currentTime;
+    g.cancelScheduledValues(t);
+    g.setValueAtTime(g.value, t);
+    g.setTargetAtTime(1, t, 0.15);
+    if (this.unlocked && this.ctx.state === 'suspended') this.ctx.resume();
   }
 
   get effectiveMusic() { return this.unlocked && this.musicEnabled && !this.muted; }
@@ -219,3 +249,9 @@ class SoundKit {
 }
 
 export const sound = new SoundKit();
+
+// beforeunload comes first, as the leave starts; pagehide covers the leaves that skip it.
+window.addEventListener('beforeunload', () => sound.hush());
+window.addEventListener('pagehide', () => sound.hush());
+// back from the back/forward cache: the page is alive again, and so is its sound
+window.addEventListener('pageshow', (e) => { if (e.persisted) sound.unhush(); });
