@@ -50,6 +50,12 @@ export const LINES = {
     'The kami told you so.',
     'The kami saw this coming from {thing}.',
   ],
+  // Back up, and the altar not yet purified
+  unclean: [
+    'The servers are back. The kami would like the altar purified before it says anything else.',
+    'The kami is sniffing the altar. It still smells of {thing}.',
+    'The kami is waiting for someone to purify the altar. It is tapping its paw.',
+  ],
   // A vigil that names a service the kami was asked to watch
   pointed: [
     'The kami told you about {thing}.',

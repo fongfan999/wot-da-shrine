@@ -104,6 +104,12 @@ body[data-resolved="1"] .vigil__time { font-size: 22px; letter-spacing: 0; color
 .plantern__core { fill: var(--flame); opacity: .4; transition: opacity 1.2s; }
 body[data-state="lit"] .plantern__glow { opacity: .95; }
 body[data-state="lit"] .plantern__core { opacity: .8; }
+/* A vigil nobody has purified yet: its lantern hangs dark, and whoever may purify can click it */
+.plantern[data-dark="1"] .plantern__body { fill: var(--paper-sunk); fill-opacity: .9; }
+.plantern[data-dark="1"] :is(.plantern__glow, .plantern__core) { opacity: 0 !important; }
+.plantern[data-purify="1"] { cursor: pointer; animation: plantern-sway 2.4s ease-in-out infinite; }
+@keyframes plantern-sway { 0%, 100% { rotate: -3deg; } 50% { rotate: 3deg; } }
+@media (prefers-reduced-motion: reduce) { .plantern[data-purify="1"] { animation: none; } }
 
 /* The altar grows with the room's karma */
 .burner__svg .torii, .burner__svg .cat { display: none; }

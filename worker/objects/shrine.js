@@ -10,11 +10,11 @@ import { cleanSub, send as sendPush, topicOf } from '../push.js';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
 import { kamiLine, kamiMood } from '../../shared/kami.js';
 import { OMEN_DEFY, readOmens } from '../../shared/omens.js';
-import { AVATARS, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, WATCHED_MAX, WATCHED_NAME_MAX, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
+import { AVATARS, purifiable, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, WATCHED_MAX, WATCHED_NAME_MAX, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
-const LOGGED = new Set(['light', 'down', 'bowl', 'bow', 'offer', 'prayer', 'blame', 'omikuji', 'resolve', 'unresolve', 'thank', 'hang', 'unhang']);
+const LOGGED = new Set(['light', 'down', 'bowl', 'bow', 'offer', 'prayer', 'blame', 'omikuji', 'resolve', 'unresolve', 'thank', 'hang', 'unhang', 'purify']);
 const MAX_OFFERINGS = 4; // the altar table has four slots
 const FORGET_AFTER = 30 * 24 * 3600 * 1000; // rooms nobody visits for 30 days are swept
 const TOUCH_EVERY = 24 * 3600 * 1000; // pushing the sweep back once a day is plenty, and saves a write per action
@@ -493,6 +493,19 @@ export class Shrine extends DurableObject {
         s.guarded = [...s.guarded, o];
         out.item = name;
         if (s.vigil) this.crack(); // named mid-vigil, and it is what is down: the kami points at it at once
+        break;
+      }
+      case 'purify': {
+        // After They're back: the altar is cleansed, once by each person, for a day after the vigil.
+        if (this.demo) return;
+        const r = purifiable(s.history, s.vigil);
+        if (!r) return;
+        const key = devoteeKey(by);
+        if (r.purified.some((p) => devoteeKey(p) === key)) { ws.send(JSON.stringify({ t: 'nope', why: 'purified' })); return; }
+        r.purified = [...r.purified, { name: by.name, avatar: by.avatar }].slice(0, CAST_SIZE * 2);
+        r.purifiedN = (r.purifiedN ?? 0) + 1;
+        out.purified = { endedAt: r.endedAt, list: r.purified, n: r.purifiedN };
+        if (r.purifiedN === 1) out.first = true;
         break;
       }
       case 'unhang': {
@@ -1044,6 +1057,7 @@ export class Shrine extends DurableObject {
       title: s.meta.title, // what was down, as it was called then: the room's title moves on to the next incident
       outcome,
     };
+    if (outcome === 'survived' && !this.demo) record.purified = []; // its lantern hangs dark until someone purifies the altar
     if (v.watch) record.watch = v.watch; // whose watch it was
     if (v.cracked?.length) record.cracked = v.cracked; // what the kami pointed at
     for (const o of s.guarded) o.cracked = 0; // it stops pointing once the vigil is over

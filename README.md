@@ -97,6 +97,18 @@ title names one, by a person or an alert through the webhook, it points at it
 ("The kami told you about payments-api") until the vigil ends; the vigil's
 record keeps which. A pasted link says how many it watches. None in the demo.
 
+### Purifying the altar
+
+When the servers come back, the altar is cleansed. The vigil's paper lantern
+hangs dark, the kami says it wants the altar purified, and its chip reads
+**Purify the altar** instead of Bow to feed it; the credits that roll after
+They're back offer the same button, and clicking the dark lantern does it too.
+Each person may purify once per vigil, for a day after it ended and while
+nothing new is down: +5 karma, and it feeds the kami. The first purification
+lights the lantern; its tooltip names who purified. Vigils from before
+purifying was kept keep their lanterns lit. The rule is `PURIFY_FOR` and
+`purifiable()` in `shared/rules.js`.
+
 ### The column beside the altar
 
 On every screen but a TV the column holds three things: who is here, the

@@ -56,6 +56,7 @@
 .credits__name { font-family: var(--font-serif); font-size: 18px; }
 .credits__karma { text-align: left; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
 .credits__more { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.credits__purify { align-self: center; margin: 18px auto 0; display: block; }
 .credits__hint { margin: 16px 0 0; font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 /* On the wall it reads from across the room */
 body[data-tv="1"] .credits__card { width: min(640px, 100%); padding: 36px 40px 30px; }

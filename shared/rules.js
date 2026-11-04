@@ -16,7 +16,7 @@ export const OFFERING_KINDS = ['energy', 'noodles', 'duck', 'coffee', 'keyboard'
 export const FORTUNES = ['great', 'good', 'small', 'bad', 'terrible'];
 
 /** What each action is worth. Lighting is free; its karma comes when the stick burns down. */
-export const KARMA = { light: 0, bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20, blame: 5, omikuji: 2, bless: 2, ship: 5, broke: 0, watch: 2, unwatch: 0, feed: 3, hang: 2, unhang: 0 };
+export const KARMA = { light: 0, bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20, blame: 5, omikuji: 2, bless: 2, ship: 5, broke: 0, watch: 2, unwatch: 0, feed: 3, hang: 2, unhang: 0, purify: 5 };
 
 /**
  * A vigil is one incident. It opens with the first thing anyone does at the altar, and closes when
@@ -270,7 +270,7 @@ export function cleanScreen(raw) {
  * Its lines are in shared/kami.js.
  */
 const HOUR = 3600 * 1000;
-export const KAMI_FEEDS = new Set(['light', 'bowl', 'bow', 'offer', 'prayer', 'blame', 'omikuji']);
+export const KAMI_FEEDS = new Set(['light', 'bowl', 'bow', 'offer', 'prayer', 'blame', 'omikuji', 'purify']);
 export const KAMI_MOODS = [['pleased', 2 * HOUR], ['content', 24 * HOUR], ['peckish', 48 * HOUR], ['hungry', 96 * HOUR], ['starving', Infinity]];
 export const KAMI_HUNGRY = 48 * HOUR; // the reminder goes out once it has waited this long
 export const KAMI_STARVE = 96 * HOUR; // its protection, as a meter, runs out here
@@ -284,6 +284,21 @@ export const KAMI_THANKS_AFTER = 24 * HOUR;
  */
 export const WATCHED_MAX = 8;
 export const WATCHED_NAME_MAX = 24;
+/**
+ * Purification: after They're back, the altar is cleansed. For PURIFY_FOR after a vigil survived, and
+ * while nothing new is down, anyone may purify it, once each: KARMA.purify, and it feeds the kami. Its
+ * paper lantern hangs dark until the first purification lights it. A record closed before purifying
+ * was kept has no `purified` list, and its lantern is lit as it always was. None in the demo.
+ */
+export const PURIFY_FOR = 24 * 3600 * 1000;
+/** The record the room may purify now: the newest vigil, survived, within PURIFY_FOR, with nothing down since. Else null. */
+export function purifiable(history, vigil, now = Date.now()) {
+  const r = history?.[0];
+  return !vigil && r?.outcome === 'survived' && Array.isArray(r.purified) && now - r.endedAt < PURIFY_FOR ? r : null;
+}
+/** Whether this record's lantern hangs dark: kept since purifying was, and nobody has purified it. */
+export const unpurified = (r) => r?.outcome === 'survived' && Array.isArray(r.purified) && r.purified.length === 0;
+
 /** Whether a vigil called `title` is this service: one names the other. */
 export function guards(name, title) {
   const a = String(name ?? '').trim().toLowerCase();

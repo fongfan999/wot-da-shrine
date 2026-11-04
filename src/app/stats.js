@@ -12,6 +12,8 @@ import { checkUnlocks, opensAtLevel, withReward } from './unlocks.js';
 import { grewText, nameList, renderBoard, renderBuild } from './together.js';
 import { renderVow } from './vow.js';
 import { renderCharms } from './charms.js';
+import { purify, purifyDue } from './kami.js';
+import { unpurified } from '../../shared/rules.js';
 
 /* ---------- Stats + progress ---------- */
 export const burnBar = $('#burn-bar');
@@ -249,9 +251,14 @@ const lanternMinutes = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `
 function lanternTip(r) {
   if (!r) return t('lanternOlder');
   const vars = { title: r.title, t: lanternMinutes(r.minutes ?? 0), date: new Date(r.endedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) };
-  return fmt(r.title ? 'lanternTipTitled' : 'lanternTip', vars);
+  const tip = fmt(r.title ? 'lanternTipTitled' : 'lanternTip', vars);
+  if (unpurified(r)) return `${tip}\n${t(purifyDue() ? 'lanternDarkClick' : 'lanternDark')}`;
+  if (r.purified?.length) return `${tip}\n${fmt('lanternLitBy', { names: nameList(r.purified.map((p) => p.name), r.purifiedN ?? r.purified.length, 3) })}`;
+  return tip;
 }
 let shownLanterns = -1;
+// Clicking a dark lantern purifies the altar, for whoever may (kami.js keeps that rule).
+$('#planterns').addEventListener('click', (e) => { if (e.target.closest('.plantern[data-purify="1"]')) purify(); });
 function renderLanterns() {
   const n = records.survived;
   lanternRow.hidden = n === 0;
@@ -271,7 +278,15 @@ function renderLanterns() {
       gsap.fromTo(el, { y: -80, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, ease: 'bounce.out' });
     }
   }
-  lanternRow.querySelectorAll('.plantern').forEach((el, i) => { el.title = tips[i]; });
+  // A vigil nobody has purified yet hangs dark; the first purification lights it.
+  const recs = Array.from({ length: show }, (_, i) => survived[show - 1 - i]);
+  lanternRow.querySelectorAll('.plantern').forEach((el, i) => {
+    el.title = tips[i];
+    const dark = unpurified(recs[i]);
+    if (el.dataset.dark === '1' && !dark && !reduceMotion) gsap.fromTo(el, { scale: 1.35 }, { scale: 1, duration: 1.2, ease: 'elastic.out(1, 0.4)', transformOrigin: '50% 0%' });
+    el.dataset.dark = dark ? '1' : '';
+    el.dataset.purify = dark && purifyDue() ? '1' : '';
+  });
   lanternRow.querySelector('.plantern-row__tag').textContent = fmt('lanternsTag', { n });
   lanternRow.title = fmt(n === 1 ? 'lanternsTitleOne' : 'lanternsTitle', { n });
   lanternRow.setAttribute('aria-label', lanternRow.title);

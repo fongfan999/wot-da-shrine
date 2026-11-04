@@ -22,7 +22,7 @@ import { applyStandings, dailyFx, renderBowBadge } from './standing.js';
 import { creditsFx, nope, takeTogether, thankFx } from './together.js';
 import { vowFx } from './vow.js';
 import { charmFx } from './charms.js';
-import { fedFx, renderKami } from './kami.js';
+import { fedFx, purifyFx, renderKami } from './kami.js';
 import { kamiAct, kamiNope } from './kami.js';
 import { openShare } from './shareSheet.js';
 import { SHIPPED_FOR, layersOn, sameMix } from '../../shared/rules.js';
@@ -34,7 +34,7 @@ import { bump, logEvent, toast } from './ui.js';
 
 /* ---------- Shared shrine ---------- */
 const DEFAULT_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader'];
-const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense', bless: 'bow', ship: 'check', broke: 'fire', watch: 'lantern', unwatch: 'lantern', thank: 'bow', vow: 'lantern', hang: 'lantern', unhang: 'lantern' };
+const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense', bless: 'bow', ship: 'check', broke: 'fire', watch: 'lantern', unwatch: 'lantern', thank: 'bow', vow: 'lantern', hang: 'lantern', unhang: 'lantern', purify: 'breathe' };
 export const joinEl = $('#join');
 /** The join sheet is up and waiting: not merely fading out after you joined. */
 export const joinOpen = () => !joinEl.hidden && !joinEl.inert;
@@ -318,6 +318,10 @@ function onShrineMessage(msg) {
         records.history = [msg.record, ...records.history].slice(0, 12);
       }
       if (msg.kind === 'unresolve') records.history = records.history.filter((r) => r.endedAt !== msg.undone);
+      if (msg.kind === 'purify' && msg.purified) { // before the counters, which redraw the lanterns
+        const r = records.history.find((h) => h.endedAt === msg.purified.endedAt);
+        if (r) Object.assign(r, { purified: msg.purified.list, purifiedN: msg.purified.n });
+      }
       if (msg.blessings) records.blessings = msg.blessings;
       if (msg.watches) records.watches = msg.watches;
       if (msg.kind === 'ship') state.shippedAt = Date.now(); // before the counters, so the heading goes straight to Shipped
@@ -329,6 +333,7 @@ function onShrineMessage(msg) {
       if (msg.kind === 'light' || msg.by.id === state.myId) syncAltar(msg.litAt);
       if (msg.kind === 'watch' || msg.kind === 'unwatch') watchAct(msg); // yours too: only the shrine knows how it went
       else if (msg.kind === 'thank') thankFx(msg); // yours too: only the shrine knows whether it counted
+      else if (msg.kind === 'purify') purifyFx(msg); // yours too: the shrine says whether you lit the lantern
       else if (msg.kind === 'hang' || msg.kind === 'unhang') kamiAct(msg); // yours too: the whole room hears what the kami watches
       else if (msg.kind === 'vow') vowFx(msg);
       else if (msg.by.id !== state.myId) remoteAct(msg);
@@ -364,6 +369,7 @@ function pastLine({ kind, item, text, level, down, to }) {
   if (kind === 'resolve') return { what: t('fResolve') };
   if (kind === 'unresolve') return { what: t('fUnresolve') };
   if (kind === 'thank' && to) return { what: fmt('fThank', { name: to.name }) };
+  if (kind === 'purify') return { what: t('fPurify') };
   if (kind === 'hang' && item) return { what: fmt('fHang', { name: item }) };
   if (kind === 'unhang' && item) return { what: fmt('fUnhang', { name: item }) };
   return null;

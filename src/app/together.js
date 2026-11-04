@@ -12,6 +12,7 @@ import { $, counters, fmt, people, records, reduceMotion, roomName, state, tv } 
 import { congregation, petals } from './engines.js';
 import { hasStanding, liveStreak, myStanding, rankName } from './standing.js';
 import { logEvent, toast } from './ui.js';
+import { purify, purifyDue } from './kami.js';
 import { nameOf, opensAtLevel } from './unlocks.js';
 
 /** "Linh", "Linh and An", "Linh, An and Huy", "Linh, An and 3 more". */
@@ -204,6 +205,13 @@ export function creditsFx(record, then = null) {
     list.appendChild(li);
   }
   if (cast.n > cast.top.length) add('p', 'credits__more', fmt('andMore', { n: cast.n - cast.top.length }));
+  // Then the rite: whoever was here sweeps the altar clean, and the vigil's lantern lights.
+  if (purifyDue()) {
+    const p = add('button', 'btn btn--accent credits__purify', t('credPurify'));
+    p.type = 'button';
+    p.title = t('credPurifyTip');
+    p.addEventListener('click', (e) => { e.stopPropagation(); purify(); closeCredits(); });
+  }
   if (!tv) add('p', 'credits__hint', t(state.shrine ? 'credHintThank' : 'credHint'));
   el.appendChild(card);
   el.addEventListener('click', () => closeCredits());
@@ -262,4 +270,5 @@ export function thankFx({ by, to, gift }) {
 /** The shrine turned something down that only the sender needs to hear about. */
 export function nope({ why, name }) {
   if (why === 'thanked') toast(fmt('thankedAlready', { name }));
+  if (why === 'purified') toast(t('nopePurified'));
 }

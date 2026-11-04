@@ -26,6 +26,12 @@
 /* Bow to feed it: a chip inside the pill, the way Take the watch sits in its own */
 .kami__action { flex: none; padding: 3px 10px; border: 0; border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--note-ink); font: inherit; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color 160ms, color 160ms; }
 .kami__action:hover, .kami__action:focus-visible { background: var(--accent); color: var(--paper); outline: 0; }
+/* After a vigil the chip purifies: the ember of the rite, not the everyday accent */
+.kami__action[data-purify="1"] { background: var(--ember-soft); color: var(--ember-ink); }
+.kami__action[data-purify="1"]:hover, .kami__action[data-purify="1"]:focus-visible { background: var(--ember); color: var(--paper); }
+/* Back up, the altar not yet purified: the kami sniffs, wary */
+.kami[data-mood="unclean"] .kami__eyes--narrow { display: block; }
+.kami[data-mood="unclean"] .kami__face { fill: color-mix(in srgb, var(--flame) 14%, var(--paper-raised)); }
 /* What it watches: under the mask */
 .kami-pop { left: 0; right: auto; top: calc(100% + 8px); gap: 10px; width: min(320px, calc(100vw - 2 * var(--gutter))); }
 .kami-pop__line { margin: 0; font-family: var(--font-serif); font-style: italic; font-size: 15px; line-height: 1.4; color: var(--ink); }

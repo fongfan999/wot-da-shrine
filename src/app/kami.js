@@ -8,13 +8,13 @@
  * real hangs on it: the servers go down when they go down.
  */
 import gsap from 'gsap';
-import { KAMI_STARVE, WATCHED_MAX } from '../../shared/rules.js';
+import { KAMI_STARVE, WATCHED_MAX, devoteeKey, purifiable } from '../../shared/rules.js';
 import { kamiLine, kamiMood } from '../../shared/kami.js';
 import { sound } from '../audio/index.js';
 import { every } from '../lib/clock.js';
 import { t } from '../lib/strings.js';
-import { $, fmt, records, reduceMotion, roomName, state, tv } from './context.js';
-import { petals } from './engines.js';
+import { $, fmt, people, records, reduceMotion, roomName, state, tv } from './context.js';
+import { art, motes, petals, smoke } from './engines.js';
 import { activity } from './fx.js';
 import { ago, logEvent, toast } from './ui.js';
 
@@ -38,10 +38,27 @@ const watched = () => records.guarded ?? [];
 /** What it is pointing at: the watched service the open vigil named, if any. */
 const pointedAt = () => (state.vigil ? watched().find((o) => o.cracked)?.name ?? '' : '');
 
-/** How it feels right now: 'vigil' while something is down, else by its last meal; '' where there is none. */
+/** The vigil the room may purify now, if there is one (shared/rules.js: a day after it, nothing down since). */
+const toPurify = () => (hasKami() ? purifiable(records.history, state.vigil, serverNow()) : null);
+/** Whether you may purify it: you are kneeling here, not a wall, and you have not yet. */
+export function purifyDue() {
+  const r = toPurify();
+  const me = people.get(state.myId) ?? state.me;
+  return Boolean(r && !tv && state.shrine && me && !r.purified.some((p) => devoteeKey(p) === devoteeKey(me)));
+}
+/** Purify the altar: the shrine says how it went, to everyone (purifyFx). */
+export function purify() {
+  if (!purifyDue()) return;
+  sound.unlock();
+  state.shrine.send('purify');
+  sound.whoosh();
+}
+
+/** How it feels right now: 'vigil' while something is down, 'unclean' while the last one waits to be purified, else by its last meal; '' where there is none. */
 export function kamiMoodNow() {
   if (!hasKami() || !state.greeted) return '';
   if (state.vigil) return 'vigil';
+  if (toPurify()?.purified.length === 0) return 'unclean';
   return kamiMood(state.kami, serverNow());
 }
 
@@ -68,6 +85,10 @@ export function renderKami() {
   const left = k.fedAt && mood !== 'vigil' ? Math.max(0, 1 - (serverNow() - k.fedAt) / KAMI_STARVE) : 0;
   fillEl.style.width = `${Math.round(left * 100)}%`;
   actionBtn.hidden = tv || mood === 'vigil';
+  // The chip bows; after a vigil, until you have, it purifies the altar instead.
+  actionBtn.dataset.i18n = purifyDue() ? 'kamiPurify' : 'kamiFeed';
+  actionBtn.textContent = t(actionBtn.dataset.i18n);
+  actionBtn.dataset.purify = purifyDue() ? '1' : '';
   btn.disabled = tv;
   btn.title = `${kamiHeadline()}\n${t('kamiTip')}`;
   if (shownMood && mood !== shownMood) {
@@ -86,6 +107,7 @@ every(60000, renderKami); // "fed 3h ago" moves on, and so does its mood
 actionBtn.addEventListener('click', () => {
   if (tv) return;
   sound.unlock();
+  if (purifyDue()) { purify(); return; }
   $('#btn-bow').click(); // a bow feeds it, and counts as your morning bow when it is the first of the day
 });
 
@@ -170,10 +192,27 @@ function pointFx(o) {
   if (!reduceMotion) gsap.fromTo('.kami__mask', { x: -3 }, { x: 3, duration: 0.08, repeat: 5, yoyo: true, clearProps: 'x' });
 }
 
+/* ---------- Purified: a paper wand sweeps the altar, the smoke clears, the lantern lights ---------- */
+/** The shrine said someone purified the altar. `first`: the lantern lights now. */
+export function purifyFx({ by, first, purified }) {
+  activity();
+  const mine = by.id === state.myId;
+  logEvent({ key: `${mine ? 'me' : by.id}:purify`, avatar: by.avatar, who: mine ? t('you') : by.name, what: t('fPurify') });
+  toast(fmt(mine ? (first ? 'purifiedFirstMine' : 'purifiedMine') : first ? 'purifiedFirstBy' : 'purifiedBy', { name: by.name, n: purified?.n ?? 1 }));
+  [392, 523, 659].forEach((n, i) => gsap.delayedCall(i * 0.18, () => sound.bowl(n)));
+  petals.burst(first ? 40 : 18);
+  if (!reduceMotion) {
+    smoke.puff(1.8);
+    art.tips().forEach((tip) => motes.burst(tip.x, tip.y, 24, 1.2));
+    gsap.fromTo('.burner', { rotate: -1.5 }, { rotate: 0, duration: 1, ease: 'elastic.out(1, 0.35)', transformOrigin: '50% 100%' });
+    gsap.fromTo('.kami__mask', { scale: 1.4, rotate: 10 }, { scale: 1, rotate: 0, duration: 1, ease: 'elastic.out(1, 0.4)', transformOrigin: '50% 60%' });
+  }
+}
+
 /* ---------- Fed: the shrine says the kami ate, and whether it was worth thanks ---------- */
 /** `msg.fed` is { was, karma? }: its mood before the meal, and what the meal paid when it had waited a day or more. */
-export function fedFx({ fed, by }) {
-  if (!fed?.karma) return;
+export function fedFx({ fed, by, kind }) {
+  if (!fed?.karma || kind === 'purify') return; // purifying says so itself
   const mine = by.id === state.myId;
   const woke = fed.was === 'new';
   const vars = { name: by.name, mood: t(`kamiMood_${fed.was}`), n: fed.karma };
