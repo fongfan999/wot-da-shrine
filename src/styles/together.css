@@ -23,17 +23,17 @@
 .board__karma { min-width: 3ch; text-align: right; color: var(--ink); font-weight: 600; }
 .board__me { margin: 4px 6px 0; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
 
-/* Beside the altar the column never scrolls: the keepers go on one line, the first three by first name */
+/* Beside the altar the column never scrolls: the top three keepers, one row each. A TV, read from across
+   the room with nothing else to do, shows all five, larger. The feed above gives up the room. */
 @media (min-width: 1100px) {
-  .card--shrine .board { display: flex; align-items: center; gap: 10px; }
-  .card--shrine .board[hidden] { display: none; }
-  .card--shrine .board__label { flex: none; margin: 0; }
-  .card--shrine .board__list { flex: 1; min-width: 0; flex-direction: row; gap: 4px; overflow: hidden; }
-  .card--shrine .board__row { display: flex; flex: none; gap: 4px; padding: 1px 8px 1px 4px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); }
-  .card--shrine .board__row:nth-child(n + 4), .card--shrine .board__streak, .card--shrine .board__me { display: none; }
-  .card--shrine .board__name { font-size: 0; }
-  .card--shrine .board__name::after { content: attr(data-first); font-size: 12px; }
-  .card--shrine .board__karma { min-width: 0; }
+  .card--shrine .board__label { margin-bottom: 4px; }
+  .card--shrine .board__row { padding: 2px 6px; }
+  .card--shrine .board__row:nth-child(n + 4), .card--shrine .board__me { display: none; }
+  body[data-tv="1"] .card--shrine .board__row:nth-child(n + 4) { display: grid; }
+  body[data-tv="1"] .card--shrine .board__row { grid-template-columns: 20px 28px minmax(0, 1fr) auto auto; gap: 10px; padding: 4px 8px; font-size: 17px; }
+  body[data-tv="1"] .card--shrine .board__avatar { font-size: 1.15rem; }
+  body[data-tv="1"] .card--shrine .board__place, body[data-tv="1"] .card--shrine .board__streak { font-size: 13px; }
+  body[data-tv="1"] .card--shrine .board__karma { font-size: 15px; }
 }
 
 /* The cast: rolled over the altar when the servers come back */

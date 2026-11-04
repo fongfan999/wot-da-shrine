@@ -19,8 +19,6 @@ export function nameList(names, total = names.length, max = 3) {
   return `${shown.join(', ')} ${fmt('andMore', { n: more })}`;
 }
 
-const firstWord = (name) => name.split(' ')[0];
-
 /** The shrine sent what the room has together: keep it for the card. */
 export function takeTogether({ board, build, grew }) {
   if (board) records.board = board;
@@ -47,7 +45,6 @@ export function renderBoard() {
     const place = Object.assign(document.createElement('span'), { className: 'board__place', textContent: String(i + 1) });
     const face = Object.assign(document.createElement('span'), { className: 'board__avatar', textContent: b.avatar });
     const name = Object.assign(document.createElement('span'), { className: 'board__name', textContent: b.name });
-    name.dataset.first = firstWord(b.name);
     const karma = Object.assign(document.createElement('span'), { className: 'board__karma', textContent: String(b.karma) });
     li.append(place, face, name);
     const run = liveStreak(b);
