@@ -8,6 +8,7 @@ import { t } from '../lib/strings.js';
 import { bowFx, bowlFx, burnOut, chorusFx, ignite, puffFx, scheduleBurnOut } from './altar.js';
 import { $, body, counters, fmt, meta, people, recentPrayers, reduceMotion, roomName, roomUrl, records, state, track, tv, urlParams } from './context.js';
 import { art, congregation, wishes } from './engines.js';
+import { OFFERINGS } from '../scene/burner.js';
 import { activity } from './fx.js';
 import { offerFx } from './offerings.js';
 import { pingPerson, presence, renderPeople } from './people.js';
@@ -215,7 +216,7 @@ function onShrineMessage(msg) {
           const { kind, by = '' } = typeof o === 'string' ? { kind: o } : o;
           gsap.delayedCall(1.6 + i * 0.25, () => art.offer(kind, by));
         });
-        for (const p of msg.prayers) logEvent({ avatar: p.avatar, who: p.name, what: t('fPrayer'), quote: p.text, at: p.at });
+        replayFeed(msg.log ?? [], msg.prayers);
         for (const p of msg.prayers.slice(-6)) recentPrayers.push({ text: p.text, name: p.name });
         records.history = msg.history ?? [];
         records.longest = msg.longest ?? 0;
@@ -300,6 +301,39 @@ function onShrineMessage(msg) {
       if (msg.chorus) chorusFx(msg.chorus, msg.bonus);
       pingPerson(msg.by.id, ACT_ICONS[msg.kind]);
       break;
+  }
+}
+
+/** What a past action reads as in the feed: the same words a live one gets. */
+function pastLine({ kind, item, text, level, down }) {
+  if (kind === 'light') return { what: t(down ? 'fLightDown' : 'fLight') };
+  if (kind === 'down') return { what: t('fDown') };
+  if (kind === 'bowl') return { what: t('fBowl') };
+  if (kind === 'bow') return { what: t('fBow') };
+  if (kind === 'offer') return OFFERINGS[item] ? { what: fmt('fOffer', { item: OFFERINGS[item].label }) } : null;
+  if (kind === 'prayer') return { what: t('fPrayer'), quote: text };
+  if (kind === 'blame') return { what: t('fBlame') };
+  if (kind === 'omikuji') return { what: fmt('fOmikuji', { level: FORTUNE_LEVELS[level]?.name ?? level }) };
+  if (kind === 'resolve') return { what: t('fResolve') };
+  if (kind === 'unresolve') return { what: t('fUnresolve') };
+  return null;
+}
+
+/**
+ * Arriving late: the feed starts from what the shrine remembers, quietly (no toasts, no sounds).
+ * Rooms from before the shrine kept a log remembered only their prayers; those older than the log still show.
+ */
+function replayFeed(log, prayers) {
+  const since = log[0]?.at ?? Infinity;
+  const past = [
+    ...prayers.filter((p) => p.at < since).map((p) => ({ kind: 'prayer', by: { name: p.name, avatar: p.avatar }, text: p.text, at: p.at })),
+    ...log,
+  ];
+  for (const e of past) {
+    const line = pastLine(e);
+    if (!line) continue;
+    const mine = e.by.id && e.by.id === state.myId;
+    logEvent({ key: `${e.by.id ?? e.by.name}:${e.kind}${e.item ? `:${e.item}` : ''}`, avatar: e.by.avatar, who: mine ? t('you') : e.by.name, at: e.at - state.clockSkew, ...line });
   }
 }
 

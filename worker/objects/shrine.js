@@ -10,6 +10,8 @@ import { QUICK_PRAYERS } from '../../shared/prayers.js';
 import { AVATARS, BLESSING_BLAME, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, TRACKS, VIGIL_IDLE, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
+const MAX_LOG = 24; // the activity a late arrival reads, newest last
+const LOGGED = new Set(['light', 'down', 'bowl', 'bow', 'offer', 'prayer', 'blame', 'omikuji', 'resolve', 'unresolve']);
 const MAX_OFFERINGS = 4; // the altar table has four slots
 const FORGET_AFTER = 30 * 24 * 3600 * 1000; // rooms nobody visits for 30 days are swept
 const TOUCH_EVERY = 24 * 3600 * 1000; // pushing the sweep back once a day is plenty, and saves a write per action
@@ -47,7 +49,7 @@ const OPENS_VIGIL = new Set(['light', 'bowl', 'bow', 'offer', 'prayer', 'puff', 
 /** What the vigil counts of each action. */
 const VIGIL_FIELD = { light: 'lights', prayer: 'prayers', blame: 'blames', omikuji: 'fortunes' };
 const EMPTY = {
-  incense: 0, karma: 0, litAt: 0, offerings: [], prayers: [],
+  incense: 0, karma: 0, litAt: 0, offerings: [], prayers: [], log: [],
   since: 0, prayed: 0, resolved: 0, resolvedAt: 0,
   meta: { title: '', subtitle: '', eta: '', track: '' }, // what's down and when it's back, shared by the whole room
   vigil: null, history: [], survived: 0, longest: 0,
@@ -135,6 +137,7 @@ export class Shrine extends DurableObject {
       ...this.counters(),
       offerings: this.state.offerings,
       prayers: this.state.prayers,
+      log: this.state.log ?? [],
       meta: this.state.meta,
       history: this.state.history,
       longest: this.state.longest,
@@ -230,6 +233,7 @@ export class Shrine extends DurableObject {
         this.broadcast({ t: 'meta', meta, by });
         if (named) {
           this.openVigil();
+          this.remember({ kind: 'down', by });
           this.broadcast({ t: 'act', kind: 'down', by, ...this.blame(), ...this.counters() });
         }
         await this.save();
@@ -361,6 +365,7 @@ export class Shrine extends DurableObject {
       s.vigil.karma += (KARMA[msg.t] ?? 0) + (out.bonus ?? 0);
       s.vigil.peak = Math.max(s.vigil.peak, this.people().length);
     }
+    this.remember(out);
     this.broadcast({ ...out, ...this.blame(), ...this.counters() });
     const fresh = !this.stored;
     await this.save();
@@ -621,6 +626,13 @@ export class Shrine extends DurableObject {
     s.litAt = 0;
     s.karma += KARMA.burnout;
     return true;
+  }
+
+  /** Keep an action for whoever arrives later: their activity feed starts from these. */
+  remember({ kind, by, item, text, level, down }) {
+    if (!LOGGED.has(kind)) return;
+    const entry = { kind, by: { id: by.id, name: by.name, avatar: by.avatar }, at: Date.now(), item, text, level, down };
+    this.state.log = [...(this.state.log ?? []), entry].slice(-MAX_LOG);
   }
 
   broadcast(msg, except) {
