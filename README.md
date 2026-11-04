@@ -121,6 +121,22 @@ reads it out in its quiet heading, **Copy the forecast** puts it in the team
 channel with the link, and the omens before a deploy count a storm against it
 and clear skies for it. Nothing real is in it. It lives in `shared/forecast.js`.
 
+### What the shrine believes
+
+The This shrine sheet ends with up to three superstitions the shrine has drawn
+from its own last dozen vigils and deploys: "3 of your last 4 incidents
+started on a Tuesday. The kami suggests skipping Tuesdays." Each is a real
+count, read the way a team reads its incidents at 2 am. They cover when it went
+down (the weekday, the part of the day, by the reader's clock), how long it
+took against the prayers, burned blames and drawn fortunes, who held the watch
+or said it first, how long the kami had gone unfed (each vigil now records
+that), and the deploys that broke (against the omens, on what day, with how few
+bows). A belief is only held when the history backs it: at least three
+incidents, most of them agreeing, and one belief of each kind so three lines
+never say one thing three ways. A younger shrine says how many incidents it
+has so far. A TV shows the strongest one. The rules are
+`shared/superstitions.js`.
+
 ### The column beside the altar
 
 On every screen but a TV the column holds three things: who is here, the
@@ -618,6 +634,7 @@ src/app/                 the shrine
   cast.js, screen.js     Cast to TV, and the TV's own screens
   quiet.js               nothing down: the days without an incident, and the TV's sound mix
   kami.js                the kami's mask, meter and line under the heading, and what it watches
+  beliefs.js             what the shrine believes, in the This shrine sheet
   vigilStart.js          saying something is down: the button, the question on lighting
   etaPicker.js           the Back at picker, in the heading and the builder
   openShrine.js          name fields and the Open sheet

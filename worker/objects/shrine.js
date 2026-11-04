@@ -941,6 +941,7 @@ export class Shrine extends DurableObject {
     const now = Date.now();
     s.vigil = { startedAt: now, lastAt: now, seenAt: now, peak: this.people().length, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0, cast: {} };
     if (by?.name) s.vigil.opened = { name: by.name, avatar: by.avatar }; // who said it first: a person, or the alerting
+    if (!this.demo) s.vigil.unfed = s.kami.fedAt ? Math.floor((now - s.kami.fedAt) / 3600000) : -1; // hours since the kami last ate (-1: never), for the superstitions
     s.undo = null;
     // On someone's watch: the vigil remembers whose, and their watch is no longer quiet.
     if (s.watch) { s.watch.vigils += 1; s.vigil.watch = s.watch.name; }
@@ -1059,6 +1060,7 @@ export class Shrine extends DurableObject {
     };
     if (outcome === 'survived' && !this.demo) record.purified = []; // its lantern hangs dark until someone purifies the altar
     if (v.watch) record.watch = v.watch; // whose watch it was
+    if (v.unfed !== undefined) record.unfed = v.unfed; // how long the kami had gone unfed when it went down
     if (v.cracked?.length) record.cracked = v.cracked; // what the kami pointed at
     for (const o of s.guarded) o.cracked = 0; // it stops pointing once the vigil is over
     if (v.alert) record.alert = v.alert; // which alerting system raised it

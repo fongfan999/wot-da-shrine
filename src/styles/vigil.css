@@ -90,6 +90,15 @@ body[data-resolved="1"] .vigil__time { font-size: 22px; letter-spacing: 0; color
 .records__empty { margin: 0; font-size: 13px; color: var(--muted); }
 .records:not(:empty) + .records__empty { display: none; }
 
+/* What the shrine believes: its superstitions, as sentences in the shrine's hand */
+.beliefs { padding-top: 12px; border-top: 1px solid var(--sheet-line); }
+.beliefs__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.beliefs__list:empty { display: none; }
+.beliefs__item { position: relative; padding-left: 18px; font-family: var(--font-serif); font-style: italic; font-size: 15px; line-height: 1.4; color: var(--ink); text-wrap: pretty; }
+.beliefs__item::before { content: "🦊"; position: absolute; left: 0; top: .1em; font-size: 11px; font-style: normal; }
+.beliefs__empty { margin: 0; font-size: 13px; color: var(--muted); }
+.beliefs__fine { margin: 8px 0 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: .02em; color: var(--muted); }
+
 /* Paper lanterns above the altar: one per vigil survived, hung from a string only as long as they are */
 .plantern-row { position: absolute; right: 2%; top: 1%; z-index: 1; display: flex; align-items: flex-start; gap: 10px; padding: 0 6px 0 0; pointer-events: none; }
 .plantern-row::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; border-top: 1.5px solid var(--ink); opacity: .45; } /* the string */

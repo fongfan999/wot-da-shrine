@@ -131,6 +131,9 @@ body[data-tv="1"] .shrine-sum__chev { display: none; }
   .card--shrine .records li + li { display: none; }
   .card--shrine .records li { padding-bottom: 0; border-top: 0; }
   .card--shrine .records__empty { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* On the TV the column keeps the strongest belief, without the fine print */
+  .card--shrine .beliefs { padding-top: 10px; }
+  .card--shrine .beliefs > .label, .card--shrine .beliefs__fine, .card--shrine .beliefs__item + .beliefs__item { display: none; }
   /* The credit: who made it and where the code is, without the tagline */
   .side > .credit { flex: none; }
   .side > .credit > .hide-sm, .side > .credit [data-i18n="madeBy"] { display: none; }

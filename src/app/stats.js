@@ -12,6 +12,7 @@ import { checkUnlocks, opensAtLevel, withReward } from './unlocks.js';
 import { grewText, nameList, renderBoard, renderBuild } from './together.js';
 import { renderVow } from './vow.js';
 import { renderCharms } from './charms.js';
+import { renderBeliefs } from './beliefs.js';
 import { purify, purifyDue } from './kami.js';
 import { unpurified } from '../../shared/rules.js';
 
@@ -240,6 +241,7 @@ export function renderRecords() {
     recordsList.appendChild(li);
   }
   renderLanterns();
+  renderBeliefs();
 }
 
 /** Paper lanterns above the altar: one for every vigil survived, hung from a string as long as they need. */
