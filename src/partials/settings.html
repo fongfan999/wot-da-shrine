@@ -192,3 +192,18 @@
   </div>
 </aside>
 <div class="panel-backdrop" id="panel-backdrop"></div>
+
+<!-- Something the shrine opened: a sound or a scene, with a button to try it (UNLOCKS in shared/rules.js). Live, or new since this browser was last here. -->
+<div class="unlock-card" id="unlock-card" hidden role="status" aria-live="polite">
+  <span class="unlock-card__icon" aria-hidden="true">🔓</span>
+  <span class="unlock-card__text"><small id="unlock-card-kind"></small><b id="unlock-card-name"></b></span>
+  <span class="unlock-card__actions" id="unlock-card-actions"></span>
+  <button class="icon-btn unlock-card__close" id="unlock-card-close" type="button" aria-label="Not now">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+</div>
+<!-- The same moment on a TV, read from across the room -->
+<div class="tv-unlock" id="tv-unlock" hidden role="status">
+  <span class="tv-unlock__icon" aria-hidden="true">🔓</span>
+  <span class="tv-unlock__text"><small data-i18n="tvUnlocked">The shrine opened</small><b id="tv-unlock-name"></b></span>
+</div>

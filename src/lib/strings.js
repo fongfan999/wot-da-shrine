@@ -546,6 +546,19 @@ export const STRINGS = {
   sceneChanged: '{name} changed the scene: {scene}',
   unlocksNext: 'Next to open: {name}. {how}.',
   unlocksAll: 'Every sound and scene is open.',
+  opensWith: '{text} · opens {name}', // a progress line, and what reaching it brings
+  charmOpens: 'Opens the {name} scene',
+  rewardLevel: 'Opens {name}: {hint}', // under the bar to the next level
+  rewardCharm: '{charm} opens the {name} scene', // under the charm shelf
+  unlockNewSound: 'New sound',
+  unlockNewScene: 'New scene',
+  unlockSince: 'New since you were last here',
+  unlockPlay: 'Play it',
+  unlockShow: 'Show it',
+  unlockTried: 'The whole shrine hears {name} now. Change the mix in Customize.',
+  unlockShown: 'The whole shrine sees {name} now.',
+  unlockDismiss: 'Not now',
+  tvUnlocked: 'The shrine opened',
   mixNow: 'Now: {mix}.',
   mixSilent: 'silence',
   trackShared: 'Everyone in the shrine hears this mix, the TV too.',

@@ -12,6 +12,7 @@ import { $, fmt, records, reduceMotion, state, tv } from './context.js';
 import { petals } from './engines.js';
 import { openRitual } from './rituals.js';
 import { logEvent, shockwave, toast } from './ui.js';
+import { nameOf, opensWithCharm } from './unlocks.js';
 
 const shelf = $('#charms');
 const row = $('#charms-row');
@@ -59,6 +60,11 @@ export function renderCharms() {
   count.textContent = fmt('charmsCount', { n: ids.length, of: CHARMS.length });
   const c = closest();
   next.textContent = c ? fmt('charmsNext', { name: t(`charm_${c.id}`), p: c.of > 1 ? progressText(c) : t(`charmHow_${c.id}`).toLowerCase() }) : t('charmsAll');
+  // What the next charm brings, on a line of its own under the shelf, when it brings a scene.
+  const opens = c ? opensWithCharm(c.id) : [];
+  const reward = $('#charms-reward');
+  reward.hidden = !opens.length;
+  reward.textContent = opens.length ? fmt('rewardCharm', { charm: t(`charm_${c.id}`), name: opens.map(nameOf).join(' & ') }) : '';
   if (!row.children.length) row.replaceChildren(...CHARMS.map((ch) => pouch(ch)));
   for (const el of row.children) {
     const ch = CHARMS.find((x) => x.id === el.dataset.id);
@@ -67,7 +73,7 @@ export function renderCharms() {
     el.title = `${t(`charm_${ch.id}`)}: ${on ? t(`charmHow_${ch.id}`) : `${t(`charmHow_${ch.id}`)} (${ch.of > 1 ? progressText(ch) : t('charmLocked')})`}`;
     if (on && shown && !shown.has(el.dataset.id) && !reduceMotion) gsap.fromTo(el, { y: -18, scale: 1.6, rotate: -12 }, { y: 0, scale: 1, rotate: 0, duration: 1, ease: 'bounce.out' });
   }
-  shelf.setAttribute('aria-label', `${t('charmsLabel')}: ${count.textContent}. ${next.textContent}`);
+  shelf.setAttribute('aria-label', `${t('charmsLabel')}: ${count.textContent}. ${next.textContent}${reward.hidden ? '' : `. ${reward.textContent}`}`);
   shelf.disabled = tv; // a wall has no hands to open the sheet
   shown = new Set(ids);
   if (!sheet.hidden) renderSheet();
@@ -85,6 +91,8 @@ function renderSheet() {
     li.dataset.on = on ? '1' : '';
     const name = Object.assign(document.createElement('b'), { className: 'charm-card__name', textContent: t(`charm_${c.id}`) });
     const how = Object.assign(document.createElement('span'), { className: 'charm-card__how', textContent: t(`charmHow_${c.id}`) });
+    const opens = opensWithCharm(c.id);
+    if (opens.length) how.append(Object.assign(document.createElement('span'), { className: 'charm-card__opens', textContent: fmt('charmOpens', { name: opens.map(nameOf).join(' & ') }) }));
     const st = document.createElement('span');
     st.className = 'charm-card__state';
     if (on) st.textContent = have[c.id] ? fmt('charmEarned', { date: day(have[c.id]) }) : t('charmEarnedOld');

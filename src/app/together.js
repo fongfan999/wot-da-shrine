@@ -12,6 +12,7 @@ import { $, counters, fmt, people, records, reduceMotion, roomName, state, tv } 
 import { congregation, petals } from './engines.js';
 import { hasStanding, liveStreak, myStanding, rankName } from './standing.js';
 import { logEvent, toast } from './ui.js';
+import { nameOf, opensAtLevel } from './unlocks.js';
 
 /** "Linh", "Linh and An", "Linh, An and Huy", "Linh, An and 3 more". */
 export function nameList(names, total = names.length, max = 3) {
@@ -115,6 +116,11 @@ export function renderBuild() {
   const faces = b.shares.slice(0, 4).map((s) => s.avatar).join('');
   if (faces) buildWhat.append(Object.assign(document.createElement('span'), { className: 'build__faces', textContent: faces }));
   buildLeft.textContent = fmt('buildLeft', { n: Math.max(0, next[0] - counters.karma) });
+  // What growing brings, on a line of its own so neither it nor the level's name is cut short.
+  const opens = opensAtLevel(b.level + 1);
+  const reward = $('#build-reward');
+  reward.hidden = !opens.length;
+  reward.textContent = opens.map((id) => fmt('rewardLevel', { name: nameOf(id), hint: t(`layerHint_${id}`).toLowerCase() })).join(' · ');
   buildEl.title = b.shares.length ? fmt('buildBy', { name: next[1], names: nameList(b.shares.map((s) => s.name), b.shares.length + (b.rest ? 1 : 0)) }) : '';
 }
 

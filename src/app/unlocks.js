@@ -10,6 +10,7 @@ import { syncPalette } from '../scene/palette.js';
 import { $, body, counters, fmt, records, roomName, state, tv } from './context.js';
 import { petals } from './engines.js';
 import { logEvent, toast } from './ui.js';
+import { sound } from '../audio/index.js';
 
 /** The level the shrine stands at: as grown to (a shrine never shrinks), or as its karma says, whichever is higher. */
 export const shrineAt = () => (roomName && roomName !== 'demo' ? Math.max(records.build?.level ?? 0, levelOf(counters.karma)) : 0);
@@ -56,23 +57,107 @@ export function applyScene() {
   syncPalette();
 }
 
-/* ---------- The moment something opens: everyone hears it, once ---------- */
-let known = null; // what was open when the shrine last said where it stands
+/** What reaching a level, or earning a charm, opens: the ids, in UNLOCKS order. */
+export const opensAtLevel = (lv) => Object.keys(UNLOCKS).filter((id) => UNLOCKS[id].level === lv);
+export const opensWithCharm = (charm) => Object.keys(UNLOCKS).filter((id) => UNLOCKS[id].charm === charm);
+/** A progress line with what it brings: "120 karma to go · opens Koto"; the line alone when it brings nothing. */
+export const withReward = (text, ids) => (ids.length ? fmt('opensWith', { text, name: ids.map(nameOf).join(' & ') }) : text);
+
+/* ---------- The moment something opens: everyone in the shrine hears it, and whoever comes back later sees it ---------- */
+const SEEN_KEY = `incense:opened:v1:${roomName}`;
+function loadSeen() {
+  try {
+    const v = JSON.parse(localStorage.getItem(SEEN_KEY));
+    return Array.isArray(v) ? new Set(v) : null;
+  } catch { return null; }
+}
+function saveSeen(set) {
+  try { localStorage.setItem(SEEN_KEY, JSON.stringify([...set])); } catch { /* private window: it is only news once */ }
+}
+
+let known = null; // what this browser knows is open here
 const listeners = new Set();
 /** Run `fn` whenever the shrine says where it stands: what is open, and how far the rest are, may have moved. */
 export const onUnlocks = (fn) => listeners.add(fn);
+let tryIt = null;
+/** What Play it and Show it do: settings.js puts the layer in the room's mix, or the scene on. */
+export const onTry = (fn) => { tryIt = fn; };
+/** Whether this page may change what the room plays and shows: a shrine, not a TV, not the demo. */
+const canTry = () => Boolean(roomName) && !tv && roomName !== 'demo';
+
 export function checkUnlocks() {
   listeners.forEach((fn) => fn());
-  if (!roomName || roomName === 'demo' || !state.greeted) return;
+  // Only once the shrine has said where it stands, its charms with it: before that a charm's scene would look new.
+  if (!roomName || roomName === 'demo' || !state.greeted || !records.charms) return;
   const now = openedBy(shrineAt(), charmsHeld());
-  if (!known) { known = new Set(now); return; } // what it had when we came in is not news
+  if (!known) {
+    const seen = loadSeen();
+    known = new Set(now);
+    saveSeen(known);
+    // The first visit has nothing new in it; a return shows what opened while this browser was away.
+    const missed = seen ? now.filter((id) => !seen.has(id)) : [];
+    if (missed.length && !tv) gsap.delayedCall(2.5, () => showCard(missed, true));
+    return;
+  }
   const fresh = now.filter((id) => !known.has(id));
-  known = new Set(now);
+  if (!fresh.length) return;
+  fresh.forEach((id) => known.add(id));
+  saveSeen(known);
   // after the grow or charm toast has had its say
-  fresh.forEach((id, i) => gsap.delayedCall(3.4 + i * 3, () => {
-    const name = nameOf(id);
-    logEvent({ avatar: '🔓', what: fmt('fUnlock', { name }), quiet: true });
-    if (!tv) toast(fmt(kindOf(id) === 'scene' ? 'unlockScene' : 'unlockSound', { name }));
-    for (const id of ['#btn-more', '#btn-settings']) $(id)?.setAttribute('data-new', '1'); // a dot until Customize is opened
-  }));
+  gsap.delayedCall(3.4, () => {
+    for (const id of fresh) logEvent({ avatar: '🔓', what: fmt('fUnlock', { name: nameOf(id) }), quiet: true });
+    if (tv) tvCard(fresh);
+    else showCard(fresh, false);
+  });
+}
+
+/* ---------- The card: what opened, and a button to try it now ---------- */
+const card = $('#unlock-card');
+let cardTl = null;
+function hideCard() {
+  if (card.hidden) return;
+  cardTl?.kill();
+  cardTl = gsap.to(card, { opacity: 0, y: -10, duration: 0.3, ease: 'power2.in', onComplete: () => { card.hidden = true; } });
+}
+function showCard(ids, since) {
+  const scenes = ids.every((id) => kindOf(id) === 'scene');
+  $('#unlock-card-kind').textContent = t(since ? 'unlockSince' : scenes ? 'unlockNewScene' : 'unlockNewSound');
+  $('#unlock-card-name').textContent = ids.map(nameOf).join(' · ');
+  // One button for each, by name when there are several; none where the room's sound and scene can't be changed.
+  const actions = canTry() ? ids.slice(0, 3).map((id) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn btn--accent btn--sm';
+    const verb = t(kindOf(id) === 'scene' ? 'unlockShow' : 'unlockPlay');
+    b.textContent = ids.length > 1 ? `${verb}: ${nameOf(id)}` : verb;
+    b.addEventListener('click', () => {
+      tryIt?.(id);
+      toast(fmt(kindOf(id) === 'scene' ? 'unlockShown' : 'unlockTried', { name: nameOf(id) }));
+      if (ids.length === 1) hideCard();
+      else b.remove();
+    });
+    return b;
+  }) : [];
+  $('#unlock-card-actions').replaceChildren(...actions);
+  for (const id of ['#btn-more', '#btn-settings']) $(id)?.setAttribute('data-new', '1'); // a dot until Customize is opened
+  card.hidden = false;
+  cardTl?.kill();
+  cardTl = gsap.timeline()
+    .fromTo(card, { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.5, ease: 'back.out(1.6)' })
+    .call(() => { if (!card.matches(':hover, :focus-within')) hideCard(); }, null, '+=12');
+  [523, 659, 784].forEach((n, k) => gsap.delayedCall(k * 0.12, () => sound.bowl(n)));
+}
+$('#unlock-card-close').addEventListener('click', hideCard);
+card.addEventListener('mouseleave', () => { if (cardTl && !cardTl.isActive()) hideCard(); });
+
+/* ---------- On the TV: the same moment, big enough to read from across the room ---------- */
+function tvCard(ids) {
+  const el = $('#tv-unlock');
+  $('#tv-unlock-name').textContent = ids.map(nameOf).join(' · ');
+  el.hidden = false;
+  gsap.killTweensOf(el);
+  gsap.timeline()
+    .fromTo(el, { opacity: 0, y: -24, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'back.out(1.8)' })
+    .to(el, { opacity: 0, y: -12, duration: 0.5, delay: 7, onComplete: () => { el.hidden = true; } });
+  [392, 523, 659, 784].forEach((n, k) => gsap.delayedCall(k * 0.18, () => sound.bowl(n)));
 }

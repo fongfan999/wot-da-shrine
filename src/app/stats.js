@@ -8,7 +8,7 @@ import { art, burner, kick, petals } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';
 import { every } from '../lib/clock.js';
 import { hasStanding, myStanding, rankOf, roomMornings } from './standing.js';
-import { checkUnlocks } from './unlocks.js';
+import { checkUnlocks, opensAtLevel, withReward } from './unlocks.js';
 import { grewText, nameList, renderBoard, renderBuild } from './together.js';
 import { renderVow } from './vow.js';
 import { renderCharms } from './charms.js';
@@ -208,7 +208,7 @@ export function renderRecords() {
   const [, name] = STRINGS.shrineLevels[i];
   $('#records-level').textContent = name;
   const up = STRINGS.shrineLevels[i + 1];
-  $('#records-level').title = up ? fmt('shrineNext', { n: up[0] - counters.karma, name: up[1] }) : name;
+  $('#records-level').title = up ? withReward(fmt('shrineNext', { n: up[0] - counters.karma, name: up[1] }), opensAtLevel(i + 1)) : name;
   updateRank(true); // its bar tracks the shrine's next level
   burner.dataset.level = String(i);
   updateTablet();

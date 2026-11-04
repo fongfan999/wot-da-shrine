@@ -207,3 +207,43 @@
   background: var(--ember);
   box-shadow: 0 0 0 2px var(--paper);
 }
+
+/* Something opened: a card under the bar, with a button to try it. It stays while the pointer or focus is on it. */
+.unlock-card {
+  position: fixed;
+  z-index: 52;
+  top: calc(var(--bar-h, 70px) + 12px);
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 10px 8px 10px 16px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-float);
+}
+.unlock-card[hidden] { display: none; }
+.unlock-card__icon { font-size: 22px; }
+.unlock-card__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.unlock-card__text small { font: 600 11px/1.2 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ember-ink); }
+.unlock-card__text b { font-size: 15px; font-weight: 600; color: var(--ink); }
+.unlock-card__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.unlock-card__actions:empty { display: none; }
+.unlock-card__close { flex: none; }
+@media (max-width: 560px) {
+  .unlock-card { flex-wrap: wrap; width: calc(100vw - 32px); }
+  .unlock-card__text { flex: 1; }
+  .unlock-card__actions { order: 3; width: 100%; padding-right: 8px; }
+}
+
+/* The same moment on a TV: the arrival card's look, read from across the room */
+.tv-unlock { position: fixed; z-index: 55; top: calc(var(--bar-h, 70px) + 18px); left: 50%; translate: -50% 0; display: flex; align-items: center; gap: 18px; padding: 14px 28px 14px 20px; border: 1px solid var(--ink); border-radius: var(--radius-pill); background: var(--paper-raised); box-shadow: var(--shadow-float); white-space: nowrap; }
+.tv-unlock[hidden] { display: none; }
+.tv-unlock__icon { font-size: 32px; }
+.tv-unlock__text { display: flex; flex-direction: column; gap: 2px; }
+.tv-unlock__text small { font: 600 14px/1.2 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ember-ink); }
+.tv-unlock__text b { font-size: 28px; font-weight: 600; }

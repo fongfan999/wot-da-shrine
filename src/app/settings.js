@@ -13,7 +13,7 @@ import { copyText, toast } from './ui.js';
 import { quietHeading } from './quiet.js';
 import { blessingHeading } from './deploy.js';
 import { cleanScreen } from '../../shared/rules.js';
-import { applyScene, howToOpen, nameOf, nextToOpen, onUnlocks, opened, playable, scene } from './unlocks.js';
+import { applyScene, howToOpen, nameOf, nextToOpen, onTry, onUnlocks, opened, playable, scene } from './unlocks.js';
 
 /** The stock headline a shrine gets until someone names what is down: picked from its name, so everyone in it reads the same one. */
 function headlineFor(room) {
@@ -276,6 +276,14 @@ onUnlocks(() => {
   sound.setMix(playable(mix()));
   renderMixer();
   renderScenes();
+});
+// Play it, from the card when something opens: the layer joins the room's mix at a level it can be heard; Show it puts the scene on.
+onTry((id) => {
+  sound.unlock();
+  if (LAYERS.includes(id)) {
+    const m = playable(mix());
+    if (!(m[id] >= 40)) setSetting('mix', { ...m, [id]: 60 });
+  } else pickScene(id);
 });
 scenePick.addEventListener('click', (e) => {
   const b = e.target.closest('[data-scene]');

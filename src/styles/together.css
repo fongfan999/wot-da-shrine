@@ -146,3 +146,9 @@ body[data-tv="1"] .credits__role dd { font-size: 20px; }
 .charm-card[data-on="1"] .charm-card__state { color: var(--live); }
 .charm-card__meter { display: block; height: 3px; margin-top: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
 .charm-card__meter > span { display: block; height: 100%; background: var(--accent); }
+/* What earning a charm opens, under how to earn it */
+.charm-card__opens { display: block; margin-top: 2px; color: var(--ember-ink); }
+/* What the next level or charm opens: its own quiet line, a lock before it, so nothing on the line above is cut short */
+.reward { display: flex; align-items: baseline; gap: 6px; margin: 6px 0 0; font-size: 12px; line-height: 1.35; color: var(--muted); text-align: left; }
+.reward::before { content: "🔒"; flex: none; font-size: 10px; }
+.reward[hidden] { display: none; }
