@@ -55,7 +55,7 @@ export function applySettings(animate = false) {
   subtitleField.value = meta('subtitle');
   titleField.placeholder = roomName ? t('title') : '';
   subtitleField.placeholder = roomName ? subtitleShown() : '';
-  $('#panel-shrine').hidden = !metaEditable();
+  renderTabs();
   for (const k of ['music', 'sfx', 'petals', 'fog']) panel.querySelector(`[name=${k}]`).checked = settings[k];
   $('#theme-seg').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.theme === settings.theme)));
   const sc = screen();
@@ -112,6 +112,39 @@ export function openPanel(open) {
   gsap.to(panel, { x: open ? '0%' : '100%', duration: 0.5, ease: open ? 'power3.out' : 'power3.in' });
   if (open) sound.tick(660, 0.06);
 }
+/* Tabs: the shrine's settings, the TV's, yours. Only yours where the shrine can't be changed (the home page, the demo, a TV). */
+const tabs = [...panel.querySelectorAll('[role=tab]')];
+let tab = 'shrine';
+function renderTabs() {
+  const all = metaEditable();
+  $('#panel-tabs').hidden = !all;
+  const shown = all ? tab : 'you';
+  for (const b of tabs) {
+    const on = b.dataset.tab === shown;
+    b.setAttribute('aria-selected', String(on));
+    b.tabIndex = on ? 0 : -1;
+    $(`#${b.getAttribute('aria-controls')}`).hidden = !on;
+  }
+}
+function selectTab(name, focus = false) {
+  if (name === tab) return;
+  tab = name;
+  renderTabs();
+  panel.scrollTop = 0;
+  if (focus) tabs.find((b) => b.dataset.tab === name).focus();
+  sound.tick(700, 0.05);
+}
+$('#panel-tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('[role=tab]');
+  if (b) selectTab(b.dataset.tab);
+});
+$('#panel-tabs').addEventListener('keydown', (e) => {
+  const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+  if (!step) return;
+  e.preventDefault();
+  const i = tabs.findIndex((b) => b.dataset.tab === tab);
+  selectTab(tabs[(i + step + tabs.length) % tabs.length].dataset.tab, true);
+});
 $('#btn-settings').addEventListener('click', () => { sound.unlock(); openPanel(!panelOpen); });
 $('#btn-close-panel').addEventListener('click', () => openPanel(false));
 backdrop.addEventListener('click', () => openPanel(false));

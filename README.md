@@ -28,7 +28,9 @@ shrine.
 - There is no solo page: praying alone is a shrine with one person in it.
   For planned downtime the landing page's builder makes a shrine of its own,
   `/r/<slug>?title=…&eta=…`, whose first visit gives the room that title and
-  time. On the home page Customize is preferences only.
+  time. Customize has three tabs: This shrine (title, subtitle, sound, alerts),
+  On the TV (how every screen showing the shrine looks and sounds) and Just for
+  you (this browser). On the home page, the demo and a TV it is the last only.
 - `/r/demo` is the public demo shrine, streamed onto the landing page in TV
   mode. Names there come from a list, only the ready-made prayers are
   accepted and the title is fixed, so it stays fit for a wall.
@@ -259,7 +261,7 @@ The shrine is built to travel from one incident channel to the next:
   roof, drops close by, thunder far away), White noise (soft and wide, for deep
   work), Spa (water in a stone basin, wooden chimes, a singing bowl) and Garden
   (birds, crickets, a frog, an owl, a dog far away). Presets are a few mixes
-  with names: Vigil, Focus, Chant, Rain, Spa, Garden. Every slider to zero is
+  with names: Vigil, Focus, Temple, Monsoon, Onsen, Dusk. Every slider to zero is
   silence. A layer only runs while its slider is up, nothing is recorded, and
   mixing opens no vigil; the room hears who put what on.
 - **Customizable**: title, subtitle, "back at" time, sound, theme, toggles for

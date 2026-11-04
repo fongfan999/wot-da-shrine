@@ -6,28 +6,34 @@
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div>
+  <!-- Three scopes, one at a time: the shrine's (everyone), the TV's (every screen), yours (this browser). Tabs show only where the shrine can be changed. -->
+  <div class="panel__tabs" id="panel-tabs" role="tablist" aria-label="Settings for" hidden>
+    <button type="button" role="tab" id="tab-shrine" data-tab="shrine" aria-controls="panel-shrine" aria-selected="true" data-i18n="panelShrine">This shrine</button>
+    <button type="button" role="tab" id="tab-tv" data-tab="tv" aria-controls="panel-tv" aria-selected="false" tabindex="-1" data-i18n="fScreen">On the TV</button>
+    <button type="button" role="tab" id="tab-you" data-tab="you" aria-controls="panel-you" aria-selected="false" tabindex="-1" data-i18n="panelYou">Just for you</button>
+  </div>
   <div class="panel__body">
-    <!-- What everyone in the shrine sees; hidden where it can't be changed (the home page, the demo, a TV) -->
-    <section class="panel__group" id="panel-shrine" aria-labelledby="panel-shrine-h" hidden>
-      <h3 class="panel__group-head" id="panel-shrine-h"><span data-i18n="panelShrine">This shrine</span> <small data-i18n="panelShrineNote">everyone sees these</small></h3>
+    <!-- What everyone in the shrine sees -->
+    <section class="panel__group" id="panel-shrine" role="tabpanel" aria-labelledby="tab-shrine" hidden>
+      <p class="panel__scope" data-i18n="panelShrineNote">Everyone in the shrine sees these.</p>
       <label class="field">
-        <span data-i18n="fTitle">Title</span>
+        <span class="field__label" data-i18n="fTitle">Title</span>
         <input type="text" name="title" maxlength="60" />
       </label>
       <label class="field">
-        <span data-i18n="fSubtitle">Subtitle</span>
+        <span class="field__label" data-i18n="fSubtitle">Subtitle</span>
         <input type="text" name="subtitle" maxlength="140" />
       </label>
       <!-- The sound: a mix of six synthesized layers, the whole room's. Presets are a few mixes with names. -->
       <div class="field mixer" id="mixer">
-        <span data-i18n="fTrack">Sound</span>
+        <span class="field__label" data-i18n="fTrack">Sound</span>
         <div class="mixer__presets" id="mix-presets" role="group" aria-label="Presets">
-          <button class="btn btn--glass btn--sm" type="button" data-preset="vigil" aria-pressed="true" data-i18n="track_vigil">Vigil</button>
-          <button class="btn btn--glass btn--sm" type="button" data-preset="focus" aria-pressed="false" data-i18n="track_focus">Focus</button>
-          <button class="btn btn--glass btn--sm" type="button" data-preset="chant" aria-pressed="false" data-i18n="track_chant">Chant</button>
-          <button class="btn btn--glass btn--sm" type="button" data-preset="rain" aria-pressed="false" data-i18n="track_rain">Rain</button>
-          <button class="btn btn--glass btn--sm" type="button" data-preset="spa" aria-pressed="false" data-i18n="track_spa">Spa</button>
-          <button class="btn btn--glass btn--sm" type="button" data-preset="garden" aria-pressed="false" data-i18n="track_garden">Garden</button>
+          <button class="chip" type="button" data-preset="vigil" aria-pressed="true" data-i18n="track_vigil">Vigil</button>
+          <button class="chip" type="button" data-preset="focus" aria-pressed="false" data-i18n="track_focus">Focus</button>
+          <button class="chip" type="button" data-preset="chant" aria-pressed="false" data-i18n="track_chant">Temple</button>
+          <button class="chip" type="button" data-preset="rain" aria-pressed="false" data-i18n="track_rain">Monsoon</button>
+          <button class="chip" type="button" data-preset="spa" aria-pressed="false" data-i18n="track_spa">Onsen</button>
+          <button class="chip" type="button" data-preset="garden" aria-pressed="false" data-i18n="track_garden">Dusk</button>
         </div>
         <div class="mixer__layers" id="mix-layers">
           <label class="mixer__layer" data-layer="sacred" data-on="1">
@@ -57,33 +63,9 @@
         </div>
         <p class="field__note" id="mix-note"></p>
       </div>
-      <!-- Every TV showing this shrine: nobody has a keyboard on the wall, so the room sets it -->
-      <div class="field screen-set" id="screen-set">
-        <span data-i18n="fScreen">On the TV</span>
-        <p class="field__note" data-i18n="screenNote">Every screen showing this shrine follows these, live. Your own settings below stay yours.</p>
-        <div class="screen-set__row">
-          <span class="screen-set__label" data-i18n="fTheme">Theme</span>
-          <div class="seg" id="screen-theme" role="radiogroup" aria-label="TV theme">
-            <button type="button" role="radio" data-screen-theme="auto" aria-checked="false" data-i18n="themeAuto">Auto</button>
-            <button type="button" role="radio" data-screen-theme="light" aria-checked="false" data-i18n="themeLight">Light</button>
-            <button type="button" role="radio" data-screen-theme="dark" aria-checked="true" data-i18n="themeDark">Dark</button>
-          </div>
-        </div>
-        <div class="screen-set__row">
-          <span class="screen-set__label" data-i18n="fFx">Effects</span>
-          <div class="seg" id="screen-fx" role="radiogroup" aria-label="TV effects">
-            <button type="button" role="radio" data-screen-fx="auto" aria-checked="true" data-i18n="fxAuto">Auto</button>
-            <button type="button" role="radio" data-screen-fx="full" aria-checked="false" data-i18n="fxFull">Full</button>
-            <button type="button" role="radio" data-screen-fx="lite" aria-checked="false" data-i18n="fxLite">Lite</button>
-          </div>
-        </div>
-        <label class="field--row screen-set__row"><span class="screen-set__label" data-i18n="fScreenSound">Music and sounds</span><input type="checkbox" data-screen="sound" checked /></label>
-        <label class="field--row screen-set__row"><span class="screen-set__label" data-i18n="fPetals">Falling petals</span><input type="checkbox" data-screen="petals" checked /></label>
-        <label class="field--row screen-set__row"><span class="screen-set__label" data-i18n="fFog">Ambient fog</span><input type="checkbox" data-screen="fog" checked /></label>
-      </div>
       <!-- The room's webhook: the team's alerting opens and closes vigils. The URL is a secret, fetched only when asked for. -->
       <div class="field hook">
-        <span data-i18n="fHook">Alerts</span>
+        <span class="field__label" data-i18n="fHook">Alerts</span>
         <p class="field__note" data-i18n="hookNote">Let your monitoring open the shrine for you: add this link as a webhook in Grafana, PagerDuty, Datadog, UptimeRobot or the like.</p>
         <button class="btn btn--accent btn--sm hook__get" type="button" id="btn-hook" data-i18n="hookShow">Get the link</button>
         <div class="hook__ready" id="hook-ready" hidden>
@@ -103,11 +85,36 @@
         </div>
       </div>
     </section>
-    <!-- Only this browser -->
-    <section class="panel__group" aria-labelledby="panel-you-h">
-      <h3 class="panel__group-head" id="panel-you-h"><span data-i18n="panelYou">Just for you</span> <small data-i18n="panelYouNote">saved in this browser</small></h3>
+    <!-- Every TV showing this shrine: nobody has a keyboard on the wall, so the room sets it -->
+    <section class="panel__group" id="panel-tv" role="tabpanel" aria-labelledby="tab-tv" hidden>
+      <p class="panel__scope" data-i18n="screenNote">Every screen showing this shrine follows these, live.</p>
       <div class="field">
-        <span data-i18n="fTheme">Theme</span>
+        <span class="field__label" data-i18n="fTheme">Theme</span>
+        <div class="seg" id="screen-theme" role="radiogroup" aria-label="TV theme">
+          <button type="button" role="radio" data-screen-theme="auto" aria-checked="false" data-i18n="themeAuto">Auto</button>
+          <button type="button" role="radio" data-screen-theme="light" aria-checked="false" data-i18n="themeLight">Light</button>
+          <button type="button" role="radio" data-screen-theme="dark" aria-checked="true" data-i18n="themeDark">Dark</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="field__label" data-i18n="fFx">Effects</span>
+        <div class="seg" id="screen-fx" role="radiogroup" aria-label="TV effects">
+          <button type="button" role="radio" data-screen-fx="auto" aria-checked="true" data-i18n="fxAuto">Auto</button>
+          <button type="button" role="radio" data-screen-fx="full" aria-checked="false" data-i18n="fxFull">Full</button>
+          <button type="button" role="radio" data-screen-fx="lite" aria-checked="false" data-i18n="fxLite">Lite</button>
+        </div>
+      </div>
+      <div class="toggles">
+        <label class="toggle"><span data-i18n="fScreenSound">Music and sound effects</span><input type="checkbox" data-screen="sound" checked /></label>
+        <label class="toggle"><span data-i18n="fPetals">Falling petals</span><input type="checkbox" data-screen="petals" checked /></label>
+        <label class="toggle"><span data-i18n="fFog">Ambient fog</span><input type="checkbox" data-screen="fog" checked /></label>
+      </div>
+    </section>
+    <!-- Only this browser -->
+    <section class="panel__group" id="panel-you" role="tabpanel" aria-labelledby="tab-you">
+      <p class="panel__scope" data-i18n="panelYouNote">Only on this device. Saved in this browser.</p>
+      <div class="field">
+        <span class="field__label" data-i18n="fTheme">Theme</span>
         <div class="seg" id="theme-seg" role="radiogroup" aria-label="Theme">
           <button type="button" role="radio" data-theme="auto" aria-checked="false" data-i18n="themeAuto">Auto</button>
           <button type="button" role="radio" data-theme="light" aria-checked="false" data-i18n="themeLight">Light</button>
@@ -115,7 +122,7 @@
         </div>
       </div>
       <div class="field">
-        <span data-i18n="fFx">Effects</span>
+        <span class="field__label" data-i18n="fFx">Effects</span>
         <div class="seg" id="fx-seg" role="radiogroup" aria-label="Effects">
           <button type="button" role="radio" data-fx="auto" aria-checked="true" data-i18n="fxAuto">Auto</button>
           <button type="button" role="radio" data-fx="full" aria-checked="false" data-i18n="fxFull">Full</button>
@@ -123,22 +130,12 @@
         </div>
         <p class="field__note" id="fx-note"></p>
       </div>
-      <label class="field field--row">
-        <span data-i18n="fMusic">Background music</span>
-        <input type="checkbox" name="music" checked />
-      </label>
-      <label class="field field--row">
-        <span data-i18n="fSfx">Sound effects</span>
-        <input type="checkbox" name="sfx" checked />
-      </label>
-      <label class="field field--row">
-        <span data-i18n="fPetals">Falling petals</span>
-        <input type="checkbox" name="petals" checked />
-      </label>
-      <label class="field field--row">
-        <span data-i18n="fFog">Ambient fog</span>
-        <input type="checkbox" name="fog" checked />
-      </label>
+      <div class="toggles">
+        <label class="toggle"><span data-i18n="fMusic">Background music</span><input type="checkbox" name="music" checked /></label>
+        <label class="toggle"><span data-i18n="fSfx">Sound effects</span><input type="checkbox" name="sfx" checked /></label>
+        <label class="toggle"><span data-i18n="fPetals">Falling petals</span><input type="checkbox" name="petals" checked /></label>
+        <label class="toggle"><span data-i18n="fFog">Ambient fog</span><input type="checkbox" name="fog" checked /></label>
+      </div>
       <div class="panel__actions">
         <button class="btn btn--glass btn--sm" type="button" id="btn-reset">
           <span data-i18n="reset">Reset my preferences</span>

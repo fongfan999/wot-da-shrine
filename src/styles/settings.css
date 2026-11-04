@@ -23,17 +23,39 @@
   flex-direction: column;
   overflow-y: auto;
 }
-.panel__head { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px 10px; }
+.panel__head { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px 12px; }
 .panel__head h2 { margin: 0; font-weight: 500; font-size: 28px; letter-spacing: -.04em; }
-.panel__body { display: flex; flex-direction: column; gap: 18px; padding: 10px 22px 30px; }
-.field { display: flex; flex-direction: column; gap: 6px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-.field--row { flex-direction: row; align-items: center; justify-content: space-between; min-height: 32px; }
+
+/* The type, once: a mono-caps label over each control, sans for everything you read or pick */
+.panel__tabs { display: flex; gap: 4px; margin: 0 22px; padding: 3px; border: 1px solid var(--field-line); border-radius: var(--radius-pill); background: var(--paper); }
+.panel__tabs[hidden] { display: none; }
+.panel__tabs button {
+  flex: 1;
+  min-height: 34px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  font: 600 13px/1.2 var(--font-sans);
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 160ms, color 160ms;
+}
+.panel__tabs button:hover { color: var(--ink); }
+.panel__tabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+.panel__body { display: flex; flex-direction: column; padding: 18px 22px 30px; }
+.panel__group { display: flex; flex-direction: column; gap: 22px; }
+.panel__group[hidden] { display: none; }
+.panel__scope { margin: 0 0 -6px; font-size: 13px; line-height: 1.45; color: var(--muted); }
+
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field__label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.field__note { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
 .field input[type="text"], .field input[type="datetime-local"] {
   min-height: 44px;
   font-family: var(--font-sans);
   font-size: 16px;
-  text-transform: none;
-  letter-spacing: 0;
   color: var(--ink);
   background: var(--paper);
   border: 1px solid var(--field-line);
@@ -41,8 +63,13 @@
   padding: 10px 12px;
   outline: 0;
 }
-.field input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.field input[type="checkbox"] {
+.field input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+
+/* On/off rows: one list, a hairline between rows */
+.toggles { display: flex; flex-direction: column; }
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; font-size: 15px; color: var(--ink); cursor: pointer; }
+.toggle + .toggle { border-top: 1px solid var(--line); }
+.toggle input[type="checkbox"] {
   appearance: none;
   width: 42px;
   height: 24px;
@@ -55,7 +82,7 @@
   margin: 0;
   flex-shrink: 0;
 }
-.field input[type="checkbox"]::after {
+.toggle input[type="checkbox"]::after {
   content: "";
   position: absolute;
   top: 3px;
@@ -66,33 +93,46 @@
   background: var(--ink);
   transition: transform 200ms var(--ease);
 }
-.field input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
-.field input[type="checkbox"]:checked::after { transform: translateX(18px); background: var(--on-accent); }
-.seg { display: inline-flex; align-self: flex-start; padding: 3px; border: 1px solid var(--field-line); border-radius: var(--radius-pill); background: var(--paper); }
+.toggle input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+.toggle input[type="checkbox"]:checked::after { transform: translateX(18px); background: var(--on-accent); }
+.toggle input[type="checkbox"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Segmented choice: full width, so every one in the panel lines up */
+.seg { display: flex; padding: 3px; border: 1px solid var(--field-line); border-radius: var(--radius-pill); background: var(--paper); }
 .seg button {
-  min-height: 32px;
+  flex: 1;
+  min-height: 34px;
   padding: 4px 14px;
   border: 0;
   border-radius: var(--radius-pill);
   background: transparent;
-  font-family: var(--font-sans);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
+  font: 600 14px/1.2 var(--font-sans);
   color: var(--muted);
+  cursor: pointer;
   transition: background-color 160ms, color 160ms;
 }
 .seg button:hover { color: var(--ink); }
 .seg button[aria-checked="true"] { background: var(--accent); color: var(--on-accent); }
+
 /* The sound mixer: a chip per preset, a slider per layer. --v is the slider's value, for the filled part of its track. */
-.mixer__presets { display: flex; flex-wrap: wrap; gap: 5px; }
-.mixer__presets .btn { min-height: 30px; padding: 4px 8px; font-size: 13px; }
-.mixer__presets .btn[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-.mixer__layers { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-.mixer__layer { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 10px; cursor: pointer; }
-.mixer__name { display: flex; flex-direction: column; gap: 1px; font-size: 11px; transition: color 160ms; }
-.mixer__name small { overflow: hidden; font-family: var(--font-sans); font-size: 11px; line-height: 1.3; letter-spacing: 0; text-transform: none; white-space: nowrap; text-overflow: ellipsis; color: var(--muted); }
+.mixer__presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.chip {
+  min-height: 34px;
+  padding: 4px 10px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  font: 600 14px/1.2 var(--font-sans);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 160ms, color 160ms, border-color 160ms;
+}
+.chip:hover { background: var(--paper-sunk); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.mixer__layers { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.mixer__layer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 14px; min-height: 44px; cursor: pointer; }
+.mixer__name { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 14px; font-weight: 600; color: var(--muted); transition: color 160ms; }
+.mixer__name small { overflow: hidden; font-size: 12px; font-weight: 400; line-height: 1.3; white-space: nowrap; text-overflow: ellipsis; color: var(--muted); }
 .mixer__layer[data-on="1"] .mixer__name { color: var(--ink); }
 .mixer input[type="range"] { appearance: none; width: 100%; height: 28px; margin: 0; background: transparent; cursor: pointer; }
 .mixer input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--accent) var(--v, 0%), var(--field-line) var(--v, 0%)); }
@@ -101,27 +141,16 @@
 .mixer input[type="range"]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--accent); }
 .mixer input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--paper-raised); border: 1px solid var(--ink); }
 /* Keyboard focus rings the thumb, not the slider's box */
-.mixer input[type="range"]:focus, .mixer input[type="range"]:focus-visible { outline: none; box-shadow: none; } /* not the text fields' box */
+.mixer input[type="range"]:focus, .mixer input[type="range"]:focus-visible { outline: none; box-shadow: none; }
 .mixer input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--paper-raised), 0 0 0 5px var(--accent); }
 .mixer input[type="range"]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--paper-raised), 0 0 0 5px var(--accent); }
-/* On the TV: the room's settings for every screen, a smaller row each */
-.screen-set__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; }
-.screen-set__label { font-size: 11px; }
-.screen-set .seg { align-self: center; }
-.field__note { margin: 0; font-family: var(--font-sans); font-size: 13px; line-height: 1.45; letter-spacing: 0; text-transform: none; color: var(--muted); }
+
 .panel__actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.field .btn { font-family: var(--font-sans); letter-spacing: 0; text-transform: none; } /* not the field label's mono caps */
 .hook__get { align-self: flex-start; }
+.hook__get[hidden] { display: none; }
 .hook__ready { display: flex; flex-direction: column; gap: 10px; }
 .hook__ready[hidden] { display: none; }
 /* Inside the link box the pill is the field: no box of its own, the box lights up instead. 16px: an iPhone zooms into anything smaller. */
 .field .linkbox .linkbox__input { min-height: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; font-family: var(--font-mono); font-size: 16px; text-overflow: ellipsis; }
 .hook .linkbox:focus-within { border-color: var(--accent); }
-.hook__how { margin: 0; padding-left: 18px; font-family: var(--font-sans); font-size: 13px; line-height: 1.5; letter-spacing: 0; text-transform: none; color: var(--ink); }
-.panel__hint { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
-
-/* Two groups: what the whole shrine sees, then what only this browser keeps */
-.panel__group { display: flex; flex-direction: column; gap: 18px; }
-.panel__group + .panel__group { padding-top: 18px; border-top: 1px solid var(--line); }
-.panel__group-head { display: flex; align-items: baseline; gap: 8px; margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.01em; color: var(--ink); }
-.panel__group-head small { font-family: var(--font-mono); font-size: 11px; font-weight: 400; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.hook__how { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; color: var(--ink); }
