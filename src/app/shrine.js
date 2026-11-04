@@ -19,6 +19,8 @@ import { blamedFx, remoteDeploy, renderDeploy, showShipped } from './deploy.js';
 import { renderDown } from './vigilStart.js';
 import { renderWatch, watchAct } from './watch.js';
 import { applyStandings, dailyFx, renderBowBadge } from './standing.js';
+import { creditsFx, takeTogether } from './together.js';
+import { openShare } from './shareSheet.js';
 import { SHIPPED_FOR, layersOn, sameMix } from '../../shared/rules.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
 import { applySettings, onHook } from './settings.js';
@@ -208,6 +210,7 @@ function onShrineMessage(msg) {
       renderPeople();
       renderBowBadge();
       if (msg.meta) { state.roomMeta = { ...state.roomMeta, ...msg.meta }; applySettings(); }
+      takeTogether(msg);
       syncCounters(msg);
       syncAltar(msg.litAt);
       if (!state.greeted) {
@@ -285,6 +288,7 @@ function onShrineMessage(msg) {
     case 'sync':
       if (msg.blessings) records.blessings = msg.blessings;
       if (msg.watches) records.watches = msg.watches;
+      takeTogether(msg);
       syncCounters(msg);
       syncAltar(msg.litAt);
       applyStandings(msg.standings);
@@ -299,6 +303,7 @@ function onShrineMessage(msg) {
       if (msg.blessings) records.blessings = msg.blessings;
       if (msg.watches) records.watches = msg.watches;
       if (msg.kind === 'ship') state.shippedAt = Date.now(); // before the counters, so the heading goes straight to Shipped
+      takeTogether(msg); // before the counters: a shrine that grew says who built it
       syncCounters(msg);
       if (msg.kind === 'ship') showShipped(state.shippedAt);
       // A vigil opened soon after a deploy, or while one went out: it counts against that deploy.
@@ -308,6 +313,8 @@ function onShrineMessage(msg) {
       else if (msg.by.id !== state.myId) remoteAct(msg);
       if (msg.chorus) chorusFx(msg.chorus, msg.bonus);
       if (msg.daily) dailyFx(msg);
+      // The servers are back: the cast rolls for everyone, and whoever said so gets the share sheet after it.
+      if (msg.kind === 'resolve' && msg.record) creditsFx(msg.record, msg.by.id === state.myId ? () => { if (body.dataset.resolved) openShare(true, true); } : null);
       applyStandings(msg.standings); // after the act's own news: a promotion reads as what it earned
       pingPerson(msg.by.id, ACT_ICONS[msg.kind]);
       break;

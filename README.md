@@ -163,6 +163,26 @@ clock buys nothing. The room keeps a run too, the days in a row someone in it
 bowed: **Mornings in a row** in the records, and on the quiet TV. A shrine
 remembers its hundred most recent people. Not in the demo.
 
+### Together
+
+A shrine shows what each person put in, so the team can see it building something together:
+
+- **Keepers this week**: the five who earned the most karma here this week,
+  with their morning runs, in This shrine and on the TV. It starts over every
+  Monday at 00:00 UTC, so a newcomer can top it by Friday. Not on it yet, you
+  see your own week under it.
+- **Building the next level**: the way to the shrine's next level (Village
+  shrine at 150, Temple at 400, Grand temple at 1000) is a bar in one segment
+  per person who earned it, with their faces beside it. When the shrine grows,
+  the room hears who built it. Karma from before anyone kept count is the
+  grey at the start.
+- **The cast**: when the servers come back, everyone in the shrine, the TV
+  too, sees the vigil's credits roll: who said it was down (or which alert
+  raised it), who was on watch, who prayed most, who said they're back, and
+  everyone who earned karma in it, most first. Whoever said they're back gets
+  the share sheet after the credits. The vigil's record keeps the cast, its
+  row in the records names them, and the retro Markdown says who kept it.
+
 ## Straight from your alerting
 
 Every shrine has a webhook, so the vigil can open before anyone thinks of

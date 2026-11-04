@@ -13,6 +13,7 @@ import { $, fmt, people, records, reduceMotion, roomName, state, tv } from './co
 import { petals } from './engines.js';
 import { renderPeople } from './people.js';
 import { updateStats } from './stats.js';
+import { renderBoard } from './together.js';
 import { logEvent, toast } from './ui.js';
 
 /** Where people have standing: a shrine of your own, not the public demo or a screen on the wall. */
@@ -48,6 +49,7 @@ export function applyStandings(list) {
   renderPeople();
   renderBowBadge();
   updateStats(); // your own title, and a promotion if you earned one
+  renderBoard(); // where you stand this week
 }
 
 function promotedFx(p) {

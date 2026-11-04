@@ -1,0 +1,61 @@
+/* Together: the way to the next level by who earned it, this week's keepers, a vigil's cast */
+
+/* Building the next level: one segment per person */
+.build__head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 13px; }
+.build__what { display: flex; align-items: baseline; gap: 6px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--ink); }
+.build__faces { font-size: 12px; letter-spacing: -.12em; }
+.build__left { flex: none; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.build__bar { display: flex; height: 8px; margin-top: 6px; overflow: hidden; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--paper-sunk); }
+.build__seg { flex: none; height: 100%; transition: width 600ms var(--ease, ease); }
+.build__seg + .build__seg { box-shadow: inset 1px 0 0 var(--paper-raised); }
+.build__seg[data-earlier] { opacity: .6; }
+
+/* Keepers this week */
+.board__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.board__row { display: grid; grid-template-columns: 16px 22px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 3px 6px; border-radius: var(--radius-sm); font-size: 13px; }
+.board__row[data-me] { background: var(--accent-soft); color: var(--note-ink); }
+.board__place { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-align: right; }
+.board__row:first-child .board__place { color: var(--ember); font-weight: 600; }
+.board__avatar { font-size: .9rem; text-align: center; }
+.board__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board__streak, .board__karma { font-family: var(--font-mono); font-size: 11px; }
+.board__streak { color: var(--ember-ink); }
+.board__karma { min-width: 3ch; text-align: right; color: var(--ink); font-weight: 600; }
+.board__me { margin: 4px 6px 0; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+/* Beside the altar the column never scrolls: the keepers go on one line, the first three by first name */
+@media (min-width: 1100px) {
+  .card--shrine .board { display: flex; align-items: center; gap: 10px; }
+  .card--shrine .board[hidden] { display: none; }
+  .card--shrine .board__label { flex: none; margin: 0; }
+  .card--shrine .board__list { flex: 1; min-width: 0; flex-direction: row; gap: 4px; overflow: hidden; }
+  .card--shrine .board__row { display: flex; flex: none; gap: 4px; padding: 1px 8px 1px 4px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); }
+  .card--shrine .board__row:nth-child(n + 4), .card--shrine .board__streak, .card--shrine .board__me { display: none; }
+  .card--shrine .board__name { font-size: 0; }
+  .card--shrine .board__name::after { content: attr(data-first); font-size: 12px; }
+  .card--shrine .board__karma { min-width: 0; }
+}
+
+/* The cast: rolled over the altar when the servers come back */
+.credits { position: fixed; z-index: 58; inset: 0; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, var(--paper) 55%, transparent); cursor: pointer; }
+.credits__card { width: min(440px, 100%); max-height: calc(100dvh - 32px); overflow: auto; padding: 26px 28px 20px; border: 1px solid var(--ink); border-radius: var(--radius-lg); background: var(--paper-raised); box-shadow: var(--shadow-sheet); text-align: center; }
+.credits__eyebrow { margin: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ember); }
+.credits__title { margin: 6px 0 2px; font-family: var(--font-serif); font-size: 28px; font-weight: 400; line-height: 1.15; letter-spacing: -.02em; text-wrap: balance; }
+.credits__sub { margin: 0 0 16px; font-size: 13px; color: var(--muted); }
+.credits__roles { display: grid; gap: 6px; margin: 0 0 16px; padding: 12px 0; border-block: 1px solid var(--sheet-line); }
+.credits__role { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: baseline; }
+.credits__role dt { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--sheet-label); text-align: right; }
+.credits__role dd { margin: 0; font-size: 14px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.credits__cast { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.credits__member { display: grid; grid-template-columns: 1fr auto 1fr; align-items: baseline; gap: 10px; font-size: 15px; }
+.credits__avatar { text-align: right; }
+.credits__name { font-family: var(--font-serif); font-size: 18px; }
+.credits__karma { text-align: left; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.credits__more { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.credits__hint { margin: 16px 0 0; font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+/* On the wall it reads from across the room */
+body[data-tv="1"] .credits__card { width: min(640px, 100%); padding: 36px 40px 30px; }
+body[data-tv="1"] .credits__title { font-size: 44px; }
+body[data-tv="1"] .credits__member { font-size: 22px; }
+body[data-tv="1"] .credits__name { font-size: 28px; }
+body[data-tv="1"] .credits__role dd { font-size: 20px; }

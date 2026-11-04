@@ -94,6 +94,19 @@ export const today = (at = Date.now()) => dayOf(at, -new Date(at).getTimezoneOff
 export const cleanTz = (tz) => (Number.isFinite(tz) ? Math.max(-840, Math.min(840, Math.round(tz))) : 0);
 /** Who someone is to the ledger: their name and avatar. */
 export const devoteeKey = (p) => `${p.name}\n${p.avatar}`;
+/**
+ * Together: the room sees what each person put in. A board of who earned the most karma this week
+ * (weeks start Monday 00:00 UTC, so a newcomer can top it by Friday), the shrine's way to its next
+ * level split by who earned it, and a cast for every vigil: who was in it, and what they did.
+ */
+export const BOARD_SIZE = 5;
+export const CAST_SIZE = 8; // the cast a vigil's record keeps, by karma; the rest are counted
+export const weekOf = (at) => Math.floor((Math.floor(at / 86400000) + 3) / 7); // day 0 was a Thursday
+
+/** The karma each of the shrine's levels begins at; their names are in STRINGS.shrineLevels. */
+export const SHRINE_LEVELS = [0, 150, 400, 1000];
+export const levelOf = (karma) => SHRINE_LEVELS.reduce((idx, at, k) => (karma >= at ? k : idx), 0);
+
 /** A run of days still counts on `day` when its last bow was that day or the one before. */
 export const streakAlive = (s, day) => Boolean(s?.streak) && day - s.day <= 1;
 

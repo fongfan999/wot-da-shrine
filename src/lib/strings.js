@@ -1,4 +1,5 @@
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
+import { SHRINE_LEVELS } from '../../shared/rules.js';
 
 export const BRAND = 'Wot Da Shrine';
 
@@ -109,6 +110,34 @@ export const STRINGS = {
   recMornings: 'Mornings in a row',
   recMorningsTip: 'Days in a row someone here made their morning bow, their first bow of the day. Best: {best}.',
   quietMornings: '{n} mornings in a row someone bowed.',
+  // Together: the board, the way to the next level, the cast
+  and: 'and',
+  andMore: 'and {n} more',
+  boardLabel: 'Keepers this week',
+  boardTitle: 'Who earned the most karma here this week. It starts over every Monday.',
+  boardTip: '{name} · {rank} · {n} karma this week',
+  boardMe: 'You: {n} karma this week',
+  buildWhat: 'Building the {name}',
+  buildLeft: '{n} karma to go',
+  buildTip: '{name}: {n} karma',
+  buildBy: 'The {name}, built by {names}',
+  buildEarlier: 'Before anyone kept count',
+  buildOthers: 'Everyone else',
+  shrineGrewBy: 'The shrine grew: {name}. Built by {names}.',
+  credEyebrow: 'The cast',
+  credTitle: 'They’re back',
+  credTitleNamed: '{title}: back',
+  credSub: 'Down for {t} · {n} praying',
+  credOpened: 'Said it was down',
+  credRaised: 'Raised by',
+  credWatch: 'On watch',
+  credPrayers: 'Most prayers',
+  credBack: 'Said they’re back',
+  credHint: 'Click anywhere to close',
+  recCastTip: 'Kept by {names}',
+  retroCast: 'Kept by: {names}',
+  retroOpened: 'Said it was down: {name}',
+  retroBack: 'Said they’re back: {name}',
   comboCaptions: [
     [3, 'the rack hears you'],
     [6, 'the monks are impressed'],
@@ -374,12 +403,7 @@ export const STRINGS = {
   shrineLevel: '{name} · {next}',
   shrineLevelMax: '{name}',
   shrineNext: '{n} karma to {name}',
-  shrineLevels: [
-    [0, 'Roadside shrine'],
-    [150, 'Village shrine'],
-    [400, 'Temple'],
-    [1000, 'Grand temple'],
-  ],
+  shrineLevels: ['Roadside shrine', 'Village shrine', 'Temple', 'Grand temple'].map((name, i) => [SHRINE_LEVELS[i], name]), // the karma each starts at is the shrine's rule
   shrineUnlocked: 'The shrine grew: {name}.',
   lanternsTitle: 'A lantern for each of the {n} vigils this shrine survived',
   lanternsTitleOne: 'A lantern for the vigil this shrine survived',

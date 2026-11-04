@@ -103,9 +103,24 @@ export function retroMarkdown() {
     `- ${fmt('retroPeople', { n: Math.max(1, v.peak ?? 1) })}`,
     `- ${fmt('retroActs', { prayers: n('prayers'), blames: n('blames'), fortunes: n('fortunes') })}`,
     `- ${fmt('retroKarma', { n: n('karma') })}`,
+    ...retroCast(v),
     `- ${fmt('retroLink', { url: roomUrl() })}`,
   ];
   return lines.join('\n');
+}
+
+/** Who kept it: the cast a filed vigil keeps ({ top, n, opened, back }), or the open vigil's, by name, most karma first. */
+function retroCast(v) {
+  const filed = Array.isArray(v.cast?.top);
+  const top = filed ? v.cast.top : Object.values(v.cast ?? {}).filter((c) => c.karma > 0).sort((a, b) => b.karma - a.karma);
+  const n = filed ? v.cast.n : top.length;
+  const opened = filed ? v.cast.opened : v.opened;
+  const back = filed ? v.cast.back : null;
+  const lines = [];
+  if (top.length) lines.push(`- ${fmt('retroCast', { names: top.slice(0, 8).map((c) => `${c.name} (${c.karma})`).join(', ') + (n > Math.min(8, top.length) ? `, ${fmt('andMore', { n: n - Math.min(8, top.length) })}` : '') })}`);
+  const roles = [opened && fmt('retroOpened', { name: opened.name }), back && fmt('retroBack', { name: back.name })].filter(Boolean);
+  if (roles.length) lines.push(`- ${roles.join(' · ')}`);
+  return lines;
 }
 
 function renderRetro() {

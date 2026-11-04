@@ -7,7 +7,7 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
-import { AVATARS, BLESSING_BLAME, cleanScreen, cleanTz, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
+import { AVATARS, BLESSING_BLAME, BOARD_SIZE, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
@@ -64,6 +64,7 @@ const EMPTY = {
   litBy: '', // whose stick is burning: the karma for its burning down is theirs
   devotees: {}, // what each person has earned here, by devoteeKey: { name, avatar, karma, streak, best, day, at, seen }
   daily: { day: 0, streak: 0, best: 0 }, // the days in a row someone made a morning bow here
+  level: -1, // the shrine's level, as last grown to (-1: not yet worked out, see the constructor)
 };
 
 function clean(text, max) {
@@ -97,6 +98,8 @@ export class Shrine extends DurableObject {
       const { meta } = this.state;
       if (!meta.mix && meta.track) meta.mix = PRESETS[meta.track] ?? null;
       delete meta.track;
+      // A shrine from before levels were kept: it is at whatever its karma has reached, and nobody built that yet.
+      if (this.state.level < 0) this.state.level = levelOf(this.state.karma);
     });
   }
 
@@ -153,6 +156,7 @@ export class Shrine extends DurableObject {
       longest: this.state.longest,
       blessings: this.state.blessings,
       watches: this.state.watches,
+      ...this.together(),
     }));
     // The incense burned down while nobody was looking: whoever lit it earned that, and the room hears so.
     if (this.credited.size) this.broadcast({ t: 'sync', ...this.standings() }, server);
@@ -254,7 +258,7 @@ export class Shrine extends DurableObject {
         s.meta = meta;
         this.broadcast({ t: 'meta', meta, by });
         if (named) {
-          this.openVigil();
+          this.openVigil(by);
           this.remember({ kind: 'down', by });
           this.broadcast({ t: 'act', kind: 'down', by, ...this.blame(), ...this.counters() });
         }
@@ -283,7 +287,7 @@ export class Shrine extends DurableObject {
         s.resolvedAt = now;
         s.resolved += 1;
         s.vigil.karma += KARMA.resolve; // the record includes the karma for coming back
-        out.record = this.closeVigil(now, 'survived'); // counters() carries `vigil` (now null), so the record travels under its own name
+        out.record = this.closeVigil(now, 'survived', by); // counters() carries `vigil` (now null), so the record travels under its own name
         break;
       }
       case 'unresolve': {
@@ -398,9 +402,10 @@ export class Shrine extends DurableObject {
 
     if (!s.since) s.since = Date.now();
     s.karma += KARMA[msg.t] ?? 0;
-    this.credit(by, (KARMA[msg.t] ?? 0) + (out.daily?.bonus ?? 0));
     const demoOpens = this.demo && OPENS_VIGIL.has(msg.t) && (msg.t === 'light' || Date.now() - s.resolvedAt > CELEBRATE_FOR);
-    if (!s.vigil && (opens || demoOpens)) this.openVigil();
+    if (!s.vigil && (opens || demoOpens)) this.openVigil(by);
+    this.credit(by, (KARMA[msg.t] ?? 0) + (out.daily?.bonus ?? 0)); // after the vigil opens: what opened it is theirs in its cast
+    if (s.vigil && msg.t === 'prayer') { const c = this.castOf(by); if (c) c.prayers += 1; }
     if (s.vigil && VIGIL_FIELD[msg.t]) s.vigil[VIGIL_FIELD[msg.t]] += 1;
     // The room's bows and prayers while a deploy goes out are its blessing.
     if (s.blessing && (msg.t === 'bow' || msg.t === 'prayer')) s.blessing[`${msg.t}s`] += 1;
@@ -462,7 +467,7 @@ export class Shrine extends DurableObject {
       did = 'opened';
       if (name && name !== s.meta.title) { s.meta = { ...s.meta, title: name }; this.broadcast({ t: 'meta', meta: s.meta, by }); }
       if (!s.since) s.since = Date.now();
-      this.openVigil();
+      this.openVigil(by);
       s.vigil.alert = by.name; // the record says who raised it
       this.remember({ kind: 'down', by });
       this.broadcast({ t: 'act', kind: 'down', by, ...this.blame(), ...this.counters() });
@@ -475,9 +480,9 @@ export class Shrine extends DurableObject {
       s.resolved += 1;
       s.vigil.karma += KARMA.resolve;
       s.karma += KARMA.resolve;
-      const out = { t: 'act', kind: 'resolve', by, record: this.closeVigil(now, 'survived') };
+      const out = { t: 'act', kind: 'resolve', by, record: this.closeVigil(now, 'survived', by) };
       this.remember(out);
-      this.broadcast({ ...out, ...this.counters() });
+      this.broadcast({ ...out, ...this.counters(), ...this.standings() }); // the karma may have grown the shrine
       this.report('resolve', { karma: KARMA.resolve });
     } else if (state === 'up') {
       did = 'already-up';
@@ -549,7 +554,7 @@ export class Shrine extends DurableObject {
   face(person) {
     const d = this.demo ? null : this.state.devotees[devoteeKey(person)];
     const out = pub(person);
-    if (d) Object.assign(out, { karma: d.karma, streak: d.streak, day: d.day });
+    if (d) Object.assign(out, { karma: d.karma, streak: d.streak, day: d.day, week: d.wk === weekOf(Date.now()) ? d.wkKarma : 0 });
     return out;
   }
 
@@ -563,6 +568,16 @@ export class Shrine extends DurableObject {
     const me = was ?? { name: person.name, avatar: person.avatar, karma: 0, streak: 0, best: 0, day: 0, at: 0 };
     me.karma = Math.max(0, me.karma + n);
     me.seen = Date.now();
+    // This week's karma, for the board: a new week starts everyone at nothing.
+    const wk = weekOf(me.seen);
+    if (me.wk !== wk) { me.wk = wk; me.wkKarma = 0; }
+    me.wkKarma = Math.max(0, me.wkKarma + n);
+    // Their share of the way to the shrine's next level.
+    if (me.lv !== this.state.level) { me.lv = this.state.level; me.lvKarma = 0; }
+    me.lvKarma = Math.max(0, me.lvKarma + n);
+    // And their part in the vigil, if one is open.
+    const c = this.castOf(person);
+    if (c) c.karma = Math.max(0, c.karma + n);
     d[key] = me;
     this.credited.add(key);
     // A full ledger lets go of whoever earned nothing for longest.
@@ -607,11 +622,60 @@ export class Shrine extends DurableObject {
 
   /** The people whose standing changed, for the broadcast that says so; {} when nobody's did. */
   standings() {
-    if (!this.credited.size) return {};
+    const grew = this.grow();
+    if (!this.credited.size && !grew) return {};
     const d = this.state.devotees;
-    const list = [...this.credited].map((k) => d[k]).filter(Boolean).map(({ name, avatar, karma, streak, day }) => ({ name, avatar, karma, streak, day }));
+    const wk = weekOf(Date.now());
+    const list = [...this.credited].map((k) => d[k]).filter(Boolean).map(({ name, avatar, karma, streak, day, wk: w, wkKarma }) => ({ name, avatar, karma, streak, day, week: w === wk ? wkKarma : 0 }));
     this.credited.clear();
-    return list.length ? { standings: list } : {};
+    const out = this.together();
+    if (list.length) out.standings = list;
+    if (grew) out.grew = grew;
+    return out;
+  }
+
+  /**
+   * What the room sees of everyone together: this week's board, and who is building the shrine's
+   * next level. Nothing in the demo, where nobody keeps anything.
+   */
+  together() {
+    if (this.demo) return {};
+    const s = this.state;
+    const all = Object.values(s.devotees);
+    const wk = weekOf(Date.now());
+    const board = all.filter((d) => d.wk === wk && d.wkKarma > 0).sort((a, b) => b.wkKarma - a.wkKarma || (b.seen ?? 0) - (a.seen ?? 0)).slice(0, BOARD_SIZE)
+      .map(({ name, avatar, wkKarma, streak, day }) => ({ name, avatar, karma: wkKarma, streak, day }));
+    const builders = this.builders();
+    return { board, build: { level: s.level, shares: builders.slice(0, 6), rest: builders.slice(6).reduce((n, b) => n + b.karma, 0) } };
+  }
+
+  /** Who put karma into the level the shrine is on now, most first. */
+  builders() {
+    const lv = this.state.level;
+    return Object.values(this.state.devotees).filter((d) => d.lv === lv && d.lvKarma > 0).sort((a, b) => b.lvKarma - a.lvKarma).map(({ name, avatar, lvKarma }) => ({ name, avatar, karma: lvKarma }));
+  }
+
+  /**
+   * The room's karma reached the shrine's next level: it grows, and the room hears who built it.
+   * Returns { level, by } when it did, else null. A shrine never shrinks back (a They're back taken back).
+   */
+  grow() {
+    const s = this.state;
+    const lv = levelOf(s.karma);
+    if (lv <= s.level) return null;
+    const by = this.builders().slice(0, BOARD_SIZE);
+    s.level = lv;
+    return this.demo ? null : { level: lv, by };
+  }
+
+  /** Their line in the open vigil's cast, made the first time they do something in it; null when no vigil is open. */
+  castOf(person) {
+    const v = this.state.vigil;
+    if (!v || this.demo || !person?.name || person.id === 'hook') return null;
+    v.cast ??= {};
+    const key = devoteeKey(person);
+    v.cast[key] ??= { name: person.name, avatar: person.avatar, karma: 0, prayers: 0 };
+    return v.cast[key];
   }
 
   counters() {
@@ -625,10 +689,11 @@ export class Shrine extends DurableObject {
    * blessed broke, and one shipped within BLESSING_BLAME is not clean after all: either way the
    * streak ends, and blame() tells the room which deploy it was.
    */
-  openVigil() {
+  openVigil(by) {
     const s = this.state;
     const now = Date.now();
-    s.vigil = { startedAt: now, lastAt: now, seenAt: now, peak: this.people().length, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0 };
+    s.vigil = { startedAt: now, lastAt: now, seenAt: now, peak: this.people().length, prayers: 0, karma: 0, blames: 0, fortunes: 0, lights: 0, cast: {} };
+    if (by?.name) s.vigil.opened = { name: by.name, avatar: by.avatar }; // who said it first: a person, or the alerting
     s.undo = null;
     // On someone's watch: the vigil remembers whose, and their watch is no longer quiet.
     if (s.watch) { s.watch.vigils += 1; s.vigil.watch = s.watch.name; }
@@ -707,7 +772,7 @@ export class Shrine extends DurableObject {
   }
 
   /** End the vigil and file it. Returns the record. */
-  closeVigil(endedAt, outcome) {
+  closeVigil(endedAt, outcome, back = null) {
     const s = this.state;
     const v = s.vigil;
     const record = {
@@ -724,6 +789,15 @@ export class Shrine extends DurableObject {
     };
     if (v.watch) record.watch = v.watch; // whose watch it was
     if (v.alert) record.alert = v.alert; // which alerting system raised it
+    // The cast: who was in it, by the karma they earned in it. Who said it was down, and who said it was back
+    // (and earned the karma for it, which the vigil's own total already counts).
+    if (back && outcome === 'survived') { const c = this.castOf(back); if (c) c.karma += KARMA.resolve; }
+    const cast = Object.values(v.cast ?? {}).filter((c) => c.karma > 0 || c.prayers > 0).sort((a, b) => b.karma - a.karma || b.prayers - a.prayers);
+    if (cast.length || v.opened) {
+      record.cast = { top: cast.slice(0, CAST_SIZE), n: cast.length };
+      if (v.opened) record.cast.opened = v.opened;
+      if (back && outcome === 'survived') record.cast.back = { name: back.name, avatar: back.avatar };
+    }
     s.history = [record, ...s.history].slice(0, MAX_HISTORY);
     if (outcome === 'survived') {
       s.survived += 1;

@@ -8,6 +8,7 @@ import { art, burner, kick, petals } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';
 import { every } from '../lib/clock.js';
 import { hasStanding, myStanding, rankOf, roomMornings } from './standing.js';
+import { grewText, nameList, renderBoard, renderBuild } from './together.js';
 
 /* ---------- Stats + progress ---------- */
 export const burnBar = $('#burn-bar');
@@ -203,13 +204,16 @@ export function renderRecords() {
   updateRank(true); // its bar tracks the shrine's next level
   burner.dataset.level = String(i);
   updateTablet();
+  renderBuild();
+  renderBoard();
   if (shownLevel !== -1 && i > shownLevel) {
-    toast(fmt('shrineUnlocked', { name }));
+    toast(grewText(name, i)); // and who built it
     sound.bowl(392);
     petals.burst(40);
     shockwave();
   }
-  shownLevel = i;
+  // In a shrine, the level before it has said where it stands is not one it grew from.
+  shownLevel = roomName && !state.greeted ? -1 : i;
 
   recordsList.innerHTML = '';
   for (const r of records.history.slice(0, 5)) {
@@ -229,6 +233,7 @@ export function renderRecords() {
       facts.append(name, ` · ${bits.join(' · ')}`);
     } else facts.textContent = bits.join(' · ');
     facts.title = facts.textContent;
+    if (r.cast?.top?.length) facts.title += `\n${fmt('recCastTip', { names: nameList(r.cast.top.map((c) => c.name), r.cast.n, 5) })}`;
     const when = document.createElement('time');
     when.className = 'records__when';
     when.textContent = ago(r.endedAt);

@@ -13,6 +13,7 @@ import { splitTitle } from './stage.js';
 import { addKarma, renderRecords, tickVigil, updateTablet } from './stats.js';
 import { logMine, shockwave, toast } from './ui.js';
 import { renderDown } from './vigilStart.js';
+import { creditsOpen } from './together.js';
 
 /* ---------- They're back: the moment worth sharing ---------- */
 export const RESOLVED_FOR = CELEBRATE_FOR; // the heading celebrates for a while, then the shrine is a shrine again
@@ -74,7 +75,8 @@ function resolve() {
   addKarma(KARMA.resolve);
   logMine('resolve', t('fResolve'), { toastText: t('resolveMessage') });
   state.shrine?.send('resolve');
-  setTimeout(() => { if (body.dataset.resolved) openShare(true, true); }, 1600); // a plain timer: GSAP's ticker sleeps in background tabs
+  // The share sheet, unless the cast is rolling: then it opens when the credits end. A plain timer: GSAP's ticker sleeps in background tabs.
+  setTimeout(() => { if (body.dataset.resolved && !creditsOpen()) openShare(true, true); }, 1600);
 }
 
 export function resolveFx() {
