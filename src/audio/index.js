@@ -72,18 +72,35 @@ class SoundKit {
    */
   hush() {
     if (!this.out) return;
-    const g = this.out.gain; const t = this.ctx.currentTime;
-    g.cancelScheduledValues(t);
-    g.setValueAtTime(g.value, t);
-    g.setTargetAtTime(0, t, 0.012);
     clearTimeout(this.unhushAt);
+    // already fading (beforeunload, then pagehide): keep that fade rather than restarting it
+    if (this.hushedAt == null) {
+      const g = this.out.gain; const t = this.ctx.currentTime;
+      g.cancelScheduledValues(t);
+      g.setValueAtTime(g.value, t);
+      g.setTargetAtTime(0, t, 0.008);
+      this.hushedAt = t;
+    }
     // a navigation that never happens (a cancelled leave, a download): bring the sound back
     this.unhushAt = setTimeout(() => this.unhush(), 2500);
+  }
+
+  /**
+   * Closing the tab destroys the context right after pagehide returns, before the fade above has
+   * been rendered, so the mix is still cut off at full level. Hold the main thread until the audio
+   * clock has played the fade down to silence (about 50 ms), never longer than 150 ms.
+   */
+  settle() {
+    if (this.hushedAt == null || this.ctx.state !== 'running') return;
+    const until = this.hushedAt + 0.05;
+    const stop = performance.now() + 150;
+    while (this.ctx.currentTime < until && performance.now() < stop) { /* let the fade play out */ }
   }
 
   unhush() {
     if (!this.out) return;
     clearTimeout(this.unhushAt);
+    this.hushedAt = null;
     const g = this.out.gain; const t = this.ctx.currentTime;
     g.cancelScheduledValues(t);
     g.setValueAtTime(g.value, t);
@@ -252,6 +269,7 @@ export const sound = new SoundKit();
 
 // beforeunload comes first, as the leave starts; pagehide covers the leaves that skip it.
 window.addEventListener('beforeunload', () => sound.hush());
-window.addEventListener('pagehide', () => sound.hush());
+// pagehide is the last moment before a closing tab's audio is torn down: wait for the fade there
+window.addEventListener('pagehide', () => { sound.hush(); sound.settle(); });
 // back from the back/forward cache: the page is alive again, and so is its sound
 window.addEventListener('pageshow', (e) => { if (e.persisted) sound.unhush(); });
