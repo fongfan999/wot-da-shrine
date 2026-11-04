@@ -7,7 +7,7 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
-import { AVATARS, BLESSING_BLAME, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, TRACKS, VIGIL_IDLE, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
+import { AVATARS, BLESSING_BLAME, cleanScreen, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, TRACKS, VIGIL_IDLE, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
@@ -227,6 +227,8 @@ export class Shrine extends DurableObject {
         if (meta.eta && Number.isNaN(Date.parse(meta.eta))) meta.eta = '';
         // The music the whole room hears, the TV too. Changing it is not an action: it opens no vigil.
         if ('track' in msg) meta.track = TRACKS.includes(msg.track) ? msg.track : TRACKS[0];
+        // How the TVs showing the shrine look and sound. Not an action either.
+        if ('screen' in msg) meta.screen = cleanScreen(msg.screen);
         // Naming what is down, in a quiet room, says something is down. Not while the room still
         // celebrates the last one: then it is the old incident being tidied up.
         // Nor while a deploy is being blessed: renaming the shrine then is not It broke.

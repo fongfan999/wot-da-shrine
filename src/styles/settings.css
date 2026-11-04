@@ -85,6 +85,10 @@
 }
 .seg button:hover { color: var(--ink); }
 .seg button[aria-checked="true"] { background: var(--accent); color: var(--on-accent); }
+/* On the TV: the room's settings for every screen, a smaller row each */
+.screen-set__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; }
+.screen-set__label { font-size: 11px; }
+.screen-set .seg { align-self: center; }
 .field__note { margin: 0; font-family: var(--font-sans); font-size: 13px; line-height: 1.45; letter-spacing: 0; text-transform: none; color: var(--muted); }
 .panel__actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .field .btn { font-family: var(--font-sans); letter-spacing: 0; text-transform: none; } /* not the field label's mono caps */

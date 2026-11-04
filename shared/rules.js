@@ -68,8 +68,69 @@ export const MAX_WATCHES = 12;
  */
 export const holdsWatch = (watch, person) => Boolean(watch && person && (watch.id === person.id || (watch.name === person.name && watch.avatar === person.avatar)));
 
-/** The music a shrine can play, all synthesized in src/audio/music.js. The first is the default. */
-export const TRACKS = ['vigil', 'focus', 'chant', 'rain'];
+/**
+ * The shrine's sound, mixed by the room: six layers, each a small synth in src/audio/music.js, each
+ * at a level from 0 to 100. A mix keeps only the layers that play; {} is silence.
+ */
+export const LAYERS = ['sacred', 'chant', 'rain', 'noise', 'spa', 'garden'];
+
+/** A few mixes with names. The first is what a shrine plays until its room mixes its own. */
+export const PRESETS = {
+  vigil: { sacred: 80 },
+  focus: { sacred: 30, noise: 50 },
+  chant: { chant: 80, sacred: 25 },
+  rain: { rain: 75, sacred: 20 },
+  spa: { spa: 75, sacred: 25 },
+  garden: { garden: 70, spa: 30 },
+};
+export const TRACKS = Object.keys(PRESETS); // the presets' names, and what ?track= takes
+export const DEFAULT_MIX = PRESETS[TRACKS[0]];
+
+/** A mix as sent: only known layers, whole numbers from 1 to 100; null when it is no mix at all. */
+export function cleanMix(v) {
+  if (!v || typeof v !== 'object') return null;
+  const out = {};
+  for (const k of LAYERS) {
+    const n = Math.round(Number(v[k]));
+    if (n > 0) out[k] = Math.min(100, n);
+  }
+  return out;
+}
+
+/** The layers a mix plays, loudest first. */
+export const layersOn = (mix) => LAYERS.filter((k) => mix?.[k] > 0).sort((a, b) => mix[b] - mix[a]);
+
+/** The preset this mix is, if it is one, else ''. */
+export const presetOf = (mix) => TRACKS.find((name) => sameMix(PRESETS[name], mix)) ?? '';
+
+export const sameMix = (a, b) => LAYERS.every((k) => (a?.[k] || 0) === (b?.[k] || 0));
+
+/** A mix as a URL parameter, ?mix=sacred:80,rain:40, and back. */
+export const mixToParam = (mix) => layersOn(mix).map((k) => `${k}:${mix[k]}`).join(',');
+export function mixFromParam(str) {
+  if (typeof str !== 'string') return null;
+  const mix = {};
+  for (const part of str.split(',')) {
+    const [k, n] = part.split(':');
+    if (k) mix[k] = n;
+  }
+  return cleanMix(mix);
+}
+
+/** How every TV showing a shrine looks and sounds: set from the room, since nobody has a keyboard on the wall. */
+export const SCREEN_DEFAULTS = { theme: 'dark', fx: 'auto', petals: true, fog: true, sound: true };
+const SCREEN_CHOICES = { theme: ['auto', 'light', 'dark'], fx: ['auto', 'full', 'lite'] };
+/** Whatever was sent, as a screen setting the shrine can keep. */
+export function cleanScreen(raw) {
+  const out = { ...SCREEN_DEFAULTS };
+  if (!raw || typeof raw !== 'object') return out;
+  for (const [k, def] of Object.entries(SCREEN_DEFAULTS)) {
+    if (!(k in raw)) continue;
+    if (typeof def === 'boolean') out[k] = raw[k] === true;
+    else if (SCREEN_CHOICES[k].includes(raw[k])) out[k] = raw[k];
+  }
+  return out;
+}
 
 /** The letters a TV pairing code is made of: no 0/O, 1/I/L, 2/Z, 5/S or 8/B to mix up across a room. */
 export const CODE_ALPHABET = 'ACDEFHJKMNPQRTUVWXY34679';

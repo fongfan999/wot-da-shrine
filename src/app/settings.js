@@ -11,6 +11,7 @@ import { updateEta, updateStats, updateVitalsLabel } from './stats.js';
 import { copyText, toast } from './ui.js';
 import { quietHeading } from './quiet.js';
 import { blessingHeading } from './deploy.js';
+import { cleanScreen } from '../../shared/rules.js';
 
 /** The stock headline a shrine gets until someone names what is down: picked from its name, so everyone in it reads the same one. */
 function headlineFor(room) {
@@ -28,6 +29,7 @@ const backdrop = $('#panel-backdrop');
 /* ---------- Apply settings ---------- */
 /** Title, subtitle and ETA: in a room the shrine's shared ones, unless this URL says otherwise. */
 export function applySettings(animate = false) {
+  if (tv && roomName) followScreen();
   applyTheme();
   applyFx();
   if (body.dataset.resolved) applyStrings({ title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
@@ -55,12 +57,30 @@ export function applySettings(animate = false) {
   $('#panel-shrine').hidden = !metaEditable();
   for (const k of ['music', 'sfx', 'petals', 'fog']) panel.querySelector(`[name=${k}]`).checked = settings[k];
   $('#theme-seg').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.theme === settings.theme)));
+  const sc = screen();
+  $('#screen-theme').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.screenTheme === sc.theme)));
+  $('#screen-fx').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.screenFx === sc.fx)));
+  panel.querySelectorAll('[data-screen]').forEach((el) => { el.checked = sc[el.dataset.screen]; });
   $('#track-seg').querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.track === track())));
   $('#track-note').textContent = `${t(`trackHint_${track()}`)} ${settings.music ? t('trackShared') : t('trackOff')}`;
 
   updateEta();
   updateStats();
   updateVitalsLabel();
+}
+
+/* ---------- The TV: it looks and sounds the way the room set it, not the way its own browser was left ---------- */
+function screen() { return cleanScreen(state.roomMeta.screen); }
+function followScreen() {
+  const sc = screen();
+  Object.assign(settings, { theme: sc.theme, fx: sc.fx, petals: sc.petals, fog: sc.fog, music: sc.sound, sfx: sc.sound }); // never saved: the room's, not this browser's
+}
+function setScreen(k, v) {
+  if (!roomName) return;
+  const next = { ...screen(), [k]: v };
+  state.roomMeta.screen = next;
+  state.shrine?.send('meta', { screen: next });
+  applySettings();
 }
 
 /* ---------- Theme: auto follows the system's light or dark setting ---------- */
@@ -138,6 +158,20 @@ $('#theme-seg').addEventListener('click', (e) => {
   applySettings();
   sound.tick(740, 0.06);
 });
+
+for (const k of ['theme', 'fx']) {
+  $(`#screen-${k}`).addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    const v = b?.dataset[`screen${k[0].toUpperCase()}${k.slice(1)}`];
+    if (!v || v === screen()[k]) return;
+    setScreen(k, v);
+    sound.tick(740, 0.06);
+  });
+}
+panel.querySelectorAll('[data-screen]').forEach((el) => el.addEventListener('change', () => {
+  setScreen(el.dataset.screen, el.checked);
+  sound.tick(el.checked ? 880 : 440, 0.06);
+}));
 
 $('#track-seg').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-track]');
