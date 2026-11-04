@@ -1,7 +1,7 @@
 <!-- The heading: what is down, how long for, when it is back, and the button that ends it -->
-<p class="eyebrow" id="eyebrow" data-i18n="eyebrow">When the servers are down</p>
+<p class="eyebrow" id="eyebrow" data-i18n="eyebrow">Before the servers go down</p>
 <h1 class="title" id="title" data-i18n="title">Pray for uptime, together</h1>
-<p class="subtitle" id="subtitle" data-i18n="subtitle">A shared altar for the incident channel. Open one, drop the link in Slack, and the whole team prays to the rack, live.</p>
+<p class="subtitle" id="subtitle" data-i18n="subtitle">A shrine for your team’s servers. Bow every morning, bless every deploy, keep the kami fed, and count the days without an incident. When one comes anyway, the whole team prays through it, live.</p>
 <!-- The vigil's clock, in the heading's top right corner: how long it has been down. It waits for the vigil to open. -->
 <p class="vigil" id="vigil">
   <span class="vigil__dot" aria-hidden="true"></span>
@@ -9,6 +9,7 @@
   <b class="vigil__time" id="vigil-time">00:00</b>
   <span class="vigil__meta" id="vigil-meta"></span>
 </p>
+<div class="heading__lines">
 <!-- The watch: who holds the pager. Take it, hand it to someone kneeling here, or end it. Waits until the room is joined. -->
 <div class="watch" id="watch" hidden>
   <button class="watch__btn" id="watch-btn" type="button">
@@ -24,5 +25,23 @@
     <p class="down-pop__note" id="watch-alone" data-i18n="watchAlone" hidden>Nobody else is kneeling here. Send them the link, and hand it over when they come.</p>
     <div class="down-pop__actions"><button class="btn btn--glass btn--sm" id="watch-end" type="button" data-i18n="watchEnd">End my watch</button></div>
   </div>
+</div>
+<!-- The kami: the spirit of the shrine, fed by anything done at the altar (src/app/kami.js). Its eyes follow its mood; the button bows. Waits until the room is joined. -->
+<div class="kami" id="kami" hidden>
+  <button class="kami__btn" id="kami-btn" type="button">
+    <svg class="kami__mask" viewBox="0 0 24 24" aria-hidden="true">
+      <path class="kami__face" d="M4 3.5l3.2 5.5h9.6L20 3.5V13c0 4.5-3.6 8-8 8s-8-3.5-8-8z"/>
+      <g class="kami__eyes kami__eyes--happy"><path d="M7.5 13.5q1.5-2.2 3 0"/><path d="M13.5 13.5q1.5-2.2 3 0"/></g>
+      <g class="kami__eyes kami__eyes--calm"><path d="M7.8 13h2.4"/><path d="M13.8 13h2.4"/></g>
+      <g class="kami__eyes kami__eyes--narrow"><path d="M7.4 12l3.2 1.3"/><path d="M16.6 12l-3.2 1.3"/></g>
+      <g class="kami__eyes kami__eyes--wide"><circle cx="9" cy="13" r="1.4"/><circle cx="15" cy="13" r="1.4"/></g>
+      <path class="kami__nose" d="M10.9 16.6h2.2L12 18z"/>
+    </svg>
+    <span class="kami__text" id="kami-text"></span>
+    <span class="kami__meter" aria-hidden="true"><i class="kami__fill" id="kami-fill"></i></span>
+    <span class="kami__since" id="kami-since"></span>
+    <span class="kami__action" id="kami-action"></span>
+  </button>
+</div>
 </div>
 <p class="mantra" aria-live="polite"><span class="mantra__dot" aria-hidden="true"></span><span class="mantra__reel"><span id="mantra">Clearing cache and karma…</span></span></p>

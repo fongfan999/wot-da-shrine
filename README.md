@@ -1,8 +1,11 @@
 # Wot Da Shrine 🪔
 
-When the servers are down, the team prays together. Open a shrine, send the
-link to your teammates, and light incense, ring the bowl, bow, make offerings
-and send prayers to the rack, all in real time on one shared altar.
+A shrine your team keeps so the servers stay up, and prays at when they
+don't. Open one, send the link to your teammates, and bow every morning, bless
+every deploy, keep the kami fed and count the days without an incident, all in
+real time on one shared altar. When something goes down anyway, the vigil
+opens and the whole team prays through it: incense, the bowl, bows, offerings
+and prayers to the rack.
 
 Inspired by every "I haven't been able to reach the server for an hour" thread,
 and the classic photo of sysadmins praying to a rack with incense. A
@@ -57,6 +60,33 @@ shrine.
   the site-wide totals the landing page shows.
 - Durable Objects use the WebSocket Hibernation API, so idle shrines cost
   nothing. A shrine nobody visits for 30 days deletes itself.
+
+## Days without an incident, and the kami
+
+A shrine is for the days nothing is down, which is most of them. While nothing
+is down, going out or just back, the heading counts: "12 days without an
+incident" (or the hours, on the first day; "Nothing has gone down. Yet." before
+the shrine's first act), with the eyebrow *Under the shrine's protection*, on
+phones, laptops and the TV alike. A pasted link unfurls the same count once a
+day has passed, the README badge reads `up 12d`, the share card leads with it,
+and the invite says come and keep it quiet rather than come and pray. The
+count runs from the end of the last vigil, or from the room's first act.
+
+Under the heading lives the **kami**, the spirit of the shrine: a fox mask
+whose eyes follow its mood, a sliver of a meter for the protection it still
+offers, when it was last fed and by whom, and *Bow to feed it*. Anything done
+at the altar feeds it (incense, the bowl, a bow, an offering, a prayer, a
+burned blame, a fortune). Fed, it is *pleased* for two hours and *content*
+for the day; left alone it turns *peckish* after a day, *hungry* after two,
+*starving* after four, and the meter runs out. Its line leads the quiet
+heading and the TV ("The kami has not been fed since Tuesday. It is looking at
+your Postgres."): the same line for everyone in the room all day, watching a
+different thing tomorrow. While a vigil is open it is not surprised. Feeding a
+kami that has waited a day or more, or its first meal ever, earns the feeder
++3 karma and a toast. Once it has gone two days unfed, the phones that asked
+hear so (see Notifications). Nothing real hangs on its mood: the servers go
+down when they go down. The rules are `KAMI_*` in `shared/rules.js`, the
+lines in `shared/kami.js`, and the demo shrine has no kami.
 
 ## A vigil, not a visit
 
@@ -309,9 +339,12 @@ you sat through ends. It sends:
 - **You hold the watch**: someone handed it to you.
 - **Keep your run**: at 7 pm on your clock, if your run of two or more morning
   bows is waiting on today's.
+- **The kami is hungry**: at the same hour, once it has gone two days unfed
+  (its line, and "One bow at payments will do."), once per hunger. It comes
+  before the run reminder, and only one of the two a day.
 
 The down, back and reminder messages skip whoever is kneeling in that shrine; tapping one opens it.
-Each of the three kinds can be switched off, per shrine and per device. iPhones
+Each of the four kinds can be switched off, per shrine and per device. iPhones
 and iPads deliver web notifications only to a page added to the Home Screen,
 so there the panel says to do that first; the shrine has a manifest and icons
 for it.
@@ -528,7 +561,8 @@ src/app/                 the shrine
   shareSheet.js          invite + share card sheet
   menus.js               the top bar's Share and More menus
   cast.js, screen.js     Cast to TV, and the TV's own screens
-  quiet.js               the TV when nothing is down: how long it has been quiet, the sound mix
+  quiet.js               nothing down: the days without an incident, and the TV's sound mix
+  kami.js                the kami's mask, meter and line under the heading
   vigilStart.js          saying something is down: the button, the question on lighting
   etaPicker.js           the Back at picker, in the heading and the builder
   openShrine.js          name fields and the Open sheet
@@ -557,7 +591,7 @@ src/lib/
 public/favicon.svg       the mark
 public/og*.png           the link preview cards (1200×630): the shrine, a room that is down, one that is back
 public/wotdafong-*.svg   the Wot Da Fong P?! mark for the credit line
-shared/                  used by the page and the Worker: the rules (burn time, karma, vigils), ready-made prayers, room names, link previews
+shared/                  used by the page and the Worker: the rules (burn time, karma, vigils, the kami), the kami’s lines, ready-made prayers, room names, link previews
 worker/index.js          Cloudflare Worker: a Hono app that mounts the routes below
 worker/middleware.js     security headers, API headers, rate limits, socket-only
 worker/routes/api.js     /api/health, /api/status, /api/world

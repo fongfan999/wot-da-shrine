@@ -10,7 +10,7 @@ export function setupSteps() {
   const crowdN = $('#demo-crowd-n');
   const vigilEl = $('#demo-vigil');
   const clock = $('#demo-clock');
-  const NAMES = ['payments-down', 'prod-is-down', 'dns-again', 'friday-deploy', 'cache-on-fire'];
+  const NAMES = ['payments-team', 'platform-squad', 'dns-again', 'friday-deploy', 'prod-is-down'];
   let run = 0; // bumped to stop every loop when the section leaves the screen
   const wait = (ms, id) => new Promise((ok, no) => setTimeout(() => (id === run ? ok() : no()), ms));
   const kneel = (n) => {

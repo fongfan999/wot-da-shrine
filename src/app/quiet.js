@@ -1,8 +1,9 @@
 /**
- * A TV with nothing down. The war-room screen stays on the wall between incidents, so instead of a
- * frozen "Vigil not started" it says how long it has been quiet, what was down last, and plays the
- * room's sound (a chant, rain, a spa, a garden, white noise to work to), mixed from any phone in the shrine.
- * The moment a vigil opens it is the incident screen again.
+ * A shrine with nothing down. The heading is not an incident's then: it counts the days without one,
+ * and the kami says how it feels about that (src/app/kami.js). On a phone or a laptop that is the
+ * shrine's everyday face; on the war-room TV, which stays on the wall between incidents, it also says
+ * what was down last and plays the room's sound (a chant, rain, a spa, a garden, white noise to work
+ * to), mixed from any phone in the shrine. The moment a vigil opens it is the incident screen again.
  */
 import { sound } from '../audio/index.js';
 import { every } from '../lib/clock.js';
@@ -10,14 +11,15 @@ import { t } from '../lib/strings.js';
 import { $, body, embedded, fmt, mix, mixName, records, roomName, settings, state, tv } from './context.js';
 import { applySettings } from './settings.js';
 import { quietStreak, shippedShown } from './deploy.js';
+import { kamiHeadline } from './kami.js';
 import { roomMornings } from './standing.js';
 import { vowHeadline } from './vow.js';
 
 const DAY = 86400000;
 const HOUR = 3600000;
 
-/** Only a shrine's own screen: not the home page's picture of the demo, not before the shrine has said what is going on. */
-const quietNow = () => Boolean(tv && !embedded && roomName && roomName !== 'demo' && state.greeted && !state.vigil && !body.dataset.resolved && !state.blessing && !shippedShown());
+/** A shrine of your own, joined, with nothing down, going out or just back. Not the public demo, which is always down. */
+const quietNow = () => Boolean(roomName) && roomName !== 'demo' && !embedded && state.greeted && !state.vigil && !body.dataset.resolved && !state.blessing && !shippedShown();
 
 const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
 
@@ -33,19 +35,32 @@ function quietTitle(since) {
   return minutes >= 2 ? fmt('quietMinutes', { n: minutes }) : t('quietMinute');
 }
 
-/** The heading while it is quiet. */
-export function quietHeading() {
+/** When the run without an incident began, by this clock: the end of the last vigil, else the room's first act; 0 before either. */
+export function quietSince() {
   const last = records.history[0];
-  const mornings = roomMornings() > 1 ? fmt('quietMornings', { n: roomMornings() }) : '';
-  const streak = [quietStreak(), mornings, vowHeadline()].filter(Boolean).join(' '); // the clean run, once the room blesses its deploys, and its mornings
-  if (!last) return { eyebrow: t('quietEyebrow'), title: t('quietNever'), subtitle: streak ? `${streak} ${t('quietNeverSub')}` : t('quietNeverSub') };
-  const since = Date.now() - (last.endedAt - state.clockSkew);
-  const survived = records.survived === 1 ? t('quietSurvivedOne') : fmt('quietSurvived', { n: records.survived });
-  const what = last.title ? fmt('quietLastTitled', { title: last.title, t: minutesText(last.minutes) }) : fmt('quietLast', { t: minutesText(last.minutes) });
-  return { eyebrow: t('quietEyebrow'), title: quietTitle(since), subtitle: [what, survived, streak].filter(Boolean).join(' ') };
+  return last ? last.endedAt - state.clockSkew : state.roomSince || 0;
 }
 
-/* ---------- Now playing: the mix, where to change it, and whether the browser lets it play ---------- */
+/** Whole days without an incident, for the share card and its text. */
+export const quietDays = () => (quietSince() ? Math.floor((Date.now() - quietSince()) / DAY) : 0);
+
+/** The heading while it is quiet: the count, and under it the kami's line, what was down last, and the room's runs. */
+export function quietHeading() {
+  const last = records.history[0];
+  const since = quietSince();
+  const mornings = roomMornings() > 1 ? fmt('quietMornings', { n: roomMornings() }) : '';
+  const runs = [quietStreak(), mornings, vowHeadline()].filter(Boolean).join(' '); // the clean run, once the room blesses its deploys, and its mornings
+  const bits = [kamiHeadline()];
+  if (last) {
+    bits.push(last.title ? fmt('quietLastTitled', { title: last.title, t: minutesText(last.minutes) }) : fmt('quietLast', { t: minutesText(last.minutes) }));
+    bits.push(records.survived === 1 ? t('quietSurvivedOne') : fmt('quietSurvived', { n: records.survived }));
+  }
+  bits.push(runs);
+  if (!last) bits.push(t(tv ? 'quietNeverSub' : 'quietKeepSub'));
+  return { eyebrow: t('quietEyebrow'), title: since ? quietTitle(Date.now() - since) : t('quietNever'), subtitle: bits.filter(Boolean).join(' ') };
+}
+
+/* ---------- Now playing, on the TV: the mix, where to change it, and whether the browser lets it play ---------- */
 const nowEl = $('#tv-now');
 const nowTrack = $('#tv-now-track');
 const nowHint = $('#tv-now-hint');
@@ -60,20 +75,20 @@ function renderNow() {
 }
 
 export function setupQuiet() {
-  if (!tv || embedded || !roomName) return;
-  // Try for sound straight away: a screen this browser has played on before is often let through.
-  sound.unlock();
-  document.addEventListener('soundstate', renderNow);
+  if (!roomName || embedded) return;
+  const screen = tv; // the war-room wall: the now-playing card, and a try for sound straight away (a screen this browser has played on before is often let through)
+  if (screen) { sound.unlock(); document.addEventListener('soundstate', renderNow); }
   let shown = false;
   let minute = 0;
+  document.addEventListener('kamimood', () => { if (shown) applySettings(); }); // a meal, or hunger: the heading's line changes with it
   every(1000, () => {
     const quiet = quietNow();
     if (quiet !== shown) {
       shown = quiet;
       if (quiet) body.dataset.quiet = '1'; else delete body.dataset.quiet;
-      nowEl.hidden = !quiet;
+      nowEl.hidden = !quiet || !screen;
       applySettings(true);
-    } else if (quiet && ++minute % 60 === 0) applySettings(); // "Quiet for 3 hours" moves on
-    if (quiet) renderNow();
+    } else if (quiet && ++minute % 60 === 0) applySettings(); // "Quiet for 3 hours" moves on, and so does the kami
+    if (quiet && screen) renderNow();
   });
 }

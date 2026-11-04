@@ -1,0 +1,72 @@
+/* ---------- The kami: the spirit of the shrine, a fox mask on a line under the heading ---------- */
+/* The watch and the kami share a row, and wrap when it is narrow */
+.heading__lines { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px 8px; max-width: 100%; }
+.heading__lines:not(:has(> :not([hidden]))) { display: none; }
+.heading__lines > .watch { margin: 0; }
+.kami { position: relative; z-index: 5; display: inline-flex; max-width: 100%; }
+.kami__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 30px;
+  padding: 3px 4px 3px 8px;
+  border: 1px solid var(--field-line);
+  border-radius: var(--radius-pill);
+  background: var(--paper-raised);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: border-color 160ms, background-color 160ms;
+}
+.kami__btn:hover:not(:disabled) { border-color: var(--line-strong); }
+.kami__btn:disabled { cursor: default; padding-right: 12px; }
+.kami__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--ink); font-weight: 600; }
+.kami__since { font-family: var(--font-mono); font-size: 11px; letter-spacing: .02em; }
+.kami__since:empty, .kami__action:empty { display: none; }
+.kami__action { padding: 3px 10px; border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--note-ink); font-size: 12px; font-weight: 600; }
+/* What is left of its protection: a sliver that drains over four days */
+.kami__meter { flex: none; width: 44px; height: 5px; border-radius: 3px; background: var(--paper-sunk); overflow: hidden; }
+.kami__fill { display: block; height: 100%; border-radius: 3px; background: var(--live); transition: width 1s, background-color 400ms; }
+.kami[data-mood="peckish"] .kami__fill { background: var(--flame); }
+.kami:is([data-mood="hungry"], [data-mood="starving"]) .kami__fill { background: var(--ember); }
+.kami[data-mood="vigil"] .kami__meter { display: none; }
+
+/* The mask: a fox face whose eyes say how it feels */
+.kami__mask { flex: none; width: 20px; height: 20px; overflow: visible; }
+.kami__face { fill: color-mix(in srgb, var(--paper) 70%, var(--paper-raised)); stroke: var(--ink); stroke-width: 1.5; stroke-linejoin: round; }
+.kami__eyes { display: none; fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
+.kami__eyes--wide { fill: var(--ink); stroke: none; }
+.kami__nose { fill: var(--ember); stroke: none; }
+.kami[data-mood="new"] .kami__eyes--wide { display: block; }
+.kami[data-mood="pleased"] .kami__eyes--happy { display: block; }
+.kami[data-mood="content"] .kami__eyes--calm { display: block; }
+.kami:is([data-mood="peckish"], [data-mood="hungry"], [data-mood="vigil"]) .kami__eyes--narrow { display: block; }
+.kami[data-mood="starving"] .kami__eyes--wide { display: block; fill: var(--ember); }
+.kami:is([data-mood="hungry"], [data-mood="starving"], [data-mood="vigil"]) .kami__eyes { stroke: var(--ember-ink); }
+.kami:is([data-mood="hungry"], [data-mood="starving"]) .kami__face { fill: var(--ember-soft); }
+.kami[data-mood="pleased"] .kami__face { fill: color-mix(in srgb, var(--live) 18%, var(--paper-raised)); }
+.kami[data-mood="starving"] .kami__mask { animation: kami-twitch 3s ease-in-out infinite; }
+@keyframes kami-twitch { 0%, 88%, 100% { transform: none; } 92% { transform: rotate(-6deg); } 96% { transform: rotate(5deg); } }
+
+/* While nothing is down the heading is the kami's: its eyebrow shows, in a room too, and its line stays on a phone */
+body[data-mode="room"][data-quiet="1"] .eyebrow { display: inline-flex; color: var(--live); }
+body[data-mode="room"][data-quiet="1"] .eyebrow::before { background: var(--live); }
+
+/* On the TV it is a sign, not a control, and big enough to read across the room */
+body[data-tv="1"] .kami__btn { min-height: 40px; padding: 6px 18px 6px 12px; font-size: 18px; gap: 12px; }
+body[data-tv="1"] .kami__mask { width: 28px; height: 28px; }
+body[data-tv="1"] .kami__since { font-size: 14px; }
+body[data-tv="1"] .kami__meter { width: 64px; height: 7px; }
+
+@media (max-width: 760px) {
+  body[data-mode="room"][data-quiet="1"] .eyebrow { display: none; }
+  body[data-mode="room"][data-quiet="1"]:not([data-subtitle="custom"]) .subtitle { display: -webkit-box; }
+}
+@media (max-width: 640px) {
+  .kami__since { display: none; }
+  .kami__btn { font-size: 12px; min-height: 28px; }
+}
+@media (prefers-reduced-motion: reduce) { .kami[data-mood="starving"] .kami__mask { animation: none; } }

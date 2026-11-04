@@ -8,6 +8,8 @@ import { openTray } from './offerings.js';
 import { minutesPrayed } from './resolve.js';
 import { openPanel } from './settings.js';
 import { copyText, toast } from './ui.js';
+import { kamiMoodNow } from './kami.js';
+import { quietDays } from './quiet.js';
 
 /* ---------- Share sheet: invite the team, and a picture of the shrine to post ---------- */
 const shareEl = $('#share');
@@ -17,11 +19,15 @@ let cardBlob = null;
 let cardSeq = 0;
 const cardName = () => `wot-da-shrine-${roomName}.png`;
 
+/** The invitation: during a vigil, come and pray; on a quiet day, come and keep it quiet. */
+const inviteText = () => fmt(body.dataset.quiet ? 'slackMessageQuiet' : 'slackMessage', { url: roomUrl() });
+
 /** What the card says when it goes out with text. */
 function cardText() {
   const url = roomUrl();
   const mins = minutesPrayed();
   if (body.dataset.resolved) return fmt('cardTextResolved', { minutes: Math.max(1, mins), url });
+  if (body.dataset.quiet) return fmt('cardTextQuiet', { days: quietDays() === 1 ? 'A whole day' : quietDays() ? `${quietDays()} days` : 'A day so far', mood: t(`kamiMood_${kamiMoodNow() || 'content'}`), url });
   const facts = [];
   if (people.size > 1) facts.push(`${people.size} devotees`);
   if (mins >= 1) facts.push(`${mins} min of incense`);
@@ -40,6 +46,7 @@ async function drawCard() {
     title: meta('title'),
     resolved: Boolean(body.dataset.resolved),
     open: Boolean(state.vigil),
+    quietDays: body.dataset.quiet ? quietDays() : null, // nothing down: the card counts the days instead
     people: people.size,
     avatars: list.map((p) => p.avatar),
     minutes: minutesPrayed(),
@@ -144,7 +151,7 @@ export function openShare(open, celebrate = false) {
   $('#btn-card-share').hidden = !canShareFiles();
   $('#card-label').textContent = celebrate || body.dataset.resolved ? t('resolvedTitle') : t('cardLabel');
   $('#share-url').value = roomUrl();
-  $('#btn-share-x').href = `https://x.com/intent/post?${new URLSearchParams({ text: fmt('slackMessage', { url: roomUrl() }) })}`;
+  $('#btn-share-x').href = `https://x.com/intent/post?${new URLSearchParams({ text: inviteText() })}`;
   const badge = `${location.origin}/api/rooms/${roomName}/badge.svg`;
   $('#badge-img').src = `${badge}?t=${Date.now()}`;
   $('#badge-md').textContent = `[![Wot Da Shrine](${badge})](${roomUrl()})`;
@@ -166,9 +173,9 @@ $('#menu-copy-link').addEventListener('click', () => copyText(roomUrl(), t('invi
 $('#btn-close-share').addEventListener('click', () => openShare(false));
 shareEl.addEventListener('click', (e) => { if (e.target === shareEl) openShare(false); });
 $('#btn-share-copy').addEventListener('click', () => copyText(roomUrl(), t('inviteCopied')));
-$('#btn-share-slack').addEventListener('click', () => copyText(fmt('slackMessage', { url: roomUrl() }), t('slackCopied')));
+$('#btn-share-slack').addEventListener('click', () => copyText(inviteText(), t('slackCopied')));
 $('#btn-share-native').addEventListener('click', async () => {
-  try { await navigator.share({ title: BRAND, text: fmt('slackMessage', { url: roomUrl() }), url: roomUrl() }); } catch { /* cancelled */ }
+  try { await navigator.share({ title: BRAND, text: inviteText(), url: roomUrl() }); } catch { /* cancelled */ }
 });
 $('#btn-badge-copy').addEventListener('click', () => copyText($('#badge-md').textContent, t('badgeCopied')));
 $('#btn-card-share').addEventListener('click', async () => {

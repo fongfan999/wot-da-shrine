@@ -16,7 +16,7 @@ export const OFFERING_KINDS = ['energy', 'noodles', 'duck', 'coffee', 'keyboard'
 export const FORTUNES = ['great', 'good', 'small', 'bad', 'terrible'];
 
 /** What each action is worth. Lighting is free; its karma comes when the stick burns down. */
-export const KARMA = { light: 0, bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20, blame: 5, omikuji: 2, bless: 2, ship: 5, broke: 0, watch: 2, unwatch: 0 };
+export const KARMA = { light: 0, bowl: 1, bow: 2, offer: 3, prayer: 3, puff: 1, burnout: 10, resolve: 20, blame: 5, omikuji: 2, bless: 2, ship: 5, broke: 0, watch: 2, unwatch: 0, feed: 3 };
 
 /**
  * A vigil is one incident. It opens with the first thing anyone does at the altar, and closes when
@@ -258,6 +258,22 @@ export function cleanScreen(raw) {
   }
   return out;
 }
+
+/**
+ * The kami: the spirit that lives in a shrine and keeps the servers up, as long as it is fed. Anything
+ * done at the altar feeds it (KAMI_FEEDS). Left alone it goes from pleased to starving (KAMI_MOODS: each
+ * mood lasts until that long since its last meal), and the room reads how it feels in the heading, on
+ * the TV, and, for whoever asked, on their phone once it is hungry. Nothing real hangs on its mood: the
+ * servers go down when they go down. The kami only saw it coming. Feeding one that has waited a day or
+ * more (KAMI_THANKS_AFTER), or its first meal ever, earns the feeder KARMA.feed. None in the demo.
+ * Its lines are in shared/kami.js.
+ */
+const HOUR = 3600 * 1000;
+export const KAMI_FEEDS = new Set(['light', 'bowl', 'bow', 'offer', 'prayer', 'blame', 'omikuji']);
+export const KAMI_MOODS = [['pleased', 2 * HOUR], ['content', 24 * HOUR], ['peckish', 48 * HOUR], ['hungry', 96 * HOUR], ['starving', Infinity]];
+export const KAMI_HUNGRY = 48 * HOUR; // the reminder goes out once it has waited this long
+export const KAMI_STARVE = 96 * HOUR; // its protection, as a meter, runs out here
+export const KAMI_THANKS_AFTER = 24 * HOUR;
 
 /** The letters a TV pairing code is made of: no 0/O, 1/I/L, 2/Z, 5/S or 8/B to mix up across a room. */
 export const CODE_ALPHABET = 'ACDEFHJKMNPQRTUVWXY34679';

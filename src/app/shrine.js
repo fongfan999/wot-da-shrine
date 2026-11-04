@@ -22,6 +22,7 @@ import { applyStandings, dailyFx, renderBowBadge } from './standing.js';
 import { creditsFx, nope, takeTogether, thankFx } from './together.js';
 import { vowFx } from './vow.js';
 import { charmFx } from './charms.js';
+import { fedFx, renderKami } from './kami.js';
 import { openShare } from './shareSheet.js';
 import { SHIPPED_FOR, layersOn, sameMix } from '../../shared/rules.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
@@ -246,6 +247,7 @@ function onShrineMessage(msg) {
         if (tv) renderTv();
         if (arrivedFromTv()) greetFromTv(people.get(msg.me)?.name ?? state.me.name);
         renderRecords();
+        renderKami(); // now that the room has said where it stands, the kami has a mood
         msg.prayers.slice(-6).forEach((p, i) => gsap.delayedCall(1.2 + i * 0.12, () => wishes.hang(p.text, p.name, false)));
         msg.prayers.slice(-3).forEach((p, i) => gsap.delayedCall(2.4 + i * 1.8, () => prayerFx(p.text, `${p.avatar} ${p.name}`, true)));
       } else {
@@ -340,6 +342,7 @@ function onShrineMessage(msg) {
       applyStandings(msg.standings); // after the act's own news: a promotion reads as what it earned
       if (msg.vowKept) vowFx({ ...msg.vowKept, kept: true });
       if (msg.charmed) charmFx(msg.charmed, msg.by);
+      if (msg.fed) fedFx(msg); // the kami ate, and may have thanked whoever fed it
       pingPerson(msg.by.id, ACT_ICONS[msg.kind]);
       break;
   }
@@ -397,7 +400,7 @@ function remoteAct(msg) {
 }
 
 /** The shrine is the source of truth for the room's counters. */
-function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo, blessing, deploys, watch, watched, mornings, vow, vowed, charms }) {
+function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longest, undo, blessing, deploys, watch, watched, mornings, vow, vowed, charms, kami }) {
   if (incense !== undefined && incense !== counters.incense) { counters.incense = incense; updateStats(); }
   if (karma !== undefined && karma !== counters.karma) { if (state.greeted) karmaBeat(karma - counters.karma); counters.karma = karma; updateStats(!state.greeted); bump(statKarma); }
   if (since) state.roomSince = since - state.clockSkew;
@@ -427,6 +430,8 @@ function syncCounters({ incense, karma, since, prayed, vigil: v, survived, longe
   // They're back can be taken back for a moment, by whoever said it (renderUndo checks who).
   if (undo !== undefined) { state.undo = undo ? { by: undo.by, until: undo.until - state.clockSkew } : null; renderUndo(); }
   if (survived !== undefined && survived !== records.survived) { records.survived = survived; if (state.greeted) renderRecords(); }
+  if (kami !== undefined) state.kami = kami;
+  if (kami !== undefined || v !== undefined) renderKami(); // its mood follows its meals, and the vigil
   if (state.greeted) renderRecords();
 }
 

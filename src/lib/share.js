@@ -110,6 +110,8 @@ function altarMarkup(host, plain = false) {
  */
 function headline(data) {
   if (data.headline) return data.headline;
+  // Nothing down: the count of days leads, and what the title names is what was down last time.
+  if (data.quietDays != null) return data.quietDays >= 2 ? [`${data.quietDays} days without`, 'an incident.'] : data.quietDays === 1 ? ['A whole day without', 'an incident.'] : ['Nothing has gone', 'down. Yet.'];
   const title = String(data.title ?? '').trim();
   if (title) return [title, data.resolved ? 'Back online.' : data.open ? 'The team is praying.' : 'The team prayed.'];
   return data.resolved ? ['The servers are', 'back.'] : ['We prayed for', 'the servers.'];
@@ -120,7 +122,7 @@ const fit = (text, base, width, em) => Math.min(base, Math.floor(width / (Math.m
 
 /**
  * Build the card. `data`:
- *   room, title, resolved, open (a vigil is on), people (count), avatars (emoji), minutes, karma, prayers (count),
+ *   room, title, resolved, open (a vigil is on), quietDays (nothing down: whole days without an incident, else null), people (count), avatars (emoji), minutes, karma, prayers (count),
  *   incense (count), quotes [{text, name}], url (as shown), link (the full address, drawn as a QR when given);
  *   `eyebrow`, `headline` [line1, line2] and `facts` override
  *   what the state would say (the link preview images are drawn this way).
@@ -142,8 +144,8 @@ export function cardSvg(data) {
   if (data.incense) facts.push(`${data.incense} incense lit`);
   if (data.karma) facts.push(`${data.karma} karma`);
   if (data.prayers) facts.push(`${data.prayers} prayer${data.prayers === 1 ? '' : 's'}`);
-  if (data.survived) facts.push(`vigil #${data.survived + (data.resolved ? 0 : 1)}`);
-  const factsLine = data.facts ?? (facts.join(' · ') || 'The incense is lit. The rack is listening.');
+  if (data.survived) facts.push(data.quietDays != null ? `${data.survived} vigil${data.survived === 1 ? '' : 's'} survived` : `vigil #${data.survived + (data.resolved ? 0 : 1)}`);
+  const factsLine = data.facts ?? (facts.join(' · ') || (data.quietDays != null ? 'The kami is fed. The rack hums on.' : 'The incense is lit. The rack is listening.'));
 
   const quotes = (data.quotes ?? []).slice(-3).reverse();
   let y = 330;

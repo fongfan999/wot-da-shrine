@@ -4,11 +4,26 @@
  * Slack would print if the demo shrine's link were pasted right now).
  */
 
+const DAY_MIN = 1440;
+/** Days without an incident, as the preview says it: whole days once there is one, else hours. '' before an hour. */
+export function quietText(st) {
+  const m = st?.quietFor ?? 0;
+  if (m >= 2 * DAY_MIN) return `${Math.floor(m / DAY_MIN)} days without an incident`;
+  if (m >= DAY_MIN) return 'a whole day without an incident';
+  if (m >= 120) return `quiet for ${Math.floor(m / 60)} hours`;
+  if (m >= 60) return 'quiet for an hour';
+  return '';
+}
+/** How the kami feels, for a preview: nothing before its first meal, or where there is none (the demo). */
+const kamiText = (st) => (st.kami && st.kami !== 'new' ? `the kami is ${st.kami}` : '');
+
 /** One line about the room, for link previews: "3 praying · incense burning · 48 karma". */
 export function describe(st) {
   const bits = [];
   if (st.downFor) bits.push(`down for ${st.downFor < 60 ? `${st.downFor} min` : `${Math.floor(st.downFor / 60)}h ${st.downFor % 60}m`}`);
   else if (st.blessing) bits.push('blessing a deploy');
+  else if (quietText(st)) bits.push(quietText(st));
+  if (!st.downFor && kamiText(st)) bits.push(kamiText(st));
   bits.push(st.people === 1 ? '1 praying' : `${st.people} praying`);
   bits.push(st.lit ? `incense burning, ${Math.ceil(st.burnLeft / 60)} min left` : 'incense is cold');
   if (st.karma) bits.push(`${st.karma} karma`);
@@ -25,8 +40,10 @@ const justBack = (st, now) => Boolean(st?.resolvedAt && now - st.resolvedAt < 36
 /** The preview's title: the room's own title when it has one, else what state it is in. */
 export function previewTitle(st, room, now = Date.now()) {
   const back = justBack(st, now);
+  // Nothing down for a day or more: the count leads, whatever the last incident was called.
+  if (st && !st.downFor && !back && st.quietFor >= DAY_MIN) return `${st.quietFor >= 2 * DAY_MIN ? `${Math.floor(st.quietFor / DAY_MIN)} days` : 'A whole day'} without an incident · ${room}`;
   if (st?.title) return `${st.title} · ${st.downFor ? 'pray at' : back ? 'back online ·' : ''} ${room}`.replace(/\s+/g, ' ');
-  return st?.downFor ? `The servers are down · pray at ${room}` : back ? `The servers are back · ${room}` : `Pray for the servers · ${room}`;
+  return st?.downFor ? `The servers are down · pray at ${room}` : back ? `The servers are back · ${room}` : `Keep the servers up · ${room}`;
 }
 
 

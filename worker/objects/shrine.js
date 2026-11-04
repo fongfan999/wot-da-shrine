@@ -8,7 +8,8 @@
 import { DurableObject } from 'cloudflare:workers';
 import { cleanSub, send as sendPush, topicOf } from '../push.js';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
-import { AVATARS, BLESSING_BLAME, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
+import { kamiLine, kamiMood } from '../../shared/kami.js';
+import { AVATARS, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
@@ -30,7 +31,7 @@ const HOOK_AVATAR = '🔔'; // the alerting system, as the feed shows it
  * want to hear about and their clock, for the evening reminder.
  */
 const MAX_SUBS = 100;
-const PUSH_TOPICS = ['down', 'watch', 'morning'];
+const PUSH_TOPICS = ['down', 'watch', 'morning', 'kami'];
 const PUSH_COOLDOWN = 10 * 60 * 1000; // a flapping monitor opens vigil after vigil: phones hear the first
 const REMIND_AT = 19 * 3600 * 1000; // a run waiting on today's bow is mentioned at 7 in the evening, their time
 const DAY = 86400000;
@@ -85,6 +86,7 @@ const EMPTY = {
   vowed: { kept: 0, missed: 0 },
   charms: {}, // the charms the room has earned: id → when (0: earned before the shrine kept charms)
   feats: { ...EMPTY_FEATS }, // what the shrine tallies only for charms (see CHARMS in shared/rules.js)
+  kami: { fedAt: 0, by: '', avatar: '' }, // the spirit of the shrine: when it last ate, and who fed it (shared/kami.js)
 };
 
 function clean(text, max) {
@@ -115,7 +117,7 @@ export class Shrine extends DurableObject {
       this.alarmAt = (await ctx.storage.getAlarm()) ?? 0;
       this.sweepAt = (await ctx.storage.get('sweep')) ?? this.alarmAt; // when the shrine is forgotten; the alarm may ring sooner, for a reminder
       this.subs = (await ctx.storage.get('push')) ?? {}; // endpoint → { endpoint, keys, name, avatar, tz, topics, at, reminded }
-      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys }, watched: { ...EMPTY.watched, ...saved?.watched }, daily: { ...EMPTY.daily, ...saved?.daily }, devotees: { ...saved?.devotees }, vowed: { ...EMPTY.vowed, ...saved?.vowed }, charms: { ...saved?.charms }, feats: { ...EMPTY_FEATS, ...saved?.feats } };
+      this.state = { ...EMPTY, ...saved, meta: this.demo ? { ...DEMO_META } : { ...EMPTY.meta, ...saved?.meta }, deploys: { ...EMPTY.deploys, ...saved?.deploys }, watched: { ...EMPTY.watched, ...saved?.watched }, daily: { ...EMPTY.daily, ...saved?.daily }, devotees: { ...saved?.devotees }, vowed: { ...EMPTY.vowed, ...saved?.vowed }, charms: { ...saved?.charms }, feats: { ...EMPTY_FEATS, ...saved?.feats }, kami: { ...EMPTY.kami, ...saved?.kami } };
       // A shrine from before charms were kept: the blames its vigils remember count, and whatever it has
       // already done is on the shelf, quietly, with nothing paid for it.
       if (saved && !saved.feats) {
@@ -503,9 +505,11 @@ export class Shrine extends DurableObject {
 
     if (!s.since) s.since = Date.now();
     s.karma += KARMA[msg.t] ?? 0;
+    const fed = this.feed(by, msg.t);
+    if (fed) { out.fed = fed; s.karma += fed.karma ?? 0; }
     const demoOpens = this.demo && OPENS_VIGIL.has(msg.t) && (msg.t === 'light' || Date.now() - s.resolvedAt > CELEBRATE_FOR);
     if (!s.vigil && (opens || demoOpens)) this.openVigil(by);
-    this.credit(by, (KARMA[msg.t] ?? 0) + (out.daily?.bonus ?? 0)); // after the vigil opens: what opened it is theirs in its cast
+    this.credit(by, (KARMA[msg.t] ?? 0) + (out.daily?.bonus ?? 0) + (out.fed?.karma ?? 0)); // after the vigil opens: what opened it is theirs in its cast
     if (s.vigil && msg.t === 'prayer') { const c = this.castOf(by); if (c) c.prayers += 1; }
     if (s.vigil && VIGIL_FIELD[msg.t]) s.vigil[VIGIL_FIELD[msg.t]] += 1;
     // The room's bows and prayers while a deploy goes out are its blessing.
@@ -513,7 +517,7 @@ export class Shrine extends DurableObject {
     if (s.blessing) s.blessing.peak = Math.max(s.blessing.peak, this.people().length);
     if (s.vigil) {
       s.vigil.lastAt = Date.now();
-      s.vigil.karma += (KARMA[msg.t] ?? 0) + (out.bonus ?? 0) + (out.daily?.bonus ?? 0);
+      s.vigil.karma += (KARMA[msg.t] ?? 0) + (out.bonus ?? 0) + (out.daily?.bonus ?? 0) + (out.fed?.karma ?? 0);
       s.vigil.peak = Math.max(s.vigil.peak, this.people().length);
     }
     const charmed = this.award(by); // before the counters: what it pays is in them
@@ -725,6 +729,23 @@ export class Shrine extends DurableObject {
     return { streak: me.streak, bonus: dailyBonus(me.streak), room: r.streak };
   }
 
+  /**
+   * The kami eats: `kind` is something done at the altar (KAMI_FEEDS), and the kami remembers when and
+   * by whom. Returns { was } (its mood before the meal) when it ate, with `karma` when the meal was worth
+   * thanks: its first ever, or one it had waited KAMI_THANKS_AFTER for. Null when this does not feed it.
+   */
+  feed(by, kind) {
+    if (this.demo || !KAMI_FEEDS.has(kind)) return null;
+    const k = this.state.kami;
+    const now = Date.now();
+    const was = kamiMood(k, now);
+    const waited = k.fedAt ? now - k.fedAt : Infinity;
+    k.fedAt = now;
+    k.by = by.name;
+    k.avatar = by.avatar;
+    return waited >= KAMI_THANKS_AFTER ? { was, karma: KARMA.feed } : { was };
+  }
+
   /** Their ledger entry, made if they have none yet. */
   ensure(person) {
     const key = devoteeKey(person);
@@ -863,7 +884,7 @@ export class Shrine extends DurableObject {
   counters() {
     const s = this.state;
     const undo = s.undo && Date.now() - s.undo.at < RESOLVE_UNDO ? { by: s.undo.id, until: s.undo.at + RESOLVE_UNDO } : null;
-    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo, blessing: s.blessing, deploys: s.deploys, watch: s.watch, watched: s.watched, mornings: s.daily, vow: s.vow, vowed: s.vowed, ...this.charms() }; // mornings: the room's run; an act's `daily` is one bow's
+    return { incense: s.incense, karma: s.karma, litAt: s.litAt, since: s.since, prayed: s.prayed, resolvedAt: s.resolvedAt, vigil: s.vigil, survived: s.survived, longest: s.longest, undo, blessing: s.blessing, deploys: s.deploys, watch: s.watch, watched: s.watched, mornings: s.daily, vow: s.vow, vowed: s.vowed, kami: this.demo ? null : s.kami, ...this.charms() }; // mornings: the room's run; an act's `daily` is one bow's
   }
 
   /**
@@ -1035,8 +1056,16 @@ export class Shrine extends DurableObject {
       blessing: Boolean(s.blessing), // a deploy is going out
       streak: s.deploys.streak,
       lastPrayer: s.prayers.at(-1)?.text ?? '',
+      kami: this.demo ? '' : kamiMood(s.kami, now), // how the spirit of the shrine feels (shared/kami.js)
+      quietFor: s.vigil ? 0 : this.quietSince() ? Math.max(0, Math.round((now - this.quietSince()) / 60000)) : 0, // minutes without an incident
       now,
     };
+  }
+
+  /** When the room's run without an incident began: the end of its last vigil, else its first act. 0 before either. */
+  quietSince() {
+    const s = this.state;
+    return s.history[0]?.endedAt || s.since || 0;
   }
 
   /** Tell the world. Fire-and-forget: the room never waits on the counter, and a missing binding (tests) is fine. */
@@ -1174,7 +1203,7 @@ export class Shrine extends DurableObject {
   nextReminder(now) {
     let next = Infinity;
     for (const sub of Object.values(this.subs)) {
-      if (!sub.topics?.morning) continue;
+      if (!sub.topics?.morning && !sub.topics?.kami) continue;
       const shift = sub.tz * 60000;
       let at = Math.floor((now + shift) / DAY) * DAY + REMIND_AT - shift;
       if (at <= now) at += DAY;
@@ -1184,27 +1213,36 @@ export class Shrine extends DurableObject {
   }
 
   /**
-   * The evening reminder: someone whose run of morning bows (two or more) is waiting on today's,
-   * who is not here and has not been told today, hears that it ends at midnight.
+   * The evening reminder, one a day at most, at 7 pm by each subscriber's clock. First the kami: once
+   * it has gone KAMI_HUNGRY unfed, everyone who asked hears so, once per hunger (a meal starts it
+   * over). Else their run of morning bows: someone whose run (two or more) is waiting on today's hears
+   * that it ends at midnight. Nobody kneeling here is told either.
    */
   async remind(now) {
     const room = this.ctx.id.name;
     if (this.demo || !room) return;
     const here = new Set(this.people().map(devoteeKey));
+    const k = this.state.kami;
+    const hungry = k.fedAt && now - k.fedAt >= KAMI_HUNGRY;
     const due = [];
     for (const sub of Object.values(this.subs)) {
-      if (!sub.topics?.morning) continue;
+      if (!sub.topics?.morning && !sub.topics?.kami) continue;
       const shift = sub.tz * 60000;
       const day = dayOf(now, sub.tz);
       if (sub.reminded === day || now + 1000 < day * DAY + REMIND_AT - shift) continue;
       sub.reminded = day;
+      if (here.has(devoteeKey(sub))) continue;
+      if (sub.topics.kami && hungry && sub.kamiTold !== k.fedAt) {
+        sub.kamiTold = k.fedAt;
+        due.push([sub, { title: 'The kami is hungry', body: `${kamiLine(kamiMood(k, now), k, room, { now, tz: sub.tz })} One bow at ${room} will do.`, tag: `${room}:kami`, url: `/r/${room}` }, 'kami']);
+        continue;
+      }
+      if (!sub.topics.morning) continue;
       const d = this.state.devotees[devoteeKey(sub)];
-      if (!d || d.streak < 2 || d.day !== day - 1 || here.has(devoteeKey(sub))) continue;
-      due.push([sub, d.streak]);
+      if (!d || d.streak < 2 || d.day !== day - 1) continue;
+      due.push([sub, { title: `Keep your ${d.streak}-morning run`, body: `You haven't bowed at ${room} today. One bow before midnight keeps it going.`, tag: `${room}:morning`, url: `/r/${room}` }, 'morning']);
     }
     await this.ctx.storage.put('push', this.subs);
-    for (const [sub, n] of due) {
-      this.pushTo([sub], { title: `Keep your ${n}-morning run`, body: `You haven't bowed at ${room} today. One bow before midnight keeps it going.`, tag: `${room}:morning`, url: `/r/${room}` }, { ttl: 4 * 3600, topic: topicOf('morning', room) });
-    }
+    for (const [sub, msg, topic] of due) this.pushTo([sub], msg, { ttl: 4 * 3600, topic: topicOf(topic, room) });
   }
 }

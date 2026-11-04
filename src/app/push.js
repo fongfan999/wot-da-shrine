@@ -12,9 +12,9 @@ import { t } from '../lib/strings.js';
 import { $, fmt, roomName, state, tv } from './context.js';
 import { toast } from './ui.js';
 
-const KEY = 'shrine:push'; // { [room]: { down, watch, morning } }
+const KEY = 'shrine:push'; // { [room]: { down, watch, morning, kami } }
 const ASKED = 'shrine:push-asked'; // { [room]: { [reason]: true, at } }
-const TOPICS = ['down', 'watch', 'morning'];
+const TOPICS = ['down', 'watch', 'morning', 'kami'];
 
 const read = (k) => { try { return JSON.parse(localStorage.getItem(k)) ?? {}; } catch { return {}; } };
 const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode: it lasts this visit */ } };

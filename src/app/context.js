@@ -60,6 +60,7 @@ export const state = {
   blessing: null,     // the deploy being blessed: { startedAt, by, what, bows, prayers, peak }
   shippedAt: 0,       // the last Shipped, while the heading still says so
   watch: null,        // who holds the pager: { startedAt, id, name, avatar, by, vigils }
+  kami: null,         // the spirit of the shrine: { fedAt, by, avatar }, in the shrine's clock (shared/kami.js)
 };
 
 /** What this room's shrine has survived: its past vigils, kept by the shrine. */
