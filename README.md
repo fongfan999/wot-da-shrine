@@ -601,9 +601,12 @@ The shrine is built to travel from one incident channel to the next:
 ```bash
 npm install
 npm run dev        # Vite + the Worker and Durable Object in workerd, http://localhost:5173
+npm test           # smoke tests: the Worker and a shrine over real sockets, a few seconds
+npm run check      # what CI runs on every push and pull request: size budget, tests, build
 ```
 
-`npm run preview` builds and serves the production bundle locally.
+`npm run preview` builds and serves the production bundle locally. Node 22.12 or newer
+(`.nvmrc` says 24).
 
 ## Deploy
 
@@ -642,6 +645,11 @@ One folder per kind of thing, one file per part of the page, and nothing very lo
   in `worker/middleware.js`, and the Durable Objects in `worker/objects/`.
 
 A new part of the page usually means a partial, a stylesheet and a module with the same name.
+
+**Nothing very long** is checked: no code file may grow past 400 lines or 24 KB
+(`npm run check:size`). A file that would is split by what it does, into a folder. The few
+that were already longer are listed in `scripts/size-budget.json`, each with a ceiling it
+may not grow past, until they are split and come off the list.
 
 ```
 index.html               the home page: head + includes (/ and /tv)
@@ -723,6 +731,9 @@ worker/objects/shrine.js   Shrine Durable Object: one per room
 worker/objects/world.js    World Durable Object: totals across every shrine
 worker/objects/pairing.js  Pairing Durable Object: one per TV code
 wrangler.jsonc           Worker + Durable Object config
+test/                    smoke tests (node --test): the Worker run through Vite, shrines over real sockets
+scripts/check-size.js    the size budget; size-budget.json lists the files waiting to be split
+.github/workflows/ci.yml size budget, tests and build, on every push and pull request
 ```
 
 ## License
