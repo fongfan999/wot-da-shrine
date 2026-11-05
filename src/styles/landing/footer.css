@@ -3,10 +3,11 @@
 .foot__inner { display: grid; grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); gap: 32px; max-width: 1080px; margin: 0 auto; padding: 48px var(--gutter) 36px; }
 .foot__brand { display: flex; flex-direction: column; gap: 8px; }
 .foot__logo { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-size: 17px; }
-.foot__mark { width: 24px; height: 28px; translate: none; }
-.foot__logo:is(:hover, :focus-visible) .brand__smoke { animation: brand-rise-again .9s var(--ease) both; }
-.foot__logo:is(:hover, :focus-visible) .brand__smoke:nth-child(2) { animation-delay: .12s; }
-.foot__logo:is(:hover, :focus-visible) .brand__smoke:nth-child(3) { animation-delay: .24s; }
+.foot__mark { width: 31px; height: 26.2px; translate: 0 -2px; }
+.foot__logo:is(:hover, :focus-visible) .brand__embers circle { animation: brand-glow-again .8s ease-out both; }
+.foot__logo:is(:hover, :focus-visible) .brand__embers circle:nth-child(2) { animation-delay: .08s; }
+.foot__logo:is(:hover, :focus-visible) .brand__embers circle:nth-child(3) { animation-delay: .16s; }
+.foot__logo:is(:hover, :focus-visible) .brand__wisp { animation: brand-wisp-again .9s var(--ease) .3s both; }
 .foot__top { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 7px 14px 7px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--paper-raised); color: var(--ink); font-size: 13px; font-weight: 600; transition: border-color 160ms ease, transform 200ms var(--ease); }
 .foot__top .ico { width: 15px; height: 15px; color: var(--flame); transition: transform 200ms var(--ease); }
 .foot__top:hover { border-color: var(--flame); }

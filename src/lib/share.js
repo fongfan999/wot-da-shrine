@@ -82,8 +82,9 @@ function drawingCss(c) {
     .temple-copy .t-sign-big { font-size: 13px; font-weight: 700; letter-spacing: .08em; }
     .brand__wot { fill: ${c.ink}; }
     .brand__shrine { color: ${c.accent}; }
-    .brand__bowl, .brand__sticks { stroke: ${c.ink}; }
-    .brand__smoke { stroke: ${c.accent}; }
+    .brand__gate, .brand__sticks { stroke: ${c.ink}; }
+    .brand__bowl { fill: ${c.ink}; }
+    .brand__wisp { display: none; }
     .brand__embers circle { fill: ${c.flame}; stroke: none; }
   `;
 }
@@ -202,8 +203,9 @@ export function cardSvg(data) {
   ${avatarSvg}${more}
 
   <g transform="translate(68 ${H - 92})">
-    <g transform="translate(0 -2) scale(1.55)" style="stroke-linecap:round;stroke-linejoin:round;stroke-width:4.2;fill:none">${brandMark.replace(/<svg[^>]*>/, '<svg viewBox="8 2 48 54" width="21" height="24">')}</g>
-    <g transform="translate(38 0)">${brandWord.replace(/<svg[^>]*>/, '<svg viewBox="-3.4 -69.4 466 78" width="226" height="38">')}</g>
+    <!-- the Gate, its posts and bowl on the wordmark's baseline, as in the bar -->
+    ${brandMark.replace(/<svg[^>]*>/, '<svg x="0" y="-10" width="54.6" height="46.2" viewBox="2 5.5 28 23.7" fill="none" stroke-linecap="round" stroke-linejoin="round">')}
+    <g transform="translate(65.3 0)">${brandWord.replace(/<svg[^>]*>/, '<svg viewBox="-3.4 -69.4 466 78" width="226" height="38">')}</g>
   </g>
   ${data.link ? linkSvg(data.link, data.url, c) : `<text x="${W - 72}" y="${data.plain ? H - 62 : 84}" text-anchor="end" font-family="${MONO}" font-size="${data.plain ? 20 : 17}" letter-spacing="1" fill="${data.plain ? c.ink : c.muted}">${esc(data.url)}</text>`}
 </svg>`;

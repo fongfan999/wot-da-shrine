@@ -119,6 +119,7 @@ const vigilTime = $('#vigil-time');
 const vigilMeta = $('#vigil-meta');
 const vigilLabel = $('#vigil-label');
 const lightCue = $('#light-cue');
+const favicon = document.querySelector('link[rel="icon"]');
 const hhmmss = (ms) => {
   const s = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(s / 3600);
@@ -131,6 +132,9 @@ const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m
 export function tickVigil() {
   // The scene reads this: the down rack's lights go out while a vigil is open.
   if (state.vigil) body.dataset.vigil = '1'; else delete body.dataset.vigil;
+  // So does the tab: while a vigil is open the favicon's tile turns ember.
+  const icon = state.vigil ? '/favicon-down.svg' : '/favicon.svg';
+  if (favicon && favicon.getAttribute('href') !== icon) favicon.setAttribute('href', icon);
   delete vigilEl.dataset.mode;
   // No vigil open: the altar says how to begin one. Not on a TV, which has no hands, and not while
   // the incense still burns from the last vigil (touching the censer then only stirs the smoke).

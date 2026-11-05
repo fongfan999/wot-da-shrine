@@ -708,7 +708,8 @@ src/lib/
   share.js               the share card: live altar + stats as SVG, rasterised to PNG
   omikuji.js             the fortunes: five levels, three lines each
   icons.js               line icons for the dock, tray and pings
-public/favicon.svg       the mark
+public/favicon*.svg      the Gate on its tile; -down is the ember tile a tab wears while a vigil is open
+public/logo.svg          the Gate, full size
 public/og*.png           the link preview cards (1200×630): the shrine, a room that is down, one that is back
 public/wotdafong-*.svg   the Wot Da Fong P?! mark for the credit line
 shared/                  used by the page and the Worker: the rules (burn time, karma, vigils, the kami), the kami’s lines, ready-made prayers, room names, link previews

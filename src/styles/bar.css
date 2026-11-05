@@ -15,26 +15,28 @@
 .brand__word { display: block; height: 26px; width: auto; aspect-ratio: 466 / 78; }
 .brand__wot { fill: var(--ink); }
 .brand__shrine { color: var(--accent); }
-/* The Censer leads, like OfflineMask's icon, its bowl on the wordmark's baseline */
-.brand__mark { width: 21px; height: 24px; translate: 0 -2px; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 4.2; }
-.brand__bowl, .brand__sticks { stroke: var(--ink); }
-.brand__smoke { stroke: var(--accent); stroke-dasharray: 1; transform-box: fill-box; }
-.brand__embers circle { fill: var(--flame); stroke: none; transform-box: fill-box; transform-origin: center; }
+/* The Gate leads: the torii over the censer, its posts and bowl on the wordmark's baseline, the torii a little above the letters */
+.brand__mark { width: 37px; height: 31.3px; translate: 0 -4px; overflow: visible; }
+.brand__gate, .brand__sticks { stroke: var(--ink); }
+.brand__bowl { fill: var(--ink); }
+.brand__wisp { stroke: var(--accent); stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
+.brand__embers circle { fill: var(--flame); transform-box: fill-box; transform-origin: center; }
 
-/* The Censer lights once as the bar arrives, and again on hover or focus: smoke rises, the tips glow.
-   Hover swaps in a copy of each keyframe so the animation restarts. */
-.brand__smoke { animation: brand-rise .9s var(--ease) .7s both; }
-.brand__smoke:nth-child(2) { animation-delay: .82s; }
-.brand__smoke:nth-child(3) { animation-delay: .94s; }
-.brand__embers circle { animation: brand-glow .8s ease-out .6s both; }
-.brand:is(:hover, :focus-visible) .brand__smoke { animation-name: brand-rise-again; animation-delay: 0s; }
-.brand:is(:hover, :focus-visible) .brand__smoke:nth-child(2) { animation-delay: .12s; }
-.brand:is(:hover, :focus-visible) .brand__smoke:nth-child(3) { animation-delay: .24s; }
+/* The mark lights once as the bar arrives, and again on hover or focus: the embers catch left to right and swell,
+   then one wisp rises through the gate and is gone, so the mark at rest has no smoke. Hover swaps in a copy of each
+   keyframe so the animation restarts. */
+.brand__embers circle { animation: brand-glow .8s ease-out .5s both; }
+.brand__embers circle:nth-child(2) { animation-delay: .58s; }
+.brand__embers circle:nth-child(3) { animation-delay: .66s; }
+.brand__wisp { animation: brand-wisp .9s var(--ease) .82s both; }
 .brand:is(:hover, :focus-visible) .brand__embers circle { animation-name: brand-glow-again; animation-delay: 0s; }
-@keyframes brand-rise { from { stroke-dashoffset: 1; opacity: .2; translate: 0 3px; } 60% { opacity: 1; } to { stroke-dashoffset: 0; opacity: 1; translate: none; } }
-@keyframes brand-rise-again { from { stroke-dashoffset: 1; opacity: .2; translate: 0 3px; } 60% { opacity: 1; } to { stroke-dashoffset: 0; opacity: 1; translate: none; } }
+.brand:is(:hover, :focus-visible) .brand__embers circle:nth-child(2) { animation-delay: .08s; }
+.brand:is(:hover, :focus-visible) .brand__embers circle:nth-child(3) { animation-delay: .16s; }
+.brand:is(:hover, :focus-visible) .brand__wisp { animation-name: brand-wisp-again; animation-delay: .3s; }
 @keyframes brand-glow { 0% { opacity: .3; scale: .6; } 45% { opacity: 1; scale: 1.35; } 70% { opacity: .75; scale: 1; } 100% { opacity: 1; scale: 1; } }
 @keyframes brand-glow-again { 0% { opacity: .3; scale: .6; } 45% { opacity: 1; scale: 1.35; } 70% { opacity: .75; scale: 1; } 100% { opacity: 1; scale: 1; } }
+@keyframes brand-wisp { 0% { stroke-dashoffset: 1; opacity: 0; translate: 0 1px; } 12% { opacity: .9; } 55% { stroke-dashoffset: 0; opacity: .85; } 100% { stroke-dashoffset: 0; opacity: 0; translate: 0 -2px; } }
+@keyframes brand-wisp-again { 0% { stroke-dashoffset: 1; opacity: 0; translate: 0 1px; } 12% { opacity: .9; } 55% { stroke-dashoffset: 0; opacity: .85; } 100% { stroke-dashoffset: 0; opacity: 0; translate: 0 -2px; } }
 
 .room-chip {
   display: inline-flex;
