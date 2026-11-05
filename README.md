@@ -617,7 +617,7 @@ It deploys to https://shrine.wotda.app as a Workers custom domain (the
 `*.workers.dev` URL and preview URLs are turned off in `wrangler.jsonc`.
 
 The shrine used to live at `shrine.wotdafong.dev`. A second, tiny Worker in `redirect/`
-answers that address and the bare `wotda.app`:
+answers that address:
 
 ```bash
 npm run deploy:redirect
@@ -625,8 +625,9 @@ npm run deploy:redirect
 
 A page visit to the old address gets a hand-over page that carries this browser's shrine (the
 `incense:*` keys: name, karma, runs, settings) to the new origin in `#carry=`, which the shared
-head takes once; anything else, webhooks included, gets a 308. The bare `wotda.app` goes to the
-workshop at https://wotdafong.dev/products until there are two apps to launch from.
+head takes once; anything else, webhooks included, gets a 308. The bare `wotda.app` is not this repo's: a
+redirect rule in the Cloudflare dashboard sends it to the workshop at
+https://wotdafong.dev/products until there are two apps to launch from.
 
 ## Project layout
 

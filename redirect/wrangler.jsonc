@@ -4,10 +4,9 @@
   "name": "wot-da-shrine-redirect",
   "main": "index.js",
   "compatibility_date": "2026-10-01",
-  "routes": [
-    { "pattern": "shrine.wotdafong.dev", "custom_domain": true },
-    { "pattern": "wotda.app", "custom_domain": true }
-  ],
+  // The bare wotda.app is not routed here: it already has its own DNS records and a redirect rule in
+  // the dashboard that sends it to the workshop. index.js still answers it the same way if it ever is.
+  "routes": [{ "pattern": "shrine.wotdafong.dev", "custom_domain": true }],
   "workers_dev": false,
   "preview_urls": false
 }
