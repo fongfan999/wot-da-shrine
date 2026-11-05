@@ -1,6 +1,6 @@
 /**
  * Notifications: the shrine calls people back while it is closed. A browser subscribes once, here,
- * and the shrine (notify() in worker/objects/shrine.js) sends through its push service when a vigil
+ * and the shrine (notify() in worker/objects/shrine/notifications.js) sends through its push service when a vigil
  * opens or ends, when the watch is handed to you, and at 7 pm when your run of morning bows is
  * waiting on today's. Nothing comes while you are kneeling in the shrine.
  *

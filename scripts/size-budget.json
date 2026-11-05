@@ -2,7 +2,6 @@
   "budget": {"lines":400,"kb":24},
   "headroom": 0.1,
   "ceilings": {
-    "worker/objects/shrine.js": {"lines":1570,"kb":79},
     "src/audio/music.js": {"lines":1040,"kb":42},
     "src/scene/devotee.js": {"lines":450,"kb":39},
     "src/scene/burner.js": {"lines":570,"kb":32},

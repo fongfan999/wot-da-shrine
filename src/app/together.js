@@ -2,7 +2,7 @@
  * Together: what each person put into the shrine, where the room can see it. The board of who
  * earned the most karma here this week, the way to the shrine's next level in one segment per person
  * who earned it, and the cast of a vigil, rolled like a film's credits when the servers come back.
- * The shrine keeps all of it (worker/objects/shrine.js); this is how it looks.
+ * The shrine keeps all of it (worker/objects/shrine/together.js); this is how it looks.
  */
 import gsap from 'gsap';
 import { RAISE_FED, RAISE_WINDOW, devoteeKey } from '../../shared/rules.js';

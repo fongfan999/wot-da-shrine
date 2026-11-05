@@ -18,7 +18,7 @@ import api from './routes/api.js';
 import rooms from './routes/rooms.js';
 import tv from './routes/tv.js';
 
-export { Shrine } from './objects/shrine.js';
+export { Shrine } from './objects/shrine/index.js';
 export { World } from './objects/world.js';
 export { Pairing } from './objects/pairing.js';
 

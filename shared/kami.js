@@ -1,6 +1,6 @@
 /**
  * The kami: the spirit that lives in a shrine and keeps the servers up, as long as it is fed. The
- * shrine keeps when it was last fed (worker/objects/shrine.js), the page reads its mood off that
+ * shrine keeps when it was last fed (worker/objects/shrine/kami.js), the page reads its mood off that
  * (src/app/kami.js), and both say the same thing about it: these lines, picked by the day so that
  * everyone in the room, and the phone the reminder lands on, reads the same one.
  */
