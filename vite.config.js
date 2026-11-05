@@ -8,8 +8,9 @@ import { cloudflare } from '@cloudflare/vite-plugin';
  * HTML partials: a line `<include src="src/partials/bar.html">` in index.html is replaced by that
  * file, indented to match. Paths in index.html are from the project root, paths in a partial from
  * that partial, so partials may include partials. Vite reloads the page when any .html file changes.
+ * The page tests' Worker serves the pages with it too (test/support/worker.js).
  */
-function partials() {
+export function partials() {
   const INCLUDE = /^([ \t]*)<include src="([^"]+)">$/gm;
   const expand = (html, dir) => html.replace(INCLUDE, (_, indent, src) => {
     const file = resolve(dir, src);

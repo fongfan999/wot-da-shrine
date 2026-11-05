@@ -1,7 +1,7 @@
 /**
  * The Worker, for tests: run through Vite and the Cloudflare plugin the same way `npm run dev` runs it
  * (workerd, the Durable Objects, the rate limits), on a free port and with nothing kept on disk, so
- * every run starts with empty shrines. Only the Worker: no pages, no partials.
+ * every run starts with empty shrines. Only the Worker, unless the page tests ask for the pages too.
  */
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
 import { cloudflare } from '@cloudflare/vite-plugin';
+import { partials } from '../../vite.config.js';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 
@@ -19,8 +20,10 @@ const STARTUP = 30_000;
  * does not load (a name nobody defined, a part defined twice) throws from inside the plugin, where
  * nobody awaits it, and the server would wait on it forever: that error, or STARTUP going by, is
  * thrown here instead, after closing the server so the tests can end.
+ *
+ * `pages: true` serves the pages as well, with their partials, as `npm run dev` does (test/page/).
  */
-export async function startWorker() {
+export async function startWorker({ pages = false } = {}) {
   // A cache of its own: the test files start their Workers at the same moment, and two Vites
   // optimizing into one node_modules/.vite trip over each other (ENOTEMPTY).
   const cacheDir = mkdtempSync(join(tmpdir(), 'wot-da-shrine-vite-'));
@@ -29,7 +32,7 @@ export async function startWorker() {
     cacheDir,
     configFile: false,
     logLevel: 'warn',
-    plugins: [cloudflare({ persistState: false, inspectorPort: false })],
+    plugins: [...(pages ? [partials()] : []), cloudflare({ persistState: false, inspectorPort: false })],
     server: { host: '127.0.0.1', port: 0 },
   });
   let fail;

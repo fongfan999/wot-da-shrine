@@ -88,6 +88,7 @@ morning bows. More in [Notifications](docs/notifications.md).
 npm install
 npm run dev        # the pages, the Worker and its Durable Objects in workerd, http://localhost:5173
 npm test           # the Worker and its shrines over real sockets, a few seconds
+npm run test:page  # the pages in a real browser against the Worker (once: npx playwright install chromium)
 npm run check      # what CI runs on every pull request: size budget, tests, build
 ```
 
