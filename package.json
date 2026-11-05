@@ -10,7 +10,7 @@
     "build": "vite build",
     "preview": "vite build && vite preview",
     "deploy": "vite build && wrangler deploy",
-    "test": "node --test \"test/**/*.test.js\"",
+    "test": "node --test --test-force-exit --test-timeout=60000 \"test/**/*.test.js\"",
     "check:size": "node scripts/check-size.js",
     "check": "npm run check:size && npm test && npm run build",
     "vapid": "node scripts/vapid.js"
