@@ -37,7 +37,7 @@ export const matsHere = () => (!roomName ? 0 : roomName === 'demo' ? MATS[MATS.l
 /** Someone passed someone still here, and now kneels closer: the room hears it (you, in a toast). */
 let lastOrder = null;
 function announceMoves(order) {
-  const ids = order.map((p) => p.id);
+  const ids = order.map((p) => p.id).filter((id) => id !== congregation.stool()); // the stool is outside the order
   const before = lastOrder && new Map(lastOrder.map((id, i) => [id, i]));
   lastOrder = ids;
   if (!before || !hasStanding() || tv) return;
@@ -56,10 +56,11 @@ function announceMoves(order) {
 
 export function renderPeople(newId) {
   const order = ranked();
-  congregation.set(order, state.myId, matsHere());
+  const watch = order.find(onWatch)?.id ?? null; // on the on-call stool, outside the order
+  congregation.set(order, state.myId, matsHere(), hasStanding() ? watch : null);
   announceMoves(order);
   const list = [...order].sort((a, b) => (b.id === state.myId) - (a.id === state.myId)); // the stack: you first
-  congregation.markWatch(list.find(onWatch)?.id);
+  congregation.markWatch(watch);
   congregation.markThanks(hasStanding() && !tv, state.myId);
 
   presence.innerHTML = '';

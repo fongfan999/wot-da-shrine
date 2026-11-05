@@ -186,6 +186,20 @@ the censer, bows and walks back. **Upkeep** is the kami's mood drawn on the
 shrine: dust when it is peckish, cobwebs when hungry, weeds when starving (they
 take the last two mats), and after a week unfed a tanuki moves in.
 
+**Raising a level.** Karma alone does not raise the next level. When the room's
+karma reaches it, the carpenters put up bamboo scaffolding around the shrine,
+with a sign that counts bows (not while the kami has gone a day unfed; they
+come with its next meal). Then three different people have to bow within a day
+of each other; a team smaller than three needs as many as have earned karma
+there. Each bow lashes a pole and the feed says so; the third raises the level,
+everyone at the altar stands up to look, and the toast names whoever raised it.
+Nobody bows: the scaffolding waits, and nothing is lost. This shrine shows the
+bows as faces in the build bar, with the time the first one runs out. Rules
+are `RAISE_*` in `shared/rules.js`; the demo grows with its karma as before.
+Whoever holds the watch kneels on the **on-call stool** in front of the altar,
+outside the order of the mats. The share card carries the shrine around the
+altar too.
+
 Title, subtitle and "back at" are shared by the whole room: click the title
 and type what is down, click "back at" to pick a time, set them in Customize,
 or open `/new?title=Payments+API+is+down&eta=…` and the first person in sets

@@ -10,7 +10,7 @@ import { cleanSub, send as sendPush, topicOf } from '../push.js';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
 import { kamiLine, kamiMood } from '../../shared/kami.js';
 import { OMEN_DEFY, readOmens } from '../../shared/omens.js';
-import { AVATARS, purifiable, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, WATCHED_MAX, WATCHED_NAME_MAX, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN } from '../../shared/rules.js';
+import { AVATARS, purifiable, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, WATCHED_MAX, WATCHED_NAME_MAX, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN, RAISE_BOWS, RAISE_FED, RAISE_WINDOW, SHRINE_LEVELS } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
@@ -81,6 +81,7 @@ const EMPTY = {
   devotees: {}, // what each person has earned here, by devoteeKey: { name, avatar, karma, streak, best, day, at, seen }
   daily: { day: 0, streak: 0, best: 0 }, // the days in a row someone made a morning bow here
   level: -1, // the shrine's level, as last grown to (-1: not yet worked out, see the constructor)
+  raising: null, // the next level while its scaffolding is up: { level, since, need, bows: [{ key, name, avatar, at }] }
   thanks: {}, // who thanked whom today: "from>to" (devotee keys) → the UTC day
   vow: null, // this week's: { week, kind, target, by, startedAt, progress, helpers: { key: { name, avatar, n } }, done }
   vows: [], // the last few, newest first: the vow as it ended, with outcome 'kept' or 'missed'
@@ -247,6 +248,9 @@ export class Shrine extends DurableObject {
         out.note = [174, 196, 220, 261].includes(msg.note) ? msg.note : 196;
         break;
       case 'bow': {
+        // The scaffolding is up: a bow from someone who has not bowed for it yet lashes a pole, and the last raises the level.
+        const raise = this.raiseBow(by);
+        if (raise) out.raise = raise;
         // The chorus: enough different people bowing together earns the room a bonus, and each of them their share.
         const now = Date.now();
         this.bows.set(by.id, { at: now, person: by });
@@ -800,9 +804,10 @@ export class Shrine extends DurableObject {
   /** The people whose standing changed, for the broadcast that says so; {} when nobody's did. */
   standings() {
     const grew = this.grow();
+    const up = this.scaffold(); // after a raise: the karma may already be past the next level too
     const kept = this.vowKept;
     this.vowKept = null;
-    if (!this.credited.size && !grew && !kept) return {};
+    if (!this.credited.size && !grew && !kept && !up) return {};
     const d = this.state.devotees;
     const wk = weekOf(Date.now());
     const list = [...this.credited].map((k) => d[k]).filter(Boolean).map(({ name, avatar, karma, streak, day, wk: w, wkKarma }) => ({ name, avatar, karma, streak, day, week: w === wk ? wkKarma : 0 }));
@@ -810,6 +815,7 @@ export class Shrine extends DurableObject {
     const out = this.together();
     if (list.length) out.standings = list;
     if (grew) out.grew = grew;
+    if (up) out.scaffold = up;
     if (kept) out.vowKept = kept;
     return out;
   }
@@ -864,7 +870,9 @@ export class Shrine extends DurableObject {
     const board = all.filter((d) => d.wk === wk && d.wkKarma > 0).sort((a, b) => b.wkKarma - a.wkKarma || (b.seen ?? 0) - (a.seen ?? 0)).slice(0, BOARD_SIZE)
       .map(({ name, avatar, wkKarma, streak, day }) => ({ name, avatar, karma: wkKarma, streak, day }));
     const builders = this.builders();
-    return { board, build: { level: s.level, shares: builders.slice(0, 6), rest: builders.slice(6).reduce((n, b) => n + b.karma, 0) } };
+    const r = s.raising;
+    const raising = r ? { level: r.level, since: r.since, need: r.need, bows: this.raisingBows().map(({ name, avatar, at }) => ({ name, avatar, at })) } : null;
+    return { board, build: { level: s.level, shares: builders.slice(0, 6), rest: builders.slice(6).reduce((n, b) => n + b.karma, 0), raising } };
   }
 
   /** Who put karma into the level the shrine is on now, most first. */
@@ -874,16 +882,58 @@ export class Shrine extends DurableObject {
   }
 
   /**
-   * The room's karma reached the shrine's next level: it grows, and the room hears who built it.
-   * Returns { level, by } when it did, else null. A shrine never shrinks back (a They're back taken back).
+   * The shrine grew: the last bow raised it (raiseBow), and the room hears who raised it and who built
+   * it. Returns { level, by, raisedBy } once, else null. The demo, where nobody keeps anything, grows
+   * with its karma as it always did. A shrine never shrinks back (a They're back taken back).
    */
   grow() {
     const s = this.state;
-    const lv = levelOf(s.karma);
-    if (lv <= s.level) return null;
-    const by = this.builders().slice(0, BOARD_SIZE);
-    s.level = lv;
-    return this.demo ? null : { level: lv, by };
+    if (this.demo) { s.level = Math.max(s.level, levelOf(s.karma)); return null; }
+    const raised = this.raised;
+    this.raised = null;
+    return raised ?? null;
+  }
+
+  /**
+   * The room's karma reached the next level: the carpenters put up the scaffolding, unless the kami
+   * has gone unfed (RAISE_FED); they come with the next meal. How many bows it takes: RAISE_BOWS, or
+   * as many people as have earned karma here when that is fewer. Returns { level, need } when it went up.
+   */
+  scaffold() {
+    const s = this.state;
+    const next = s.level + 1;
+    if (this.demo || s.raising || next >= SHRINE_LEVELS.length || s.karma < SHRINE_LEVELS[next]) return null;
+    if (s.kami.fedAt && Date.now() - s.kami.fedAt >= RAISE_FED) return null;
+    const team = Object.values(s.devotees).filter((d) => d.karma > 0).length;
+    s.raising = { level: next, since: Date.now(), need: Math.max(1, Math.min(RAISE_BOWS, team)), bows: [] };
+    return { level: next, need: s.raising.need };
+  }
+
+  /** The bows that still count toward the raising: the last RAISE_WINDOW. */
+  raisingBows(now = Date.now()) {
+    return (this.state.raising?.bows ?? []).filter((b) => now - b.at < RAISE_WINDOW);
+  }
+
+  /**
+   * A bow while the scaffolding is up: it lashes a pole, once per person; the bow that makes `need`
+   * different people within a day raises the level. Returns { level, n, need, raised } when it counted.
+   */
+  raiseBow(person) {
+    const s = this.state;
+    const r = s.raising;
+    if (!r || this.demo || !person?.name || person.id === 'hook') return null;
+    const now = Date.now();
+    const key = devoteeKey(person);
+    const bows = this.raisingBows(now);
+    if (bows.some((b) => b.key === key)) return { level: r.level, n: bows.length, need: r.need, again: true };
+    bows.push({ key, name: person.name, avatar: person.avatar, at: now });
+    r.bows = bows;
+    if (bows.length < r.need) return { level: r.level, n: bows.length, need: r.need };
+    const by = this.builders().slice(0, BOARD_SIZE); // who built the level it rises from
+    s.level = r.level;
+    s.raising = null;
+    this.raised = { level: s.level, by, raisedBy: bows.map(({ name, avatar }) => ({ name, avatar })) };
+    return { level: s.level, n: bows.length, need: r.need, raised: true };
   }
 
   /** Their line in the open vigil's cast, made the first time they do something in it; null when no vigil is open. */

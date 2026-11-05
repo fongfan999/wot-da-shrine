@@ -12,6 +12,9 @@
  * Lighting incense or bringing an offering is a walk: up off the mat, across to the censer, a bow over
  * it, and back. The mat stays theirs meanwhile, outlined.
  *
+ * Whoever holds the watch sits on the on-call stool in front of the altar, outside the order: it is
+ * the closest seat, and nobody wants it.
+ *
  * Sized in the burner's own units so the people always match the altar.
  */
 import gsap from 'gsap';
@@ -29,6 +32,9 @@ const BOX_H = TOP + 8;
 const STEP_BACK = 30;  // how far behind the mats the standing stand
 const REACH = 170;     // where a walker stops at the censer: this far from its middle
 const STRIDE = 46;     // one step, in burner units
+const STOOL_X = 128;   // the on-call stool: in front of the altar, right of the middle
+const STOOL_SCALE = 0.78;
+const STOOL_SEAT = 37; // how high it sits them: the seat top, in the figure box's units
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const figureSvg = (hair) => `
@@ -48,6 +54,7 @@ const MAT = {
   weeds: `<path class="d-line" d="M -30 4 q -2 -12 -8 -18 M -27 4 q 0 -16 3 -24 M -22 4 q 3 -9 9 -14 M -6 4 q -1 -13 -6 -19 M -3 4 q 1 -15 5 -21 M 12 4 q -2 -11 -7 -15 M 15 4 q 1 -13 6 -19 M 28 4 q -1 -10 -6 -14 M 31 4 q 2 -13 7 -17"/><circle class="d-paper" cx="8" cy="-16" r="3"/>`,
 };
 const matKind = (i) => (i === 0 ? 'silk' : i < 3 ? 'cushion' : 'tatami');
+const STOOL = `<svg class="mat__svg" viewBox="-44 -40 88 48" aria-hidden="true"><ellipse class="d-shade" cx="0" cy="5" rx="30" ry="3.5"/><path class="d-line" d="M -16 -30 L -21 6 M 16 -30 L 21 6 M 0 -27 V 6"/><path class="d-thin" d="M -19 -10 H 19"/><ellipse class="d-paper" cx="0" cy="-33" rx="24" ry="6"/></svg>`;
 
 export class Congregation {
   constructor(host, burnerEl) {
@@ -57,6 +64,9 @@ export class Congregation {
     this.order = [];
     this.mats = 0;  // laid in front of the altar
     this.lost = 0;  // of those, taken by weeds
+    this.stoolId = null; // whoever holds the watch, on the on-call stool
+    this.stoolEl = Object.assign(document.createElement('div'), { className: 'mat mat--stool', innerHTML: STOOL, hidden: true });
+    host.appendChild(this.stoolEl);
     this.matEls = [];
     this.lit = false;
     this.lite = false;
@@ -67,8 +77,9 @@ export class Congregation {
     new ResizeObserver(() => this.layout()).observe(host);
   }
 
-  /** Show exactly these people (`list` of {id, name, avatar}), in the order they take the mats, on `mats` mats. */
-  set(list, meId, mats = this.mats) {
+  /** Show exactly these people (`list` of {id, name, avatar}), in the order they take the mats, on `mats` mats; `stoolId` on the on-call stool. */
+  set(list, meId, mats = this.mats, stoolId = this.stoolId) {
+    this.stoolId = stoolId ?? null;
     const ids = new Set(list.map((p) => p.id));
     for (const [id, item] of this.items) {
       if (ids.has(id)) continue;
@@ -99,11 +110,18 @@ export class Congregation {
   /** The mats people can kneel on. */
   usable() { return Math.max(0, this.mats - Math.min(this.lost, this.mats)); }
 
-  /** Where someone is: their place in the order, the mats, and who is one place ahead. */
+  /** Who is on the stool, if they are here. */
+  stool() { return this.stoolId && this.items.has(this.stoolId) ? this.stoolId : null; }
+  /** Everyone else, in the order they take the mats. */
+  seated() { const s = this.stool(); return s ? this.order.filter((id) => id !== s) : this.order; }
+
+  /** Where someone is: their place in the order, the mats, and who is one place ahead; or on the stool. */
   placeOf(id) {
-    const i = this.order.indexOf(id);
+    if (id === this.stool()) return { stool: true, mats: this.mats, usable: this.usable() };
+    const seated = this.seated();
+    const i = seated.indexOf(id);
     if (i < 0) return null;
-    const ahead = i > 0 ? this.items.get(this.order[i - 1])?.person : null;
+    const ahead = i > 0 ? this.items.get(seated[i - 1])?.person : null;
     return { i, mats: this.mats, usable: this.usable(), me: this.items.get(id)?.person, ahead };
   }
 
@@ -178,6 +196,7 @@ export class Congregation {
   /** The one holding the pager kneels with a lantern on their name tag. */
   markWatch(id) {
     for (const [pid, item] of this.items) item.el.classList.toggle('kneeler--watch', pid === id);
+    if ((id ?? null) !== this.stoolId) { this.stoolId = id ?? null; this.layout(); }
   }
 
   /** As many mat elements as there are mats to show. */
@@ -197,7 +216,8 @@ export class Congregation {
     if (!unit) return;
     const half = this.host.clientWidth / 2 / unit;
     const outer = Math.max(MIN_INNER, half - EDGE);
-    const n = this.order.length;
+    const seated = this.seated();
+    const n = seated.length;
     const slots = Math.max(n, this.mats);
 
     // Fit as many per side as the column allows, squeezing the gap before giving up.
@@ -241,7 +261,29 @@ export class Congregation {
       gsap.set(el, { x: s.x, y: s.y, scale: s.depth, transformOrigin: '50% 100%' });
     });
 
-    this.order.forEach((id, i) => {
+    // The watch, on the on-call stool in front of the altar.
+    const stoolId = this.stool();
+    this.stoolEl.hidden = !stoolId;
+    if (stoolId) {
+      const item = this.items.get(stoolId);
+      const x = STOOL_X * unit - w / 2;
+      Object.assign(this.stoolEl.style, { width: `${w}px`, height: `${48 * unit * SCALE}px`, zIndex: '49' });
+      gsap.set(this.stoolEl, { x, y: 0, scale: STOOL_SCALE, transformOrigin: '50% 100%' });
+      const y = -STOOL_SEAT * unit * SCALE * STOOL_SCALE;
+      Object.assign(item, { slot: -1, side: 1, kneels: true, w, home: { x, y, scale: STOOL_SCALE } });
+      Object.assign(item.el.style, { width: `${w}px`, height: `${h}px` });
+      item.el.style.setProperty('--lift', '0px');
+      item.el.hidden = false;
+      if (!item.walking) {
+        item.el.style.zIndex = '50';
+        this.pose(item, this.looking() ? 'stand' : 'kneel');
+        const to = { x, y, scale: STOOL_SCALE, transformOrigin: '50% 100%' };
+        if (!item.placed) { item.placed = true; gsap.set(item.el, { ...to, opacity: 0 }); gsap.to(item.el, { opacity: 1, duration: 0.9 }); }
+        else gsap.to(item.el, { ...to, duration: reduceMotion ? 0 : 0.8, ease: 'power3.inOut', overwrite: 'auto' });
+      }
+    }
+
+    seated.forEach((id, i) => {
       const item = this.items.get(id);
       if (!item) return;
       const s = slot(i);
@@ -259,7 +301,7 @@ export class Congregation {
       item.el.hidden = i >= visible;
       if (item.walking) return; // the walk comes back to wherever home is now
       item.el.style.zIndex = String((kneels ? 30 : 10) + (s.back ? 0 : 10) - s.k);
-      this.pose(item, kneels ? 'kneel' : 'stand');
+      this.pose(item, kneels && !this.looking() ? 'kneel' : 'stand');
       const to = { x: s.x, y, scale: depth, transformOrigin: '50% 100%' };
       if (!item.placed) {
         item.placed = true;
@@ -332,6 +374,22 @@ export class Congregation {
       .call(() => this.pose(item, item.kneels ? 'kneel' : 'stand'))
       .to(item.el, { y: () => item.home.y, duration: 0.32, ease: 'power3.out' });
     return true;
+  }
+
+  /** Whether everyone is up looking at a level just raised (standAll): a layout meanwhile keeps them up. */
+  looking() { return Date.now() < (this.lookUntil ?? 0); }
+
+  /** Everyone gets up to look (a level was just raised), and kneels again after `seconds`. */
+  standAll(seconds = 2) {
+    if (reduceMotion) return;
+    this.lookUntil = Date.now() + seconds * 1000;
+    for (const item of this.items.values()) {
+      if (item.walking || item.el.hidden || !item.home) continue;
+      this.pose(item, 'stand');
+      gsap.fromTo(item.el, { y: item.home.y }, { y: item.home.y - 8, duration: 0.3, yoyo: true, repeat: 1, ease: 'power2.out' });
+    }
+    clearTimeout(this.standTimer);
+    this.standTimer = setTimeout(() => this.layout(), seconds * 1000);
   }
 
   /** A little hop and a flare of their incense: they just did something. */

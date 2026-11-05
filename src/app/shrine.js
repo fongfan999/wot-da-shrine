@@ -19,7 +19,7 @@ import { blamedFx, remoteDeploy, renderDeploy, showShipped } from './deploy.js';
 import { renderDown } from './vigilStart.js';
 import { renderWatch, watchAct } from './watch.js';
 import { applyStandings, dailyFx, renderBowBadge } from './standing.js';
-import { creditsFx, nope, takeTogether, thankFx } from './together.js';
+import { creditsFx, nope, raiseFx, scaffoldFx, takeTogether, thankFx } from './together.js';
 import { vowFx } from './vow.js';
 import { charmFx } from './charms.js';
 import { fedFx, purifyFx, renderKami } from './kami.js';
@@ -308,6 +308,7 @@ function onShrineMessage(msg) {
       syncCounters(msg);
       syncAltar(msg.litAt);
       applyStandings(msg.standings);
+      if (msg.scaffold) scaffoldFx(msg.scaffold);
       if (msg.vowKept) vowFx({ ...msg.vowKept, kept: true });
       break;
     case 'act':
@@ -337,6 +338,8 @@ function onShrineMessage(msg) {
       else if (msg.kind === 'vow') vowFx(msg);
       else if (msg.by.id !== state.myId) remoteAct(msg);
       if (msg.chorus) chorusFx(msg.chorus, msg.bonus);
+      if (msg.raise) raiseFx(msg); // a pole lashed for the next level
+      if (msg.scaffold) scaffoldFx(msg.scaffold); // the carpenters are in
       if (msg.daily) dailyFx(msg);
       // The servers are back: the cast rolls for everyone, and whoever said so gets the share sheet after it.
       if (msg.kind === 'resolve' && msg.record) creditsFx(msg.record, msg.by.id === state.myId ? () => { if (body.dataset.resolved) openShare(true, true); } : null);

@@ -68,6 +68,18 @@ function drawingCss(c) {
     [data-level="2"] .cat, [data-level="3"] .cat, [data-level="4"] .cat, [data-level="5"] .cat { display: block; }
     [data-level="3"] .censer-body, [data-level="3"] .censer-rim, [data-level="4"] .censer-body, [data-level="4"] .censer-rim, [data-level="5"] .censer-body, [data-level="5"] .censer-rim { fill: ${c['ember-soft']}; }
     .lv0-note .d-mono { font-size: 7.5px; font-weight: 700; }
+    .t-tiles { fill: none; stroke: ${c.ink}; stroke-linecap: butt; stroke-dasharray: 1 7; opacity: .32; }
+    .t-rail { opacity: .7; stroke-dasharray: 1.6 12; }
+    .t-window { fill: ${c['paper-sunk']}; stroke: ${c.ink}; stroke-width: 1.4; }
+    .t-lit { display: none; }
+    .t-far { opacity: .5; }
+    .temple-copy .d-mono { font-size: 12px; }
+    .temple-copy .t-plaque { font-size: 13px; font-weight: 700; }
+    .temple-copy .t-word { font-size: 10px; font-weight: 700; }
+    .temple-copy .t-tiny { font-size: 9px; }
+    .temple-copy .t-note { font-size: 13px; fill: ${c.muted}; }
+    .temple-copy .t-banner .d-mono { font-size: 18px; font-weight: 700; }
+    .temple-copy .t-sign-big { font-size: 13px; font-weight: 700; letter-spacing: .08em; }
     .brand__wot { fill: ${c.ink}; }
     .brand__shrine { color: ${c.accent}; }
     .brand__bowl, .brand__sticks { stroke: ${c.ink}; }
@@ -101,7 +113,10 @@ function altarMarkup(host, plain = false) {
   }).join('\n');
   const level = host.closest('.burner')?.dataset.level ?? '0';
   const resolved = document.body.dataset.resolved ?? '';
-  return `<svg viewBox="0 0 520 470" x="650" y="86" width="500" height="452" overflow="visible" data-level="${level}" data-resolved="${resolved}">${inner}</svg>`;
+  // The shrine around the altar (temple.js), in the same units, kept to the card's right side so the words stay clear.
+  const temple = document.querySelector('.temple__svg');
+  const around = temple ? `<svg class="temple-copy" x="-440" y="-300" width="1400" height="770" viewBox="${temple.getAttribute('viewBox')}" overflow="visible">${temple.innerHTML}</svg>` : '';
+  return `<g clip-path="url(#altarSide)"><svg viewBox="0 0 520 470" x="650" y="86" width="500" height="452" overflow="visible" data-level="${level}" data-resolved="${resolved}">${around}${inner}</svg></g>`;
 }
 
 /**
@@ -167,6 +182,7 @@ export function cardSvg(data) {
   <style>${drawingCss(c)}</style>
   <defs>
     <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="${c['line-strong']}" opacity=".6"/></pattern>
+    <clipPath id="altarSide"><rect x="612" y="0" width="${W - 612}" height="${H}"/></clipPath>
   </defs>
   <rect width="${W}" height="${H}" fill="${c.paper}"/>
   <rect width="${W}" height="${H}" fill="url(#dots)"/>

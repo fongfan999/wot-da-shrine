@@ -12,8 +12,8 @@ import { petals } from './engines.js';
 import { logEvent, toast } from './ui.js';
 import { sound } from '../audio/index.js';
 
-/** The level the shrine stands at: as grown to (a shrine never shrinks), or as its karma says, whichever is higher. */
-export const shrineAt = () => (roomName && roomName !== 'demo' ? Math.max(records.build?.level ?? 0, levelOf(counters.karma)) : 0);
+/** The level the shrine stands at, as the shrine last raised it (three bows raise each one; a shrine never shrinks). Before it says, what its karma would make it. */
+export const shrineAt = () => (roomName && roomName !== 'demo' ? (records.build ? records.build.level : levelOf(counters.karma)) : 0);
 const charmsHeld = () => records.charms?.got ?? {};
 
 /** Whether this shrine has opened `id` (a layer or a scene). The home page and the demo have only what every shrine has. */

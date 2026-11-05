@@ -12,6 +12,8 @@
  * Every group says the levels it stands at (data-min, data-max) or the upkeep it shows from
  * (data-upkeep); setLevel and setUpkeep show and hide them, here and in the burner's own drawing.
  */
+import gsap from 'gsap';
+
 const X0 = -440;
 const Y0 = -300;
 const W = 1400;
@@ -181,6 +183,19 @@ export function buildTemple(host) {
     ${chochin(590, 170, 'SLO')}
   </g>
 
+  <!-- raising the next level: bamboo scaffolding, and a sign that counts the bows (setRaising) -->
+  <g class="t-scaffold" style="display: none">
+    <path class="d-line" stroke-width="5" d="M -210 452 V -40 M -60 452 V -40 M 90 452 V -40 M 430 452 V -40 M 580 452 V -40 M 730 452 V -40"/>
+    <path class="d-line" stroke-width="4" d="M -232 40 H 752 M -232 170 H 752 M -232 300 H 752"/>
+    <path class="d-line" stroke-width="2.4" d="M -210 300 L -60 170 M 580 170 L 730 300 M -60 40 L 90 170 M 430 170 L 580 40 M -210 170 L -60 40 M 580 300 L 730 170"/>
+    <path class="d-thin" d="M -216 34 l 12 12 M -204 34 l -12 12 M -66 164 l 12 12 M -54 164 l -12 12 M 574 34 l 12 12 M 586 34 l -12 12 M 724 294 l 12 12 M 736 294 l -12 12 M -216 294 l 12 12 M -204 294 l -12 12 M 724 164 l 12 12 M 736 164 l -12 12"/>
+    <rect class="d-raised" x="-232" y="160" width="190" height="10" rx="2"/>
+    <rect class="d-raised" x="560" y="290" width="192" height="10" rx="2"/>
+    <rect class="d-raised" x="-256" y="186" width="232" height="58" rx="3"/>
+    <text class="d-mono t-sign-big" x="-140" y="210" text-anchor="middle">UNDER CONSTRUCTION</text>
+    <text class="d-mono t-sign t-raise-line" x="-140" y="232" text-anchor="middle"></text>
+  </g>
+
   <!-- from the village shrine: stone lanterns -->
   <g data-min="2">${lantern(-70)}${lantern(590)}</g>
 
@@ -306,7 +321,21 @@ export function buildTemple(host) {
     }
   }
 
+  const scaffold = host.querySelector('.t-scaffold');
+  const raiseLine = host.querySelector('.t-raise-line');
+  /** The scaffolding for the next level, up while it is being raised, its sign saying how many bows it has: `line`, or nothing to take it down. */
+  function setRaising(line) {
+    scaffold.style.display = line ? '' : 'none';
+    raiseLine.textContent = line ?? '';
+  }
+
+  /** The new level inks in: the drawing comes up from faint. */
+  function reveal() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    gsap.fromTo(svg, { opacity: 0.15 }, { opacity: 1, duration: 1.6, ease: 'power2.out' });
+  }
+
   setLevel(0);
   setUpkeep(0);
-  return { layout, setLevel, setUpkeep };
+  return { layout, setLevel, setUpkeep, setRaising, reveal };
 }

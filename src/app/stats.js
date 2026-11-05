@@ -33,6 +33,12 @@ export function renderPlace() {
   const place = !tv && hasStanding() && state.myId ? congregation.placeOf(state.myId) : null;
   rankPlace.hidden = !place?.mats;
   if (rankPlace.hidden) return;
+  if (place.stool) {
+    rankPlace.replaceChildren(Object.assign(document.createElement('b'), { textContent: t('placeStool') }));
+    rankPlace.title = t('placeStoolTip');
+    rankPlace.dataset.standing = '';
+    return;
+  }
   const { i, mats, usable, me, ahead } = place;
   const where = i < usable ? fmt('placeMat', { n: i + 1, of: mats }) : mats === 1 ? t('placeStandingOne') : fmt('placeStanding', { of: mats });
   // The one to pass: whoever is a place ahead, while passing them gets you a mat (or a closer one).
@@ -213,11 +219,12 @@ export function renderRecords() {
   const longest = $('#rec-longest');
   longest.hidden = !records.longest;
   longest.textContent = records.longest ? fmt('recLongest', { t: minutesText(records.longest) }) : '';
-  const i = shrineLevel();
+  const i = roomName && roomName !== 'demo' ? shrineAt() : shrineLevel();
   const [, name] = STRINGS.shrineLevels[i];
   $('#records-level').textContent = name;
   const up = STRINGS.shrineLevels[i + 1];
-  $('#records-level').title = up ? withReward(fmt('shrineNext', { n: up[0] - counters.karma, name: up[1] }), opensAtLevel(i + 1)) : name;
+  const raising = records.build?.raising;
+  $('#records-level').title = raising ? fmt('buildRaising', { name: up?.[1] }) : up ? withReward(fmt('shrineNext', { n: Math.max(0, up[0] - counters.karma), name: up[1] }), opensAtLevel(i + 1)) : name;
   updateRank(true); // its bar tracks the shrine's next level
   // The shrine drawn around the altar: this one's own, or on the home page and the demo the biggest there is.
   const drawn = roomName && roomName !== 'demo' ? shrineAt() : 5;
@@ -231,10 +238,12 @@ export function renderRecords() {
   renderBoard();
   checkUnlocks(); // a level or a charm may have opened a sound or a scene
   if (shownLevel !== -1 && i > shownLevel) {
-    toast(grewText(name, i)); // and who built it
+    toast(grewText(name, i)); // and who raised it
     sound.bowl(392);
     petals.burst(40);
     shockwave();
+    temple.reveal(); // the new level inks in
+    congregation.standAll(2.2); // everyone gets up to look
   }
   // In a shrine, the level before it has said where it stands is not one it grew from.
   shownLevel = roomName && !state.greeted ? -1 : i;

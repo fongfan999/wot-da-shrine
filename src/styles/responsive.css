@@ -91,6 +91,9 @@
   .stage { padding: 12px 16px var(--space-4); }
   .kneeler__name { display: none; }
   .kneeler__tag { padding: 2px; }
+  /* A phone's column is the censer's width: it gives up a little of it so the shrine shows around it, out to the screen's edges */
+  body[data-mode="room"] .burner { max-width: 84%; }
+  body[data-mode="room"] .temple { left: -16px; right: -16px; }
   .ema { display: none; }
   .plantern-row { gap: 6px; }
   .plantern { margin-top: 14px; width: 24px; height: 42px; }

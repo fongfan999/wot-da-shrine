@@ -5,11 +5,11 @@
  * The shrine keeps all of it (worker/objects/shrine.js); this is how it looks.
  */
 import gsap from 'gsap';
-import { devoteeKey } from '../../shared/rules.js';
+import { RAISE_FED, RAISE_WINDOW, devoteeKey } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { STRINGS, t } from '../lib/strings.js';
 import { $, counters, fmt, people, records, reduceMotion, roomName, state, tv } from './context.js';
-import { congregation, petals } from './engines.js';
+import { congregation, petals, temple } from './engines.js';
 import { hasStanding, liveStreak, myStanding, rankName } from './standing.js';
 import { logEvent, toast } from './ui.js';
 import { purify, purifyDue } from './kami.js';
@@ -28,6 +28,41 @@ export function takeTogether({ board, build, grew }) {
   if (board) records.board = board;
   if (build) records.build = build;
   if (grew) records.grew = grew;
+}
+
+/* ---------- Raising the next level: the scaffolding, a pole lashed for each bow, the raise ---------- */
+const levelName = (level) => STRINGS.shrineLevels[level]?.[1] ?? '';
+const isMe = (p) => { const me = myStanding(); return Boolean(me) && devoteeKey(p) === devoteeKey(me); };
+
+/** The carpenters are in: the room's karma reached the next level, and the scaffolding went up. */
+export function scaffoldFx({ level, need }) {
+  const name = levelName(level);
+  logEvent({ key: `scaffold:${level}`, avatar: '🔨', what: fmt('fScaffold', { name }), quiet: true, toastText: need > 1 ? fmt('scaffoldToast', { name, need }) : fmt('scaffoldToastOne', { name }) });
+  sound.bowl(220);
+}
+
+/** A bow while the scaffolding is up lashed a pole (the bow that raises it is the level's own news). */
+export function raiseFx({ by, raise }) {
+  if (raise.raised) return;
+  const name = levelName(raise.level);
+  const mine = by.id === state.myId;
+  if (raise.again) { if (mine) toast(fmt('raiseBowAgain', { name })); return; }
+  logEvent({ key: `${by.id}:raise`, avatar: by.avatar, who: mine ? t('you') : by.name, what: fmt('fRaiseBow', { name, n: raise.n, need: raise.need }), quiet: !mine, toastText: mine ? fmt('raiseBowMine', { name, n: raise.n, need: raise.need }) : '' });
+  if (mine) sound.bowl(262 + raise.n * 33);
+}
+
+/** When the scaffolding's bows run out: a day after the first that still counts. */
+const raiseBy = (r) => (r.bows.length ? Math.min(...r.bows.map((b) => b.at)) + RAISE_WINDOW - state.clockSkew : 0);
+const clock = (at) => new Date(at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+/** The bows so far, as faces, and the ones still to come, as empty dashed rings. */
+function bowSlots(r) {
+  return Array.from({ length: r.need }, (_, i) => {
+    const b = r.bows[i];
+    const slot = Object.assign(document.createElement('span'), { className: 'build__slot' });
+    if (b) { slot.textContent = b.avatar; slot.title = isMe(b) ? t('you') : b.name; slot.dataset.done = '1'; } else slot.textContent = String(i + 1);
+    return slot;
+  });
 }
 
 /* ---------- Keepers this week ---------- */
@@ -90,8 +125,26 @@ export function renderBuild() {
   const b = records.build;
   const levels = STRINGS.shrineLevels;
   const next = b && levels[b.level + 1];
+  const r = b?.raising;
+  temple.setRaising(hasStanding() && r ? fmt('raiseSignBows', { name: levelName(r.level).toUpperCase(), n: r.bows.length, need: r.need }) : null);
   buildEl.hidden = !hasStanding() || !next;
+  buildEl.dataset.raising = r ? '1' : '';
   if (buildEl.hidden) return;
+  // The scaffolding is up: the bar is the bows it still needs.
+  if (r) {
+    buildWhat.textContent = fmt('buildRaising', { name: levelName(r.level) });
+    buildLeft.textContent = fmt('buildRaisingLeft', { n: r.bows.length, need: r.need });
+    buildBar.replaceChildren(...bowSlots(r));
+    buildBar.setAttribute('aria-label', fmt('buildRaisingLeft', { n: r.bows.length, need: r.need }));
+    const k = r.need - r.bows.length;
+    const time = r.bows.length ? clock(raiseBy(r)) : '';
+    buildEl.title = !r.bows.length ? fmt('scaffoldToast', { name: levelName(r.level), need: r.need }) : k === 1 ? fmt('buildRaisingHintOne', { name: levelName(r.level), time }) : fmt('buildRaisingHint', { name: levelName(r.level), k, time });
+    const opens = opensAtLevel(r.level);
+    const reward = $('#build-reward');
+    reward.hidden = !opens.length;
+    reward.textContent = opens.map((id) => fmt('rewardLevel', { name: nameOf(id), hint: t(`layerHint_${id}`).toLowerCase() })).join(' · ');
+    return;
+  }
   const [from] = levels[b.level];
   const span = next[0] - from;
   const progress = Math.max(0, Math.min(span, counters.karma - from));
@@ -116,7 +169,10 @@ export function renderBuild() {
   // The faces of whoever is building it, most first.
   const faces = b.shares.slice(0, 4).map((s) => s.avatar).join('');
   if (faces) buildWhat.append(Object.assign(document.createElement('span'), { className: 'build__faces', textContent: faces }));
-  buildLeft.textContent = fmt('buildLeft', { n: Math.max(0, next[0] - counters.karma) });
+  // The karma is there, but the kami has gone unfed: the carpenters wait for its next meal.
+  const unfed = counters.karma >= next[0] && state.kami?.fedAt && Date.now() + state.clockSkew - state.kami.fedAt >= RAISE_FED;
+  buildLeft.textContent = unfed ? t('buildWaitKami') : fmt('buildLeft', { n: Math.max(0, next[0] - counters.karma) });
+  if (unfed) buildLeft.title = t('buildWaitKamiTip');
   // What growing brings, on a line of its own so neither it nor the level's name is cut short.
   const opens = opensAtLevel(b.level + 1);
   const reward = $('#build-reward');
@@ -125,10 +181,17 @@ export function renderBuild() {
   buildEl.title = b.shares.length ? fmt('buildBy', { name: next[1], names: nameList(b.shares.map((s) => s.name), b.shares.length + (b.rest ? 1 : 0)) }) : '';
 }
 
-/** The words for a shrine that just grew: who built it, when the shrine says. */
+/** The words for a shrine that just grew: who raised it (or built it), when the shrine says. */
 export function grewText(name, level) {
   const g = records.grew;
-  if (!g || g.level !== level || !g.by.length) return fmt('shrineUnlocked', { name });
+  if (!g || g.level !== level) return fmt('shrineUnlocked', { name });
+  if (g.raisedBy?.length) {
+    const mine = g.raisedBy.some(isMe);
+    const names = [...g.raisedBy.filter((b) => !isMe(b)).map((b) => b.name), ...(mine ? [t('you')] : [])];
+    const text = fmt('shrineRaisedBy', { name, names: nameList(names, names.length, 4) });
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+  if (!g.by.length) return fmt('shrineUnlocked', { name });
   return fmt('shrineGrewBy', { name, names: nameList(g.by.map((b) => b.name)) });
 }
 

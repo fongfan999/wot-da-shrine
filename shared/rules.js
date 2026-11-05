@@ -129,6 +129,16 @@ export const levelOf = (karma) => SHRINE_LEVELS.reduce((idx, at, k) => (karma >=
  */
 export const MATS = [1, 3, 5, 7, 10, 12];
 
+/**
+ * Raising a level: once the room's karma reaches the next one, the carpenters put up scaffolding
+ * (not while the kami is unfed: RAISE_FED, from its last meal). Then it takes RAISE_BOWS different
+ * people bowing within RAISE_WINDOW of each other to raise it; a smaller team needs as many as have
+ * earned karma here. Nobody bows: the scaffolding waits, and nothing is lost. The demo grows as it always did.
+ */
+export const RAISE_BOWS = 3;
+export const RAISE_WINDOW = 24 * 3600 * 1000;
+export const RAISE_FED = 24 * 3600 * 1000;
+
 /** A run of days still counts on `day` when its last bow was that day or the one before. */
 export const streakAlive = (s, day) => Boolean(s?.streak) && day - s.day <= 1;
 
