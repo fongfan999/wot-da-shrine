@@ -10,7 +10,7 @@ import { cleanSub, send as sendPush, topicOf } from '../push.js';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
 import { kamiLine, kamiMood } from '../../shared/kami.js';
 import { OMEN_DEFY, readOmens } from '../../shared/omens.js';
-import { AVATARS, cleanRole, cleanTone, purifiable, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, WATCHED_MAX, WATCHED_NAME_MAX, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN, RAISE_BOWS, RAISE_FED, RAISE_WINDOW, SHRINE_LEVELS } from '../../shared/rules.js';
+import { AVATARS, cleanCloud, cleanRole, cleanTone, purifiable, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, WATCHED_MAX, WATCHED_NAME_MAX, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN, RAISE_BOWS, RAISE_FED, RAISE_WINDOW, SHRINE_LEVELS } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
@@ -298,6 +298,8 @@ export class Shrine extends DurableObject {
         if ('mix' in msg) meta.mix = openMix(cleanMix(msg.mix), s.level, s.charms);
         // How the shrine looks, for everyone: a scene it has earned, or nothing changes.
         if ('scene' in msg) meta.scene = cleanScene(msg.scene, s.level, s.charms) ?? meta.scene ?? null;
+        // The cloud the room prays to: its lantern is lit. Not an action.
+        if ('cloud' in msg) meta.cloud = cleanCloud(msg.cloud);
         // How the TVs showing the shrine look and sound. Not an action either.
         if ('screen' in msg) meta.screen = cleanScreen(msg.screen);
         // Naming what is down, in a quiet room, says something is down. Not while the room still

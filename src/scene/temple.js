@@ -40,6 +40,37 @@ const chochin = (cx, top, word) => `
     <path class="d-h2" d="M ${cx - 17} ${top + 26} H ${cx + 17} M ${cx - 17} ${top + 50} H ${cx + 17}"/>
     <text class="d-mono t-word" x="${cx}" y="${top + 42}" text-anchor="middle">${word}</text>`;
 
+/**
+ * A donor's paper lantern hung from the torii's tie beam at `cx`, lettered with the cloud's name; `dark`:
+ * never lit, with a cobweb (its free tier ended).
+ */
+const donor = (id, cx, line1, line2, dark = false) => `
+    <g class="t-donor${dark ? ' t-donor--dark' : ''}" data-cloud="${id}">
+      <path class="d-line" d="M ${cx} 21 V 31"/>
+      <rect class="d-paper" x="${cx - 12}" y="31" width="24" height="6" rx="1"/>
+      <ellipse class="t-donor__body" cx="${cx}" cy="60" rx="20" ry="24"/>
+      <rect class="d-paper" x="${cx - 12}" y="83" width="24" height="6" rx="1"/>
+      <path class="d-h2" d="M ${cx - 18} 47 H ${cx + 18} M ${cx - 18} 73 H ${cx + 18}"/>
+      <text class="d-mono t-donor__name" x="${cx}" y="${line2 ? 59 : 64}" text-anchor="middle">${line1}</text>
+      ${line2 ? `<text class="d-mono t-donor__sub" x="${cx}" y="68" text-anchor="middle">${line2}</text>` : ''}
+      <path class="d-line" d="M ${cx} 89 V 97 M ${cx - 3} 97 L ${cx} 104 L ${cx + 3} 97"/>
+      ${dark ? `<path class="d-thin" d="M ${cx + 6} 37 L ${cx + 22} 37 M ${cx + 6} 37 L ${cx + 20} 49 M ${cx + 6} 37 Q ${cx + 13} 41 ${cx + 13} 37 M ${cx + 9} 37 Q ${cx + 18} 44 ${cx + 19} 37"/>` : ''}
+    </g>`;
+/** The data center's lantern is a little rack: a steel box with LEDs, THE BASEMENT on it. */
+const datacenter = (cx) => `
+    <g class="t-donor" data-cloud="dc">
+      <path class="d-line" d="M ${cx} 21 V 31"/>
+      <rect class="t-donor__body" x="${cx - 19}" y="31" width="38" height="56" rx="3"/>
+      <path class="d-thin" d="M ${cx - 15} 45 H ${cx + 15} M ${cx - 15} 59 H ${cx + 15} M ${cx - 15} 73 H ${cx + 15}"/>
+      <circle class="d-accent" cx="${cx - 12}" cy="38" r="1.8"/><circle class="d-accent" cx="${cx - 7}" cy="38" r="1.8"/><circle class="d-accent" cx="${cx - 12}" cy="52" r="1.8"/><circle class="d-accent" cx="${cx - 12}" cy="66" r="1.8"/>
+      <text class="d-mono t-donor__sub" x="${cx + 3}" y="55" text-anchor="middle">DATA</text>
+      <text class="d-mono t-donor__sub" x="${cx + 3}" y="69" text-anchor="middle">CENTER</text>
+      <text class="d-mono t-donor__sub" x="${cx}" y="82" text-anchor="middle">BASEMENT</text>
+      <path class="d-line" d="M ${cx} 87 V 97"/>
+    </g>`;
+/** What the plaque on the torii says the shrine prays to: its cloud's region, or 200 OK. */
+const DEITY = { aws: 'us-east-1', azure: 'EAST US', gcp: 'us-central1', cloudflare: '1.1.1.1', dc: 'RACK 42' };
+
 /** A bell under the eaves at (cx, top), rung with a patch cable that ends in a plug. */
 const bell = (cx, top) => `
     <path class="d-line" d="M ${cx} ${top} V ${top + 12}"/>
@@ -266,7 +297,18 @@ export function buildTemple(host) {
     <path class="d-paper" d="M -330 -78 Q 260 -52 850 -78 L 846 -58 Q 260 -32 -326 -58 Z"/>
     <rect class="d-paper" x="226" y="-20" width="68" height="28"/>
     <rect class="d-thin" x="231" y="-16" width="58" height="20"/>
-    <text class="d-mono t-plaque" x="260" y="-1" text-anchor="middle">200 OK</text>
+    <text class="d-mono t-plaque t-deity" x="260" y="-1" text-anchor="middle">200 OK</text>
+  </g>
+
+  <!-- from the village shrine: lanterns hung from the torii by its donors, the clouds the servers live on.
+       The room's own cloud (setCloud) is lit and bigger, and its region is on the plaque. One is dark. -->
+  <g data-min="2">
+    ${donor('aws', -232, 'AWS', 'us-east-1')}
+    ${donor('azure', -152, 'AZURE', '')}
+    ${donor('gcp', -72, 'GOOGLE', 'CLOUD')}
+    ${donor('cloudflare', 592, 'CLOUD', 'FLARE')}
+    ${datacenter(672)}
+    ${donor('heroku', 752, 'HEROKU', 'FREE TIER', true)}
   </g>
 
   <!-- upkeep, from the kami's mood: weeds along the floor, cobwebs in the eaves -->
@@ -335,7 +377,21 @@ export function buildTemple(host) {
     gsap.fromTo(svg, { opacity: 0.15 }, { opacity: 1, duration: 1.6, ease: 'power2.out' });
   }
 
+  const deity = host.querySelector('.t-deity');
+  /** The cloud the room prays to: its lantern is lit and hangs bigger, its region goes on the plaque; null, all of them alike. */
+  function setCloud(cloud) {
+    host.querySelectorAll('.t-donor').forEach((g) => {
+      const ours = g.dataset.cloud === cloud;
+      g.classList.toggle('is-ours', ours);
+      const top = g.querySelector('path');
+      const cx = top ? Number(top.getAttribute('d').split(' ')[1]) : 0;
+      if (ours) g.setAttribute('transform', `translate(${cx} 21) scale(1.3) translate(${-cx} -21)`);
+      else g.removeAttribute('transform');
+    });
+    deity.textContent = DEITY[cloud] ?? '200 OK';
+  }
+
   setLevel(0);
   setUpkeep(0);
-  return { layout, setLevel, setUpkeep, setRaising, reveal };
+  return { layout, setLevel, setUpkeep, setRaising, reveal, setCloud };
 }

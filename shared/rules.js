@@ -229,6 +229,14 @@ export const openMix = (mix, level, charms) => (mix ? Object.fromEntries(Object.
 /** A scene as sent: one of SCENES, and one this shrine has opened; else null. */
 export const cleanScene = (v, level, charms) => (SCENES.includes(v) && isOpen(v, level, charms) ? v : null);
 
+/**
+ * The clouds the servers live on. Every shrine from the village up hangs a lantern for each, the way a
+ * shrine hangs lanterns from its donors; the room picks the one it prays to (Customize) and that one is
+ * lit, bigger, and its region is on the torii's plaque. Names only, lettered in the shrine's own ink.
+ */
+export const CLOUDS = ['aws', 'azure', 'gcp', 'cloudflare', 'dc'];
+export const cleanCloud = (v) => (CLOUDS.includes(v) ? v : null);
+
 /** A few mixes with names. The first is what a shrine plays until its room mixes its own. */
 export const PRESETS = {
   vigil: { sacred: 80 },

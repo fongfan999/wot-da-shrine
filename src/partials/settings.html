@@ -110,6 +110,31 @@
         </div>
         <p class="field__note" id="unlock-next"></p>
       </div>
+      <!-- The cloud the shrine prays to: its donor lantern on the torii is lit, its region on the plaque -->
+      <div class="field scenes">
+        <span class="field__label" id="cloud-label" data-i18n="fCloud">Our cloud</span>
+        <div class="scenes__list" id="cloud-pick" role="radiogroup" aria-labelledby="cloud-label">
+          <button class="scene-pick cloud-pick" type="button" role="radio" aria-checked="true" data-cloud="">
+            <span class="scene-pick__name"><span data-i18n="cloudAll">All of them</span><small data-i18n="cloudAllHint">Multi-cloud. Every lantern alike</small></span>
+          </button>
+          <button class="scene-pick cloud-pick" type="button" role="radio" aria-checked="false" data-cloud="aws">
+            <span class="scene-pick__name"><span data-i18n="cloud_aws">AWS</span><small data-i18n="cloudHint_aws">us-east-1, of course</small></span>
+          </button>
+          <button class="scene-pick cloud-pick" type="button" role="radio" aria-checked="false" data-cloud="azure">
+            <span class="scene-pick__name"><span data-i18n="cloud_azure">Azure</span><small data-i18n="cloudHint_azure">East US</small></span>
+          </button>
+          <button class="scene-pick cloud-pick" type="button" role="radio" aria-checked="false" data-cloud="gcp">
+            <span class="scene-pick__name"><span data-i18n="cloud_gcp">Google Cloud</span><small data-i18n="cloudHint_gcp">us-central1</small></span>
+          </button>
+          <button class="scene-pick cloud-pick" type="button" role="radio" aria-checked="false" data-cloud="cloudflare">
+            <span class="scene-pick__name"><span data-i18n="cloud_cloudflare">Cloudflare</span><small data-i18n="cloudHint_cloudflare">1.1.1.1</small></span>
+          </button>
+          <button class="scene-pick cloud-pick" type="button" role="radio" aria-checked="false" data-cloud="dc">
+            <span class="scene-pick__name"><span data-i18n="cloud_dc">Our own data center</span><small data-i18n="cloudHint_dc">Rack 42, in the basement</small></span>
+          </button>
+        </div>
+        <p class="field__note" data-i18n="cloudNote">Lanterns hang from the torii from the village shrine up. Yours is lit.</p>
+      </div>
       <!-- The room's webhook: the team's alerting opens and closes vigils. The URL is a secret, fetched only when asked for. -->
       <div class="field hook">
         <span class="field__label" data-i18n="fHook">Alerts</span>

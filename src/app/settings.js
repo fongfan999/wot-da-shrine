@@ -5,7 +5,7 @@ import { syncPalette } from '../scene/palette.js';
 import { BRAND, STRINGS, applyStrings, t } from '../lib/strings.js';
 import { $, body, fmt, landing, meta, mix, mixName, persist, resetSettings, roomName, settings, state, tv, urlParams } from './context.js';
 import { LAYERS, PRESETS, cleanMix, presetOf, sameMix } from '../../shared/rules.js';
-import { fog, petals } from './engines.js';
+import { fog, petals, temple } from './engines.js';
 import { applyFx, lite } from './fx.js';
 import { splitTitle, title } from './stage.js';
 import { updateEta, updateStats, updateVitalsLabel } from './stats.js';
@@ -35,6 +35,7 @@ export function applySettings(animate = false) {
   applyTheme();
   applyScene();
   applyFx();
+  applyCloud();
   if (body.dataset.resolved) applyStrings({ title: t('resolvedTitle'), subtitle: $('#subtitle').textContent, resolve: t('resolved') });
   else if (landing) applyStrings({ eyebrow: t('landEyebrow'), title: t('landTitle'), subtitle: t('landSubtitle') });
   else if (body.dataset.blessing || body.dataset.shipped) applyStrings(blessingHeading());
@@ -244,6 +245,26 @@ $('#mix-layers').addEventListener('input', (e) => {
   if (!e.target.dataset.layer) return;
   sound.unlock();
   setSetting('mix', slidersMix()); // every move plays here at once; the room hears it a moment after the slider rests
+});
+
+/* ---------- The cloud the shrine prays to: its lantern lit on the torii ---------- */
+const cloudPick = $('#cloud-pick');
+const cloudNow = () => (roomName && roomName !== 'demo' ? state.roomMeta.cloud ?? '' : '');
+function applyCloud() {
+  temple.setCloud(cloudNow() || null);
+  for (const b of cloudPick.querySelectorAll('[data-cloud]')) {
+    const on = b.dataset.cloud === cloudNow();
+    b.setAttribute('aria-checked', String(on));
+    b.tabIndex = on ? 0 : -1;
+  }
+}
+cloudPick.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-cloud]');
+  if (!b || !roomName || roomName === 'demo' || b.dataset.cloud === cloudNow()) return;
+  state.roomMeta.cloud = b.dataset.cloud || null;
+  state.shrine?.send('meta', { cloud: state.roomMeta.cloud });
+  applyCloud();
+  sound.tick(740, 0.06);
 });
 
 /* ---------- The scene: the room's, picked from the ones it has opened ---------- */
