@@ -274,6 +274,10 @@ export const STRINGS = {
   renameTitle: 'Change who you',
   renameTitleAccent: 'are',
   renameHint: 'Everyone in the shrine sees the change at once.',
+  elsewhereTitle: 'Kneeling in',
+  elsewhereTitleAccent: 'another tab',
+  elsewhereHint: 'You opened this shrine somewhere else, so this tab stepped aside. One of you at the altar is plenty.',
+  elsewhereBtn: 'Pray here instead',
   // Who you are at the altar: what you do (devotee.js draws each), and your colour
   joinRoleLabel: 'What do you do here?',
   joinToneLabel: 'Your colour',

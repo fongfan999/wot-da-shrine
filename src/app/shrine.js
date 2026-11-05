@@ -234,12 +234,31 @@ $('#join-form').addEventListener('submit', (e) => {
   else connect();
 });
 
+/**
+ * The shrine is open in a newer tab of this browser, and that one kneels now. This one goes still
+ * and silent (no sound, no animation, no reconnecting) until you ask to pray here, which reloads
+ * it and so sends the other tab aside in turn.
+ */
+function stepAside() {
+  body.dataset.conn = 'closed';
+  roomStatus.dataset.status = 'closed';
+  $('#room-state').textContent = t('statusOffline');
+  if (joinOpen()) closeJoin();
+  $('#elsewhere-room').textContent = fmt('roomEyebrow', { room: roomName });
+  $('#elsewhere').hidden = false;
+  sound.ctx?.suspend().catch(() => {});
+  gsap.ticker.sleep();
+  $('#btn-elsewhere').focus();
+}
+$('#btn-elsewhere').addEventListener('click', () => location.reload());
+
 function connect() {
   state.shrine = connectRoom(roomName, state.me, {
     watch: tv,
     arrival: arrivedFromTv() ? { via: 'tv', hello: urlParams.get('hello') } : null,
     onMessage: onShrineMessage,
     onStatus(status) {
+      if (status === 'elsewhere') { stepAside(); return; }
       body.dataset.conn = status;
       roomStatus.dataset.status = status;
       $('#room-state').textContent = t(status === 'open' ? 'statusLive' : status === 'closed' ? 'statusOffline' : 'statusConnecting');
@@ -332,12 +351,6 @@ function onShrineMessage(msg) {
     }
     case 'rename':
       people.set(msg.person.id, msg.person);
-      // You, renamed from another tab: this one goes by it too, and comes back by it after a drop.
-      if (msg.person.id === state.myId && !tv) {
-        const { name, avatar, role, tone } = msg.person;
-        state.me = { name, avatar, role, tone };
-        state.shrine?.adopt(state.me);
-      }
       renderWatch(); // a new name may hold the watch, or no longer
       break;
     case 'push':

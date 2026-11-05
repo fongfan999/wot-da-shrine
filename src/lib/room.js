@@ -41,6 +41,7 @@ export function saveMe(me) {
  * private window, is someone else. Nobody signs in; losing it only makes you a newcomer.
  */
 const TOKEN_KEY = 'incense:who:v1';
+const ELSEWHERE = 4001; // the shrine's close code: this person opened it in a newer tab
 const TOKEN_RE = /^[0-9a-f-]{36}$/;
 let tabToken = ''; // storage refused (some private windows): this tab alone, for as long as it is open
 function browserToken() {
@@ -56,7 +57,8 @@ function browserToken() {
 
 /**
  * Connect to a room. `onMessage(msg)` receives every server message;
- * `onStatus('connecting' | 'open' | 'closed')` tracks the connection.
+ * `onStatus('connecting' | 'open' | 'closed' | 'elsewhere')` tracks the connection; 'elsewhere' is
+ * final: the same browser opened the shrine in a newer tab, and this one does not come back by itself.
  * `arrival` ({ via, hello }) goes with the first connection only, so a reconnect is not a second entrance.
  */
 export function connectRoom(room, me, { onMessage, onStatus, watch = false, arrival = null }) {
@@ -66,6 +68,15 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false, arri
   let closed = false;
   // A screen on the wall is nobody: it never goes as this browser's person.
   const token = watch ? '' : browserToken();
+
+  // This browser opened the shrine in a newer tab: that one kneels now, and this one stays put.
+  const stepAside = () => {
+    if (closed) return;
+    closed = true;
+    clearTimeout(timer);
+    try { ws?.close(); } catch { /* already closed */ }
+    onStatus('elsewhere');
+  };
 
   const open = () => {
     onStatus('connecting');
@@ -80,12 +91,15 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false, arri
     ws.addEventListener('open', () => { retry = 0; arrival = null; onStatus('open'); });
     ws.addEventListener('message', (e) => {
       try {
-        onMessage(JSON.parse(e.data));
+        const msg = JSON.parse(e.data);
+        if (msg.t === 'elsewhere') { stepAside(); return; }
+        onMessage(msg);
       } catch (err) { console.error(err); }
     });
     ws.addEventListener('close', (e) => {
+      if (e.code === ELSEWHERE) { stepAside(); return; }
+      if (closed) return; // stepped aside already, or closed on purpose
       onStatus('closed');
-      if (closed) return;
       const delay = Math.min(15000, 500 * 2 ** retry++) * (0.75 + Math.random() * 0.5);
       timer = setTimeout(open, delay);
     });
@@ -109,10 +123,6 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false, arri
     rename(next) {
       me = next;
       this.send('rename', next);
-    },
-    /** Who to come back as after a drop, when another tab already told the shrine. */
-    adopt(next) {
-      me = next;
     },
     close() {
       closed = true;

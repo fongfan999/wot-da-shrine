@@ -22,6 +22,7 @@ const CHORUS_BONUS = 3; // per person, when at least CHORUS_MIN people bow withi
 const CHORUS_MIN = 3;
 const CHORUS_WINDOW = 4000;
 const META_MAX = { title: 60, subtitle: 140, eta: 40 };
+const ELSEWHERE = 4001; // the close code for a tab whose person opened the shrine in a newer one
 const LEAVE_GRACE = 5000; // a dropped socket gets this long to come back before the room hears it left
 const TOKEN_RE = /^[0-9a-f-]{36}$/;
 const HOOK_AVATAR = '🔔'; // the alerting system, as the feed shows it
@@ -169,6 +170,12 @@ export class Shrine extends DurableObject {
     const { 0: client, 1: server } = new WebSocketPair();
     this.ctx.acceptWebSocket(server);
     server.serializeAttachment(person);
+    // Opened in another tab: the newest one kneels, and the others step aside, quietly (no leave, no join).
+    for (const tab of this.tabsOf(person.token, server)) {
+      tab.serializeAttachment({ ...tab.deserializeAttachment(), replaced: true });
+      // Said as well as closed: a close the server starts does not always reach the browser (the local dev proxy drops it).
+      try { tab.send(JSON.stringify({ t: 'elsewhere' })); tab.close(ELSEWHERE, 'kneeling in another tab'); } catch { /* already closing */ }
+    }
 
     this.settle();
     let dirty = this.forget();
@@ -210,11 +217,8 @@ export class Shrine extends DurableObject {
     }
     if (person.watcher) { /* a screen comes and goes unannounced */ }
     else if (!was) this.broadcast({ t: 'join', person: this.face(person) }, server);
-    else if (['name', 'avatar', 'role', 'tone'].some((k) => was[k] !== person[k])) {
-      for (const tab of this.tabsOf(person.token, server)) tab.serializeAttachment(person); // their other tabs go by it too
-      this.broadcast({ t: 'rename', person: this.face(person) }, server);
-    }
-    // else: another tab of someone already kneeling here, or them back from a blip: no news.
+    else if (['name', 'avatar', 'role', 'tone'].some((k) => was[k] !== person[k])) this.broadcast({ t: 'rename', person: this.face(person) }, server);
+    // else: them in a new tab, or back from a blip: no news.
     if (this.stored) await this.touch();
 
     return new Response(null, { status: 101, webSocket: client });
@@ -543,7 +547,6 @@ export class Shrine extends DurableObject {
         if (role !== undefined) person.role = role;
         if (tone !== undefined) person.tone = tone;
         ws.serializeAttachment(person);
-        for (const tab of this.tabsOf(self.token, ws)) tab.serializeAttachment(person); // the same person in every tab
         // What they earned goes with them, unless the new name is someone's already.
         const from = devoteeKey(self);
         const to = devoteeKey(person);
