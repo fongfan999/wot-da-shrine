@@ -3,6 +3,9 @@
  * (workerd, the Durable Objects, the rate limits), on a free port and with nothing kept on disk, so
  * every run starts with empty shrines. Only the Worker: no pages, no partials.
  */
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
 import { cloudflare } from '@cloudflare/vite-plugin';
@@ -18,8 +21,12 @@ const STARTUP = 30_000;
  * thrown here instead, after closing the server so the tests can end.
  */
 export async function startWorker() {
+  // A cache of its own: the test files start their Workers at the same moment, and two Vites
+  // optimizing into one node_modules/.vite trip over each other (ENOTEMPTY).
+  const cacheDir = mkdtempSync(join(tmpdir(), 'wot-da-shrine-vite-'));
   const server = await createServer({
     root,
+    cacheDir,
     configFile: false,
     logLevel: 'warn',
     plugins: [cloudflare({ persistState: false, inspectorPort: false })],
@@ -35,9 +42,10 @@ export async function startWorker() {
     const origin = `http://127.0.0.1:${server.httpServer.address().port}`;
     const res = await Promise.race([fetch(`${origin}/api/health`), failed]);
     if (!res.ok) throw new Error(`the Worker answered its health check with ${res.status}: ${(await res.text()).slice(0, 500)}`);
-    return { origin, close: () => server.close() };
+    return { origin, close: () => server.close().finally(() => rmSync(cacheDir, { recursive: true, force: true })) };
   } catch (e) {
     await server.close().catch(() => {});
+    rmSync(cacheDir, { recursive: true, force: true });
     throw e;
   } finally {
     clearTimeout(late);
