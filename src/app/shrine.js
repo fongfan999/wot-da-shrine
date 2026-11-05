@@ -332,6 +332,12 @@ function onShrineMessage(msg) {
     }
     case 'rename':
       people.set(msg.person.id, msg.person);
+      // You, renamed from another tab: this one goes by it too, and comes back by it after a drop.
+      if (msg.person.id === state.myId && !tv) {
+        const { name, avatar, role, tone } = msg.person;
+        state.me = { name, avatar, role, tone };
+        state.shrine?.adopt(state.me);
+      }
       renderWatch(); // a new name may hold the watch, or no longer
       break;
     case 'push':

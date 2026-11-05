@@ -148,10 +148,15 @@ export class Shrine extends DurableObject {
       tone: cleanTone(url.searchParams.get('tone')),
     };
     for (const k of ['role', 'tone']) if (person[k] === undefined) delete person[k];
-    // Coming back after a dropped connection or a refresh: the same person, not a stranger.
-    const was = this.resume(url.searchParams.get('token'));
+    // A screen on the wall: sees everything, counts as nobody, and is never anyone's other tab.
+    const watcher = url.searchParams.get('watch') === '1';
+    // The browser keeps one token for everyone it is: another tab, a refresh or a dropped connection
+    // comes back as the same person, not a stranger. A new token is a new person (another browser, a private window).
+    const asked = watcher ? '' : url.searchParams.get('token');
+    const was = this.resume(asked);
     if (was) Object.assign(person, { id: was.id, token: was.token, via: was.via, hello: was.hello });
-    if (url.searchParams.get('watch') === '1') person.watcher = true; // a screen on the wall: sees everything, counts as nobody
+    else if (TOKEN_RE.test(asked ?? '')) person.token = asked;
+    if (watcher) person.watcher = true;
     // Scanned the code on a TV: the TV makes a fuss of them, and the home page's TV knows its own visitor by `hello`.
     if (url.searchParams.get('via') === 'tv') {
       person.via = 'tv';
@@ -159,7 +164,6 @@ export class Shrine extends DurableObject {
       if (/^[a-z0-9]{8,24}$/.test(hello)) person.hello = hello;
     }
     if (this.demo) person.name = DEMO_NAMES[parseInt(person.id, 16) % DEMO_NAMES.length];
-    if (was?.watcher) person.watcher = true;
     for (const k of ['via', 'hello']) if (person[k] === undefined) delete person[k];
 
     const { 0: client, 1: server } = new WebSocketPair();
@@ -180,7 +184,6 @@ export class Shrine extends DurableObject {
     server.send(JSON.stringify({
       t: 'state',
       me: person.id,
-      token: person.token,
       now: Date.now(),
       burn: BURN_SECONDS,
       people: this.people(),
@@ -207,7 +210,11 @@ export class Shrine extends DurableObject {
     }
     if (person.watcher) { /* a screen comes and goes unannounced */ }
     else if (!was) this.broadcast({ t: 'join', person: this.face(person) }, server);
-    else if (['name', 'avatar', 'role', 'tone'].some((k) => was[k] !== person[k])) this.broadcast({ t: 'rename', person: this.face(person) }, server);
+    else if (['name', 'avatar', 'role', 'tone'].some((k) => was[k] !== person[k])) {
+      for (const tab of this.tabsOf(person.token, server)) tab.serializeAttachment(person); // their other tabs go by it too
+      this.broadcast({ t: 'rename', person: this.face(person) }, server);
+    }
+    // else: another tab of someone already kneeling here, or them back from a blip: no news.
     if (this.stored) await this.touch();
 
     return new Response(null, { status: 101, webSocket: client });
@@ -536,6 +543,7 @@ export class Shrine extends DurableObject {
         if (role !== undefined) person.role = role;
         if (tone !== undefined) person.tone = tone;
         ws.serializeAttachment(person);
+        for (const tab of this.tabsOf(self.token, ws)) tab.serializeAttachment(person); // the same person in every tab
         // What they earned goes with them, unless the new name is someone's already.
         const from = devoteeKey(self);
         const to = devoteeKey(person);
@@ -681,6 +689,7 @@ export class Shrine extends DurableObject {
     const person = ws.deserializeAttachment();
     if (!person || person.replaced || person.watcher) return;
     ws.serializeAttachment({ ...person, replaced: true }); // close and error can both fire: announce once
+    if (this.tabsOf(person.token).length) return; // one tab closed; they are still here in another
     // The last one out starts the clock on forgetting the vigil.
     const v = this.state.vigil;
     if (v && !this.people().length) { v.seenAt = Date.now(); this.ctx.waitUntil(this.save().catch(() => {})); }
@@ -694,8 +703,8 @@ export class Shrine extends DurableObject {
   }
 
   /**
-   * The person a resume token belongs to, if they are still about: dropped within the grace, or
-   * still connected on a socket that has not noticed it is dead (that socket is retired quietly).
+   * The person a browser's token belongs to, if they are still about: dropped within the grace,
+   * or kneeling here in another tab.
    */
   resume(token) {
     if (!token || !TOKEN_RE.test(token)) return null;
@@ -705,18 +714,26 @@ export class Shrine extends DurableObject {
       this.leaving.delete(token);
       return gone.person;
     }
-    for (const ws of this.ctx.getWebSockets()) {
-      const p = ws.deserializeAttachment();
-      if (p?.token !== token || p.replaced) continue;
-      ws.serializeAttachment({ ...p, replaced: true });
-      try { ws.close(4000, 'resumed elsewhere'); } catch { /* already closing */ }
-      return p;
-    }
-    return null;
+    const tab = this.tabsOf(token)[0];
+    return tab?.deserializeAttachment() ?? null;
   }
 
+  /** The open sockets a person has here, one per tab, but for `except`. A screen is nobody's. */
+  tabsOf(token, except) {
+    if (!token) return [];
+    return this.ctx.getWebSockets().filter((ws) => {
+      if (ws === except) return false;
+      const p = ws.deserializeAttachment();
+      return p && !p.watcher && !p.replaced && p.token === token;
+    });
+  }
+
+  /** Everyone kneeling here, once each however many tabs they have open. */
   people() {
-    return this.ctx.getWebSockets().map((ws) => ws.deserializeAttachment()).filter((p) => p && !p.watcher && !p.replaced).map((p) => this.face(p));
+    const seen = new Set();
+    return this.ctx.getWebSockets().map((ws) => ws.deserializeAttachment())
+      .filter((p) => p && !p.watcher && !p.replaced && !seen.has(p.id) && seen.add(p.id))
+      .map((p) => this.face(p));
   }
 
   /* ---------- Standing: what each person has earned here ---------- */

@@ -36,15 +36,22 @@ export function saveMe(me) {
 }
 
 /**
- * The resume token the shrine gave this tab, so a reconnect or a refresh comes back as the same
- * person. Per tab (sessionStorage): two tabs are two people kneeling.
+ * Who this browser is, to every shrine: a secret made here once and kept (localStorage), so every
+ * tab, a refresh and a dropped connection are the same person kneeling. Another browser, or a
+ * private window, is someone else. Nobody signs in; losing it only makes you a newcomer.
  */
-const tokenKey = (room) => `incense:resume:${room}`;
-function loadToken(room) {
-  try { return sessionStorage.getItem(tokenKey(room)) || ''; } catch { return ''; }
-}
-function saveToken(room, token) {
-  try { if (token) sessionStorage.setItem(tokenKey(room), token); else sessionStorage.removeItem(tokenKey(room)); } catch { /* ignore */ }
+const TOKEN_KEY = 'incense:who:v1';
+const TOKEN_RE = /^[0-9a-f-]{36}$/;
+let tabToken = ''; // storage refused (some private windows): this tab alone, for as long as it is open
+function browserToken() {
+  try {
+    let token = localStorage.getItem(TOKEN_KEY);
+    if (!TOKEN_RE.test(token ?? '')) { token = crypto.randomUUID(); localStorage.setItem(TOKEN_KEY, token); }
+    return token;
+  } catch {
+    tabToken ||= crypto.randomUUID();
+    return tabToken;
+  }
 }
 
 /**
@@ -57,7 +64,8 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false, arri
   let retry = 0;
   let timer = null;
   let closed = false;
-  let token = loadToken(room);
+  // A screen on the wall is nobody: it never goes as this browser's person.
+  const token = watch ? '' : browserToken();
 
   const open = () => {
     onStatus('connecting');
@@ -72,14 +80,10 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false, arri
     ws.addEventListener('open', () => { retry = 0; arrival = null; onStatus('open'); });
     ws.addEventListener('message', (e) => {
       try {
-        const msg = JSON.parse(e.data);
-        if (msg.t === 'state' && msg.token) { token = msg.token; saveToken(room, token); }
-        onMessage(msg);
+        onMessage(JSON.parse(e.data));
       } catch (err) { console.error(err); }
     });
     ws.addEventListener('close', (e) => {
-      // Another tab came back as this person (a duplicated tab carries our token): be someone new.
-      if (e.code === 4000) { token = ''; saveToken(room, ''); }
       onStatus('closed');
       if (closed) return;
       const delay = Math.min(15000, 500 * 2 ** retry++) * (0.75 + Math.random() * 0.5);
@@ -105,6 +109,10 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false, arri
     rename(next) {
       me = next;
       this.send('rename', next);
+    },
+    /** Who to come back as after a drop, when another tab already told the shrine. */
+    adopt(next) {
+      me = next;
     },
     close() {
       closed = true;
