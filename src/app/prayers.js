@@ -5,7 +5,7 @@ import { sound } from '../audio/index.js';
 import { releaseLantern } from '../scene/lanterns.js';
 import { STRINGS, t } from '../lib/strings.js';
 import { puff } from './altar.js';
-import { $, recentPrayers, reduceMotion, roomName, state } from './context.js';
+import { $, myName, recentPrayers, reduceMotion, roomName, state } from './context.js';
 import { congregation, petals, wishes } from './engines.js';
 import { addKarma } from './stats.js';
 import { logMine, toast } from './ui.js';
@@ -23,8 +23,8 @@ $('#wish-form').addEventListener('submit', (e) => {
 
 export function sendPrayer(text) {
   prayerFx(text, roomName ? `${state.me?.avatar ?? ''} ${t('you')}` : '', false, congregation.element(state.myId));
-  wishes.hang(text, roomName ? state.me?.name ?? '' : '');
-  remember(text, roomName ? state.me?.name ?? '' : '');
+  wishes.hang(text, roomName ? myName() : '');
+  remember(text, roomName ? myName() : '');
   addKarma(KARMA.prayer);
   logMine('prayer', t('fPrayer'), { quote: text, toastText: t('wishSent') });
   state.shrine?.send('prayer', { text });

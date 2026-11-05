@@ -40,6 +40,8 @@ export const roomUrl = () => `${location.origin}${roomName ? `/r/${roomName}` : 
 
 /* ---------- Shared state ---------- */
 export const people = new Map();
+/** The name the shrine knows you by: on the demo it hands out its own, never the one saved here. */
+export const myName = () => people.get(state.myId)?.name ?? state.me?.name ?? '';
 export const recentPrayers = []; // the last few prayers, with names, for the share card
 export const state = {
   lit: false,

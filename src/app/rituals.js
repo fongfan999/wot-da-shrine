@@ -4,7 +4,7 @@ import { KARMA } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { LEVELS as FORTUNE_LEVELS, asText as fortuneText, draw as drawFortune } from '../lib/omikuji.js';
 import { t } from '../lib/strings.js';
-import { $, fmt, reduceMotion, roomName, roomUrl, state, tv } from './context.js';
+import { $, fmt, myName, reduceMotion, roomName, roomUrl, state, tv } from './context.js';
 import { art, burner, motes, petals, smoke, wishes } from './engines.js';
 import { openTray } from './offerings.js';
 import { shareOpen } from './shareSheet.js';
@@ -128,7 +128,7 @@ export function fortuneFx() {
 }
 $('#btn-fortune-tie').addEventListener('click', () => {
   if (!fortune) return;
-  wishes.hang(FORTUNE_LEVELS[fortune.level].name, roomName ? state.me?.name ?? '' : '');
+  wishes.hang(FORTUNE_LEVELS[fortune.level].name, roomName ? myName() : '');
   openRitual('fortune', false);
   toast(t('fortuneTied'));
   sound.tick(990, 0.08);

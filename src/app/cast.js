@@ -6,7 +6,7 @@
 import { CODE_ALPHABET } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { t } from '../lib/strings.js';
-import { $, fmt, roomName, state, tv, urlParams } from './context.js';
+import { $, fmt, myName, roomName, tv, urlParams } from './context.js';
 import { claimShrine, suggested } from './openShrine.js';
 import { openRitual } from './rituals.js';
 import { spaced } from './screen.js';
@@ -80,7 +80,7 @@ async function cast(room, open = false) {
     res = await fetch(`/api/tv/${code}/cast`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ room, by: state.me?.name ?? '' }),
+      body: JSON.stringify({ room, by: myName() }),
     });
   } catch {
     res = null;
