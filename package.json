@@ -10,7 +10,6 @@
     "build": "vite build",
     "preview": "vite build && vite preview",
     "deploy": "vite build && wrangler deploy",
-    "deploy:redirect": "wrangler deploy -c redirect/wrangler.jsonc",
     "vapid": "node scripts/vapid.js"
   },
   "dependencies": {
