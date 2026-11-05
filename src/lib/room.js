@@ -6,7 +6,7 @@
 
 const ME_KEY = 'incense:me:v1';
 
-import { AVATARS } from '../../shared/rules.js';
+import { AVATARS, cleanRole, cleanTone } from '../../shared/rules.js';
 
 export { AVATARS };
 
@@ -19,7 +19,14 @@ export function roomFromPath(path = location.pathname) {
 export function loadMe() {
   try {
     const me = JSON.parse(localStorage.getItem(ME_KEY) || 'null');
-    if (me?.name) return { name: String(me.name).slice(0, 24), avatar: AVATARS.includes(me.avatar) ? me.avatar : AVATARS[0] };
+    if (me?.name) {
+      const out = { name: String(me.name).slice(0, 24), avatar: AVATARS.includes(me.avatar) ? me.avatar : AVATARS[0] };
+      const role = cleanRole(me.role);
+      const tone = cleanTone(me.tone);
+      if (role !== undefined) out.role = role;
+      if (tone !== undefined) out.tone = tone;
+      return out;
+    }
   } catch { /* ignore */ }
   return null;
 }
@@ -56,6 +63,8 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false, arri
     onStatus('connecting');
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     const q = new URLSearchParams({ name: me.name, avatar: me.avatar });
+    if (me.role) q.set('role', me.role);
+    if (me.tone !== undefined) q.set('tone', String(me.tone));
     if (watch) q.set('watch', '1');
     if (token) q.set('token', token);
     for (const [k, v] of Object.entries(arrival ?? {})) if (v) q.set(k, v);

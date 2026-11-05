@@ -130,6 +130,16 @@ export const levelOf = (karma) => SHRINE_LEVELS.reduce((idx, at, k) => (karma >=
 export const MATS = [1, 3, 5, 7, 10, 12];
 
 /**
+ * Who you are at the altar: you pick what you do at the company and your colour when you enter (the
+ * figures for each are in src/scene/devotee.js). Not picked, the shrine leaves them out and your name
+ * decides.
+ */
+export const DEVOTEE_ROLES = ['dev', 'devops', 'boss', 'sales', 'designer', 'pm', 'intern', 'security'];
+export const TONES = 4;
+export const cleanRole = (r) => (DEVOTEE_ROLES.includes(r) ? r : undefined);
+export const cleanTone = (t) => { const n = Number(t); return t !== null && t !== '' && Number.isInteger(n) && n >= 0 && n < TONES ? n : undefined; };
+
+/**
  * Raising a level: once the room's karma reaches the next one, the carpenters put up scaffolding
  * (not while the kami is unfed: RAISE_FED, from its last meal). Then it takes RAISE_BOWS different
  * people bowing within RAISE_WINDOW of each other to raise it; a smaller team needs as many as have

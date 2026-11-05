@@ -136,7 +136,7 @@ export class Congregation {
     const el = document.createElement('div');
     el.className = 'kneeler';
     el.dataset.pose = 'kneel';
-    el.innerHTML = '<div class="kneeler__tag"><span class="kneeler__avatar"></span><span class="kneeler__name"></span></div><svg class="kneeler__svg"></svg>';
+    el.innerHTML = '<div class="kneeler__tag"><span class="kneeler__avatar"></span><span class="kneeler__name"></span><span class="kneeler__role"></span></div><svg class="kneeler__svg"></svg>';
     this.host.appendChild(el);
     const item = { el, person, placed: false, walking: false, dressed: '' };
     this.items.set(person.id, item);
@@ -146,13 +146,15 @@ export class Congregation {
   /** Draw them as they are now: their look (from their name and avatar), their rank, their mornings in a row. */
   dress(item) {
     const p = item.person;
-    const look = lookOf(devoteeKey(p));
+    const look = lookOf(p.key ?? devoteeKey(p), p.role, p.tone);
     const rank = this.rankOf?.(p) ?? 0;
     const streak = this.streakOf?.(p) ?? 0;
     const key = dressKey(look, rank, streak);
     if (key === item.dressed) return;
     item.dressed = key;
     item.el.dataset.tone = String(look.tone);
+    item.el.dataset.role = look.role;
+    item.el.querySelector('.kneeler__role').textContent = this.roleTag?.(look.role) ?? '';
     const holder = document.createElement('div');
     holder.innerHTML = figureSvg(look, rank, streak);
     item.el.querySelector('.kneeler__svg').replaceWith(holder.firstElementChild);
@@ -195,6 +197,7 @@ export class Congregation {
     item.el.dataset.id = person.id;
     item.el.querySelector('.kneeler__avatar').textContent = person.avatar;
     item.el.querySelector('.kneeler__name').textContent = person.name;
+    item.el.classList.toggle('kneeler--untagged', person.tagged === false);
     this.dress(item);
   }
 
@@ -319,7 +322,7 @@ export class Congregation {
       item.w = w;
       item.home = { x: s.x, y, scale: depth };
       Object.assign(item.el.style, { width: `${w}px`, height: `${h}px` });
-      item.el.style.setProperty('--lift', s.k % 2 ? '24px' : '0px'); // neighbours' name tags never collide
+      item.el.style.setProperty('--lift', `${(s.k % (perSide > 3 ? 3 : 2)) * 22}px`); // neighbours' name tags never collide: two heights, three when it is crowded
       item.el.hidden = i >= visible;
       if (item.walking) return; // the walk comes back to wherever home is now
       item.el.style.zIndex = String((kneels ? 30 : 10) + (s.back ? 0 : 10) - s.k);

@@ -10,7 +10,7 @@
     </div>
     <div class="join__head">
       <h2 class="join__title join--enter"><span data-i18n="joinTitle">Enter the</span> <em data-i18n="joinTitleAccent">shrine</em></h2>
-      <h2 class="join__title join--rename"><span data-i18n="renameTitle">Change your</span> <em data-i18n="renameTitleAccent">name</em></h2>
+      <h2 class="join__title join--rename"><span data-i18n="renameTitle">Change who you</span> <em data-i18n="renameTitleAccent">are</em></h2>
       <button class="icon-btn join--rename" id="btn-close-join" type="button" aria-label="Close">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
@@ -20,6 +20,17 @@
     <label class="sr-only" for="join-name">Your name</label>
     <input class="join__input" id="join-name" type="text" maxlength="24" required />
     <div class="join__avatars" id="join-avatars" role="radiogroup" aria-label="Pick an avatar"></div>
+    <!-- Who you are at the altar: what you do, your colour, and you as the room will see you -->
+    <div class="join__me">
+      <div class="join__preview" id="join-preview" aria-hidden="true"></div>
+      <div class="join__picks">
+        <p class="join__label" id="join-role-label" data-i18n="joinRoleLabel">What do you do here?</p>
+        <div class="join__roles" id="join-roles" role="radiogroup" aria-labelledby="join-role-label"></div>
+        <p class="join__role-tip" id="join-role-tip" aria-live="polite"></p>
+        <p class="join__label" id="join-tone-label" data-i18n="joinToneLabel">Your colour</p>
+        <div class="join__tones" id="join-tones" role="radiogroup" aria-labelledby="join-tone-label"></div>
+      </div>
+    </div>
     <button class="btn btn--accent btn--block" type="submit">
       <span class="join--enter" data-i18n="joinBtn">Kneel at the altar</span>
       <span class="join--rename" data-i18n="renameSave">Save</span>

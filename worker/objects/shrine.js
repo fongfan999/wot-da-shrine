@@ -10,7 +10,7 @@ import { cleanSub, send as sendPush, topicOf } from '../push.js';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
 import { kamiLine, kamiMood } from '../../shared/kami.js';
 import { OMEN_DEFY, readOmens } from '../../shared/omens.js';
-import { AVATARS, purifiable, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, WATCHED_MAX, WATCHED_NAME_MAX, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN, RAISE_BOWS, RAISE_FED, RAISE_WINDOW, SHRINE_LEVELS } from '../../shared/rules.js';
+import { AVATARS, cleanRole, cleanTone, purifiable, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, WATCHED_MAX, WATCHED_NAME_MAX, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN, RAISE_BOWS, RAISE_FED, RAISE_WINDOW, SHRINE_LEVELS } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
@@ -144,7 +144,10 @@ export class Shrine extends DurableObject {
       token: crypto.randomUUID(),
       name: clean(url.searchParams.get('name'), 24) || 'Anonymous sysadmin',
       avatar: AVATARS.includes(url.searchParams.get('avatar')) ? url.searchParams.get('avatar') : '🧘',
+      role: cleanRole(url.searchParams.get('role')),
+      tone: cleanTone(url.searchParams.get('tone')),
     };
+    for (const k of ['role', 'tone']) if (person[k] === undefined) delete person[k];
     // Coming back after a dropped connection or a refresh: the same person, not a stranger.
     const was = this.resume(url.searchParams.get('token'));
     if (was) Object.assign(person, { id: was.id, token: was.token, via: was.via, hello: was.hello });
@@ -204,7 +207,7 @@ export class Shrine extends DurableObject {
     }
     if (person.watcher) { /* a screen comes and goes unannounced */ }
     else if (!was) this.broadcast({ t: 'join', person: this.face(person) }, server);
-    else if (was.name !== person.name || was.avatar !== person.avatar) this.broadcast({ t: 'rename', person: this.face(person) }, server);
+    else if (['name', 'avatar', 'role', 'tone'].some((k) => was[k] !== person[k])) this.broadcast({ t: 'rename', person: this.face(person) }, server);
     if (this.stored) await this.touch();
 
     return new Response(null, { status: 101, webSocket: client });
@@ -526,6 +529,10 @@ export class Shrine extends DurableObject {
         const avatar = AVATARS.includes(msg.avatar) ? msg.avatar : by.avatar;
         if (!name) return;
         const person = { ...self, name, avatar };
+        const role = cleanRole(msg.role) ?? self.role;
+        const tone = cleanTone(msg.tone) ?? self.tone;
+        if (role !== undefined) person.role = role;
+        if (tone !== undefined) person.tone = tone;
         ws.serializeAttachment(person);
         // What they earned goes with them, unless the new name is someone's already.
         const from = devoteeKey(self);

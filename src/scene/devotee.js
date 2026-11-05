@@ -53,8 +53,8 @@ const BUILDS = [0.86, 1, 1.15, 1.12]; // slim, average, broad, the belly (its ow
 
 const hash = (s) => { let h = 2166136261; for (const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0; return h; };
 
-/** A person's look, from who they are (`key`: their name and avatar); `role` pins what they are. */
-export function lookOf(key, role = null) {
+/** A person's look, from who they are (`key`: their name and avatar); a picked `role` and `tone` win over the name's. */
+export function lookOf(key, role = null, tone = null) {
   const pick = (salt, list) => list[hash(`${key}#${salt}`) % list.length];
   const r = ROLES[role] ? role : pick('role', ROLE_IDS);
   const def = ROLES[r];
@@ -63,7 +63,7 @@ export function lookOf(key, role = null) {
     build: pick('build', def.builds),
     hair: pick('hair', def.hairs),
     outfit: pick('outfit', def.outfits),
-    tone: hash(`${key}#tone`) % 4,
+    tone: Number.isInteger(tone) && tone >= 0 && tone < 4 ? tone : hash(`${key}#tone`) % 4,
     carries: pick('carries', def.carries),
     print: hash(`${key}#print`) % 4,
     glasses: def.glasses ? hash(`${key}#glasses`) % def.glasses === 0 : false,

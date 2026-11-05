@@ -55,6 +55,7 @@ function announceMoves(order) {
 }
 
 export function renderPeople(newId) {
+  if (!roomName) { renderPlace(); return; } // the home page's crowd is its own (landing/crowd.js)
   const order = ranked();
   const watch = order.find(onWatch)?.id ?? null; // on the on-call stool, outside the order
   congregation.set(order, state.myId, matsHere(), hasStanding() ? watch : null);
@@ -112,8 +113,9 @@ export function pingPerson(id, iconName) {
 congregation.thankTip = (p) => fmt('thankTip', { name: p.name });
 congregation.atGate = (n) => fmt('atGate', { n });
 // What they have earned shows on them: their title dresses them, their mornings in a row wear through their socks.
-congregation.rankOf = (p) => (hasStanding() ? rankOf(p.karma) : 0);
-congregation.streakOf = (p) => (hasStanding() ? liveStreak(p) : 0);
+congregation.rankOf = (p) => (hasStanding() ? rankOf(p.karma) : p.rank ?? 0);
+congregation.streakOf = (p) => (hasStanding() ? liveStreak(p) : p.streak ?? 0);
+congregation.roleTag = (role) => (roomName ? t(`roleTag_${role}`) : ''); // who is who: what they do, on their name tag (the home page's tags are the role itself)
 $('#congregation').addEventListener('click', (e) => {
   const kneeler = e.target.closest('.kneeler--thanks');
   if (!kneeler || !e.target.closest('.kneeler__tag') || roomName === 'demo') return;

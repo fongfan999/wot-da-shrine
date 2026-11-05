@@ -34,6 +34,9 @@ body[data-landing="1"] .altar::before {
 }
 body[data-landing="1"][data-state="lit"] .altar::before { opacity: .9; }
 body[data-landing="1"] .burner { height: min(100%, 520px); cursor: pointer; }
+/* The crowd's tags say what each one does; there are few of them, staggered, so they take their natural width */
+body[data-landing="1"] .kneeler__tag { max-width: none; font-size: 11px; padding: 2px 8px 2px 2px; }
+body[data-landing="1"] .kneeler__avatar { width: 18px; height: 18px; font-size: .7rem; }
 /* The landing shows the biggest shrine there is: a smaller censer with the whole head temple around it,
    spilling into the gap beside the words and the gutter (temple.js lines it up with the censer) */
 @media (min-width: 900px) {

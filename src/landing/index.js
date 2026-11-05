@@ -7,6 +7,7 @@ import { onPalette } from '../scene/palette.js';
 import { scene } from '../scene/ticker.js';
 import { burner, placeSmoke, smoke } from '../app/engines.js';
 import { setupBuilder } from './builder.js';
+import { setupCrowd } from './crowd.js';
 import { watchPulse } from './pulse.js';
 import { setupRibbon } from './ribbon.js';
 import { setupRituals } from './rituals.js';
@@ -24,6 +25,7 @@ export function setupLanding() {
   $('#hero-form').hidden = false;
   setupBuilder();
   setupTv();
+  setupCrowd();
   // The altar is alive when you arrive: lit after the intro, with a hint that it can be touched.
   const hint = $('#hero-hint');
   introStarted.then(() => setTimeout(() => { if (!state.lit) ignite(Date.now()); hint.hidden = false; }, reduceMotion ? 300 : 2200));

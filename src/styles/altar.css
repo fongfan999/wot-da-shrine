@@ -197,6 +197,11 @@ body[data-state="lit"] .t-lit { opacity: 1; }
 .kneeler--me .kneeler__tag { border-color: var(--accent); background: var(--accent-soft); color: var(--note-ink); }
 .kneeler__avatar { width: 20px; height: 20px; display: grid; place-items: center; flex-shrink: 0; border-radius: 50%; background: var(--paper-sunk); font-size: .78rem; }
 .kneeler__name { overflow: hidden; text-overflow: ellipsis; }
+/* What they do, after their name: dev, ops, boss, sales… */
+.kneeler__role { flex-shrink: 0; font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.kneeler__role:empty { display: none; }
+.kneeler--untagged .kneeler__tag { display: none; }
+.kneeler--me .kneeler__role { color: inherit; opacity: .75; }
 .kneeler-more {
   position: absolute;
   right: 0;

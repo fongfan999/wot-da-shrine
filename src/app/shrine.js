@@ -25,7 +25,8 @@ import { charmFx } from './charms.js';
 import { fedFx, purifyFx, renderKami } from './kami.js';
 import { kamiAct, kamiNope } from './kami.js';
 import { openShare } from './shareSheet.js';
-import { SHIPPED_FOR, layersOn, sameMix } from '../../shared/rules.js';
+import { DEVOTEE_ROLES, SHIPPED_FOR, TONES, devoteeKey, layersOn, sameMix } from '../../shared/rules.js';
+import { kneeling, lookOf, walking } from '../scene/devotee.js';
 import { announceArrival, arrivedFromTv, greetFromTv, tvJoinUrl } from './screen.js';
 import { applySettings, onHook } from './settings.js';
 import { askPush, onPush, syncPush } from './push.js';
@@ -40,6 +41,10 @@ export const joinEl = $('#join');
 export const joinOpen = () => !joinEl.hidden && !joinEl.inert;
 const joinName = $('#join-name');
 const joinAvatars = $('#join-avatars');
+const joinRoles = $('#join-roles');
+const joinTones = $('#join-tones');
+const joinPreview = $('#join-preview');
+const joinRoleTip = $('#join-role-tip');
 const roomStatus = $('#room-status');
 
 export function enterRoom() {
@@ -129,6 +134,23 @@ export function openJoin() {
     b.tabIndex = a === current.avatar ? 0 : -1; // one tab stop for the group; arrows move inside it
     joinAvatars.appendChild(b);
   }
+  // What you do and your colour: as you picked them, or as your name would have them.
+  const first = lookOf(devoteeKey(current), current.role, current.tone);
+  const radio = (cls, value, label, checked, extra = {}) => {
+    const b = Object.assign(document.createElement('button'), { type: 'button', className: cls, tabIndex: checked ? 0 : -1, ...extra });
+    b.dataset.value = String(value);
+    b.setAttribute('role', 'radio');
+    b.setAttribute('aria-checked', String(checked));
+    b.setAttribute('aria-label', label);
+    return b;
+  };
+  joinRoles.replaceChildren(...DEVOTEE_ROLES.map((r) => radio('join__role', r, t(`role_${r}`), r === first.role, { textContent: t(`role_${r}`), title: t(`roleTip_${r}`) })));
+  joinTones.replaceChildren(...Array.from({ length: TONES }, (_, i) => {
+    const b = radio('join__tone', i, t(`tone_${i}`), i === first.tone, { title: t(`tone_${i}`) });
+    b.dataset.tone = String(i);
+    return b;
+  }));
+  renderPreview();
   joinEl.hidden = false;
   joinEl.inert = false;
   gsap.fromTo(joinEl, { opacity: 0 }, { opacity: 1, duration: 0.4 });
@@ -136,34 +158,56 @@ export function openJoin() {
   setTimeout(() => { joinName.focus(); joinName.select(); }, 50);
 }
 
-function pickAvatar(b) {
-  joinAvatars.querySelectorAll('.join__avatar').forEach((x) => {
+/** What the card has picked: your avatar, what you do, your colour. */
+const picked = () => ({
+  avatar: joinAvatars.querySelector('[aria-checked="true"]')?.textContent ?? AVATARS[0],
+  role: joinRoles.querySelector('[aria-checked="true"]')?.dataset.value,
+  tone: Number(joinTones.querySelector('[aria-checked="true"]')?.dataset.value ?? 0),
+});
+
+/** You as the room will see you: kneeling from behind, and from the side carrying incense. */
+function renderPreview() {
+  const { avatar, role, tone } = picked();
+  const name = joinName.value.trim() || 'You';
+  const look = lookOf(devoteeKey({ name, avatar }), role, tone);
+  joinPreview.dataset.tone = String(look.tone);
+  joinPreview.innerHTML = `<svg viewBox="-62 -232 124 240">${kneeling('kneeler', { look })}</svg><svg viewBox="-46 -236 92 244">${walking('walker', { look }, { sticks: true })}</svg>`;
+  joinRoleTip.textContent = role ? t(`roleTip_${role}`) : '';
+}
+joinName.addEventListener('input', renderPreview);
+
+/** Choose `b` in its radio group, and redraw you. */
+function pick(group, b) {
+  group.querySelectorAll('[role="radio"]').forEach((x) => {
     x.setAttribute('aria-checked', String(x === b));
     x.tabIndex = x === b ? 0 : -1;
   });
   sound.unlock();
   sound.tick(880, 0.05);
+  renderPreview();
 }
-joinAvatars.addEventListener('click', (e) => {
-  const b = e.target.closest('.join__avatar');
-  if (b) pickAvatar(b);
-});
-// A radio group: arrows choose (left and right by one, up and down by a row), Home and End jump to the ends.
-joinAvatars.addEventListener('keydown', (e) => {
-  const all = [...joinAvatars.querySelectorAll('.join__avatar')];
-  const i = all.indexOf(document.activeElement);
-  if (i < 0) return;
-  const cols = getComputedStyle(joinAvatars).gridTemplateColumns.split(' ').length;
-  const step = { ArrowRight: 1, ArrowDown: cols, ArrowLeft: -1, ArrowUp: -cols }[e.key];
-  let next = null;
-  if (step) next = all[(i + step + all.length) % all.length];
-  else if (e.key === 'Home') next = all[0];
-  else if (e.key === 'End') next = all.at(-1);
-  if (!next) return;
-  e.preventDefault();
-  pickAvatar(next);
-  next.focus();
-});
+// Three radio groups: a click chooses; arrows choose (left and right by one, up and down by a row), Home and End jump to the ends.
+for (const group of [joinAvatars, joinRoles, joinTones]) {
+  group.addEventListener('click', (e) => {
+    const b = e.target.closest('[role="radio"]');
+    if (b && group.contains(b)) pick(group, b);
+  });
+  group.addEventListener('keydown', (e) => {
+    const all = [...group.querySelectorAll('[role="radio"]')];
+    const i = all.indexOf(document.activeElement);
+    if (i < 0) return;
+    const cols = getComputedStyle(group).gridTemplateColumns.split(' ').length || all.length;
+    const step = { ArrowRight: 1, ArrowDown: cols, ArrowLeft: -1, ArrowUp: -cols }[e.key];
+    let next = null;
+    if (step) next = all[(i + step + all.length) % all.length];
+    else if (e.key === 'Home') next = all[0];
+    else if (e.key === 'End') next = all.at(-1);
+    if (!next) return;
+    e.preventDefault();
+    pick(group, next);
+    next.focus();
+  });
+}
 
 function closeJoin() {
   joinName.blur(); // so the shortcuts work right away
@@ -181,8 +225,8 @@ $('#join-form').addEventListener('submit', (e) => {
   sound.unlock();
   const name = joinName.value.trim().slice(0, 24);
   if (!name) return;
-  const avatar = joinAvatars.querySelector('[aria-checked="true"]')?.textContent ?? AVATARS[0];
-  state.me = { name, avatar };
+  const { avatar, role, tone } = picked();
+  state.me = { name, avatar, role, tone };
   saveMe(state.me);
   closeJoin();
   sound.bowl(220);

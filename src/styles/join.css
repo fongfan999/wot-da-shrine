@@ -8,8 +8,10 @@
   padding: 16px;
   background: var(--backdrop);
 }
+.join { overflow-y: auto; }
 .join__card {
-  width: min(420px, 100%);
+  width: min(520px, 100%);
+  margin: auto;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -38,7 +40,47 @@
   font-size: 16px;
 }
 .join__input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.join__avatars { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 6px; }
+.join__avatars { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 6px; }
+.join__avatars .join__avatar { font-size: 1.3rem; }
+/* You, as the room will see you: from behind at the altar, from the side carrying incense */
+.join__me { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 14px; align-items: start; padding: 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background-color: var(--sheet); background-image: radial-gradient(var(--sheet-line) 1px, transparent 1.2px); background-size: 14px 14px; }
+.join__preview { display: flex; align-items: flex-end; justify-content: center; gap: 0; min-height: 168px; }
+.join__preview svg { display: block; height: 164px; width: auto; overflow: visible; }
+.join__preview .kneeler__halo { fill: var(--ember-soft); }
+.join__preview .kneeler__ember { fill: var(--flame); }
+.join__picks { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.join__label { margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.join__roles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.join__role {
+  min-height: 40px;
+  padding: 4px 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.15;
+  transition: border-color 160ms, background-color 160ms;
+}
+.join__role:hover { border-color: var(--field-line); background: var(--paper-sunk); }
+.join__role[aria-checked="true"] { border: 2px solid var(--accent); background: var(--accent-soft); color: var(--note-ink); }
+.join__role-tip { min-height: 2.6em; margin: 0; font-size: 13px; line-height: 1.3; color: var(--muted); }
+.join__tones { display: flex; gap: 8px; }
+.join__tone { width: 40px; height: 40px; border: 1px solid var(--field-line); border-radius: 50%; background: var(--paper); transition: transform 160ms; }
+.join__tone[data-tone="1"] { background: var(--tone-1-soft); border-color: var(--tone-1); }
+.join__tone[data-tone="2"] { background: var(--tone-2-soft); border-color: var(--tone-2); }
+.join__tone[data-tone="3"] { background: var(--tone-3-soft); border-color: var(--tone-3); }
+.join__tone[aria-checked="true"] { outline: 2px solid var(--accent); outline-offset: 3px; }
+.join__tone:hover { transform: scale(1.06); }
+:is(.join__role, .join__tone):focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 520px) {
+  .join__card { padding: 20px; }
+  .join__me { grid-template-columns: 1fr; }
+  .join__preview { min-height: 130px; }
+  .join__preview svg { height: 128px; }
+}
 .join__avatar {
   aspect-ratio: 1;
   border: 1px solid var(--line-strong);
