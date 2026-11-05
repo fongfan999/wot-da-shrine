@@ -8,6 +8,7 @@ import { t } from '../lib/strings.js';
 import { $, fmt, reduceMotion, state } from './context.js';
 import { art, congregation, smoke } from './engines.js';
 import { addKarma } from './stats.js';
+import { myFigure } from './people.js';
 import { logMine } from './ui.js';
 
 let lastOffering = null;
@@ -17,7 +18,8 @@ export function offer(kind = null) {
   if (!OFFERINGS[kind]) kind = gsap.utils.random(Object.keys(OFFERINGS).filter((k) => k !== lastOffering));
   lastOffering = kind;
   const label = offerFx(kind, t('you'));
-  if (state.myId) congregation.walk(state.myId, { sticks: false }); // you carry it to the table
+  const me = myFigure();
+  if (me) congregation.walk(me, { sticks: false }); // you carry it to the table
   addKarma(KARMA.offer);
   logMine(`offer:${kind}`, fmt('fOffer', { item: label }), { toastText: fmt('offered', { item: label }) });
   state.shrine?.send('offer', { kind });

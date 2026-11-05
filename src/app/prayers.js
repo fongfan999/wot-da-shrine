@@ -8,6 +8,7 @@ import { puff } from './altar.js';
 import { $, myName, recentPrayers, reduceMotion, roomName, state } from './context.js';
 import { congregation, petals, wishes } from './engines.js';
 import { addKarma } from './stats.js';
+import { myFigure } from './people.js';
 import { logMine, toast } from './ui.js';
 
 /* ---------- Prayers ---------- */
@@ -22,7 +23,7 @@ $('#wish-form').addEventListener('submit', (e) => {
 });
 
 export function sendPrayer(text) {
-  prayerFx(text, roomName ? `${state.me?.avatar ?? ''} ${t('you')}` : '', false, congregation.element(state.myId));
+  prayerFx(text, roomName ? `${state.me?.avatar ?? ''} ${t('you')}` : '', false, congregation.element(myFigure()));
   wishes.hang(text, roomName ? myName() : '');
   remember(text, roomName ? myName() : '');
   addKarma(KARMA.prayer);

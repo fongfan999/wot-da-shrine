@@ -9,7 +9,7 @@ import { AVATARS, connectRoom, saveMe } from '../lib/room.js';
 import { t } from '../lib/strings.js';
 import { $, body, fmt, roomName, state, tv, urlParams } from './context.js';
 import { art } from './engines.js';
-import { presence } from './people.js';
+import { kneelNow, presence } from './people.js';
 import { wishInput } from './prayers.js';
 import { arrivedFromTv } from './screen.js';
 import { toast } from './ui.js';
@@ -79,6 +79,8 @@ function stepAside(where) {
 $('#btn-elsewhere').addEventListener('click', () => location.reload());
 
 function connect() {
+  // You kneel at once; the shrine confirms when the socket opens. The demo names you itself, and a TV is nobody.
+  if (!tv && roomName !== 'demo') kneelNow(state.me);
   state.shrine = connectRoom(roomName, state.me, {
     watch: tv,
     arrival: arrivedFromTv() ? { via: 'tv', hello: urlParams.get('hello') } : null,

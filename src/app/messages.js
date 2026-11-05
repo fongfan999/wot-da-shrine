@@ -9,7 +9,7 @@ import { art, congregation, wishes } from './engines.js';
 import { OFFERINGS } from '../scene/burner.js';
 import { activity } from './fx.js';
 import { offerFx } from './offerings.js';
-import { pingPerson, renderPeople } from './people.js';
+import { claimStandIn, pingPerson, renderPeople } from './people.js';
 import { prayerFx, remember } from './prayers.js';
 import { clearResolved, renderResolve, renderUndo, RESOLVED_FOR, resolveFx, showResolved, undoneFx } from './resolve.js';
 import { blameFx, fortuneFx } from './rituals.js';
@@ -36,6 +36,7 @@ export function onShrineMessage(msg) {
     case 'state': {
       state.myId = msg.me;
       state.clockSkew = msg.now - Date.now();
+      claimStandIn(msg.me); // the figure drawn while connecting is you
       people.clear();
       for (const p of msg.people) people.set(p.id, p);
       renderPeople();
@@ -284,7 +285,7 @@ function syncAltar(serverLitAt) {
     const at = serverLitAt - state.clockSkew;
     if (!state.lit) ignite(at);
     else { state.litAt = at; scheduleBurnOut(); }
-  } else if (state.lit && Date.now() - state.pendingLightAt > 3000) {
-    burnOut();
+  } else if (state.lit && Date.now() - Math.max(state.pendingLightAt, state.shrine?.flushedAt ?? 0) > 3000) {
+    burnOut(); // lit here but not there: unless it was lit while connecting, and the shrine is only now hearing it
   }
 }

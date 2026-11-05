@@ -110,6 +110,16 @@ export class Congregation {
     this.layout();
   }
 
+  /** `from` is now known as `to` (you, once the shrine says who you are): the same figure, not a new one. */
+  rekey(from, to) {
+    const item = this.items.get(from);
+    if (!item || this.items.has(to)) return;
+    this.items.delete(from);
+    this.items.set(to, item);
+    item.el.dataset.id = to;
+    this.order = this.order.map((id) => (id === from ? to : id));
+  }
+
   /** How many mats the shrine lays; weeds take `lost` of them. */
   setMats(mats, lost = this.lost) {
     if (mats === this.mats && lost === this.lost) return;
@@ -199,8 +209,7 @@ export class Congregation {
 
   /** Stop everything that moves on their figure. */
   still(item) {
-    item.swaying?.kill();
-    item.flicker?.kill();
+    for (const t of [item.swaying, item.flicker]) t?.kill();
     item.swaying = item.flicker = null;
     gsap.killTweensOf([...Object.values(item.uppers ?? {}), ...(item.embers ?? []), ...(item.halos ?? [])]);
   }
@@ -459,7 +468,7 @@ export class Congregation {
     const item = this.items.get(id);
     if (!item) return;
     gsap.fromTo(item.el.querySelector('.kneeler__tag'), { y: -6 }, { y: 0, duration: 0.6, ease: 'bounce.out' });
-    gsap.fromTo(item.halos, { opacity: 0.9, attr: { r: 16 } }, { opacity: this.lit ? 0.45 : 0, attr: { r: 7 }, duration: 1.2, ease: 'power2.out' });
+    if (item.halos.length) gsap.fromTo(item.halos, { opacity: 0.9, attr: { r: 16 } }, { opacity: this.lit ? 0.45 : 0, attr: { r: 7 }, duration: 1.2, ease: 'power2.out' });
   }
 
   setLit(lit) {
@@ -470,10 +479,12 @@ export class Congregation {
   glow(item, on) {
     item.flicker?.kill();
     item.flicker = null;
-    gsap.killTweensOf([...item.embers, ...item.halos]);
-    if (!on) { gsap.to([...item.embers, ...item.halos], { opacity: 0, duration: 1 }); return; }
-    gsap.to(item.embers, { opacity: 1, duration: 0.6 });
-    gsap.to(item.halos, { opacity: 0.45, duration: 0.6 });
-    if (!this.lite && !reduceMotion) item.flicker = stepped(item.embers, 8, { opacity: 0.5, duration: gsap.utils.random(0.5, 0.9), yoyo: true, repeat: -1, delay: 0.6 });
+    const parts = [...item.embers, ...item.halos];
+    if (!parts.length) return; // only a walking pose drawn so far: it carries no incense of its own
+    gsap.killTweensOf(parts);
+    if (!on) { gsap.to(parts, { opacity: 0, duration: 1 }); return; }
+    if (item.embers.length) gsap.to(item.embers, { opacity: 1, duration: 0.6 });
+    if (item.halos.length) gsap.to(item.halos, { opacity: 0.45, duration: 0.6 });
+    if (item.embers.length && !this.lite && !reduceMotion) item.flicker = stepped(item.embers, 8, { opacity: 0.5, duration: gsap.utils.random(0.5, 0.9), yoyo: true, repeat: -1, delay: 0.6 });
   }
 }

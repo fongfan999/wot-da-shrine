@@ -39,7 +39,10 @@ What happens when someone presses **Bow** in a shared shrine:
 
 1. **The page plays it.** `bow()` in `src/app/altar.js` bows their figure, rings the bowl,
    adds the karma and writes the feed line straight away, then sends `{ t: 'bow', tz }` over
-   the room's socket (`state.shrine`, a reconnecting WebSocket from `src/lib/room.js`).
+   the room's socket (`state.shrine`, a reconnecting WebSocket from `src/lib/room.js`). Before
+   the socket has opened (a far-away network can take seconds) it waits there and goes the moment
+   it does; meanwhile you kneel at the altar as a stand-in the shrine's answer takes over
+   (`kneelNow` in `src/app/people.js`).
 2. **The Worker hands the socket to the room.** `/api/rooms/:room/ws` (`worker/routes/rooms.js`)
    checks the room's name and the rate limit, and passes the upgrade to that room's `Shrine`.
 3. **The shrine looks up the action.** `webSocketMessage` in `worker/objects/shrine/index.js`
@@ -137,7 +140,8 @@ people beside the page over sockets (`Devotee`), and fails a test on any error a
 throws, except the 404 from `/api/push/key` (there is no VAPID key locally). `join.spec.js`
 covers the join card and kneeling; `acts.spec.js` another person's acts reaching the feed;
 `rename.spec.js` renaming from the More menu; `tabs.spec.js` a second tab of the same browser
-stepping the first aside; `screens.spec.js` TV mode's QR code and the home page. CI runs them in
+stepping the first aside; `slow.spec.js` a socket that opens late (you kneel at once, and what you
+do meanwhile reaches the shrine when it opens); `screens.spec.js` TV mode's QR code and the home page. CI runs them in
 a job of their own. The first time on your machine, `npx playwright install chromium` fetches
 the browser.
 

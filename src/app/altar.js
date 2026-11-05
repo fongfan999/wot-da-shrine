@@ -9,6 +9,7 @@ import { art, burner, congregation, kick, motes, petals, room, smoke } from './e
 import { addKarma, burnBar, tickProgress, updateStats } from './stats.js';
 import { logEvent, logMine, shockwave, toast } from './ui.js';
 import { myTz } from './standing.js';
+import { myFigure } from './people.js';
 import { askDown, askOpen, asksBeforeLighting, lightSaysDown, promptTitle } from './vigilStart.js';
 
 /* ---------- Light the incense ---------- */
@@ -36,7 +37,8 @@ function lightNow(down, ask = true) {
     updateStats();
   }
   ignite(Date.now());
-  if (state.myId && !congregation.walk(state.myId)) congregation.bow(state.myId, 3); // you carry it up to the censer
+  const me = myFigure();
+  if (me && !congregation.walk(me)) congregation.bow(me, 3); // you carry it up to the censer
   logMine('light', t('fLight'), { toastText: t('litToast') });
 }
 
@@ -161,7 +163,7 @@ function comboEnd() {
 /* ---------- Bow + offerings ---------- */
 export function bow() {
   sound.unlock();
-  bowFx(state.myId);
+  bowFx(myFigure());
   addKarma(KARMA.bow);
   logMine('bow', t('fBow'), { toastText: t('bowed') });
   state.shrine?.send('bow', { tz: myTz() }); // the shrine counts the morning bow by my day

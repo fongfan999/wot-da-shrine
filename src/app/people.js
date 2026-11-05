@@ -15,6 +15,26 @@ import { logEvent, toast } from './ui.js';
 
 export const presence = $('#presence');
 
+/**
+ * You, before the shrine has said who is here: drawn at once from who you said you are, and kept as
+ * the same figure when it answers. On a slow connection that answer is seconds away, and the altar
+ * should not wait for it.
+ */
+const STAND_IN = 'me';
+let standIn = null;
+export function kneelNow(me) {
+  standIn = { id: STAND_IN, name: me.name, avatar: me.avatar, role: me.role, tone: me.tone };
+  renderPeople();
+}
+/** Your figure at the altar: who the shrine says you are, or your stand-in while it hasn't yet. */
+export const myFigure = () => state.myId ?? (standIn ? STAND_IN : null);
+/** The shrine says who you are (`id`): the stand-in becomes you, the same figure on the same mat. */
+export function claimStandIn(id) {
+  if (!standIn) return;
+  standIn = null;
+  congregation.rekey(STAND_IN, id);
+}
+
 /* The stack shows four faces, or three and a +N for the rest (two and a +N on a phone);
    you are always first, so never the one left out. */
 const phone = matchMedia('(max-width: 760px)');
@@ -56,20 +76,21 @@ function announceMoves(order) {
 
 export function renderPeople(newId) {
   if (!roomName) { renderPlace(); return; } // the home page's crowd is its own (landing/crowd.js)
-  const order = ranked();
+  const order = standIn && !people.size ? [standIn] : ranked();
+  const meId = state.myId ?? standIn?.id ?? null;
   const watch = order.find(onWatch)?.id ?? null; // on the on-call stool, outside the order
-  congregation.set(order, state.myId, matsHere(), hasStanding() ? watch : null);
+  congregation.set(order, meId, matsHere(), hasStanding() ? watch : null);
   announceMoves(order);
-  const list = [...order].sort((a, b) => (b.id === state.myId) - (a.id === state.myId)); // the stack: you first
+  const list = [...order].sort((a, b) => (b.id === meId) - (a.id === meId)); // the stack: you first
   congregation.markWatch(watch);
-  congregation.markThanks(hasStanding() && !tv, state.myId);
+  congregation.markThanks(hasStanding() && !tv, meId);
 
   presence.innerHTML = '';
   const room = faces();
   const shown = list.length > room ? list.slice(0, room - 1) : list;
   for (const p of shown) {
     const a = document.createElement('span');
-    a.className = 'presence__avatar' + (p.id === state.myId ? ' presence__avatar--me' : '');
+    a.className = 'presence__avatar' + (p.id === meId ? ' presence__avatar--me' : '');
     a.dataset.id = p.id;
     a.textContent = p.avatar;
     presence.appendChild(a);
