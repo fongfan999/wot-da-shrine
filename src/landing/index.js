@@ -12,7 +12,7 @@ import { setupGrow } from './grow.js';
 import { setupRibbon } from './ribbon.js';
 import { setupRituals } from './rituals.js';
 import { setupShowcase } from './showcase.js';
-import { setupSteps } from './steps.js';
+import { setupDay } from './day.js';
 import { setupTv } from './tv.js';
 
 /* ---------- The landing page below the shrine ---------- */
@@ -33,7 +33,7 @@ export function setupLanding() {
   burner.addEventListener('pointerdown', () => { hint.hidden = true; }, { once: true });
   setupScene();
   setupRibbon();
-  setupSteps();
+  setupDay();
   setupRituals();
   setupShowcase();
   setupFooter();

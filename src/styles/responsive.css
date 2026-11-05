@@ -49,10 +49,6 @@
 }
 
 @media (max-width: 1099px) {
-  .steps { grid-template-columns: 1fr; max-width: 560px; padding-top: 16px; row-gap: 32px; }
-  .steps::before { display: none; }
-  .step__n { top: -16px; left: 22px; z-index: 1; width: 32px; height: 32px; font-size: 16px; transform: scale(.4); }
-  .land.is-in .step__n { transform: none; }
   .rituals { grid-template-columns: 1fr 1fr; }
   .showcase { grid-template-columns: minmax(0, 1fr); }
   .showcase__tabs { flex-direction: row; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); }
@@ -157,10 +153,8 @@
   .hero-ribbon__rail { animation: none; }
   .hero-ribbon__track { overflow-x: auto; }
   body[data-landing="1"] .title .word--accent::after { animation: none; clip-path: none; }
-  .mini-bar__caret, .mini-vigil__dot { animation: none; }
   .cta-stick__stick, .cta-stick__ember, .cta-stick__smoke path { animation: none; }
   .tv::before, .tv__poster-mark { animation: none; }
   .readme__badges .facts__badge, .showcase__pane, .showcase__tab .showcase__copy span { animation: none !important; }
-  .burnslip, .burnslip__edge, .burnslip__glow, .is-yours .burnslip, .is-yours :is(.burnslip__edge, .burnslip__glow), .chorus__bow i, .chorus__badge, .chorus::before { animation: none; }
-  .chorus__badge { opacity: 1; }
+  .burnslip, .burnslip__edge, .burnslip__glow, .is-yours .burnslip, .is-yours :is(.burnslip__edge, .burnslip__glow) { animation: none; }
 }

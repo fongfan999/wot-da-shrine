@@ -1,6 +1,6 @@
 /* The home page's sections, below the shrine. Only home.css loads them. */
 @import './landing/page.css';
-@import './landing/how.css';
+@import './landing/day.css';
 @import './landing/rituals.css';
 @import './landing/grow.css';
 @import './landing/cta.css';

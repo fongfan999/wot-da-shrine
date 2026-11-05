@@ -25,8 +25,9 @@ shrine.
   it, ring the bowl, say a prayer, and after a few actions it points you at
   the one thing to do here, open a shrine for your team. Rituals, vigils,
   records and sharing only exist in a shrine, and
-  nothing done on the demo is counted in the world totals. Below it: how a
-  shrine works (open it, send the link, bow daily), the daily rituals (a
+  nothing done on the demo is counted in the world totals. Below it: a day
+  at the shrine (the bow before standup, a blessed deploy, the watch handed
+  over, the 7 pm reminder, the rare incident, a new week), the rituals (a
   deploy blessed against the omens, today's forecast, a fortune, a burned
   blame), the shrine growing through its six levels (its own copy of the
   temple and a team on its mats: raise a level, skip feeding the kami, hang

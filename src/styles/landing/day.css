@@ -1,0 +1,131 @@
+/* A day at the shrine: six moments of a team's day, each a card that plays its moment (landing/day.js) */
+.day__lede { max-width: 62ch; margin: calc(-1 * clamp(12px, 2vw, 22px)) 0 clamp(28px, 4vw, 40px) !important; font-size: 17px !important; }
+.day { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.moment {
+  --m-c: var(--accent);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 14px 14px 22px;
+  border: 1px solid var(--sheet-line);
+  border-radius: var(--radius-lg);
+  background: var(--sheet);
+  box-shadow: var(--shadow-sheet);
+  transition: transform 260ms var(--ease), border-color 260ms ease;
+}
+.moment:hover { transform: translateY(-4px); border-color: var(--line-strong); }
+.moment h3, .moment > p { padding-inline: 8px; }
+.moment > p:last-child { font-size: 15px; }
+/* When it happens: the hour in the moment's colour, then what the team calls it */
+.moment__time { display: flex; align-items: center; gap: 10px; margin: 2px 0 12px !important; font-family: var(--font-mono); font-size: 11px !important; letter-spacing: .08em; text-transform: uppercase; color: var(--muted) !important; }
+.moment__time::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--m-c); box-shadow: 0 0 0 4px color-mix(in srgb, var(--m-c) 18%, transparent); }
+.moment__time b { font-size: 15px; font-weight: 600; letter-spacing: .02em; text-transform: none; color: var(--ink); }
+
+/* The stage each moment plays on */
+.moment__demo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 160px;
+  margin-bottom: 20px;
+  padding: 0 10px;
+  border: 1px solid var(--sheet-line);
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(120% 90% at 50% 120%, color-mix(in srgb, var(--m-c) 16%, transparent), transparent 70%),
+    radial-gradient(circle at 1px 1px, var(--sheet-line) 1px, transparent 0) 0 0 / 14px 14px,
+    var(--paper);
+  overflow: hidden;
+}
+.moment__demo .ico { width: 15px; height: 15px; }
+.moment .is-tick { animation: tick-up .5s var(--ease); }
+@keyframes tick-up { 0% { opacity: 0; translate: 0 6px; } 100% { opacity: 1; translate: none; } }
+.moment .is-press { transform: scale(.9); }
+
+/* A reward rising off whatever earned it: +5 for the morning bow, +10 for a quiet watch */
+.mini-plus { position: absolute; right: 8px; top: 0; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--ember-soft); color: var(--ember-ink); font-family: var(--font-mono); font-size: 11px; white-space: nowrap; opacity: 0; translate: 0 -50%; pointer-events: none; }
+:is(.is-fed, .is-handed) > .mini-plus { animation: plus-rise 2.4s var(--ease) forwards; }
+@keyframes plus-rise { 0% { opacity: 0; translate: 0 -20%; } 15%, 70% { opacity: 1; translate: 0 -110%; } 100% { opacity: 0; translate: 0 -150%; } }
+
+/* 09:30: the days without an incident, and the kami waiting for its morning bow (the real kami pill, kami.css) */
+.mini-quiet { display: inline-flex; align-items: center; gap: 8px; margin: 0 !important; padding: 8px 16px !important; border: 1px solid color-mix(in srgb, var(--live) 45%, transparent); border-radius: var(--radius-pill); background: var(--live-soft); color: var(--live) !important; font-size: 13px !important; font-weight: 600; white-space: nowrap; box-shadow: 0 10px 24px -16px #0008; }
+.mini-quiet b { font-family: var(--font-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+.mini-quiet__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live); animation: world-beat 2.4s ease-out infinite; }
+.mini-kami { z-index: auto; max-width: 100%; box-shadow: 0 10px 24px -16px #0008; }
+.mini-kami .kami__btn { cursor: default; }
+.mini-kami .kami__text { overflow: visible; }
+.mini-kami .kami__since { overflow: hidden; text-overflow: ellipsis; }
+.mini-kami:not(.is-fed) .kami__since { display: none; }
+.mini-kami .kami__action { transition: transform 120ms ease, background-color 160ms, color 160ms; }
+.mini-kami .kami__action.is-press { background: var(--accent); color: var(--paper); }
+.mini-kami.is-fed .kami__action { display: none; }
+
+/* 11:00: the omens (the Bless a deploy prompt's own pills, vigil.css), then it ships */
+.mini-omens { display: flex; flex-direction: column; gap: 8px; width: min(100%, 310px); padding: 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--paper-raised); box-shadow: 0 10px 24px -16px #0008; }
+.mini-omens__what { display: flex; align-items: baseline; gap: 8px; margin: 0 !important; font-size: 13px !important; color: var(--ink) !important; }
+.mini-omens__what span { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.mini-omens__what b { font-family: var(--font-mono); font-weight: 500; }
+.mini-omens__foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 26px; margin: 0 !important; }
+.mini-omens__foot i { font-family: var(--font-serif); font-size: 14px; color: var(--live); }
+.mini-omens__go { flex: none; padding: 4px 12px; border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); font-size: 12px; font-weight: 600; transition: transform 120ms ease; }
+.mini-omens.is-press .mini-omens__go { transform: scale(.9); }
+.mini-omens__done { display: none; flex: none; padding: 4px 10px; border-radius: var(--radius-pill); background: var(--live-soft); color: var(--live); font-size: 12px; font-weight: 600; animation: rise-in .35s var(--ease) both; }
+.mini-omens.is-shipped .mini-omens__foot i, .mini-omens.is-shipped .mini-omens__go { display: none; }
+.mini-omens.is-shipped .mini-omens__done { display: inline-block; }
+
+/* 18:00: the watch (the real watch pill, watch.css), handed on */
+.mini-watch { position: relative; z-index: auto; margin: 0; max-width: 100%; }
+.mini-watch .watch__btn { cursor: default; box-shadow: 0 10px 24px -16px #0008; }
+.mini-watch .watch__action { transition: transform 120ms ease; }
+.mini-watch.is-handed .watch__action { display: none; }
+.mini-watch.is-handed .watch__text { animation: tick-up .5s var(--ease); }
+
+/* 19:00: a notification, as the phone shows it */
+.mini-push { display: flex; gap: 10px; width: min(100%, 310px); padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--paper-raised); box-shadow: 0 16px 34px -20px #000b; text-align: left; animation: push-in 7s var(--ease) infinite; }
+.land:not(.is-on) .mini-push { animation-play-state: paused; }
+@keyframes push-in { 0%, 6% { opacity: 0; transform: translateY(-16px); } 14%, 88% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; transform: translateY(-8px); } }
+.mini-push__icon { flex: none; width: 28px; height: 28px; border-radius: 7px; }
+.mini-push__copy { min-width: 0; }
+.mini-push__head { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 2px !important; font-size: 11px !important; color: var(--muted) !important; }
+.mini-push__head b { font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.mini-push__title { margin: 0 !important; font-size: 13px !important; font-weight: 650; color: var(--ink) !important; }
+.mini-push__body { margin: 0 !important; font-size: 12.5px !important; line-height: 1.35 !important; color: var(--ink) !important; }
+
+/* 02:13: down for a while, then they're back */
+.mini-vigil { display: grid; }
+.mini-vigil > span { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 16px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--paper-raised); font-size: 13px; color: var(--muted); white-space: nowrap; transition: opacity 350ms ease, transform 450ms var(--ease); box-shadow: 0 10px 24px -16px #0008; }
+.mini-vigil b { font-family: var(--font-mono); font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+.mini-vigil__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--flame); animation: world-beat 2.4s ease-out infinite; }
+.mini-vigil__up { border-color: color-mix(in srgb, var(--live) 50%, transparent) !important; background: var(--live-soft) !important; color: var(--live) !important; font-weight: 600; opacity: 0; transform: translateY(10px) scale(.96); }
+.mini-vigil.is-back .mini-vigil__down { opacity: 0; transform: translateY(-10px) scale(.96); }
+.mini-vigil.is-back .mini-vigil__up { opacity: 1; transform: none; }
+.mini-alert { margin: 0 !important; font-family: var(--font-mono); font-size: 11px !important; color: var(--muted) !important; transition: opacity 350ms ease; }
+.mini-vigil.is-back + .mini-alert { opacity: .35; }
+
+/* Monday: Keepers this week, and you passing someone */
+.mini-board { width: min(100%, 290px); padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--paper-raised); box-shadow: 0 10px 24px -16px #0008; }
+.mini-board__label { margin: 0 0 6px !important; font-family: var(--font-mono); font-size: 10px !important; letter-spacing: .1em; text-transform: uppercase; color: var(--muted) !important; }
+.mini-board__list { position: relative; height: 90px; margin: 0; padding: 0; list-style: none; }
+.mini-board__list li { --at: 0; position: absolute; left: 0; right: 0; top: calc(var(--at) * 30px); display: grid; grid-template-columns: 14px 22px minmax(0, 1fr) auto 30px; align-items: center; gap: 8px; height: 26px; padding: 0 8px; border-radius: var(--radius-sm); font-size: 13px; color: var(--ink); transition: top .6s var(--ease); }
+.mini-board__list li[data-row="minh"] { --at: 1; }
+.mini-board__list li[data-row="you"] { --at: 2; }
+.mini-board__list li.is-you { background: var(--accent-soft); color: var(--note-ink); }
+.mini-board__n { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.mini-board__av { font-size: 14px; }
+.mini-board__list b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-board__run { font-size: 11px; color: var(--muted); }
+.mini-board__k { font-family: var(--font-mono); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 1099px) {
+  .day { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .day { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mini-quiet__dot, .mini-vigil__dot, .mini-push { animation: none; }
+  :is(.is-fed, .is-handed) > .mini-plus { animation: none; }
+}
