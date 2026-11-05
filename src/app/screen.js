@@ -179,6 +179,18 @@ export function setupScreen() {
 
 /* ---------- Arrivals: whoever scanned the TV's code ---------- */
 
+/** TV mode, in a shrine: the screen on the war-room wall shows the code to kneel from a phone. */
+export function renderTv() {
+  body.dataset.tv = '1';
+  const url = roomUrl();
+  const qr = qrcode(0, 'M');
+  qr.addData(tvJoinUrl());
+  qr.make();
+  $('#tv-qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  $('#tv-url').textContent = url.replace(/^https?:\/\//, '');
+  $('#tv-join').hidden = false;
+}
+
 /** The link the TV's QR opens: the shrine, marked as arriving from the TV (and, on the home page, whose TV). */
 export function tvJoinUrl() {
   const q = new URLSearchParams({ via: 'tv' });
