@@ -235,16 +235,22 @@ $('#join-form').addEventListener('submit', (e) => {
 });
 
 /**
- * The shrine is open in a newer tab of this browser, and that one kneels now. This one goes still
+ * This browser knelt in a newer tab, at this shrine or at `where`, and that one kneels now: one body,
+ * one altar. This one goes still
  * and silent (no sound, no animation, no reconnecting) until you ask to pray here, which reloads
  * it and so sends the other tab aside in turn.
  */
-function stepAside() {
+function stepAside(where) {
   body.dataset.conn = 'closed';
   roomStatus.dataset.status = 'closed';
   $('#room-state').textContent = t('statusOffline');
   if (joinOpen()) closeJoin();
   $('#elsewhere-room').textContent = fmt('roomEyebrow', { room: roomName });
+  const moved = where && where !== roomName; // walked over to another shrine, not this one in another tab
+  $('#elsewhere-lead').textContent = t(moved ? 'elsewhereMovedTitle' : 'elsewhereTitle');
+  $('#elsewhere-where').textContent = moved ? where : t('elsewhereTitleAccent');
+  $('#elsewhere-hint').textContent = moved ? fmt('elsewhereMovedHint', { room: where }) : t('elsewhereHint');
+  $('#btn-elsewhere').textContent = t(moved ? 'elsewhereMovedBtn' : 'elsewhereBtn');
   $('#elsewhere').hidden = false;
   sound.ctx?.suspend().catch(() => {});
   gsap.ticker.sleep();
@@ -257,8 +263,8 @@ function connect() {
     watch: tv,
     arrival: arrivedFromTv() ? { via: 'tv', hello: urlParams.get('hello') } : null,
     onMessage: onShrineMessage,
-    onStatus(status) {
-      if (status === 'elsewhere') { stepAside(); return; }
+    onStatus(status, where) {
+      if (status === 'elsewhere') { stepAside(where); return; }
       body.dataset.conn = status;
       roomStatus.dataset.status = status;
       $('#room-state').textContent = t(status === 'open' ? 'statusLive' : status === 'closed' ? 'statusOffline' : 'statusConnecting');

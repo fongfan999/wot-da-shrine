@@ -56,9 +56,16 @@ function browserToken() {
 }
 
 /**
+ * One body, one altar: a tab that kneels at any shrine says so to this browser's other tabs, and
+ * whichever was kneeling before gets up (the shrine itself sees to two tabs of the same one, too).
+ */
+const BODY = (() => { try { return new BroadcastChannel('incense:body:v1'); } catch { return null; } })();
+
+/**
  * Connect to a room. `onMessage(msg)` receives every server message;
- * `onStatus('connecting' | 'open' | 'closed' | 'elsewhere')` tracks the connection; 'elsewhere' is
- * final: the same browser opened the shrine in a newer tab, and this one does not come back by itself.
+ * `onStatus('connecting' | 'open' | 'closed' | 'elsewhere', room)` tracks the connection; 'elsewhere'
+ * is final: this browser knelt at `room` (this one or another) in a newer tab, and this one does not
+ * come back by itself.
  * `arrival` ({ via, hello }) goes with the first connection only, so a reconnect is not a second entrance.
  */
 export function connectRoom(room, me, { onMessage, onStatus, watch = false, arrival = null }) {
@@ -69,14 +76,24 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false, arri
   // A screen on the wall is nobody: it never goes as this browser's person.
   const token = watch ? '' : browserToken();
 
-  // This browser opened the shrine in a newer tab: that one kneels now, and this one stays put.
-  const stepAside = () => {
+  let since = 0; // when this tab knelt here: a tab that knelt later, anywhere, sends it aside
+  const tab = Math.random().toString(36).slice(2);
+
+  // This browser knelt somewhere in a newer tab: that one kneels now, and this one stays put.
+  const stepAside = (where = room) => {
     if (closed) return;
     closed = true;
     clearTimeout(timer);
     try { ws?.close(); } catch { /* already closed */ }
-    onStatus('elsewhere');
+    BODY?.removeEventListener('message', heard);
+    onStatus('elsewhere', where);
   };
+  // Two tabs that knelt at the same moment: the later stays, so exactly one does.
+  const heard = (e) => {
+    const { room: where, at, tab: other } = e.data ?? {};
+    if (since && typeof where === 'string' && (at > since || (at === since && other > tab))) stepAside(where);
+  };
+  if (!watch) BODY?.addEventListener('message', heard);
 
   const open = () => {
     onStatus('connecting');
@@ -93,6 +110,7 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false, arri
       try {
         const msg = JSON.parse(e.data);
         if (msg.t === 'elsewhere') { stepAside(); return; }
+        if (msg.t === 'state' && !watch && !since) { since = Date.now(); BODY?.postMessage({ room, at: since, tab }); }
         onMessage(msg);
       } catch (err) { console.error(err); }
     });

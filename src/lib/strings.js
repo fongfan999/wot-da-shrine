@@ -278,6 +278,9 @@ export const STRINGS = {
   elsewhereTitleAccent: 'another tab',
   elsewhereHint: 'You opened this shrine somewhere else, so this tab stepped aside. One of you at the altar is plenty.',
   elsewhereBtn: 'Pray here instead',
+  elsewhereMovedTitle: 'You walked over to',
+  elsewhereMovedHint: 'You knelt at {room} in another tab, and one body only fits at one altar. Come back and you get up from that one.',
+  elsewhereMovedBtn: 'Walk back here',
   // Who you are at the altar: what you do (devotee.js draws each), and your colour
   joinRoleLabel: 'What do you do here?',
   joinToneLabel: 'Your colour',
