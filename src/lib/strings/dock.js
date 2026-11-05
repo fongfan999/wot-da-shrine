@@ -1,0 +1,55 @@
+/** The dock and what it does: light, bowl, bow, offer, breathe, the rituals, and the toasts they raise. A part of STRINGS (src/lib/strings.js). */
+import { QUICK_PRAYERS } from '../../../shared/prayers.js';
+
+export default {
+  // Dock
+  light: 'Light incense',
+  burning: 'Burning',
+  bowl: 'Ring bowl',
+  bow: 'Bow',
+  offer: 'Offer',
+  breathe: 'Breathe',
+  wishLabel: 'Say a prayer to the servers',
+  wishPlaceholder: 'Say a prayer to the servers…',
+  quickPrayers: QUICK_PRAYERS,
+  surprise: 'Surprise me',
+  trayTitle: 'Choose an offering',
+
+  // Rituals
+  ritualsLabel: 'Rituals',
+  blame: 'Burn a blame',
+  blameTitle: 'Burn the',
+  blameTitleAccent: 'blame',
+  blameHint: 'Write what happened. It is burned in the censer, never sent anywhere, and never spoken of again.',
+  blamePlaceholder: 'I ran the migration on prod at 5pm on a Friday…',
+  blameBtn: 'Burn it',
+  blameBurned: 'Burned. It never happened. +5 karma.',
+  blameEmpty: 'Even a blank page burns. Write something first.',
+  fBlame: 'burned a confession in the censer',
+  fortune: 'Draw a fortune',
+  fortuneTitle: 'Your',
+  fortuneTitleAccent: 'fortune',
+  fortuneHint: 'One slip per vigil. The box is shaken, the stick is drawn, the paper is read.',
+  fortuneTie: 'Tie it to the rail',
+  fortuneTied: 'Tied to the rail. May it come true, or not.',
+  fortuneCopy: 'Copy',
+  fortuneCopied: 'Fortune copied.',
+  fortuneAgain: 'You already drew one this vigil. Here it is again.',
+  fOmikuji: 'drew a fortune: {level}',
+  chorus: 'Chorus ×{n}! The whole room bowed. +{bonus} karma.',
+  fChorus: 'bowed in chorus',
+
+  // Toasts
+  litToast: 'Incense lit. The servers feel it.',
+  wishSent: 'Your prayer floats up to the cloud.',
+  wishEmpty: 'A silent prayer still counts.',
+  bowed: 'The ops team bows. Prod hums approvingly.',
+  offered: 'The servers accept {item}.',
+  offeringBy: '{name} offered {item}.',
+  offeringAnon: 'Someone offered {item}.',
+  tabletDefault: 'Prod',
+  candleCold: 'Light the incense first; the candles follow.',
+  inhale: 'Inhale',
+  hold: 'Hold',
+  exhale: 'Exhale',
+};
