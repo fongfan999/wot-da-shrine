@@ -37,6 +37,7 @@ export class Devotee {
     const url = new URL(`/api/rooms/${room}/ws`, origin.replace(/^http/, 'ws'));
     url.search = new URLSearchParams({ name, avatar, ...params });
     const d = new Devotee(name, new WebSocket(url));
+    d.room = room;
     d.state = await d.next('state');
     return d;
   }
@@ -78,6 +79,17 @@ export class Devotee {
   /** The next act of `kind` the room hears (light, bow, down, resolve…). */
   act(kind, test = () => true, ms) {
     return this.next('act', (m) => m.kind === kind && test(m), ms);
+  }
+
+  /**
+   * Waits until the room has handled everything this person sent. Two people's messages may reach
+   * the room in either order; one person's arrive in the order sent, so a request that only they
+   * hear back from, and that changes nothing (letting go of a subscription they never had), comes
+   * back after all the rest. Not in the demo, which answers no such request.
+   */
+  async settled() {
+    this.send({ t: 'push', off: true, endpoint: '' });
+    await this.next('push', (m) => m.on === false);
   }
 
   /** Whether a message of type `t` arrives within `ms`: for what the room must not hear. */

@@ -132,6 +132,7 @@ describe('a shrine', () => {
     ann.send({ t: 'resolve' });
     await bo.act('resolve');
     bo.send({ t: 'unresolve' }); // not Bo's to take back
+    await bo.settled();
     ann.send({ t: 'unresolve' });
     const undone = await bo.act('unresolve');
     assert.equal(undone.by.name, 'Ann');
