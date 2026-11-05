@@ -1,5 +1,5 @@
-# Every push to main and every pull request: the size budget, the smoke tests, then the build.
-# The same as `npm run check` on your machine.
+# Every push to main and every pull request: the size budget, the smoke tests, then the build
+# (`npm run check` on your machine), and beside them the page tests in a browser (`npm run test:page`).
 name: CI
 
 on:
@@ -31,3 +31,26 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+
+  # Its own job, so the browser download never slows the checks above.
+  page:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Browser
+        run: npx playwright install --with-deps --only-shell chromium
+      - name: Page tests
+        run: npm run test:page
+      - name: Traces of what failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: page-test-results
+          path: test-results/
+          retention-days: 7

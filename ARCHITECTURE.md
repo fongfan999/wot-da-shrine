@@ -129,6 +129,18 @@ wait for the next message of a kind, and wait for the room to have handled what 
 (`settled()`). `shrine.test.js` covers the routes and a room's life; `actions.test.js` has a
 test for every action; `strings.test.js` checks the page's words.
 
+`npm run test:page` runs `test/page/` in a real browser: Playwright, headless Chromium, two at a
+time (`playwright.config.js`). Each Playwright worker starts the same Worker with
+`startWorker({ pages: true })`, which also serves the pages through the partials plugin from
+`vite.config.js`. `test/support/page.js` gives every test a room of its own, `kneel()` to put
+people beside the page over sockets (`Devotee`), and fails a test on any error a tab logs or
+throws, except the 404 from `/api/push/key` (there is no VAPID key locally). `join.spec.js`
+covers the join card and kneeling; `acts.spec.js` another person's acts reaching the feed;
+`rename.spec.js` renaming from the More menu; `tabs.spec.js` a second tab of the same browser
+stepping the first aside; `screens.spec.js` TV mode's QR code and the home page. CI runs them in
+a job of their own. The first time on your machine, `npx playwright install chromium` fetches
+the browser.
+
 ## Project layout
 
 One folder per kind of thing, one file per part of the page, and nothing very long:
@@ -256,6 +268,7 @@ worker/objects/world.js    World Durable Object: totals across every shrine
 worker/objects/pairing.js  Pairing Durable Object: one per TV code
 wrangler.jsonc           Worker + Durable Object config
 test/                    node --test: the Worker run through Vite, shrines over real sockets; every string key used exists
+test/page/               Playwright: the pages in a browser against that Worker (playwright.config.js)
 scripts/check-size.js    the size budget; size-budget.json lists the files waiting to be split
-.github/workflows/ci.yml size budget, tests and build, on every push and pull request
+.github/workflows/ci.yml size budget, tests and build, and the page tests, on every push and pull request
 ```

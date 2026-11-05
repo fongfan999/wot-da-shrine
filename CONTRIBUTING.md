@@ -27,11 +27,17 @@ npm run vapid --silent -- --dev >> .dev.vars
 
 ```bash
 npm run check      # the size budget, the tests and the build: what CI runs on every pull request
+npm run test:page  # the pages in a browser: CI runs these too, in a job of their own
 ```
 
 - **Tests**: `npm test` takes a few seconds. It starts the real Worker and kneels in shrines
   over real sockets ([ARCHITECTURE.md § Tests](ARCHITECTURE.md#tests)). A change to what a
   shrine does gets a test; a new action gets one in `test/actions.test.js`.
+- **Page tests**: `npm run test:page` takes about fifteen seconds. It opens the pages in
+  headless Chromium (Playwright) against the same Worker: the join card, someone else's acts
+  in the feed, renaming, a second tab, TV mode and the home page, and no tab may log an error.
+  The first time, `npx playwright install chromium` fetches the browser. A change to one of
+  those flows, or to what the page does with a shrine's messages, gets a test in `test/page/`.
 - **The size budget**: no code file may grow past 400 lines or 24 KB (`npm run check:size`).
   When one would, split it by what it does, into a folder: that is how
   `worker/objects/shrine/` and `src/lib/strings/` came about. The few drawing files still

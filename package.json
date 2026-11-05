@@ -11,6 +11,7 @@
     "preview": "vite build && vite preview",
     "deploy": "vite build && wrangler deploy",
     "test": "node --test --test-force-exit --test-timeout=60000 \"test/**/*.test.js\"",
+    "test:page": "playwright test",
     "check:size": "node scripts/check-size.js",
     "check": "npm run check:size && npm test && npm run build",
     "vapid": "node scripts/vapid.js"
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.65.0",
+    "@playwright/test": "^1.64.1",
     "vite": "^8.3.4",
     "wrangler": "^4.152.0"
   }
