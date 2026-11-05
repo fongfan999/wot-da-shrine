@@ -1,0 +1,13 @@
+{
+  // The shrine's old address and the bare family domain (see index.js). Deploy: npm run deploy:redirect
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "wot-da-shrine-redirect",
+  "main": "index.js",
+  "compatibility_date": "2026-10-01",
+  "routes": [
+    { "pattern": "shrine.wotdafong.dev", "custom_domain": true },
+    { "pattern": "wotda.app", "custom_domain": true }
+  ],
+  "workers_dev": false,
+  "preview_urls": false
+}

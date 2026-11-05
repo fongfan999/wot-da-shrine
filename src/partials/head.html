@@ -1,21 +1,36 @@
 <!-- The head every page shares. A room page's title, description and link preview are rewritten by the Worker (worker/views/roomPage.js). -->
 <meta charset="utf-8" />
+<!-- Moving house: the old shrine.wotdafong.dev hands this browser's name, karma, runs and settings over
+     once, in the address's #carry= (redirect/index.js). Only from that page, and only keys this origin
+     does not have yet, so it can never overwrite a shrine you already keep here. -->
+<script>(() => {
+  if (!location.hash.startsWith('#carry=')) return;
+  try {
+    if (document.referrer.startsWith('https://shrine.wotdafong.dev/')) {
+      const d = JSON.parse(decodeURIComponent(location.hash.slice(7)));
+      for (const [k, v] of Object.entries(d)) {
+        if (k.startsWith('incense:') && typeof v === 'string' && localStorage.getItem(k) === null) localStorage.setItem(k, v);
+      }
+    }
+  } catch {}
+  history.replaceState(history.state, '', location.pathname + location.search);
+})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#151713" />
 <meta name="description" content="Wot Da Shrine: pray for uptime, together. A 30-second daily ritual for engineering teams: bow at standup, bless every deploy, keep the kami fed, and watch your shrine grow with every quiet day. When something breaks anyway, the whole team prays through it, live." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Wot Da Shrine" />
-<meta property="og:url" content="https://shrine.wotdafong.dev/" />
+<meta property="og:url" content="https://shrine.wotda.app/" />
 <meta property="og:title" content="Wot Da Shrine: pray for uptime, together" />
 <meta property="og:description" content="A 30-second daily ritual for engineering teams. Bow at standup, bless every deploy, keep the kami fed, and watch your shrine grow with every quiet day. When something breaks anyway, pray through it together, live." />
-<meta property="og:image" content="https://shrine.wotdafong.dev/og.png" />
+<meta property="og:image" content="https://shrine.wotda.app/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="An ink drawing of an incense burner on an altar inside a temple, with the words: pray for uptime, together. Bow daily. Bless deploys. Keep the kami fed." />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Wot Da Shrine: pray for uptime, together" />
 <meta name="twitter:description" content="A 30-second daily ritual for engineering teams. Bow at standup, bless every deploy, keep the kami fed, and watch your shrine grow with every quiet day. When something breaks anyway, pray through it together, live." />
-<meta name="twitter:image" content="https://shrine.wotdafong.dev/og.png" />
+<meta name="twitter:image" content="https://shrine.wotda.app/og.png" />
 <title>Wot Da Shrine: Pray for uptime, together</title>
 <!-- Until the script has set the heading for this page and started the intro, what the intro reveals stays hidden (never longer than 4s). -->
 <script>document.documentElement.classList.add('booting'); setTimeout(() => document.documentElement.classList.remove('booting'), 4000);</script>

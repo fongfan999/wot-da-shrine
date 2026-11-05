@@ -518,7 +518,7 @@ The shrine is built to travel from one incident channel to the next:
   of Markdown (down for how long, people at the peak, prayers, blames,
   fortunes, karma, the link) for the postmortem doc.
 - **A badge for the README or status page**:
-  `[![Wot Da Shrine](https://shrine.wotdafong.dev/api/rooms/serene-rack-42/badge.svg)](https://shrine.wotdafong.dev/r/serene-rack-42)`
+  `[![Wot Da Shrine](https://shrine.wotda.app/api/rooms/serene-rack-42/badge.svg)](https://shrine.wotda.app/r/serene-rack-42)`
   shows "shrine | down 12m · 3 praying" while a vigil is open, "back · 3
   praying" for the hour after, and otherwise who is there and whether the
   incense burns. It links to the altar.
@@ -612,9 +612,21 @@ npx wrangler login # once
 npm run deploy
 ```
 
-It deploys to https://shrine.wotdafong.dev as a Workers custom domain (the
-`wotdafong.dev` zone must be on the same Cloudflare account). The
+It deploys to https://shrine.wotda.app as a Workers custom domain (the
+`wotda.app` zone must be on the same Cloudflare account). The
 `*.workers.dev` URL and preview URLs are turned off in `wrangler.jsonc`.
+
+The shrine used to live at `shrine.wotdafong.dev`. A second, tiny Worker in `redirect/`
+answers that address and the bare `wotda.app`:
+
+```bash
+npm run deploy:redirect
+```
+
+A page visit to the old address gets a hand-over page that carries this browser's shrine (the
+`incense:*` keys: name, karma, runs, settings) to the new origin in `#carry=`, which the shared
+head takes once; anything else, webhooks included, gets a 308. The bare `wotda.app` goes to the
+workshop at https://wotdafong.dev/products until there are two apps to launch from.
 
 ## Project layout
 

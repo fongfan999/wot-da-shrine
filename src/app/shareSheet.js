@@ -82,7 +82,7 @@ const PREVIEWS = {
 };
 export async function previewCard(kind) {
   const svg = cardSvg({
-    room: '', resolved: kind === 'back', people: 0, avatars: [], quotes: [], url: 'shrine.wotdafong.dev', plain: true,
+    room: '', resolved: kind === 'back', people: 0, avatars: [], quotes: [], url: 'shrine.wotda.app', plain: true,
     ...(PREVIEWS[kind] ?? PREVIEWS.down),
   });
   return cardPng(svg);

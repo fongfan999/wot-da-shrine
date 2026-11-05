@@ -33,13 +33,14 @@
   ],
   // Web Push: who the push services can contact about this deployment. The key itself is the
   // VAPID_KEY secret (npm run vapid); without it notifications are simply off.
-  "vars": { "VAPID_SUBJECT": "https://shrine.wotdafong.dev" },
+  "vars": { "VAPID_SUBJECT": "https://shrine.wotda.app" },
   "observability": {
     "enabled": true
   },
-  // Served only on its own hostname (the wotdafong.dev zone must be on this Cloudflare account):
-  // no *.workers.dev URL and no per-version preview URLs.
-  "routes": [{ "pattern": "shrine.wotdafong.dev", "custom_domain": true }],
+  // Served only on its own hostname (the wotda.app zone must be on this Cloudflare account): no
+  // *.workers.dev URL and no per-version preview URLs. The old shrine.wotdafong.dev and the bare
+  // wotda.app are answered by the redirect Worker in redirect/.
+  "routes": [{ "pattern": "shrine.wotda.app", "custom_domain": true }],
   "workers_dev": false,
   "preview_urls": false
 }

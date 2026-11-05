@@ -101,7 +101,7 @@ export async function send(env, sub, msg, { ttl = 3600, urgency = 'normal', topi
   if (!k) return 'off';
   try {
     const aud = new URL(sub.endpoint).origin;
-    const token = await jwt(k, aud, env.VAPID_SUBJECT || 'https://shrine.wotdafong.dev');
+    const token = await jwt(k, aud, env.VAPID_SUBJECT || 'https://shrine.wotda.app');
     const headers = {
       Authorization: `vapid t=${token}, k=${k.key}`,
       'Content-Encoding': 'aes128gcm',
