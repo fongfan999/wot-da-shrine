@@ -36,6 +36,12 @@ describe('the Worker', () => {
     assert.equal(await res.text(), 'om');
   });
 
+  test('publishes nothing under /.well-known/: a 404, not the home page', async () => {
+    const res = await get('/.well-known/ard.json');
+    assert.equal(res.status, 404);
+    assert.match(res.headers.get('content-type') ?? '', /json/);
+  });
+
   test('turns away a room name nobody could have', async () => {
     const res = await get('/api/rooms/x/status');
     assert.equal(res.status, 400);

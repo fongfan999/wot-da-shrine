@@ -1,5 +1,5 @@
 /**
- * Cloudflare Worker: a Hono app. Only /api/*, /new and /r/* reach it (run_worker_first in
+ * Cloudflare Worker: a Hono app. Only /api/*, /new, /r/* and /.well-known/* reach it (run_worker_first in
  * wrangler.jsonc); the page and bundles come straight from the asset store, with headers
  * from public/_headers.
  *
@@ -31,7 +31,9 @@ app.route('/', api);
 app.route('/', rooms);
 app.route('/', tv);
 
-// Only unknown /api/* paths get here: run_worker_first sends nothing else to the Worker.
+// Only unknown /api/* paths get here, and /.well-known/*: run_worker_first sends nothing else to the Worker.
+// The site publishes nothing there, and a crawler or an agent asking (ard.json, security.txt…) should hear
+// so, not get the home page that the asset store answers every other unknown path with (for /tv).
 app.notFound((c) => c.json({ error: 'not found' }, 404));
 
 export default app;

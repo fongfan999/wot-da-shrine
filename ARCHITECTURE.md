@@ -23,9 +23,10 @@ them, what travels between them, and where each part lives. For using a shrine, 
   `r/index.html` (a shared shrine) are each a head and a list of `<include>` lines that a
   small plugin in `vite.config.js` fills from `src/partials/`. Every page runs
   `src/main.js`; `src/home.js` and `src/room.js` add what only one of them needs.
-- **The Worker runs first only where it has to.** `wrangler.jsonc` sends `/api/*`, `/new`
-  and `/r/*` to the Worker; everything else comes straight from the asset store. A room page
-  goes through the Worker so its link preview can say what the room is doing right now.
+- **The Worker runs first only where it has to.** `wrangler.jsonc` sends `/api/*`, `/new`,
+  `/r/*` and `/.well-known/*` to the Worker; everything else comes straight from the asset store. A room page
+  goes through the Worker so its link preview can say what the room is doing right now; `/.well-known/*`
+  so that what the site doesn't publish there is a 404, where the asset store would answer with the home page.
 - **A room is a Durable Object.** Each shrine is one `Shrine` object, named after the room.
   It holds the room's state, takes every person's socket (with the hibernation API, so an
   idle room costs nothing), and is the source of truth: the page plays an action at once,

@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="/src/styles/room.css" />
 </head>
 <body data-theme="dark" data-state="unlit" data-mode="room" data-fx="full">
+  <!-- The theme this browser chose (src/lib/config.js), before the first paint rather than when the script arrives -->
+  <script>try { const t = new URLSearchParams(location.search).get('theme') || JSON.parse(localStorage.getItem('incense:settings:v2') || '{}').theme; if (['auto', 'light', 'dark'].includes(t)) document.body.dataset.theme = t; } catch { /* the default */ }</script>
   <include src="src/partials/scene.html">
 
   <include src="src/partials/bar.html">

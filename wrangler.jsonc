@@ -8,7 +8,7 @@
     "not_found_handling": "single-page-application",
     // The API, /new and room pages need code (a room page gets its link preview rewritten); everything
     // else comes straight from the asset store, with headers from public/_headers.
-    "run_worker_first": ["/api/*", "/new", "/r/*"]
+    "run_worker_first": ["/api/*", "/new", "/r/*", "/.well-known/*"]
   },
   "durable_objects": {
     "bindings": [

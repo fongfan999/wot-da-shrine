@@ -33,6 +33,13 @@ function run(job, now) {
   try { job.fn(now); } catch (err) { console.error(err); } // one broken reading never stops the others
 }
 
+/**
+ * Give the main thread back to the browser for a moment, then go on: between the steps of starting
+ * the page, so it draws and answers in between rather than after one long task. A task over 50ms is
+ * blocking time; the page's start used to be a single one of 400ms on a slow machine.
+ */
+export const breathe = () => (globalThis.scheduler?.yield ? globalThis.scheduler.yield() : new Promise((go) => setTimeout(go, 0)));
+
 setInterval(() => {
   const now = Date.now();
   for (const job of jobs) if (now >= job.due) run(job, now);

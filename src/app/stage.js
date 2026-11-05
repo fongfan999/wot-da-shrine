@@ -1,7 +1,7 @@
 /* The stage around the altar: layout, the split title and intro, parallax, mantras. */
 import gsap from 'gsap';
 import { STRINGS } from '../lib/strings.js';
-import { $, body, reduceMotion } from './context.js';
+import { $, body, landing, reduceMotion } from './context.js';
 import { every } from '../lib/clock.js';
 
 export const title = $('#title');
@@ -50,7 +50,9 @@ export function intro() {
   if (reduceMotion) { reveal(); introStarts(); return; }
   const dock = ['.quick', '.pray', '.actions', '.credit'];
   gsap.set('.title .ch', { y: 40, opacity: 0, rotateX: -70, transformOrigin: '50% 100%' });
-  gsap.set(['.eyebrow', '.vigil', '.subtitle', '.mantra'], { y: 14, opacity: 0 });
+  // On the home page the sentence under the title is there from the first paint (altar.css): it stays put
+  const rise = landing ? ['.vigil', '.mantra'] : ['.vigil', '.subtitle', '.mantra'];
+  gsap.set(['.eyebrow', ...rise], { y: 14, opacity: 0 });
   gsap.set('.bar', { y: -12, opacity: 0 });
   gsap.set('.side .card', { y: 20, opacity: 0 });
   gsap.set(dock, { y: 24, opacity: 0 });
@@ -67,7 +69,7 @@ export function intro() {
     .to('.bar', { y: 0, opacity: 1, duration: 0.8 }, 0.1)
     .to('.eyebrow', { y: 0, opacity: 1, duration: 0.7 }, 0.25)
     .to('.title .ch', { y: 0, opacity: 1, rotateX: 0, duration: 1, stagger: 0.022, onComplete: () => gsap.set('.title .ch', { clearProps: 'willChange' }) }, 0.35)
-    .to(['.vigil', '.subtitle', '.mantra'], { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }, 0.8)
+    .to(rise, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }, 0.8)
     .to('.burner', { y: 0, opacity: 1, scale: 1, duration: 1.3, ease: 'elastic.out(1, 0.7)' }, 0.5)
     .to('.temple', { opacity: 1, duration: 1.6, ease: 'power2.out' }, 0.6)
     .to('.plantern-row', { opacity: 1, duration: 1, ease: 'power2.out' }, 1.2)

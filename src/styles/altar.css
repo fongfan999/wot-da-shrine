@@ -11,6 +11,8 @@
 }
 /* Before the script runs, the page doesn't yet know which heading it shows (home or shrine): the intro's pieces wait. */
 .booting :is(.bar, .heading, .temple, .burner, .side .card, .quick, .pray, .actions, .credit, .plantern-row, .hero-ribbon) { visibility: hidden; }
+/* The home page's own heading is in the page already: its sentence shows from the first paint, the intro raises the rest around it */
+.booting body[data-landing="1"] .subtitle { visibility: visible; }
 /* Nor does anything there start animating: an animation that starts unseen never moves to the
    compositor, and ticks on the main thread, restyling every frame, for as long as the page is open */
 .booting :is(.bar, .heading, .temple, .burner, .side .card, .quick, .pray, .actions, .credit, .plantern-row, .hero-ribbon) :is(*, *::before, *::after),

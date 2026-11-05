@@ -3,6 +3,7 @@ import { sound } from '../audio/index.js';
 import { ignite } from '../app/altar.js';
 import { $, body, landing, reduceMotion, state } from '../app/context.js';
 import { introStarted } from '../app/stage.js';
+import { breathe } from '../lib/clock.js';
 import { onPalette } from '../scene/palette.js';
 import { scene } from '../scene/ticker.js';
 import { burner, placeSmoke, smoke } from '../app/engines.js';
@@ -16,16 +17,16 @@ import { setupDay } from './day.js';
 import { setupTv } from './tv.js';
 
 /* ---------- The landing page below the shrine ---------- */
-export function setupLanding() {
+export async function setupLanding() {
   if (!landing) return;
   body.dataset.landing = '1';
   placeSmoke();
   const landingEl = $('#landing');
-  landingEl.classList.add('is-later');
-  landingEl.hidden = false;
   setupBuilder();
+  await breathe();
   setupCrowd();
   const censer = copyCenser(); // now, before anyone can light the one it copies
+  await breathe();
   // The altar is alive when you arrive: lit after the intro, with a hint that it can be touched.
   const hint = $('#hero-hint');
   introStarted.then(() => setTimeout(() => { if (!state.lit) ignite(Date.now()); hint.hidden = false; }, reduceMotion ? 300 : 2200));
@@ -35,17 +36,16 @@ export function setupLanding() {
   // Everything below the shrine waits until the intro is under way, or someone heads down to it: laying
   // it out and setting it up was a third of the time before anything showed, on a page nobody scrolls yet.
   let below = false;
-  const setupBelow = () => {
+  const setupBelow = async () => {
     if (below) return;
     below = true;
     near.disconnect();
     landingEl.classList.remove('is-later');
-    setupTv();
-    setupGrow(censer);
-    setupDay();
-    setupRituals();
-    setupShowcase();
-    setupFooter();
+    // A section at a time, with the main thread given back in between.
+    for (const step of [setupTv, () => setupGrow(censer), setupDay, setupRituals, setupShowcase, setupFooter]) {
+      step();
+      await breathe();
+    }
     // Sections reveal as they scroll in.
     const seen = new IntersectionObserver((entries) => {
       for (const en of entries) if (en.isIntersecting) { en.target.classList.add('is-in'); seen.unobserve(en.target); }

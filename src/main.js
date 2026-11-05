@@ -28,6 +28,7 @@ import { menuOpen } from './app/menus.js';
 import { setupScreen } from './app/screen.js';
 import { setupCast } from './app/cast.js';
 import { setupQuiet } from './app/quiet.js';
+import { breathe } from './lib/clock.js';
 
 /* ---------- Keyboard shortcuts ---------- */
 document.addEventListener('keydown', (e) => {
@@ -69,23 +70,23 @@ if (import.meta.env.DEV) window.__incense = { gsap, sound, smoke, fog, petals, p
 /**
  * Start the page. `setupLanding` lays out the home page's sections (it does nothing
  * on /tv); `loadWorld` shows what every shrine is doing. A room page passes neither.
+ *
+ * In steps, with the main thread given back between them (breathe): the first frame needs only the
+ * layout, the theme and where the intro starts from, and everything else can follow a moment later.
  */
-export function start({ setupLanding, loadWorld } = {}) {
-  buildTray();
-  dealQuick();
-  setupLanding?.();
-  setupScreen();
-  setupCast();
-  setupQuiet();
+export async function start({ setupLanding, loadWorld } = {}) {
+  setupScreen(); // a TV is laid out for the wall from the first frame
   applySettings();
-  renderResolve();
-  renderRecords();
   intro();
-  watchFrameRate();
-  parallax();
+  await breathe();
+  if (roomName) enterRoom(); // the socket first: on a far network it is the longest wait
+  else loadWorld?.();
   introStarted.then(startMantras);
+  for (const step of [setupLanding, renderResolve, renderRecords, dealQuick, buildTray, setupCast, setupQuiet, watchFrameRate, parallax]) {
+    if (!step) continue;
+    await breathe();
+    await step();
+  }
   petals.rate = 0.35; // a few stray petals before the incense is lit
   petals.start();
-  if (roomName) enterRoom();
-  else loadWorld?.();
 }

@@ -1,0 +1,29 @@
+# Wot Da Shrine
+
+> A shrine your team keeps so the servers stay up, and prays at when they don't: a 30-second daily ritual for engineering teams. Bow at standup, bless every deploy, keep the kami (a fox spirit with opinions) fed, and watch your shrine grow with every quiet day. When something breaks anyway, the whole team prays through it, live, on one shared altar. Free, no account, source available.
+
+Each shrine is a link, `https://shrine.wotda.app/r/<name>`, that everyone on the team opens. Opening `/new` makes one. A shrine can open a vigil by itself when your alerting sends it a webhook, and its status is readable as JSON.
+
+## Use it
+
+- [Open a shrine](https://shrine.wotda.app/new): makes a new shrine and goes there; `/new?name=Prod is down` names it `/r/prod-is-down`
+- [The demo shrine](https://shrine.wotda.app/r/demo): a public shrine anyone can kneel at
+- [A shrine's status](https://shrine.wotda.app/api/rooms/demo/status): JSON, what a shrine is doing right now (names stay in the room)
+- [Every shrine at once](https://shrine.wotda.app/api/world): JSON, totals across every shrine
+
+## Guide
+
+- [How it works](https://github.com/fongfan999/wot-da-shrine/blob/main/docs/how-it-works.md): the pages, the demo, and what a room keeps
+- [Straight from your alerting](https://github.com/fongfan999/wot-da-shrine/blob/main/docs/alerting.md): the webhook, and the tools it reads (Alertmanager, Grafana, PagerDuty, Opsgenie, Statuspage…)
+- [URL parameters](https://github.com/fongfan999/wot-da-shrine/blob/main/docs/url-parameters.md): seeding a room's title, ETA and sound from a link
+- [A vigil, not a visit](https://github.com/fongfan999/wot-da-shrine/blob/main/docs/vigils.md): saying something is down and They're back, the shrine's levels
+- [Deploys and the watch](https://github.com/fongfan999/wot-da-shrine/blob/main/docs/deploys-and-the-watch.md): blessing a deploy, holding the pager
+- [Days without an incident, and the kami](https://github.com/fongfan999/wot-da-shrine/blob/main/docs/quiet-days.md): the quiet heading, the kami, today's forecast
+- [Notifications](https://github.com/fongfan999/wot-da-shrine/blob/main/docs/notifications.md): Web Push for vigils, the watch and the morning bow
+- [Sharing](https://github.com/fongfan999/wot-da-shrine/blob/main/docs/sharing.md): link previews, the share card, the README badge
+
+## Optional
+
+- [The whole guide](https://github.com/fongfan999/wot-da-shrine/blob/main/docs/README.md): every part of a shrine, a page each
+- [Architecture](https://github.com/fongfan999/wot-da-shrine/blob/main/ARCHITECTURE.md): the pages, the Worker and the Durable Objects, and what travels between them
+- [Source code](https://github.com/fongfan999/wot-da-shrine): under the O'Saasy License; issues and pull requests welcome

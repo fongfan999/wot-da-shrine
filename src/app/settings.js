@@ -112,6 +112,7 @@ export let panelOpen = false;
 export function openPanel(open) {
   panelOpen = open;
   panel.setAttribute('aria-hidden', String(!open));
+  panel.inert = !open; // closed, nothing in it takes the focus either
   backdrop.classList.toggle('open', open);
   gsap.to(panel, { x: open ? '0%' : '100%', duration: 0.5, ease: open ? 'power3.out' : 'power3.in' });
   if (open) { sound.tick(660, 0.06); for (const id of ['#btn-more', '#btn-settings']) $(id).removeAttribute('data-new'); }

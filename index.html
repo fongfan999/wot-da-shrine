@@ -10,9 +10,12 @@
   <link rel="stylesheet" href="/src/styles/home.css" />
 </head>
 <body data-theme="dark" data-state="unlit" data-mode="home" data-fx="full">
-  <!-- The home page's hero is laid out for the landing (body[data-landing]) from the first paint, not when the script
-       arrives, which on a slow connection moved it in front of the visitor; the /tv code screen has no landing -->
-  <script>if (!/^\/tv\/?$/.test(location.pathname) && new URLSearchParams(location.search).get('tv') !== '1') document.body.dataset.landing = '1';</script>
+  <!-- Before the first paint, not when the script arrives (which on a slow connection changed it in front of the visitor):
+       the theme this browser chose (src/lib/config.js), and the hero laid out for the landing (body[data-landing]), which the /tv code screen has not -->
+  <script>
+    try { const t = new URLSearchParams(location.search).get('theme') || JSON.parse(localStorage.getItem('incense:settings:v2') || '{}').theme; if (['auto', 'light', 'dark'].includes(t)) document.body.dataset.theme = t; } catch { /* the default */ }
+    if (!/^\/tv\/?$/.test(location.pathname) && new URLSearchParams(location.search).get('tv') !== '1') document.body.dataset.landing = '1';
+  </script>
   <include src="src/partials/scene.html">
 
   <include src="src/partials/bar.html">
@@ -49,8 +52,8 @@
     <include src="src/partials/shrine/dock.html">
   </div>
 
-  <!-- The landing page: everything below the shrine on / (hidden on /tv) -->
-  <div class="landing" id="landing" hidden>
+  <!-- The landing page: everything below the shrine on / (hidden on /tv). Skipped (is-later) until landing/index.js sets it up -->
+  <div class="landing is-later" id="landing">
     <include src="src/partials/landing/day.html">
 
     <include src="src/partials/landing/rituals.html">
