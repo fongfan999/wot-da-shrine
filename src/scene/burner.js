@@ -8,6 +8,7 @@
  */
 import gsap from 'gsap';
 import { kneeling } from './devotee.js';
+import { stepped } from './stepped.js';
 
 const CX = 260;
 const RIM_Y = 236;
@@ -328,21 +329,28 @@ export function buildBurner(host) {
   let burning = false;
   let burnTl = null;
   let flickerCall = null;
+  let sways = [];   // the devotees' sway, and
+  let flickers = []; // the flames', and
+  let glows = [];   // the embers': stepped tweens (stepped.js), which touch the drawing only when a step moves
+  let burnDown = null; // the sticks burning down: paused, and moved on by burnTl a step at a time
+  const killAll = (list) => { list.forEach((t) => t.kill()); return []; };
 
   // Anything that moves inside the live SVG repaints it whole, so in lite mode the idle
   // motion stops and the flames update 6 times a second.
   /** The devotees sway almost imperceptibly while they wait. */
   function startSway() {
+    sways = killAll(sways);
     devotees.forEach((d, i) => {
       gsap.killTweensOf(d, 'rotation');
       if (lite) { gsap.set(d, { rotation: 0 }); return; }
-      gsap.to(d, { rotation: i ? -1.5 : 1.5, duration: 3.4, yoyo: true, repeat: -1, ease: 'steps(40)', delay: i * 0.7 });
+      sways.push(stepped(d, 40, { rotation: i ? -1.5 : 1.5, duration: 3.4, yoyo: true, repeat: -1, delay: i * 0.7 }));
     });
   }
 
   function stopFlicker() {
     flickerCall?.kill();
     flickerCall = null;
+    flickers = killAll(flickers);
     flames.forEach((f) => gsap.killTweensOf(f, 'scaleX,scaleY,rotation'));
   }
 
@@ -357,24 +365,25 @@ export function buildBurner(host) {
       return;
     }
     // A transform on an SVG element is a layout, so the flames step 17 times a second rather than 60.
-    flames.forEach((f) => gsap.to(f, {
+    flickers = flames.map((f) => stepped(f, 3, {
       scaleY: () => gsap.utils.random(0.85, 1.15),
       scaleX: () => gsap.utils.random(0.9, 1.1),
       rotation: () => gsap.utils.random(-5, 5),
-      duration: 0.18, repeat: -1, repeatRefresh: true, ease: 'steps(3)',
+      duration: 0.18, repeat: -1,
     }));
   }
 
   /** The embers pulse while the sticks burn; in lite mode they just glow. */
   function startEmbers() {
     const all = [...sticks.map((s) => s.ember), ...sticks.map((s) => s.halo), ...devoteeEmbers];
+    glows = killAll(glows);
     all.forEach((e) => gsap.killTweensOf(e, 'opacity'));
     if (lite) { gsap.set(sticks.map((s) => s.ember), { opacity: 1 }); gsap.set(devoteeEmbers, { opacity: 0.8 }); return; }
     sticks.forEach((s, i) => {
-      gsap.to(s.ember, { opacity: 0.55, duration: gsap.utils.random(0.4, 0.8), yoyo: true, repeat: -1, ease: 'steps(8)', delay: 1 + i * 0.3 });
-      gsap.to(s.halo, { opacity: 0.3, duration: gsap.utils.random(0.5, 1), yoyo: true, repeat: -1, ease: 'steps(8)', delay: 1.2 + i * 0.3 });
+      glows.push(stepped(s.ember, 8, { opacity: 0.55, duration: gsap.utils.random(0.4, 0.8), yoyo: true, repeat: -1, delay: 1 + i * 0.3 }));
+      glows.push(stepped(s.halo, 8, { opacity: 0.3, duration: gsap.utils.random(0.5, 1), yoyo: true, repeat: -1, delay: 1.2 + i * 0.3 }));
     });
-    devoteeEmbers.forEach((e, i) => gsap.to(e, { opacity: 0.5, duration: 0.6, yoyo: true, repeat: -1, ease: 'steps(8)', delay: 1.5 + i * 0.3 }));
+    devoteeEmbers.forEach((e, i) => glows.push(stepped(e, 8, { opacity: 0.5, duration: 0.6, yoyo: true, repeat: -1, delay: 1.5 + i * 0.3 })));
   }
 
   startSway();
@@ -405,24 +414,38 @@ export function buildBurner(host) {
     /** Light up: candles catch, embers glow, sticks burn down over `seconds`. */
     light(seconds = 600) {
       burnTl?.kill();
+      burnDown?.kill();
       burning = true;
       burnTl = gsap.timeline();
+      burnDown = gsap.timeline({ paused: true });
       flames.forEach((f, i) => burnTl.to(f, { opacity: 1, duration: 0.5, ease: 'power2.out' }, 0.1 + i * 0.25));
       startFlicker();
       burnTl.to(devoteeEmbers, { opacity: 1, duration: 0.6, stagger: 0.2 }, 0.8);
       burnTl.call(startEmbers, null, 1.4);
       sticks.forEach((s, i) => {
         const burnTo = STICK_BOTTOM - 50 - i * 6;
-        // Every attribute write forces an SVG layout, so the burn-down steps once a second (under a pixel each).
-        const slow = `steps(${Math.max(1, Math.round(seconds))})`;
         burnTl
           .fromTo(s.ember, { opacity: 0, attr: { r: 0 } }, { opacity: 1, attr: { r: 4 }, duration: 0.5, ease: 'back.out(3)' }, 0.5 + i * 0.18)
-          .to(s.halo, { opacity: 0.6, duration: 0.8 }, 0.55 + i * 0.18)
-          .to(s.halo, { attr: { cy: burnTo }, duration: seconds, ease: slow }, 1)
-          .to(s.body, { attr: { y: burnTo, height: STICK_BOTTOM - burnTo }, duration: seconds, ease: slow }, 1)
-          .to(s.ember, { attr: { cy: burnTo }, duration: seconds, ease: slow }, 1)
-          .to(s.ash, { attr: { y: burnTo - 10, height: 10 }, duration: seconds, ease: slow }, 1);
+          .to(s.halo, { opacity: 0.6, duration: 0.8 }, 0.55 + i * 0.18);
+        burnDown
+          .to(s.halo, { attr: { cy: burnTo }, duration: 1, ease: 'none' }, 0)
+          .to(s.body, { attr: { y: burnTo, height: STICK_BOTTOM - burnTo }, duration: 1, ease: 'none' }, 0)
+          .to(s.ember, { attr: { cy: burnTo }, duration: 1, ease: 'none' }, 0)
+          .to(s.ash, { attr: { y: burnTo - 10, height: 10 }, duration: 1, ease: 'none' }, 0);
       });
+      // Every attribute write forces an SVG layout, so the burn-down steps once a second (under a pixel
+      // each), and only a step writes: burnTl moves a number every frame and the drawing when it steps.
+      const steps = Math.max(1, Math.round(seconds));
+      const down = burnDown;
+      const at = { p: 0 };
+      let step = -1;
+      burnTl.to(at, {
+        p: 1, duration: seconds, ease: 'none',
+        onUpdate() {
+          const q = Math.floor(at.p * steps) / steps;
+          if (q !== step) { step = q; down.progress(q); }
+        },
+      }, 1);
     },
 
     /** Lite mode: no idle motion, slow flame flicker, steady embers. */
@@ -461,6 +484,8 @@ export function buildBurner(host) {
     /** Burned out: embers and candles fade, ash falls, fresh sticks appear. */
     extinguish() {
       burnTl?.kill();
+      burnDown?.kill();
+      burnDown = null;
       burning = false;
       stopFlicker();
       const tl = gsap.timeline();

@@ -21,11 +21,11 @@ export const art = buildBurner($('#burner-art'));
 /** The shrine around the altar. The home page and the demo show the biggest there is; a shrine shows its own (stats.js). */
 export const temple = buildTemple($('#temple'));
 temple.setLevel(roomName && roomName !== 'demo' ? 0 : 5);
-export const smoke = new IncenseSmoke($('#smoke'), () => art.tips());
+export const motes = new Motes($('#smoke'));
+export const smoke = new IncenseSmoke($('#smoke'), () => art.tips(), motes);
 export const fog = new Fog($('#fog'));
 export const petals = new Petals($('#petals'));
-export const motes = new Motes($('#motes'));
-/** Smoke and motes live in a column centered on the altar, which is off-center on wide layouts. */
+/** Smoke and motes live in a column centered on the altar (one canvas), which is off-center on wide layouts. */
 export function placeSmoke() {
   const r = burner.getBoundingClientRect();
   if (!r.width) return;

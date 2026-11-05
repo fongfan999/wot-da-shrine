@@ -21,7 +21,7 @@
 @keyframes sign-in { from { opacity: 0; transform: translateY(24px); } }
 .foot__tag { margin: 0; font-family: var(--font-serif); font-style: italic; font-size: 18px; color: var(--muted); }
 .foot__live { display: inline-flex; align-items: center; gap: 8px; margin: 6px 0 0; font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.foot__live-dot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--live); animation: world-beat 2.4s ease-out infinite; }
+.foot__live-dot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--live); }
 .foot__col { display: flex; flex-direction: column; gap: 10px; }
 .foot__head { margin: 0 0 4px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .foot__col a { color: var(--ink); font-size: 14px; text-decoration: none; }

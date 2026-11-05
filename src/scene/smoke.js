@@ -34,8 +34,10 @@ export class IncenseSmoke {
   /**
    * @param {HTMLCanvasElement} canvas
    * @param {() => {x:number,y:number}[]} emitters  screen-space tip positions
+   * @param {{ active: boolean, paint: Function }} [over]  drawn on top each frame, on this canvas (the motes)
    */
-  constructor(canvas, emitters) {
+  constructor(canvas, emitters, over = null) {
+    this.over = over;
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.emitters = emitters;
@@ -59,7 +61,7 @@ export class IncenseSmoke {
     this.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     this.resize();
     window.addEventListener('resize', () => this.resize());
-    onFrame((t, dt) => this.frame(dt));
+    onFrame((t, dt) => this.frame(t, dt));
     if (!scene.still) gsap.to(this, { wind: 1, duration: 7, ease: 'sine.inOut', yoyo: true, repeat: -1 });
   }
 
@@ -123,16 +125,20 @@ export class IncenseSmoke {
     }
   }
 
-  frame(dt) {
+  frame(time, dt) {
     const ctx = this.ctx;
-    // A cold altar draws nothing, so don't even clear: a cleared canvas is still uploaded to the GPU.
-    if (!this.running && this.puffs.length === 0 && this.sparks.length === 0) {
+    const idle = !this.running && this.puffs.length === 0 && this.sparks.length === 0;
+    const over = this.over?.active;
+    // A cold altar with nothing over it draws nothing, so don't even clear: a cleared canvas is still uploaded to the GPU.
+    if (idle && !over) {
       if (!this.cleared) { ctx.clearRect(0, 0, this.w, this.h); this.cleared = true; }
       return;
     }
     this.cleared = false;
     if (scene.still) { this.still(); return; }
-    this.advance(dt * STEP, true);
+    if (idle) ctx.clearRect(0, 0, this.w, this.h); // only the motes: no smoke to move, nor tips to read
+    else this.advance(dt * STEP, true);
+    if (over) this.over.paint(ctx, time, dt / 1000);
   }
 
   /** Reduced motion: grow the ribbons to full height once, and again only when the tips have moved. */

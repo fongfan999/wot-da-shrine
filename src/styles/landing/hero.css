@@ -136,7 +136,7 @@ body[data-landing="1"] .subtitle { color: color-mix(in srgb, var(--ink) 76%, tra
 .hero-cta__btn:hover .ico { transform: translateX(3px); }
 .hero-cta__fine { padding-left: 20px; }
 .hero-proof { flex-basis: 100%; display: inline-flex; align-items: center; gap: 9px; margin: 2px 0 0; padding-left: 20px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; color: var(--ink); font-variant-numeric: tabular-nums; animation: rise-in .8s var(--ease) both; }
-.hero-proof__dot { width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: var(--flame); animation: world-beat 2.4s ease-out infinite; }
+.hero-proof__dot { width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: var(--flame); }
 @keyframes rise-in { from { opacity: 0; transform: translateY(6px); } }
 
 /* The prayer ribbon: ready-made prayers drift by; tap one and it rises from the altar */

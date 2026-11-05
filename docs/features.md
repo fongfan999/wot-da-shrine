@@ -19,13 +19,15 @@
   sits a little higher than the last.
 - **Ranks**: karma promotes you from lurker in #incidents to enlightened SRE,
   with a toast and a shower of petals at every promotion.
-- **Effects levels**: phones, small tablets and anything that reports a weak
-  CPU get *lite* effects (no fog, fewer particles, flames that flicker at
-  6 fps instead of 60). Desktops start with
-  the full set and drop to lite for the session if the frame rate falls below
-  40 fps after the intro. Pick one yourself under Customize, or with `?fx=lite`
-  / `?fx=full`. Lite mode, and any shrine nobody has touched for 90 seconds,
-  runs the whole scene at 30 fps; a cold altar draws nothing at all.
+- **Effects levels**: phones, small tablets, anything that reports a weak
+  CPU (two cores, or four with 4 GB or less) and anyone saving data get *lite*
+  effects (no fog, fewer particles, flames that flicker at 6 fps instead of 60,
+  nobody swaying, and the ornaments that only breathe stand still). Desktops
+  start with the full set and drop to lite if the frame rate falls below 40 fps
+  after the intro (at once below 24), and that device starts lite for the next
+  month. Pick one yourself under Customize, or with `?fx=lite` / `?fx=full`.
+  Lite mode, and any shrine nobody has touched for 90 seconds, runs the whole
+  scene at 30 fps; a cold altar draws nothing at all.
 - **Atmosphere**: a camera push down the server corridor on load, dust over
   the altar, sparks when the incense catches, and cobalt shockwaves across the
   floor when the bowl rings.

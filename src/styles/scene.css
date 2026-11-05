@@ -1,14 +1,9 @@
 /* ---------- Scene layers ---------- */
 .scene { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .layer { position: absolute; inset: 0; }
-.layer--bg {
-  inset: -6%;
-  will-change: transform;
-  -webkit-mask-image: radial-gradient(60% 70% at 50% 62%, #000 25%, transparent 80%);
-  mask-image: radial-gradient(60% 70% at 50% 62%, #000 25%, transparent 80%);
-}
-.layer--bg .room { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: .5; }
-.layer--bg .room--leds { opacity: .8; }
+.layer--bg { inset: -6%; will-change: transform; }
+/* One canvas: the room faded and feathered at the edges as it is drawn (scene/serverRoom.js), not by a CSS mask the GPU applies every frame */
+.layer--bg .room { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
 /* The notebook's dot grid under everything */
 .layer--grid {
   background-image: radial-gradient(circle at 1px 1px, var(--sheet-line) 1px, transparent 0);
@@ -17,8 +12,8 @@
 }
 .layer--fog { width: 100%; height: 100%; opacity: .35; } /* drawn at 35% resolution, stretched to fill */
 .layer--petals { width: 100%; height: 100%; } /* one canvas; see scene/petals.js */
-.smoke-layer, .motes-layer {
-  /* only the column above the altar: smoke and motes never leave it, and a smaller canvas is a smaller upload every frame */
+.smoke-layer {
+  /* only the column above the altar: smoke and motes (drawn on the same canvas) never leave it, and a smaller canvas is a smaller upload every frame */
   position: fixed;
   top: 0;
   bottom: 0;

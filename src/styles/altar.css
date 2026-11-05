@@ -11,6 +11,9 @@
 }
 /* Before the script runs, the page doesn't yet know which heading it shows (home or shrine): the intro's pieces wait. */
 .booting :is(.bar, .heading, .temple, .burner, .side .card, .quick, .pray, .actions, .credit, .plantern-row) { visibility: hidden; }
+/* Nor does anything there start animating: an animation that starts unseen never moves to the
+   compositor, and ticks on the main thread, restyling every frame, for as long as the page is open */
+.booting :is(.bar, .heading, .temple, .burner, .side .card, .quick, .pray, .actions, .credit, .plantern-row) :is(*, *::before, *::after) { animation-name: none !important; }
 .heading { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); }
 .eyebrow { display: inline-flex; align-items: center; }
 /* A shrine names itself in the top bar's chip, and the clock takes the heading's corner */
@@ -148,9 +151,9 @@ body[data-state="lit"] .t-lit { opacity: 1; }
 .hair--grey .t-comb { stroke: var(--muted); }
 .t-beret { fill: var(--ink); stroke: none; }
 .t-sticky { font-family: var(--font-mono); font-size: 4px; font-weight: 700; fill: var(--ink); }
-.t-led { animation: pager-blink 1.8s steps(1) infinite; }
-@keyframes pager-blink { 50% { opacity: .15; } }
-@media (prefers-reduced-motion: reduce) { .t-led { animation: none; } }
+/* The pagers' LEDs blink together: fx.js flips body[data-blink] once a second. An animation on each
+   LED would restyle and repaint every figure wearing a pager, every frame (SVG can't be composited) */
+body[data-blink="1"] .t-led { opacity: .15; }
 
 /* One pose at a time: kneeling on a mat, standing past the mats, walking incense up, bowing at the censer, walking back */
 .kneeler [data-p] { display: none; }
@@ -231,6 +234,9 @@ body[data-state="lit"] .t-lit { opacity: 1; }
   aspect-ratio: 520 / 470;
   max-width: 100%;
   transform-origin: 50% 100%;
+  /* It floats for as long as the page is open (stage.js). Promised to move, it moves on the compositor:
+     without this, every step of the float made the browser rebuild the page's layers */
+  will-change: transform;
 }
 /* The first thing to do, hung over the middle stick's tip (3.4% down the drawing) like a name tag */
 .light-cue {

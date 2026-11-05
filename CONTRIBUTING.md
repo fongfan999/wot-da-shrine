@@ -68,6 +68,12 @@ npm run test:page  # the pages in a browser: CI runs these too, in a job of thei
   page: anything you add takes only what it can trust there, or is off in the demo.
 - **The shrine is the source of truth.** The page may play an action at once, but the
   counters, the vigil and what anyone earned are what the shrine says.
+- **Every frame costs, on the slowest phone.** What moves forever moves on the compositor
+  (`transform` or `opacity` on an HTML element, with `will-change` if script moves it) or is
+  drawn on a canvas. A loop on an SVG attribute, a box-shadow or anything else that repaints
+  goes through `stepped()` (`src/scene/stepped.js`) or the clock, and lite mode stops it. A
+  write that changes nothing still costs: compare first. Try a change with `?fx=lite` and the
+  CPU throttled 6× in DevTools.
 
 ## Pull requests
 

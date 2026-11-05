@@ -20,7 +20,17 @@
 /* The world: what every shrine is doing, on the landing page */
 .world { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--sheet-line); display: flex; flex-direction: column; gap: 6px; }
 .world__line { display: flex; align-items: center; gap: 8px; margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; color: var(--ink); font-variant-numeric: tabular-nums; }
-.world__dot { width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 0 var(--ember); animation: world-beat 2.4s ease-out infinite; }
-@keyframes world-beat { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ember) 45%, transparent); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.world__dot { width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; background: var(--ember); }
+/* A live dot's beat: a ring swells out of it and fades. The ring (::after) is drawn once and scaled
+   on the compositor, under the dot's own face (::before); an animated box-shadow repainted the page
+   around every dot, every frame */
+:is(.world__dot, .vigil__dot, .pair-screen__dot, .pair-card__beat, .tv__live-dot, .hero-proof__dot, .mini-quiet__dot, .mini-vigil__dot, .foot__live-dot) { position: relative; isolation: isolate; }
+:is(.world__dot, .vigil__dot, .pair-screen__dot, .pair-card__beat, .tv__live-dot, .hero-proof__dot, .mini-quiet__dot, .mini-vigil__dot, .foot__live-dot)::before, :is(.world__dot, .vigil__dot, .pair-screen__dot, .pair-card__beat, .tv__live-dot, .hero-proof__dot, .mini-quiet__dot, .mini-vigil__dot, .foot__live-dot)::after { content: ""; position: absolute; inset: 0; border-radius: 50%; }
+:is(.world__dot, .vigil__dot, .pair-screen__dot, .pair-card__beat, .tv__live-dot, .hero-proof__dot, .mini-quiet__dot, .mini-vigil__dot, .foot__live-dot)::before { z-index: 1; background: inherit; }
+:is(.world__dot, .vigil__dot, .pair-screen__dot, .pair-card__beat, .tv__live-dot, .hero-proof__dot, .mini-quiet__dot, .mini-vigil__dot, .foot__live-dot)::after { opacity: 0; background: color-mix(in srgb, var(--ember) 45%, transparent); animation: world-beat 2.4s ease-out infinite; }
+@keyframes world-beat { 0% { transform: none; opacity: 1; } 70% { transform: scale(3); opacity: 0; } 100% { transform: none; opacity: 0; } }
+/* The two beats on a dot drawn as ::before keep their box-shadow, and stand still on a lite page */
+@keyframes world-beat-shadow { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ember) 45%, transparent); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+body[data-fx="lite"] :is(.eyebrow--live, .chat__tag[data-live="1"])::before { animation: none; }
 .world__ticker { margin: 0; min-height: 1.4em; font-size: 13px; color: var(--muted); font-style: italic; font-family: var(--font-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .world__ticker b { font-weight: 500; color: var(--ink); }

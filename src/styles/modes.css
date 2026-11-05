@@ -7,7 +7,7 @@ body[data-landing="1"] .card--open.is-nudged { animation: nudge 1.2s var(--ease)
 @keyframes nudge { 0%, 100% { transform: none; box-shadow: var(--shadow-sheet); } 40% { transform: translateY(-4px); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-sheet); } }
 
 /* ---------- Off screen, asleep: the home page's scene layers stop compositing, and animations nobody can see pause ---------- */
-body[data-scene="off"] :is(.scene, .smoke-layer, .motes-layer) { visibility: hidden; }
+body[data-scene="off"] :is(.scene, .smoke-layer) { visibility: hidden; }
 body[data-scene="off"] .center :is(*, *::before, *::after),
 #landing .land:not(.is-on) :is(*, *::before, *::after),
 .foot:not(.is-on) :is(*, *::before, *::after),
@@ -19,3 +19,8 @@ body[data-mode="room"] .card--open { display: none; }
 /* ---------- Lite effects: fewer moving parts on phones and slow devices ---------- */
 body[data-fx="lite"] .layer--fog { display: none; }
 body[data-fx="lite"] .stick__halo, body[data-fx="lite"] .kneeler__halo { display: none; }
+/* The ornaments that only breathe stand still: each costs a restyle every frame (and a repaint, for
+   those the compositor can't run), and with nothing else moving the page draws at the scene's 30 fps */
+body[data-fx="lite"] :is(.altar, .tv)::before,
+body[data-fx="lite"] :is(.hero-hint, .light-cue, .cta-stick__ember, .readme__badges .facts__badge, .tv__poster-mark),
+body[data-fx="lite"] :is(.world__dot, .vigil__dot, .pair-screen__dot, .pair-card__beat, .tv__live-dot, .hero-proof__dot, .mini-quiet__dot, .mini-vigil__dot, .foot__live-dot)::after { animation: none !important; }

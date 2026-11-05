@@ -62,7 +62,8 @@ body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { 
   text-align: right;
   color: var(--muted);
 }
-.vigil__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 0 color-mix(in srgb, var(--ember) 45%, transparent); animation: world-beat 2s ease-out infinite; }
+.vigil__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ember); }
+.vigil__dot::after { animation-duration: 2s; }
 .vigil__label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
 .vigil__label:empty { display: none; }
 .vigil__time { grid-column: 1 / -1; font-family: var(--font-mono); font-size: clamp(2rem, 3.4vw, 3.2rem); font-weight: 600; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
@@ -70,11 +71,13 @@ body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { 
 .vigil__meta:empty { display: none; }
 /* The title leaves the corner to the clock */
 body:is([data-vigil], [data-resolved], [data-blessing], [data-shipped]) .title { max-width: calc(100% - 15rem); }
-body[data-resolved="1"] .vigil__dot { background: var(--live); animation: none; }
+body[data-resolved="1"] .vigil__dot { background: var(--live); }
+body[data-resolved="1"] .vigil__dot::after { animation: none; }
 body[data-resolved="1"] .vigil__time { font-size: 22px; letter-spacing: 0; color: var(--live); }
 /* A deploy being blessed counts up in the corner too, with a calm dot; Shipped reads like They're back */
-.vigil[data-mode="bless"] .vigil__dot { background: var(--accent); box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
-.vigil[data-mode="shipped"] .vigil__dot { background: var(--live); animation: none; }
+.vigil[data-mode="bless"] .vigil__dot { background: var(--accent); }
+.vigil[data-mode="shipped"] .vigil__dot { background: var(--live); }
+.vigil[data-mode="shipped"] .vigil__dot::after { animation: none; }
 .vigil[data-mode="shipped"] .vigil__time { font-size: 22px; letter-spacing: 0; color: var(--live); }
 
 /* Shrine records */

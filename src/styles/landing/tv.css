@@ -20,7 +20,7 @@
 .tv__led { width: 4px; height: 4px; border-radius: 50%; background: #e5484d; box-shadow: 0 0 6px 1px #e5484daa; }
 .tv__brand { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: #6b6e66; }
 .tv__live { justify-self: end; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #a8ab9f; font-variant-numeric: tabular-nums; }
-.tv__live-dot { width: 6px; height: 6px; border-radius: 50%; background: #e5484d; animation: world-beat 2.4s ease-out infinite; }
+.tv__live-dot { width: 6px; height: 6px; border-radius: 50%; background: #e5484d; }
 .tv__stand { position: relative; z-index: 0; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: -1px; }
 .tv__neck { width: 64px; height: 38px; background: linear-gradient(90deg, #22251f, #5a5e55 48%, #22251f); clip-path: polygon(30% 0, 70% 0, 80% 100%, 20% 100%); }
 .tv__base { width: min(34%, 300px); height: 12px; border-radius: 7px 7px 50% 50% / 7px 7px 100% 100%; background: linear-gradient(180deg, #6a6e64 0%, #3a3d37 35%, #161815 100%); box-shadow: inset 0 1px 0 #ffffff40, 0 16px 22px -6px #000b; }
@@ -34,7 +34,7 @@
 .pair-demo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-4); align-items: stretch; margin-top: 12px; }
 .pair-card { display: flex; flex-direction: column; gap: 14px; padding: 20px 22px 22px; border: 1px solid var(--sheet-line); border-radius: var(--radius-lg); background: var(--paper-raised); box-shadow: var(--shadow-sheet); }
 .pair-card__eyebrow { display: flex; align-items: center; gap: 8px; margin: 0 !important; font-family: var(--font-mono); font-size: 11px !important; letter-spacing: .1em; text-transform: uppercase; color: var(--flame) !important; }
-.pair-card__beat { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: world-beat 2.4s ease-out infinite; }
+.pair-card__beat { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .pair-card__title { margin: 0; font-size: clamp(20px, 2vw, 25px); font-weight: 600; line-height: 1.2; letter-spacing: -.03em; color: var(--ink); }
 .pair-card__body { display: flex; align-items: center; gap: 24px; margin: auto 0; }
 .pair-card__qr { flex: none; padding: 8px; border-radius: var(--radius-sm); background: #fff; box-shadow: 0 0 0 1px var(--sheet-line); }

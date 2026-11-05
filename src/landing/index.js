@@ -80,7 +80,7 @@ function setupScene() {
 function paintVeil(p) {
   const paper = (a) => `rgba(${p.paper},${a})`;
   const draw = (radial, linear) => {
-    const W = 480; const H = 300;
+    const W = 240; const H = 150; // smooth gradients stretch well, and a small PNG is quick to encode
     const c = document.createElement('canvas');
     c.width = W; c.height = H;
     const ctx = c.getContext('2d');

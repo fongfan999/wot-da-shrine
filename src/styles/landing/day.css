@@ -53,7 +53,7 @@
 /* 09:30: the days without an incident, and the kami waiting for its morning bow (the real kami pill, kami.css) */
 .mini-quiet { display: inline-flex; align-items: center; gap: 8px; margin: 0 !important; padding: 8px 16px !important; border: 1px solid color-mix(in srgb, var(--live) 45%, transparent); border-radius: var(--radius-pill); background: var(--live-soft); color: var(--live) !important; font-size: 13px !important; font-weight: 600; white-space: nowrap; box-shadow: 0 10px 24px -16px #0008; }
 .mini-quiet b { font-family: var(--font-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
-.mini-quiet__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live); animation: world-beat 2.4s ease-out infinite; }
+.mini-quiet__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live); }
 .mini-kami { z-index: auto; max-width: 100%; box-shadow: 0 10px 24px -16px #0008; }
 .mini-kami .kami__btn { cursor: default; }
 .mini-kami .kami__text { overflow: visible; }
@@ -98,7 +98,7 @@
 .mini-vigil { display: grid; }
 .mini-vigil > span { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 16px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--paper-raised); font-size: 13px; color: var(--muted); white-space: nowrap; transition: opacity 350ms ease, transform 450ms var(--ease); box-shadow: 0 10px 24px -16px #0008; }
 .mini-vigil b { font-family: var(--font-mono); font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
-.mini-vigil__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--flame); animation: world-beat 2.4s ease-out infinite; }
+.mini-vigil__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--flame); }
 .mini-vigil__up { border-color: color-mix(in srgb, var(--live) 50%, transparent) !important; background: var(--live-soft) !important; color: var(--live) !important; font-weight: 600; opacity: 0; transform: translateY(10px) scale(.96); }
 .mini-vigil.is-back .mini-vigil__down { opacity: 0; transform: translateY(-10px) scale(.96); }
 .mini-vigil.is-back .mini-vigil__up { opacity: 1; transform: none; }
@@ -126,6 +126,6 @@
   .day { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mini-quiet__dot, .mini-vigil__dot, .mini-push { animation: none; }
+  .mini-quiet__dot::after, .mini-vigil__dot::after, .mini-push { animation: none; }
   :is(.is-fed, .is-handed) > .mini-plus { animation: none; }
 }

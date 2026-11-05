@@ -14,6 +14,7 @@ import { buildTemple } from '../scene/temple.js';
 import { Congregation } from '../scene/congregation.js';
 import { STRINGS, t } from '../lib/strings.js';
 import { $, fmt, reduceMotion } from '../app/context.js';
+import { lite } from '../app/fx.js';
 
 // name tag (or none), avatar, what they do, colour, rank, mornings in a row. In the order they take the mats.
 const TEAM = [
@@ -228,8 +229,8 @@ export function setupGrow() {
       crowd.atGate = (n) => fmt('atGate', { n });
       seat();
     }
-    // Off screen the people stop swaying (lite), so nothing animates where nobody looks.
-    crowd?.setLite(!onScreen || reduceMotion);
+    // Off screen the people stop swaying (lite), so nothing animates where nobody looks; nor on a lite page.
+    crowd?.setLite(!onScreen || reduceMotion || lite);
     if (touched) return;
     run++;
     if (!onScreen) temple.setRaising(null);

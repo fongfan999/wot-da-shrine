@@ -20,6 +20,7 @@
 import gsap from 'gsap';
 import { devoteeKey } from '../../shared/rules.js';
 import { kneeling, lookOf, planting, standing, walking } from './devotee.js';
+import { stepped } from './stepped.js';
 
 const VB_H = 470;      // the burner's viewBox height
 const SCALE = 1.18;    // same size as the ops team drawn into the burner
@@ -42,14 +43,19 @@ const STOOL_SCALE = 0.78;
 const STOOL_SEAT = 37; // how high it sits them: the seat top, in the figure box's units
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/** Someone as they kneel, stand and walk: their own look, dressed by their rank, their socks by their mornings. */
-const figureSvg = (look, rank, streak) => `<svg class="kneeler__svg" viewBox="-${BOX_W / 2} -${TOP} ${BOX_W} ${BOX_H}" aria-hidden="true">
-  <g data-p="kneel"><g transform="scale(${S})">${kneeling('kneeler', { look, rank, streak })}</g></g>
-  <g data-p="stand"><g transform="scale(${S})">${standing('stander', { look, rank, streak })}</g></g>
-  <g data-p="walk"><g class="kneeler__face"><g transform="scale(${S})">${walking('walker', { look }, { sticks: true, rank })}</g></g></g>
-  <g data-p="back"><g class="kneeler__face"><g transform="scale(${S})">${walking('walker', { look }, { sticks: false, rank })}</g></g></g>
-  <g data-p="plant"><g class="kneeler__face"><g transform="scale(${S})">${planting('walker', { look }, { rank })}</g></g></g>
-</svg>`;
+/**
+ * Someone as they kneel, stand and walk: their own look, dressed by their rank, their socks by their
+ * mornings. Each pose is drawn the first time they take it: most people only ever kneel, and a crowd
+ * of five-pose drawings is thousands of SVG nodes the page lays out and never shows.
+ */
+const POSES = {
+  kneel: (look, rank, streak) => `<g transform="scale(${S})">${kneeling('kneeler', { look, rank, streak })}</g>`,
+  stand: (look, rank, streak) => `<g transform="scale(${S})">${standing('stander', { look, rank, streak })}</g>`,
+  walk: (look, rank) => `<g class="kneeler__face"><g transform="scale(${S})">${walking('walker', { look }, { sticks: true, rank })}</g></g>`,
+  back: (look, rank) => `<g class="kneeler__face"><g transform="scale(${S})">${walking('walker', { look }, { sticks: false, rank })}</g></g>`,
+  plant: (look, rank) => `<g class="kneeler__face"><g transform="scale(${S})">${planting('walker', { look }, { rank })}</g></g>`,
+};
+const figureSvg = () => `<svg class="kneeler__svg" viewBox="-${BOX_W / 2} -${TOP} ${BOX_W} ${BOX_H}" aria-hidden="true"></svg>`;
 /** What a figure is dressed in: a new rank, or socks (a week of mornings) and holes (a month), redraws it. */
 const dressKey = (look, rank, streak) => `${JSON.stringify(look)}|${rank}|${streak >= 30 ? 2 : streak >= 7 ? 1 : 0}`;
 
@@ -67,7 +73,7 @@ export class Congregation {
   constructor(host, burnerEl) {
     this.host = host;
     this.burner = burnerEl;
-    this.items = new Map(); // id -> { el, uppers, embers, halos, person, … }
+    this.items = new Map(); // id -> { el, svg, uppers: { kneel, stand }, embers, halos, person, … }
     this.order = [];
     this.mats = 0;  // laid in front of the altar
     this.lost = 0;  // of those, taken by weeds
@@ -92,7 +98,7 @@ export class Congregation {
       if (ids.has(id)) continue;
       this.items.delete(id);
       gsap.killTweensOf(item.el);
-      gsap.to(item.el, { opacity: 0, y: '+=14', duration: 0.6, ease: 'power2.in', onComplete: () => { gsap.killTweensOf([...item.uppers, ...item.embers, ...item.halos]); item.el.remove(); } });
+      gsap.to(item.el, { opacity: 0, y: '+=14', duration: 0.6, ease: 'power2.in', onComplete: () => { this.still(item); item.el.remove(); } });
     }
     for (const p of list) {
       const item = this.items.get(p.id);
@@ -152,41 +158,71 @@ export class Congregation {
     const key = dressKey(look, rank, streak);
     if (key === item.dressed) return;
     item.dressed = key;
+    item.look = { look, rank, streak };
     item.el.dataset.tone = String(look.tone);
     item.el.dataset.role = look.role;
     item.el.querySelector('.kneeler__role').textContent = this.roleTag?.(look.role) ?? '';
+    this.still(item);
     const holder = document.createElement('div');
-    holder.innerHTML = figureSvg(look, rank, streak);
+    holder.innerHTML = figureSvg();
     item.el.querySelector('.kneeler__svg').replaceWith(holder.firstElementChild);
-    const el = item.el;
-    gsap.killTweensOf([...(item.uppers ?? []), ...(item.embers ?? []), ...(item.halos ?? [])]);
-    Object.assign(item, {
-      svg: el.querySelector('.kneeler__svg'),
-      uppers: [el.querySelector('.kneeler__upper'), el.querySelector('.stander__upper')],
-      embers: [el.querySelector('.kneeler__ember'), el.querySelector('.stander__ember')],
-      halos: [el.querySelector('.kneeler__halo'), el.querySelector('.stander__halo')],
-      faces: [...el.querySelectorAll('.kneeler__face')],
-    });
+    Object.assign(item, { svg: item.el.querySelector('.kneeler__svg'), drawn: new Set(), uppers: {}, embers: [], halos: [] });
+    this.draw(item, item.el.dataset.pose);
     this.sway(item);
     if (this.lit) this.glow(item, true);
   }
 
-  /** The pose they are drawn in: kneel, stand, walk, back (walking back) or plant (bowing at the censer). */
-  pose(item, p) { item.el.dataset.pose = p; }
-  upper(item) { return item.el.dataset.pose === 'stand' ? item.uppers[1] : item.uppers[0]; }
+  /** Draw pose `p` for them, if it isn't drawn yet. Its incense glows like the rest of theirs. */
+  draw(item, p) {
+    if (item.drawn.has(p)) return;
+    item.drawn.add(p);
+    const { look, rank, streak } = item.look;
+    item.svg.insertAdjacentHTML('beforeend', `<g data-p="${p}">${POSES[p](look, rank, streak)}</g>`);
+    const g = item.svg.lastElementChild;
+    const upper = g.querySelector('.kneeler__upper, .stander__upper');
+    if (upper) item.uppers[p] = upper;
+    const ember = g.querySelector('.kneeler__ember, .stander__ember');
+    const halo = g.querySelector('.kneeler__halo, .stander__halo');
+    if (ember) item.embers.push(ember);
+    if (halo) item.halos.push(halo);
+    if (this.lit && (ember || halo)) this.glow(item, true);
+  }
 
-  /** A slow, out-of-step sway so the room never looks frozen. Skipped in lite mode: each sway repaints a figure every frame. */
+  /** The pose they are drawn in: kneel, stand, walk, back (walking back) or plant (bowing at the censer). */
+  pose(item, p) {
+    this.draw(item, p);
+    if (item.el.dataset.pose === p) return;
+    item.el.dataset.pose = p;
+    this.sway(item);
+  }
+  upper(item) { return item.uppers[item.el.dataset.pose === 'stand' ? 'stand' : 'kneel'] ?? null; }
+
+  /** Stop everything that moves on their figure. */
+  still(item) {
+    item.swaying?.kill();
+    item.flicker?.kill();
+    item.swaying = item.flicker = null;
+    gsap.killTweensOf([...Object.values(item.uppers ?? {}), ...(item.embers ?? []), ...(item.halos ?? [])]);
+  }
+
+  /**
+   * A slow, out-of-step sway so the room never looks frozen: the pose they are in, a few steps a
+   * second. Skipped in lite mode, where every step would repaint a figure.
+   */
   sway(item) {
-    const [kneel, stand] = item.uppers;
-    gsap.killTweensOf(item.uppers, 'rotation');
-    if (this.lite) { gsap.set(kneel, { rotation: 0, svgOrigin: WAIST.kneel }); gsap.set(stand, { rotation: 0, svgOrigin: WAIST.stand }); return; }
-    const r = gsap.utils.random(-1.6, 1.6);
-    const opts = { duration: gsap.utils.random(2.8, 4), yoyo: true, repeat: -1, ease: 'steps(40)', delay: Math.random() * 2 };
-    gsap.to(kneel, { rotation: r, svgOrigin: WAIST.kneel, ...opts });
-    gsap.to(stand, { rotation: r, svgOrigin: WAIST.stand, ...opts });
+    item.swaying?.kill();
+    item.swaying = null;
+    const p = item.el.dataset.pose;
+    const upper = item.uppers[p];
+    if (!upper) return;
+    const svgOrigin = WAIST[p];
+    if (this.lite || reduceMotion) { gsap.set(upper, { rotation: 0, svgOrigin }); return; }
+    item.sway ??= { r: gsap.utils.random(-1.6, 1.6), duration: gsap.utils.random(2.8, 4) };
+    item.swaying = stepped(upper, 40, { rotation: item.sway.r, svgOrigin, duration: item.sway.duration, yoyo: true, repeat: -1, delay: Math.random() * 2 });
   }
 
   setLite(on) {
+    if (on === this.lite) return;
     this.lite = on;
     for (const item of this.items.values()) { this.sway(item); if (this.lit) this.glow(item, true); }
   }
@@ -352,7 +388,8 @@ export class Congregation {
     const item = this.items.get(id);
     if (!item || item.walking) return;
     const upper = this.upper(item);
-    const origin = upper === item.uppers[1] ? WAIST.stand : WAIST.kneel;
+    if (!upper) return;
+    const origin = upper === item.uppers.stand ? WAIST.stand : WAIST.kneel;
     gsap.timeline({ repeat: times - 1 })
       .to(upper, { scaleY: 0.52, y: 4, svgOrigin: origin, duration: 0.55, ease: 'power2.inOut' })
       .to(upper, { scaleY: 1, y: 0, svgOrigin: origin, duration: 0.8, ease: 'power2.inOut' }, '+=0.25');
@@ -371,7 +408,7 @@ export class Congregation {
     const reach = item.side * REACH * unit - item.w / 2;
     const steps = Math.max(2, Math.round(Math.abs(item.home.x - reach) / (STRIDE * unit)));
     // The side view faces left: mirror it to walk right.
-    const face = (right) => item.faces.forEach((g) => g.setAttribute('transform', right ? 'scale(-1 1)' : ''));
+    const face = (right) => item.svg.querySelectorAll('.kneeler__face').forEach((g) => g.setAttribute('transform', right ? 'scale(-1 1)' : ''));
     const toCenter = item.side < 0; // from the left, the censer is to the right
     const mat = item.kneels ? this.matEls[item.slot] : null;
     const bob = (n, d) => gsap.to(item.svg, { y: -2 * unit * SCALE, duration: d / 2, yoyo: true, repeat: n * 2 - 1, ease: 'sine.inOut' });
@@ -431,10 +468,12 @@ export class Congregation {
   }
 
   glow(item, on) {
+    item.flicker?.kill();
+    item.flicker = null;
     gsap.killTweensOf([...item.embers, ...item.halos]);
     if (!on) { gsap.to([...item.embers, ...item.halos], { opacity: 0, duration: 1 }); return; }
     gsap.to(item.embers, { opacity: 1, duration: 0.6 });
     gsap.to(item.halos, { opacity: 0.45, duration: 0.6 });
-    if (!this.lite) gsap.to(item.embers, { opacity: 0.5, duration: gsap.utils.random(0.5, 0.9), yoyo: true, repeat: -1, ease: 'steps(8)', delay: 0.6 });
+    if (!this.lite && !reduceMotion) item.flicker = stepped(item.embers, 8, { opacity: 0.5, duration: gsap.utils.random(0.5, 0.9), yoyo: true, repeat: -1, delay: 0.6 });
   }
 }

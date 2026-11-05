@@ -17,6 +17,17 @@ import { renderBeliefs } from './beliefs.js';
 import { purify, purifyDue } from './kami.js';
 import { unpurified } from '../../shared/rules.js';
 
+/**
+ * Write only what changed. The burn timer and the vigil strip are redrawn four times a second, and a
+ * write that changes nothing still costs: new text is a relayout, an attribute set again a restyle.
+ */
+const text = (el, s) => { if (el.textContent !== s) el.textContent = s; };
+const title = (el, s) => { if (el.title !== s) el.title = s; };
+const data = (el, key, value) => {
+  if ((el.dataset[key] ?? null) === value) return;
+  if (value === null) delete el.dataset[key]; else el.dataset[key] = value;
+};
+
 /* ---------- Stats + progress ---------- */
 export const burnBar = $('#burn-bar');
 const dockTime = $('#dock-time');
@@ -107,7 +118,7 @@ export function tickProgress() {
   if (state.lit) {
     const elapsed = (Date.now() - state.litAt) / 1000;
     const left = Math.max(0, BURN_SECONDS - Math.floor(elapsed));
-    dockTime.textContent = mmss(left);
+    text(dockTime, mmss(left));
     burnBar.style.width = `${(left / BURN_SECONDS) * 100}%`;
   }
 }
@@ -131,62 +142,67 @@ const vigilHint = (n) => fmt('vigilNoHint', { n, nth: nth(n) });
 const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
 export function tickVigil() {
   // The scene reads this: the down rack's lights go out while a vigil is open.
-  if (state.vigil) body.dataset.vigil = '1'; else delete body.dataset.vigil;
+  data(body, 'vigil', state.vigil ? '1' : null);
   // So does the tab: while a vigil is open the favicon's tile turns ember.
   const icon = state.vigil ? '/favicon-down.svg' : '/favicon.svg';
   if (favicon && favicon.getAttribute('href') !== icon) favicon.setAttribute('href', icon);
-  delete vigilEl.dataset.mode;
+  let mode = null;
   // No vigil open: the altar says how to begin one. Not on a TV, which has no hands, and not while
   // the incense still burns from the last vigil (touching the censer then only stirs the smoke).
-  lightCue.hidden = Boolean(state.vigil || body.dataset.resolved || tv || state.lit || !roomName);
+  const noCue = Boolean(state.vigil || body.dataset.resolved || tv || state.lit || !roomName);
+  if (lightCue.hidden !== noCue) lightCue.hidden = noCue;
   if (body.dataset.resolved && state.lastVigil) {
-    delete vigilEl.dataset.idle;
-    vigilLabel.textContent = '';
-    vigilTime.textContent = fmt('vigilSurvived', { t: minutesText(state.lastVigil.minutes) });
-    vigilMeta.textContent = [fmt('vigilPraying', { n: state.lastVigil.peak }), fmt('vigilPrayers', { n: state.lastVigil.prayers }), fmt('vigilNo', { n: records.survived })].join(' · ');
-    vigilEl.title = vigilHint(records.survived);
+    data(vigilEl, 'idle', null);
+    text(vigilLabel, '');
+    text(vigilTime, fmt('vigilSurvived', { t: minutesText(state.lastVigil.minutes) }));
+    text(vigilMeta, [fmt('vigilPraying', { n: state.lastVigil.peak }), fmt('vigilPrayers', { n: state.lastVigil.prayers }), fmt('vigilNo', { n: records.survived })].join(' · '));
+    title(vigilEl, vigilHint(records.survived));
+    data(vigilEl, 'mode', mode);
     return;
   }
   // A deploy going out counts up in the corner; for a minute after Shipped, it says how long it took.
   if (!state.vigil && (state.blessing || body.dataset.shipped)) {
-    delete vigilEl.dataset.idle;
+    data(vigilEl, 'idle', null);
     const run = records.deploys.streak ? fmt('vigilCleanRun', { n: records.deploys.streak }) : '';
     if (state.blessing) {
-      vigilEl.dataset.mode = 'bless';
-      vigilLabel.textContent = t('vigilBlessing');
-      vigilTime.textContent = hhmmss(Date.now() - state.blessing.startedAt);
+      mode = 'bless';
+      text(vigilLabel, t('vigilBlessing'));
+      text(vigilTime, hhmmss(Date.now() - state.blessing.startedAt));
       const bits = [fmt('vigilPraying', { n: people.size })];
       if (state.blessing.bows) bits.push(fmt('vigilBowing', { n: state.blessing.bows }));
       if (run) bits.push(run);
-      vigilMeta.textContent = bits.join(' · ');
+      text(vigilMeta, bits.join(' · '));
     } else {
       const last = records.blessings[0];
-      vigilEl.dataset.mode = 'shipped';
-      vigilLabel.textContent = '';
-      vigilTime.textContent = last ? fmt('vigilShipped', { t: minutesText(Math.max(1, Math.round((last.endedAt - last.startedAt) / 60000))) }) : t('shippedEyebrow');
-      vigilMeta.textContent = run;
+      mode = 'shipped';
+      text(vigilLabel, '');
+      text(vigilTime, last ? fmt('vigilShipped', { t: minutesText(Math.max(1, Math.round((last.endedAt - last.startedAt) / 60000))) }) : t('shippedEyebrow'));
+      text(vigilMeta, run);
     }
-    vigilEl.title = '';
+    title(vigilEl, '');
+    data(vigilEl, 'mode', mode);
     return;
   }
   if (!state.vigil) {
     // No vigil open: the strip says so, and They're back waits.
-    vigilEl.dataset.idle = '1';
-    vigilLabel.textContent = '';
-    vigilTime.textContent = '';
-    vigilMeta.textContent = t('vigilNone');
+    data(vigilEl, 'idle', '1');
+    text(vigilLabel, '');
+    text(vigilTime, '');
+    text(vigilMeta, t('vigilNone'));
+    data(vigilEl, 'mode', mode);
     return;
   }
-  delete vigilEl.dataset.idle;
-  vigilLabel.textContent = t('vigilDown');
-  vigilTime.textContent = hhmmss(Date.now() - state.vigil.startedAt);
+  data(vigilEl, 'idle', null);
+  text(vigilLabel, t('vigilDown'));
+  text(vigilTime, hhmmss(Date.now() - state.vigil.startedAt));
   const bits = [];
   if (roomName) bits.push(fmt('vigilPraying', { n: people.size }));
   if (state.vigil.prayers) bits.push(fmt('vigilPrayers', { n: state.vigil.prayers }));
   bits.push(fmt('vigilNo', { n: records.survived + 1 }));
   if (state.vigil.watch) bits.push(fmt('vigilWatch', { name: state.vigil.watch }));
-  vigilMeta.textContent = bits.join(' · ');
-  vigilEl.title = vigilHint(records.survived + 1);
+  text(vigilMeta, bits.join(' · '));
+  title(vigilEl, vigilHint(records.survived + 1));
+  data(vigilEl, 'mode', mode);
 }
 
 /* ---------- Shrine records: what this altar has survived, and how far it has grown ---------- */

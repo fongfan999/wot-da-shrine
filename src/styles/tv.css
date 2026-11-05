@@ -31,7 +31,7 @@ body[data-tv-home="1"] .center { grid-column: 2; }
 .pair-screen { position: fixed; z-index: 5; top: var(--bar-h, 70px); bottom: 0; left: 0; width: 54%; display: grid; align-items: center; padding: var(--space-5) clamp(24px, 4vw, 72px); pointer-events: none; }
 .pair-screen__card { display: flex; flex-direction: column; gap: clamp(18px, 2.6vh, 30px); pointer-events: auto; }
 .pair-screen__eyebrow { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--font-mono); font-size: clamp(12px, 1vw, 16px); letter-spacing: .14em; text-transform: uppercase; color: var(--flame); }
-.pair-screen__dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; animation: world-beat 2.4s ease-out infinite; }
+.pair-screen__dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
 .pair-screen__title { margin: 0; font-weight: 500; font-size: clamp(2.6rem, 4.6vw, 5.4rem); line-height: 1; letter-spacing: -.045em; }
 .pair-screen__title em { font-family: var(--font-serif); font-weight: 400; color: var(--accent); }
 .pair-screen__code { display: flex; align-items: center; gap: clamp(6px, .7vw, 12px); min-height: clamp(84px, 9vw, 150px); }
@@ -55,7 +55,8 @@ body[data-tv-home="1"] .center { grid-column: 2; }
 .pair-screen__qr svg path, .tv-join__qr svg path { fill: #151713; }
 /* the socket dropped: the code can't take a cast until it is back, so it says so instead of looking fine */
 body[data-paired="lost"] .pair-screen__eyebrow { color: var(--muted); }
-body[data-paired="lost"] .pair-screen__dot { animation: none; opacity: .5; }
+body[data-paired="lost"] .pair-screen__dot { opacity: .5; }
+body[data-paired="lost"] .pair-screen__dot::after { animation: none; opacity: 0; }
 body[data-paired="lost"] .pair-screen__code, body[data-paired="lost"] .pair-screen__qr { opacity: .35; transition: opacity 400ms ease; }
 body[data-paired="lost"] .tv-join__cast { opacity: .4; }
 @media (max-height: 620px) { .pair-screen__fine { display: none; } }

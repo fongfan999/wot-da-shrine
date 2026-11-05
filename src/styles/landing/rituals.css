@@ -134,7 +134,7 @@
 .ritual--forecast .ritual__stage { height: 250px; }
 .ritual--forecast .fortune-mini__hint { bottom: 8px; }
 
-.eyebrow--live::before { background: var(--ember); animation: world-beat 2.4s ease-out infinite; }
+.eyebrow--live::before { background: var(--ember); animation: world-beat-shadow 2.4s ease-out infinite; }
 /* Stacked, the deploy's stage is as tall as its longest reading, so the tile never jumps while the omens come in */
 @media (max-width: 760px) {
   .ritual--deploy .ritual__stage { min-height: 310px !important; }

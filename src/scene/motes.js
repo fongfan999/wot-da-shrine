@@ -1,42 +1,39 @@
 /**
  * Dust in the air: specks of ink drifting above the altar, and sparks that
- * fly up when the incense catches or the bowl rings. Dots on one canvas;
- * a little denser while the altar burns. None at all with reduced motion.
+ * fly up when the incense catches or the bowl rings. Dots, drawn over the
+ * smoke on its canvas (smoke.js paints them each frame): one layer over the
+ * altar, not two. A little denser while the altar burns. None at all with
+ * reduced motion.
  */
 import gsap from 'gsap';
 import { onPalette } from './palette.js';
-import { onFrame, scene } from './ticker.js';
+import { scene } from './ticker.js';
 
 const MOTES = 70;
 
 export class Motes {
+  /** `canvas` is the smoke's: the motes are drawn in its box, by its frame. */
   constructor(canvas) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
     this.motes = [];
     this.sparks = [];
     this.glow = 0.45; // tweened towards 1 when lit
     onPalette((p) => { this.rgb = p.ink; this.spark = p.flame; });
     this.lite = false;
-    this.acc = 0;
     this.resize();
     window.addEventListener('resize', () => this.resize());
-    onFrame((time, dt) => this.frame(time, dt / 1000));
   }
 
   resize() {
-    this.dpr = this.lite ? 1 : Math.min(1.5, devicePixelRatio || 1);
     const r = this.canvas.getBoundingClientRect();
     this.left = r.left;
     this.top = r.top;
     this.w = r.width || innerWidth;
     this.h = r.height || innerHeight;
-    this.canvas.width = Math.round(this.w * this.dpr);
-    this.canvas.height = Math.round(this.h * this.dpr);
     this.motes = Array.from({ length: this.lite ? MOTES / 3 : MOTES }, () => this.mote(true));
   }
 
-  /** Lite mode: a third of the motes on a 1x canvas, redrawn at 30 fps. */
+  /** Lite mode: a third of the motes. */
   setLite(on) {
     this.lite = on;
     this.resize();
@@ -80,20 +77,12 @@ export class Motes {
     }
   }
 
-  frame(time, dt) {
-    if (scene.still) { // reduced motion: an empty canvas, cleared once
-      if (!this.cleared) { this.ctx.setTransform(1, 0, 0, 1, 0, 0); this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); this.cleared = true; }
-      return;
-    }
-    if (this.lite) {
-      this.acc += dt;
-      if (this.acc < 1 / 32) return;
-      dt = this.acc;
-      this.acc = 0;
-    }
-    const { ctx, dpr } = this;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, this.w, this.h);
+  /** Whether there is anything to draw: never with reduced motion. */
+  get active() { return !scene.still; }
+
+  /** Move the motes on by `dt` seconds and draw them on `ctx` (in the canvas's CSS pixels), over what is there. */
+  paint(ctx, time, dt) {
+    if (scene.still) return;
     // One colour per layer and alpha via globalAlpha: no rgba() string to build and parse for every dot.
     ctx.fillStyle = `rgb(${this.rgb})`;
 

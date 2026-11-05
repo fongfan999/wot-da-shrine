@@ -226,9 +226,10 @@ src/app/                 the shrine
 src/landing/             the home page's sections (steps, rituals, grow, showcase, builder, TV…) and its world line
 src/scene/               what is drawn
   burner.js              inline-SVG incense burner (burn-down, embers, offerings)
-  serverRoom.js          procedural SVG server room with blinking LEDs
-  smoke.js               incense smoke particles (runtime sprite)
+  serverRoom.js          procedural server room: drawn once to a canvas, LEDs blinking over it
+  smoke.js               incense smoke particles (runtime sprite), with the motes on the same canvas
   fog.js, petals.js, motes.js   ambient fog, what falls in the scene (petals, leaves, snow, gold, fireflies), dust and sparks
+  stepped.js             a tween that writes to the page only when its value moves a step
   lanterns.js            prayer lanterns
   ema.js                 prayers hung on the altar as plaques
   congregation.js        teammates kneeling at the altar

@@ -22,7 +22,10 @@ function roundUp(ms, minutes) {
   return new Date(Math.ceil(ms / step) * step);
 }
 const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-const timeLabel = (d) => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+// One formatter each, made once: toLocaleTimeString with options builds a new one on every call, and the grid has hundreds of times
+const TIME = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit' });
+const WEEKDAY = new Intl.DateTimeFormat([], { weekday: 'short', day: 'numeric' });
+const timeLabel = (d) => TIME.format(d);
 
 /** "in 2h 30m", "in 45 min" or "passed": how far away the time is. */
 export function fromNow(d) {
@@ -40,7 +43,7 @@ export function etaLabel(iso) {
   const d = new Date(iso);
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const day = sameDay(d, new Date()) ? 'Today' : sameDay(d, tomorrow) ? 'Tomorrow' : d.toLocaleDateString([], { weekday: 'short', day: 'numeric' });
+  const day = sameDay(d, new Date()) ? 'Today' : sameDay(d, tomorrow) ? 'Tomorrow' : WEEKDAY.format(d);
   return `${day}, ${timeLabel(d)}`;
 }
 
@@ -93,7 +96,7 @@ export function etaPicker(trigger, { label = true } = {}) {
     const days = Array.from({ length: DAYS }, (_, i) => {
       const d = new Date(now);
       d.setDate(now.getDate() + i);
-      const label = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : d.toLocaleDateString([], { weekday: 'short', day: 'numeric' });
+      const label = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : WEEKDAY.format(d);
       return button(label, 'eta-day', () => { day = d; render(); }, { pressed: sameDay(d, day) });
     });
     const slots = [];

@@ -39,11 +39,8 @@ export function setupShowcase() {
     });
     caption.textContent = tabs[i].querySelector('.showcase__copy span').textContent;
     if (focus) tabs[i].focus();
-    // restart the progress bar on the newly selected tab
-    const bar = tabs[i].querySelector('.showcase__bar');
-    bar.style.animation = 'none';
-    void bar.offsetWidth;
-    bar.style.animation = '';
+    // restart the progress bar on the newly selected tab (rewound, not re-laid-out to restart it)
+    for (const a of tabs[i].querySelector('.showcase__bar').getAnimations({ subtree: true })) a.currentTime = 0;
     schedule();
   }
   const stopTour = () => { if (auto) { auto = false; schedule(); } };
