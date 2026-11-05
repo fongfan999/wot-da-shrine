@@ -254,7 +254,6 @@ function stepAside(where) {
   $('#elsewhere').hidden = false;
   sound.ctx?.suspend().catch(() => {});
   gsap.ticker.sleep();
-  $('#btn-elsewhere').focus();
 }
 $('#btn-elsewhere').addEventListener('click', () => location.reload());
 
