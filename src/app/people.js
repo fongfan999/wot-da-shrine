@@ -5,7 +5,7 @@ import { MATS } from '../../shared/rules.js';
 import { t } from '../lib/strings.js';
 import { $, fmt, people, reduceMotion, roomName, state, tv } from './context.js';
 import { congregation } from './engines.js';
-import { openJoin } from './shrine.js';
+import { openJoin } from './join.js';
 import { onWatch } from './watch.js';
 import { hasStanding, liveStreak, rankOf } from './standing.js';
 import { renderPlace } from './stats.js';

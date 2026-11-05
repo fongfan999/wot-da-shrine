@@ -686,12 +686,14 @@ src/app/                 the shrine
   incident.js            the title and ETA, edited in the heading
   altar.js               light, burn out, bowl + combos, bow, puff, breathing
   offerings.js, prayers.js, rituals.js   the offering tray, prayers, blame + fortune sheets
-  shrine.js              shared-shrine client: join, connection, remote actions
+  shrine.js              a shared shrine: entering it, kneeling, the live connection
+  join.js                the join card: name, avatar, what you do, colour; renaming
+  messages.js            what the shrine says over the socket, and what the page does about it
   people.js              people card and presence stack
   resolve.js             "they're back"
   shareSheet.js          invite + share card sheet
   menus.js               the top bar's Share and More menus
-  cast.js, screen.js     Cast to TV, and the TV's own screens
+  cast.js, screen.js     Cast to TV, and the TV's own screens (the code, the QR to kneel from a phone)
   quiet.js               nothing down: the days without an incident, and the TV's sound mix
   kami.js                the kami's mask, meter and line under the heading, and what it watches
   beliefs.js             what the shrine believes, in the This shrine sheet
@@ -711,7 +713,8 @@ src/scene/               what is drawn
   palette.js             theme colours for the canvas layers
 src/audio/
   index.js               Web Audio sound kit (one-shot effects)
-  music.js               generative ambient sound: eleven layers, mixed by the room
+  music.js               generative ambient sound: the mixer for the eleven layers
+  layers/                one synth per file (sacred.js, rain.js, koto.js…), and layer.js, the scale and the Layer they extend
 src/lib/
   clock.js               the page's one clock, and the rules for anything timed
   config.js              settings: URL params > localStorage > defaults

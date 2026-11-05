@@ -2,10 +2,8 @@
   "budget": {"lines":400,"kb":24},
   "headroom": 0.1,
   "ceilings": {
-    "src/audio/music.js": {"lines":1040,"kb":42},
     "src/scene/devotee.js": {"lines":450,"kb":39},
     "src/scene/burner.js": {"lines":570,"kb":32},
-    "src/app/shrine.js": {"lines":590,"kb":32},
     "src/scene/temple.js": {"lines":440,"kb":29},
     "src/partials/bar.html": {"lines":170,"kb":28},
     "src/scene/congregation.js": {"lines":490,"kb":25}
