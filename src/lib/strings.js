@@ -265,6 +265,7 @@ export const STRINGS = {
   menuCardHint: 'The altar as it is right now',
   menuCustomizeHint: 'Theme, sound, what is down',
   menuRenameHint: 'And your avatar at the altar',
+  menuTvHint: 'Shows a code to cast to',
   linkCopied: 'Link copied.',
   roomEyebrow: 'Shared shrine / {room}',
   joinTitle: 'Enter the',
