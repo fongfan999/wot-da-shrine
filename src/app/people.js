@@ -7,7 +7,7 @@ import { $, fmt, people, reduceMotion, roomName, state, tv } from './context.js'
 import { congregation } from './engines.js';
 import { openJoin } from './shrine.js';
 import { onWatch } from './watch.js';
-import { hasStanding, liveStreak } from './standing.js';
+import { hasStanding, liveStreak, rankOf } from './standing.js';
 import { renderPlace } from './stats.js';
 import { shrineAt } from './unlocks.js';
 import { thank } from './together.js';
@@ -111,6 +111,9 @@ export function pingPerson(id, iconName) {
 // The name tags over the kneelers: a click on anyone else's thanks them.
 congregation.thankTip = (p) => fmt('thankTip', { name: p.name });
 congregation.atGate = (n) => fmt('atGate', { n });
+// What they have earned shows on them: their title dresses them, their mornings in a row wear through their socks.
+congregation.rankOf = (p) => (hasStanding() ? rankOf(p.karma) : 0);
+congregation.streakOf = (p) => (hasStanding() ? liveStreak(p) : 0);
 $('#congregation').addEventListener('click', (e) => {
   const kneeler = e.target.closest('.kneeler--thanks');
   if (!kneeler || !e.target.closest('.kneeler__tag') || roomName === 'demo') return;

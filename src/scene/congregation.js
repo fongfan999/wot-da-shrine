@@ -18,7 +18,8 @@
  * Sized in the burner's own units so the people always match the altar.
  */
 import gsap from 'gsap';
-import { FIGURE, PLANTING, STANDING, WALKING, look } from './burner.js';
+import { devoteeKey } from '../../shared/rules.js';
+import { kneeling, lookOf, planting, standing, walking } from './devotee.js';
 
 const VB_H = 470;      // the burner's viewBox height
 const SCALE = 1.18;    // same size as the ops team drawn into the burner
@@ -29,6 +30,10 @@ const MIN_GAP = 46;
 const EDGE = 34;
 const TOP = 250;       // a figure's box runs from y −250 to 8: room for one standing; a kneeling one fills the lower part
 const BOX_H = TOP + 8;
+const BOX_W = 112;     // and x ±56: a broad build with its elbows out
+const MAT_W = 92;
+const S = 0.9;         // devotee.js draws a little larger than the box's units
+const WAIST = { kneel: '0 -43.2', stand: '0 -102.6' }; // where the upper body sways and bows, in the box's units
 const STEP_BACK = 30;  // how far behind the mats the standing stand
 const REACH = 170;     // where a walker stops at the censer: this far from its middle
 const STRIDE = 46;     // one step, in burner units
@@ -37,14 +42,16 @@ const STOOL_SCALE = 0.78;
 const STOOL_SEAT = 37; // how high it sits them: the seat top, in the figure box's units
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const figureSvg = (hair) => `
-<svg class="kneeler__svg" viewBox="-44 -${TOP} 88 ${BOX_H}" aria-hidden="true">
-  <g data-p="kneel">${FIGURE('kneeler', { hair, cushion: false })}</g>
-  <g data-p="stand">${STANDING('stander', { hair })}</g>
-  <g data-p="walk"><g class="kneeler__face">${WALKING({ hair, sticks: true })}</g></g>
-  <g data-p="back"><g class="kneeler__face">${WALKING({ hair, sticks: false })}</g></g>
-  <g data-p="plant"><g class="kneeler__face">${PLANTING({ hair })}</g></g>
+/** Someone as they kneel, stand and walk: their own look, dressed by their rank, their socks by their mornings. */
+const figureSvg = (look, rank, streak) => `<svg class="kneeler__svg" viewBox="-${BOX_W / 2} -${TOP} ${BOX_W} ${BOX_H}" aria-hidden="true">
+  <g data-p="kneel"><g transform="scale(${S})">${kneeling('kneeler', { look, rank, streak })}</g></g>
+  <g data-p="stand"><g transform="scale(${S})">${standing('stander', { look, rank, streak })}</g></g>
+  <g data-p="walk"><g class="kneeler__face"><g transform="scale(${S})">${walking('walker', { look }, { sticks: true, rank })}</g></g></g>
+  <g data-p="back"><g class="kneeler__face"><g transform="scale(${S})">${walking('walker', { look }, { sticks: false, rank })}</g></g></g>
+  <g data-p="plant"><g class="kneeler__face"><g transform="scale(${S})">${planting('walker', { look }, { rank })}</g></g></g>
 </svg>`;
+/** What a figure is dressed in: a new rank, or socks (a week of mornings) and holes (a month), redraws it. */
+const dressKey = (look, rank, streak) => `${JSON.stringify(look)}|${rank}|${streak >= 30 ? 2 : streak >= 7 ? 1 : 0}`;
 
 /** Mat 1 is silk, mats 2 and 3 are cushions, the rest tatami; weeds once the kami starves. Drawn on the figure's own floor line. */
 const MAT = {
@@ -129,23 +136,35 @@ export class Congregation {
     const el = document.createElement('div');
     el.className = 'kneeler';
     el.dataset.pose = 'kneel';
-    const { tone, hair } = look(person.id); // their own robe and hair, the same on every visit
-    el.dataset.tone = String(tone);
-    el.innerHTML = `<div class="kneeler__tag"><span class="kneeler__avatar"></span><span class="kneeler__name"></span></div>${figureSvg(hair)}`;
+    el.innerHTML = '<div class="kneeler__tag"><span class="kneeler__avatar"></span><span class="kneeler__name"></span></div><svg class="kneeler__svg"></svg>';
     this.host.appendChild(el);
-    const item = {
-      el,
+    const item = { el, person, placed: false, walking: false, dressed: '' };
+    this.items.set(person.id, item);
+    this.label(item, person, mine);
+  }
+
+  /** Draw them as they are now: their look (from their name and avatar), their rank, their mornings in a row. */
+  dress(item) {
+    const p = item.person;
+    const look = lookOf(devoteeKey(p));
+    const rank = this.rankOf?.(p) ?? 0;
+    const streak = this.streakOf?.(p) ?? 0;
+    const key = dressKey(look, rank, streak);
+    if (key === item.dressed) return;
+    item.dressed = key;
+    item.el.dataset.tone = String(look.tone);
+    const holder = document.createElement('div');
+    holder.innerHTML = figureSvg(look, rank, streak);
+    item.el.querySelector('.kneeler__svg').replaceWith(holder.firstElementChild);
+    const el = item.el;
+    gsap.killTweensOf([...(item.uppers ?? []), ...(item.embers ?? []), ...(item.halos ?? [])]);
+    Object.assign(item, {
       svg: el.querySelector('.kneeler__svg'),
       uppers: [el.querySelector('.kneeler__upper'), el.querySelector('.stander__upper')],
       embers: [el.querySelector('.kneeler__ember'), el.querySelector('.stander__ember')],
       halos: [el.querySelector('.kneeler__halo'), el.querySelector('.stander__halo')],
       faces: [...el.querySelectorAll('.kneeler__face')],
-      person,
-      placed: false,
-      walking: false,
-    };
-    this.label(item, person, mine);
-    this.items.set(person.id, item);
+    });
     this.sway(item);
     if (this.lit) this.glow(item, true);
   }
@@ -158,11 +177,11 @@ export class Congregation {
   sway(item) {
     const [kneel, stand] = item.uppers;
     gsap.killTweensOf(item.uppers, 'rotation');
-    if (this.lite) { gsap.set(kneel, { rotation: 0, svgOrigin: '0 -30' }); gsap.set(stand, { rotation: 0, svgOrigin: '0 -84' }); return; }
+    if (this.lite) { gsap.set(kneel, { rotation: 0, svgOrigin: WAIST.kneel }); gsap.set(stand, { rotation: 0, svgOrigin: WAIST.stand }); return; }
     const r = gsap.utils.random(-1.6, 1.6);
     const opts = { duration: gsap.utils.random(2.8, 4), yoyo: true, repeat: -1, ease: 'steps(40)', delay: Math.random() * 2 };
-    gsap.to(kneel, { rotation: r, svgOrigin: '0 -30', ...opts });
-    gsap.to(stand, { rotation: r, svgOrigin: '0 -84', ...opts });
+    gsap.to(kneel, { rotation: r, svgOrigin: WAIST.kneel, ...opts });
+    gsap.to(stand, { rotation: r, svgOrigin: WAIST.stand, ...opts });
   }
 
   setLite(on) {
@@ -176,6 +195,7 @@ export class Congregation {
     item.el.dataset.id = person.id;
     item.el.querySelector('.kneeler__avatar').textContent = person.avatar;
     item.el.querySelector('.kneeler__name').textContent = person.name;
+    this.dress(item);
   }
 
   /** Everyone but you wears a 🙏 on their name tag where a click thanks them. */
@@ -240,14 +260,16 @@ export class Congregation {
     const room = Math.min(2 * inner, n > 4 ? 2 * gap : Infinity) * unit - 10;
     this.host.style.setProperty('--tag-max', `${Math.round(Math.max(72, Math.min(220, room)))}px`);
 
-    const w = 88 * unit * SCALE;
+    const w = BOX_W * unit * SCALE;
     const h = BOX_H * unit * SCALE;
+    const mw = MAT_W * unit * SCALE;
     /** Slot `i`: the closest pair first, left then right; when it gets crowded every other slot is a step further back, so a big team reads as rows. */
     const slot = (i) => {
       const k = Math.floor(i / 2);
       const side = i % 2 ? 1 : -1;
       const back = gap < GAP && k % 2 === 1;
-      return { k, side, x: side * (inner + k * gap) * unit - w / 2, y: back ? -42 * unit : 0, depth: (back ? 0.8 : 1) - k * 0.02, back };
+      const cx = side * (inner + k * gap) * unit;
+      return { k, side, cx, x: cx - w / 2, y: back ? -42 * unit : 0, depth: (back ? 0.8 : 1) - k * 0.02, back };
     };
 
     // The mats, under whoever kneels there, or empty.
@@ -257,8 +279,8 @@ export class Congregation {
       const s = slot(i);
       const kind = i < usable ? matKind(i) : 'weeds';
       if (el.dataset.kind !== kind) { el.dataset.kind = kind; el.querySelector('.mat__art').innerHTML = MAT[kind]; }
-      Object.assign(el.style, { width: `${w}px`, height: `${24 * unit * SCALE}px`, zIndex: String(s.back ? 1 : 2) });
-      gsap.set(el, { x: s.x, y: s.y, scale: s.depth, transformOrigin: '50% 100%' });
+      Object.assign(el.style, { width: `${mw}px`, height: `${24 * unit * SCALE}px`, zIndex: String(s.back ? 1 : 2) });
+      gsap.set(el, { x: s.cx - mw / 2, y: s.y, scale: s.depth, transformOrigin: '50% 100%' });
     });
 
     // The watch, on the on-call stool in front of the altar.
@@ -327,7 +349,7 @@ export class Congregation {
     const item = this.items.get(id);
     if (!item || item.walking) return;
     const upper = this.upper(item);
-    const origin = upper === item.uppers[1] ? '0 -84' : '0 -30';
+    const origin = upper === item.uppers[1] ? WAIST.stand : WAIST.kneel;
     gsap.timeline({ repeat: times - 1 })
       .to(upper, { scaleY: 0.52, y: 4, svgOrigin: origin, duration: 0.55, ease: 'power2.inOut' })
       .to(upper, { scaleY: 1, y: 0, svgOrigin: origin, duration: 0.8, ease: 'power2.inOut' }, '+=0.25');

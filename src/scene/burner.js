@@ -7,6 +7,7 @@
  * styles/base.css, so the altar follows the theme.
  */
 import gsap from 'gsap';
+import { kneeling } from './devotee.js';
 
 const CX = 260;
 const RIM_Y = 236;
@@ -63,112 +64,14 @@ export const OFFERINGS = {
 };
 
 /**
- * A devotee seen from behind, kneeling on a cushion, incense raised: drawn with
- * its knees at (0, 0) inside the box x −44…44, y −196…8. Robe folds, a sash,
- * sleeves hanging from the raised arms, hair in a bun, soles peeking out under the hem.
+ * The two from the ops team who kneel at the home page's altar (devotee.js): a dev in a hoodie with a
+ * duck in the hood and a pager, and a devops engineer in flannel and headphones, with an Abbot's kesa
+ * and socks from twelve mornings in a row.
  */
-/** The hair, three ways: a bun (0), a short crop (1), a tail down the back (2). Drawn over the head at (0, -108). */
-const HAIR = [
-  `<path class="d-ink" d="M -15 -108 Q -13 -127 0 -127 Q 13 -127 15 -108 Q 9 -116 0 -115 Q -9 -116 -15 -108 Z"/>
-      <circle class="d-ink" cx="0" cy="-126" r="4.5"/>
-      <path class="d-strand" d="M -10 -118 Q -5 -122 0 -122 M 5 -122 Q 9 -121 12 -116"/>`,
-  `<path class="d-ink" d="M -15 -106 Q -15 -126 0 -125 Q 15 -126 15 -106 Q 12 -112 8 -111 Q 0 -117 -8 -111 Q -12 -112 -15 -106 Z"/>
-      <path class="d-strand" d="M -9 -116 Q -3 -120 3 -119 M 6 -118 Q 10 -116 12 -112"/>`,
-  `<path class="d-ink" d="M -15 -108 Q -13 -127 0 -127 Q 13 -127 15 -108 Q 9 -116 0 -115 Q -9 -116 -15 -108 Z"/>
-      <path class="d-ink" d="M -4 -112 Q -8 -96 -3 -78 Q 2 -72 5 -78 Q 8 -96 4 -112 Z"/>
-      <path class="d-strand" d="M -10 -118 Q -5 -122 0 -122 M 5 -122 Q 9 -121 12 -116 M 0 -108 Q -2 -92 1 -80"/>`,
+const OPS_TEAM = [
+  { x: 34, s: 1.18, look: { role: 'dev', build: 1, hair: 'bun', outfit: 'hoodie', tone: 1, carries: 'duck', print: 0, glasses: false, beard: false }, rank: 1, streak: 3 },
+  { x: 486, s: 1.18, look: { role: 'devops', build: 2, hair: 'beanie', outfit: 'flannel', tone: 2, carries: 'phones', print: 0, glasses: false, beard: true }, rank: 4, streak: 12 },
 ];
-
-export const FIGURE = (cls, { hair = 0, cushion = true } = {}) => `
-    <ellipse class="d-shade" cx="0" cy="4" rx="44" ry="4"/>${cushion ? `
-    <path class="d-sunk" d="M -40 -4 Q 0 -14 40 -4 L 40 0 Q 0 8 -40 0 Z"/>
-    <path class="d-thin" d="M -40 -4 Q 0 6 40 -4"/>` : ''}
-    <path class="d-paper robe" d="M -30 0 Q -33 -24 -14 -32 L 14 -32 Q 33 -24 30 0 Q 0 4 -30 0 Z"/>
-    <path class="d-h2" d="M -17 -26 Q -21 -14 -18 -2 M -6 -30 Q -8 -16 -5 0 M 6 -30 Q 8 -16 5 0 M 17 -26 Q 21 -14 18 -2"/>
-    <ellipse class="d-paper" cx="-13" cy="1" rx="8" ry="4"/>
-    <ellipse class="d-paper" cx="13" cy="1" rx="8" ry="4"/>
-    <path class="d-thin" d="M -19 0 h 3 M -17 -2 h 3 M 16 0 h 3 M 14 -2 h 3"/>
-    <g class="${cls}__upper" style="transform-origin: 0px -30px">
-      <path class="d-paper robe" d="M -18 -30 L -22 -80 Q 0 -96 22 -80 L 18 -30 Z"/>
-      <path class="d-h2" d="M 0 -78 V -38"/>
-      <path class="d-thin" d="M -19 -40 Q 0 -35 19 -40 M -19 -35 Q 0 -30 19 -35"/>
-      <path class="d-paper robe" d="M -22 -80 L -33 -48 Q -25 -41 -13 -49 L -9 -78 Z"/>
-      <path class="d-paper robe" d="M 22 -80 L 33 -48 Q 25 -41 13 -49 L 9 -78 Z"/>
-      <path class="d-tube-out" stroke-width="11" d="M -18 -78 Q -26 -106 -8 -118 L 0 -122"/>
-      <path class="d-tube-out" stroke-width="11" d="M 18 -78 Q 26 -106 8 -118 L 0 -122"/>
-      <path class="d-tube-in" stroke-width="7.5" d="M -18 -78 Q -26 -106 -8 -118 L 0 -122"/>
-      <path class="d-tube-in" stroke-width="7.5" d="M 18 -78 Q 26 -106 8 -118 L 0 -122"/>
-      <rect class="d-paper" x="-5" y="-102" width="10" height="14" rx="2.5"/>
-      <circle class="d-paper" cx="0" cy="-108" r="15"/>
-      ${HAIR[hair % HAIR.length]}
-      <path class="d-thin" d="M -15 -106 q -2 2 0 4 M 15 -106 q 2 2 0 4"/>
-      <circle class="d-paper" cx="-3.5" cy="-123" r="4"/>
-      <circle class="d-paper" cx="3.5" cy="-123" r="4"/>
-      <rect class="d-muted" x="-1.2" y="-182" width="2.4" height="58"/>
-      <circle class="${cls}__halo" cx="0" cy="-182" r="7" opacity="0"/>
-      <circle class="${cls}__ember" cx="0" cy="-182" r="2.6" opacity="0"/>
-    </g>`;
-
-/**
- * The same person standing, from behind: no mat to kneel on. The upper body is the kneeling one's,
- * raised onto legs (hips at −84 rather than −30); its group is `${cls}__upper`, its ember `${cls}__ember`.
- */
-export const STANDING = (cls, { hair = 0 } = {}) => {
-  const upper = FIGURE(cls, { hair, cushion: false }).split(`<g class="${cls}__upper"`)[1];
-  return `
-    <ellipse class="d-shade" cx="0" cy="3" rx="30" ry="4"/>
-    <ellipse class="d-sunk" cx="-9" cy="0" rx="8" ry="3.5"/>
-    <ellipse class="d-sunk" cx="9" cy="0" rx="8" ry="3.5"/>
-    <path class="d-paper robe" d="M -19 -88 L -25 -3 Q 0 2 25 -3 L 19 -88 Z"/>
-    <path class="d-h2" d="M -8 -84 L -11 -6 M 8 -84 L 11 -6 M 0 -84 V -4"/>
-    <g transform="translate(0 -54)"><g class="${cls}__upper"${upper}</g>`;
-};
-
-/** Their hair from the side, facing left: the bun, the crop, the tail (as HAIR). */
-const SIDE_HAIR = [
-  `<path class="d-ink" d="M -16 -166 Q -12 -178 2 -176 Q 15 -173 13 -158 Q 12 -150 9 -147 Q 6 -156 2 -160 Q -6 -168 -16 -166 Z"/><circle class="d-ink" cx="11" cy="-172" r="4.5"/>`,
-  `<path class="d-ink" d="M -16 -166 Q -12 -178 2 -176 Q 15 -173 13 -158 Q 12 -150 9 -147 Q 6 -156 2 -160 Q -6 -168 -16 -166 Z"/>`,
-  `<path class="d-ink" d="M -16 -166 Q -12 -178 2 -176 Q 15 -173 13 -158 Q 12 -150 9 -147 Q 6 -156 2 -160 Q -6 -168 -16 -166 Z"/><path class="d-ink" d="M 9 -160 Q 18 -140 12 -122 Q 8 -118 6 -124 Q 10 -140 3 -156 Z"/>`,
-];
-
-/** The body from the hips up, from the side and facing left, hips at (0, −88): hands out in front, maybe holding three lit sticks. */
-const SIDE_UPPER = (hair, sticks) => `
-    <path class="d-paper robe" d="M -12 -86 L -14 -136 Q 0 -146 12 -134 L 14 -86 Z"/>
-    <path class="d-thin" d="M -13 -96 L 13 -96 M -13 -91 L 13 -91"/>
-    <path class="d-tube-out" stroke-width="11" d="M 0 -128 Q -6 -104 -24 -110"/>
-    <path class="d-tube-in" stroke-width="7.5" d="M 0 -128 Q -6 -104 -24 -110"/>
-    <path class="d-paper robe" d="M -6 -134 L -14 -104 Q -4 -98 6 -106 L 8 -130 Z"/>
-    <circle class="d-paper" cx="-26" cy="-111" r="4.5"/>
-    <rect class="d-paper" x="-7" y="-152" width="10" height="14" rx="2.5"/>
-    <circle class="d-paper" cx="-2" cy="-160" r="15"/>
-    ${SIDE_HAIR[hair % SIDE_HAIR.length]}
-    <circle class="d-ink" cx="-10" cy="-161" r="1.4"/>
-    <path class="d-thin" d="M -17 -160 q -2.5 2.5 0 4 M 3 -160 q 3 1 2 5"/>${sticks ? `
-    <path class="kneeler__stick" d="M -26 -114 L -29 -166 M -24 -114 L -22 -164 M -28 -114 L -35 -162"/>
-    <circle class="d-ember-soft" cx="-29" cy="-166" r="5"/><circle class="d-ember-soft" cx="-22" cy="-164" r="5"/><circle class="d-ember-soft" cx="-35" cy="-162" r="5"/>
-    <circle class="d-flame" cx="-29" cy="-166" r="2.4"/><circle class="d-flame" cx="-22" cy="-164" r="2.4"/><circle class="d-flame" cx="-35" cy="-162" r="2.4"/>` : ''}`;
-
-/** Walking, from the side and facing left (mirror it to face right), feet at (0, 0): incense in hand, or empty-handed on the way back. */
-export const WALKING = ({ hair = 0, sticks = true } = {}) => `
-    <ellipse class="d-shade" cx="0" cy="3" rx="32" ry="4"/>
-    <path class="d-sunk" d="M 16 -1 Q 18 -8 26 -6 L 30 -2 L 22 1 Z"/>
-    <path class="d-sunk" d="M -32 -1 Q -32 -6 -24 -6 L -14 -5 L -14 0 Z"/>
-    <path class="d-paper robe" d="M -10 -88 L -26 -4 Q -18 -1 -10 -3 L 0 -42 L 12 -3 Q 20 -1 28 -4 L 12 -88 Z"/>
-    <path class="d-h2" d="M -2 -84 L -16 -8 M 4 -84 L 18 -8"/>${SIDE_UPPER(hair, sticks)}`;
-
-/** At the censer, facing left: the sticks are planted, and they bow over it. */
-export const PLANTING = ({ hair = 0 } = {}) => `
-    <ellipse class="d-shade" cx="0" cy="3" rx="28" ry="4"/>
-    <path class="d-sunk" d="M -26 -1 Q -26 -6 -18 -6 L -8 -5 L -8 0 Z"/>
-    <path class="d-paper robe" d="M -12 -88 L -18 -3 Q 0 1 18 -3 L 14 -88 Z"/>
-    <path class="d-h2" d="M -4 -84 L -6 -4 M 6 -84 L 8 -4"/>
-    <g transform="rotate(-28 0 -88)">${SIDE_UPPER(hair, false)}</g>`;
-
-/** A person's look, from their id: one of four robe tones and three hair styles, the same every time they kneel. */
-export function look(id) {
-  const n = parseInt(String(id).slice(0, 8), 16) || 0;
-  return { tone: n % 4, hair: Math.floor(n / 4) % 3 };
-}
 
 export function buildBurner(host) {
   host.innerHTML = `
@@ -398,9 +301,11 @@ export function buildBurner(host) {
     </g>`).join('')}
   </g>
 
-  <!-- the ops team, kneeling, backs to us, incense raised -->
-  ${[{ x: 34, s: 1.18, flip: 1, tone: 1, hair: 2 }, { x: 486, s: 1.18, flip: -1, tone: 2, hair: 1 }].map((d, i) => `
-  <g class="devotee" data-i="${i}" data-tone="${d.tone}" transform="translate(${d.x} 470) scale(${d.flip * d.s} ${d.s})">${FIGURE('devotee', { hair: d.hair })}
+  <!-- the ops team, kneeling on cushions, backs to us, incense raised (devotee.js) -->
+  ${OPS_TEAM.map((d, i) => `
+  <g class="devotee" data-i="${i}" data-tone="${d.look.tone}" transform="translate(${d.x} 470) scale(${d.s})">
+    <path class="d-sunk" d="M -44 -4 Q 0 -15 44 -4 L 44 1 Q 0 9 -44 1 Z"/>
+    <g transform="scale(0.9)">${kneeling('devotee', d)}</g>
   </g>`).join('')}
 </svg>`;
 

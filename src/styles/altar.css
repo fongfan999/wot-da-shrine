@@ -104,6 +104,46 @@ body[data-state="lit"] .t-lit { opacity: 1; }
 .kneeler__halo, .stander__halo { fill: var(--ember-soft); }
 .kneeler__ember, .stander__ember { fill: var(--flame); }
 .kneeler__stick { fill: none; stroke: var(--muted); stroke-width: 2.2; stroke-linecap: round; }
+/* The devotees (devotee.js): hair in ink (grey once the error budget is theirs), sleeves, prints, plaid and
+   lanyards in their own tone, beads, a halo that is a loading spinner, a pager whose light blinks */
+.t-hair { fill: var(--ink); stroke: none; }
+.hair--grey .t-hair { fill: var(--muted); }
+.t-shine { fill: none; stroke: var(--line-strong); stroke-width: 1.6; stroke-linecap: round; }
+.t-sleeve { fill: none; stroke: var(--paper); stroke-linecap: round; stroke-linejoin: round; }
+.t-shirtsleeve { fill: none; stroke: var(--paper-raised); stroke-linecap: round; stroke-linejoin: round; }
+.tink { fill: var(--muted); }
+.t-plaid, .t-lanyard { fill: none; stroke: var(--muted); }
+[data-tone="1"] .t-sleeve { stroke: var(--tone-1-soft); }
+[data-tone="2"] .t-sleeve { stroke: var(--tone-2-soft); }
+[data-tone="3"] .t-sleeve { stroke: var(--tone-3-soft); }
+[data-tone="1"] .tink { fill: var(--tone-1); }
+[data-tone="2"] .tink { fill: var(--tone-2); }
+[data-tone="3"] .tink { fill: var(--tone-3); }
+[data-tone="1"] :is(.t-plaid, .t-lanyard) { stroke: var(--tone-1); }
+[data-tone="2"] :is(.t-plaid, .t-lanyard) { stroke: var(--tone-2); }
+[data-tone="3"] :is(.t-plaid, .t-lanyard) { stroke: var(--tone-3); }
+.t-plaid { opacity: .3; }
+.t-twill { fill: none; stroke: var(--ink); stroke-width: .6; opacity: .3; }
+.t-rib { fill: none; stroke: var(--ink); stroke-width: 5; stroke-dasharray: .8 2.4; opacity: .35; }
+.t-lanyard { stroke-width: 2.6; stroke-linecap: round; }
+.t-beads { fill: none; stroke: var(--ink); stroke-width: 3.6; stroke-dasharray: .01 4.4; stroke-linecap: round; }
+.t-spinner { fill: none; stroke: var(--ink); stroke-width: 2; stroke-dasharray: 4 3.4; }
+.t-pom { stroke-dasharray: 1.6 1.4; }
+.t-print { font-family: var(--font-mono); font-size: 7px; font-weight: 700; letter-spacing: .04em; }
+.t-nines { font-family: var(--font-mono); font-size: 6.5px; font-weight: 700; }
+.t-tiny, .t-sticker { font-family: var(--font-mono); font-size: 4.4px; font-weight: 700; fill: var(--ink); }
+.t-dark { fill: var(--ink); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.t-dark-line { fill: none; stroke: var(--paper); stroke-width: .9; stroke-linecap: round; opacity: .55; }
+.t-darksleeve { fill: none; stroke: var(--ink); stroke-linecap: round; stroke-linejoin: round; }
+.t-pants { fill: none; stroke: var(--paper-sunk); stroke-linecap: round; stroke-linejoin: round; }
+.t-comb { fill: none; stroke: var(--ink); stroke-width: .9; stroke-linecap: round; }
+.hair--grey .t-comb { stroke: var(--muted); }
+.t-beret { fill: var(--ink); stroke: none; }
+.t-sticky { font-family: var(--font-mono); font-size: 4px; font-weight: 700; fill: var(--ink); }
+.t-led { animation: pager-blink 1.8s steps(1) infinite; }
+@keyframes pager-blink { 50% { opacity: .15; } }
+@media (prefers-reduced-motion: reduce) { .t-led { animation: none; } }
+
 /* One pose at a time: kneeling on a mat, standing past the mats, walking incense up, bowing at the censer, walking back */
 .kneeler [data-p] { display: none; }
 .kneeler:is([data-pose="kneel"]) [data-p="kneel"],
@@ -112,9 +152,9 @@ body[data-state="lit"] .t-lit { opacity: 1; }
 .kneeler:is([data-pose="back"]) [data-p="back"],
 .kneeler:is([data-pose="plant"]) [data-p="plant"] { display: inline; }
 .kneeler[data-pose="stand"] { --tag-at: 99%; }
-.kneeler[data-pose="walk"] { --tag-at: 81%; }
-.kneeler[data-pose="back"] { --tag-at: 73%; }
-.kneeler[data-pose="plant"] { --tag-at: 67%; }
+.kneeler[data-pose="walk"] { --tag-at: 80%; }
+.kneeler[data-pose="back"] { --tag-at: 78%; }
+.kneeler[data-pose="plant"] { --tag-at: 70%; }
 /* The mats in front of the altar: silk for the first, cushions, then tatami; outlined while their kneeler is away */
 .mat { position: absolute; left: 50%; bottom: 0; }
 .mat__svg { display: block; width: 100%; height: 100%; overflow: visible; }
