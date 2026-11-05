@@ -18,7 +18,7 @@ import { blameFx, fortuneFx } from './rituals.js';
 import { blamedFx, remoteDeploy, renderDeploy, showShipped } from './deploy.js';
 import { renderDown } from './vigilStart.js';
 import { renderWatch, watchAct } from './watch.js';
-import { applyStandings, dailyFx, renderBowBadge } from './standing.js';
+import { applyStandings, dailyFx, morningTime, renderBowBadge } from './standing.js';
 import { creditsFx, nope, raiseFx, scaffoldFx, takeTogether, thankFx } from './together.js';
 import { vowFx } from './vow.js';
 import { charmFx } from './charms.js';
@@ -415,8 +415,8 @@ function onShrineMessage(msg) {
       if (msg.kind === 'resolve' && msg.record && msg.by.id !== state.myId) setTimeout(() => askPush('vigil'), 12000);
       // You took the watch, or were handed it: this is when a buzz at night is worth having.
       if (msg.kind === 'watch' && state.watch?.id === state.myId) setTimeout(() => askPush('watch'), 2500);
-      // A run of mornings that has begun to mean something.
-      if (msg.daily && msg.by.id === state.myId && msg.daily.streak >= 2) setTimeout(() => askPush('morning', { n: msg.daily.streak }), 4000);
+      // Your morning bow, from the very first: tomorrow's is the one that makes it a habit, so this is when a nudge is worth having.
+      if (msg.daily && msg.by.id === state.myId) setTimeout(() => askPush('morning', { n: msg.daily.streak, time: morningTime() }), 4000);
       applyStandings(msg.standings); // after the act's own news: a promotion reads as what it earned
       if (msg.vowKept) vowFx({ ...msg.vowKept, kept: true });
       if (msg.charmed) charmFx(msg.charmed, msg.by);

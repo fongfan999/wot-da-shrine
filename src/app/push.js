@@ -163,8 +163,8 @@ topicsEl?.addEventListener('change', async () => {
 /* ---------- Asking, at the moment it matters ---------- */
 /**
  * Offer notifications once for each reason, in each shrine, and at most once a day: when you take
- * the watch, when a run of morning bows begins to mean something, and when a vigil you sat through
- * ends. Never if they are on already, the browser blocks them, or it can't show them at all.
+ * the watch, after your morning bow (the first one already: tomorrow's is the one that makes a habit),
+ * and when a vigil you sat through ends. Never if they are on already, the browser blocks them, or it can't show them at all.
  */
 const ask = $('#push-ask');
 let askTl;
@@ -174,7 +174,7 @@ export async function askPush(reason, vars = {}) {
   const room = asked[roomName] ?? {};
   if (room[reason] || Date.now() - (room.at ?? 0) < 86400000) return;
   write(ASKED, { ...asked, [roomName]: { ...room, [reason]: true, at: Date.now() } });
-  $('#push-ask-text').textContent = fmt(reason === 'watch' ? 'pushAskWatch' : reason === 'morning' ? 'pushAskMorning' : 'pushAskVigil', vars);
+  $('#push-ask-text').textContent = fmt(reason === 'watch' ? 'pushAskWatch' : reason === 'morning' ? (vars.n > 1 ? 'pushAskMorning' : 'pushAskFirst') : 'pushAskVigil', vars);
   ask.hidden = false;
   askTl?.kill();
   askTl = gsap.timeline()

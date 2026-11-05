@@ -5,11 +5,13 @@
 <div class="ema" id="ema" aria-hidden="true"><span class="ema__rail"></span></div>
 <div class="plantern-row" id="planterns" role="img" hidden><span class="plantern-row__tag"></span></div>
 <div class="burner" id="burner">
-  <!-- No vigil yet: what to do first, pinned to the incense itself. A click on it reaches the burner, which lights -->
+  <!-- No vigil: what to do first, pinned to the incense itself. Before your morning bow it is the bow
+       (standing.js); after it, a click reaches the burner, which lights -->
   <button class="light-cue" id="light-cue" type="button" hidden>
     <span class="light-cue__dot" aria-hidden="true"></span>
     <span class="light-cue__text light-cue__text--click" data-i18n="lightCue">Click the censer to light the incense</span>
     <span class="light-cue__text light-cue__text--tap" data-i18n="lightCueTap">Tap the censer to light the incense</span>
+    <span class="light-cue__text light-cue__text--bow" id="light-cue-bow"></span>
   </button>
   <div class="burner__art" id="burner-art" role="img" aria-label="A bronze tripod censer with three incense sticks on a carved altar table, with a tablet for the rack, candles, chrysanthemums and two engineers kneeling on cushions"></div>
 </div>

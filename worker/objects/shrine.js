@@ -10,7 +10,7 @@ import { cleanSub, send as sendPush, topicOf } from '../push.js';
 import { QUICK_PRAYERS } from '../../shared/prayers.js';
 import { kamiLine, kamiMood } from '../../shared/kami.js';
 import { OMEN_DEFY, readOmens } from '../../shared/omens.js';
-import { AVATARS, cleanCloud, cleanRole, cleanTone, purifiable, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, WATCHED_MAX, WATCHED_NAME_MAX, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN, RAISE_BOWS, RAISE_FED, RAISE_WINDOW, SHRINE_LEVELS } from '../../shared/rules.js';
+import { AVATARS, cleanCloud, cleanRole, cleanTone, purifiable, BLESSING_BLAME, KAMI_FEEDS, KAMI_HUNGRY, KAMI_THANKS_AFTER, WATCHED_MAX, WATCHED_NAME_MAX, guards, CHARM_KARMA, CHARMS, EMPTY_FEATS, QUICK_FIX, QUICK_MIN, charmProgress, BOARD_SIZE, MAX_VOWS, THANK, VOW_SHARE, VOWS, CAST_SIZE, cleanScreen, cleanTz, levelOf, weekOf, DAILY_GAP, dailyBonus, dayOf, devoteeKey, MORNING_LATE, morningMinute, MAX_DEVOTEES, BLESSING_MAX, BURN_SECONDS, CELEBRATE_FOR, FORTUNES, holdsWatch, KARMA, MAX_BLESSINGS, MAX_HISTORY, MAX_WATCHES, OFFERING_KINDS, QUIET_WATCH, RESOLVE_UNDO, PRESETS, VIGIL_IDLE, cleanMix, cleanScene, openMix, WATCH_MAX, WATCH_QUIET_MIN, RAISE_BOWS, RAISE_FED, RAISE_WINDOW, SHRINE_LEVELS } from '../../shared/rules.js';
 
 const MAX_PRAYERS = 12;
 const MAX_LOG = 24; // the activity a late arrival reads, newest last
@@ -38,6 +38,10 @@ const PUSH_COOLDOWN = 10 * 60 * 1000; // a flapping monitor opens vigil after vi
 const REMIND_AT = 19 * 3600 * 1000; // a run waiting on today's bow is mentioned at 7 in the evening, their time
 const DAY = 86400000;
 const cleanTopics = (raw) => Object.fromEntries(PUSH_TOPICS.map((k) => [k, raw?.[k] !== false]));
+/** The morning nudge for a run of `streak` mornings that today's bow would keep. */
+const morningNudge = (streak, room) => (streak > 1
+  ? { title: `Day ${streak + 1} of your run`, body: `Your ${streak}-morning run at ${room} is waiting on today's bow. The kami is up.`, tag: `${room}:morning`, url: `/r/${room}` }
+  : { title: 'Day 2 starts with a bow', body: `You bowed at ${room} yesterday. One bow this morning makes it a run.`, tag: `${room}:morning`, url: `/r/${room}` });
 const minutes = (m) => (m < 60 ? `${m} min` : m < 1440 ? `${Math.floor(m / 60)}h ${m % 60 ? `${m % 60}m` : ''}`.trim() : `${Math.floor(m / 1440)}d ${Math.floor((m % 1440) / 60)}h`);
 
 /** A person as the others see them: never their resume token. */
@@ -283,6 +287,8 @@ export class Shrine extends DurableObject {
         if (daily) {
           out.daily = daily;
           s.karma += daily.bonus;
+          // Their morning nudge follows the time they bow: the alarm may need to ring at a new hour.
+          if (Object.values(this.subs).some((sub) => devoteeKey(sub) === devoteeKey(by))) this.ctx.waitUntil(this.schedule());
         }
         break;
       }
@@ -1349,24 +1355,31 @@ export class Shrine extends DurableObject {
     return p;
   }
 
-  /** The next time any subscriber's evening reminder could be due, after `now`. */
+  /** The next time any subscriber's morning nudge or evening reminder could be due, after `now`. */
   nextReminder(now) {
     let next = Infinity;
-    for (const sub of Object.values(this.subs)) {
-      if (!sub.topics?.morning && !sub.topics?.kami) continue;
+    const after = (sub, offset) => {
       const shift = sub.tz * 60000;
-      let at = Math.floor((now + shift) / DAY) * DAY + REMIND_AT - shift;
+      let at = Math.floor((now + shift) / DAY) * DAY + offset - shift;
       if (at <= now) at += DAY;
       next = Math.min(next, at);
+    };
+    for (const sub of Object.values(this.subs)) {
+      if (!sub.topics?.morning && !sub.topics?.kami) continue;
+      after(sub, REMIND_AT);
+      const d = sub.topics.morning ? this.state.devotees[devoteeKey(sub)] : null;
+      if (d?.at) after(sub, morningMinute(d.at, sub.tz) * 60000);
     }
     return next;
   }
 
   /**
-   * The evening reminder, one a day at most, at 7 pm by each subscriber's clock. First the kami: once
-   * it has gone KAMI_HUNGRY unfed, everyone who asked hears so, once per hunger (a meal starts it
-   * over). Else their run of morning bows: someone whose run (two or more) is waiting on today's hears
-   * that it ends at midnight. Nobody kneeling here is told either.
+   * The morning nudge, at about the time each subscriber last made their morning bow (morningMinute):
+   * someone whose run is waiting on today's bow, the first day after their first bow included, hears
+   * that today's keeps it going. Then the evening reminder, one a day at most, at 7 pm by their clock.
+   * First the kami: once it has gone KAMI_HUNGRY unfed, everyone who asked hears so, once per hunger
+   * (a meal starts it over). Else their run of morning bows: someone whose run (two or more) is still
+   * waiting on today's hears that it ends at midnight. Nobody kneeling here is told any of it.
    */
   async remind(now) {
     const room = this.ctx.id.name;
@@ -1379,16 +1392,24 @@ export class Shrine extends DurableObject {
       if (!sub.topics?.morning && !sub.topics?.kami) continue;
       const shift = sub.tz * 60000;
       const day = dayOf(now, sub.tz);
+      const d = this.state.devotees[devoteeKey(sub)];
+      const away = !here.has(devoteeKey(sub));
+      if (sub.topics.morning && d?.at && sub.morningTold !== day) {
+        const at = day * DAY + morningMinute(d.at, sub.tz) * 60000 - shift;
+        if (now + 1000 >= at) {
+          sub.morningTold = day;
+          if (away && d.day === day - 1 && now - at < MORNING_LATE) due.push([sub, morningNudge(d.streak, room), 'morning']);
+        }
+      }
       if (sub.reminded === day || now + 1000 < day * DAY + REMIND_AT - shift) continue;
       sub.reminded = day;
-      if (here.has(devoteeKey(sub))) continue;
+      if (!away) continue;
       if (sub.topics.kami && hungry && sub.kamiTold !== k.fedAt) {
         sub.kamiTold = k.fedAt;
         due.push([sub, { title: 'The kami is hungry', body: `${kamiLine(kamiMood(k, now), k, room, { now, tz: sub.tz, things: this.state.guarded.map((o) => o.name) })} One bow at ${room} will do.`, tag: `${room}:kami`, url: `/r/${room}` }, 'kami']);
         continue;
       }
       if (!sub.topics.morning) continue;
-      const d = this.state.devotees[devoteeKey(sub)];
       if (!d || d.streak < 2 || d.day !== day - 1) continue;
       due.push([sub, { title: `Keep your ${d.streak}-morning run`, body: `You haven't bowed at ${room} today. One bow before midnight keeps it going.`, tag: `${room}:morning`, url: `/r/${room}` }, 'morning']);
     }

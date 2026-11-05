@@ -293,7 +293,11 @@ takes it with you, unless the new name is someone's already.
 
 Your first bow of the day is the **morning bow**: +5 karma on top of the bow,
 and every seventh morning in a row +15 more. Until you make it the Bow key
-wears a seal (+5, or 🔥3 when a run is waiting on today), and a run of two or
+wears a seal (+5, or 🔥3 when a run is waiting on today), the cue over the
+incense is the bow itself (*Bow to wake the kami* in a new shrine, *Bow to
+keep your 3-morning run*, *Day 2: bow to make it a run*, or *Make your
+morning bow*; after it, the cue
+lights the incense as before), and a run of two or
 more shows as a flame beside your name. The shrine counts days by your own
 clock, and two morning bows are at least four hours apart, so moving the
 clock buys nothing. The room keeps a run too, the days in a row someone in it
@@ -433,8 +437,10 @@ gets 30 calls a minute.
 A shrine can call people back while it is closed. In a shrine, Customize →
 Just for you → **Turn on notifications** subscribes this browser to this
 shrine, and the shrine offers it once at the moments it matters: when you
-take the watch, when your morning bows reach two in a row, and when a vigil
-you sat through ends. It sends:
+take the watch, right after your morning bow (the very first one already,
+since tomorrow's is the one that makes a habit: "Want a nudge tomorrow at
+about 9:40 AM, so it becomes a run?"), and when a vigil you sat through ends.
+It sends:
 
 - **Something's down**: a vigil opened, by a person or an alert ("Grafana
   raised the alarm in payments-war-room. Come kneel."). Urgent, and it stays on
@@ -442,8 +448,14 @@ you sat through ends. It sends:
 - **They're back**: the same vigil ended, replacing the down message, to those
   who heard it go down. "Not back after all" if it is taken back.
 - **You hold the watch**: someone handed it to you.
+- **Bow before standup**: in the morning, if your run is waiting on today's
+  bow, the day after your first bow included ("Day 2 starts with a bow").
+  It comes at about the time of day you last made your morning bow, so it
+  lands near your standup and follows you if that moves; kept between 7:00
+  and 11:30, and 9:30 for a bow made outside them (`morningMinute` in
+  `shared/rules.js`).
 - **Keep your run**: at 7 pm on your clock, if your run of two or more morning
-  bows is waiting on today's.
+  bows is still waiting on today's.
 - **The kami is hungry**: at the same hour, once it has gone two days unfed
   (its line, and "One bow at payments will do."), once per hunger. It comes
   before the run reminder, and only one of the two a day.

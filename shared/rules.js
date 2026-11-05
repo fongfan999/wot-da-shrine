@@ -88,6 +88,22 @@ export const dailyBonus = (streak) => DAILY_BOW + (streak > 0 && streak % 7 === 
 
 /** The day number of `at` for a clock `tz` minutes ahead of UTC. */
 export const dayOf = (at, tz = 0) => Math.floor((at + tz * 60000) / 86400000);
+
+/**
+ * The morning nudge: someone whose run is waiting on today's bow hears it at about the time of day
+ * they last made their morning bow, by their clock, so it lands near their standup. Kept to the
+ * morning (MORNING_EARLIEST to MORNING_LATEST, on the five minutes); a bow outside it means MORNING_USUAL.
+ * In minutes after their midnight. A nudge more than MORNING_LATE behind its time is not sent.
+ */
+export const MORNING_EARLIEST = 7 * 60;
+export const MORNING_LATEST = 11 * 60 + 30;
+export const MORNING_USUAL = 9 * 60 + 30;
+export const MORNING_LATE = 3 * 3600 * 1000;
+export function morningMinute(at, tz = 0) {
+  const m = Math.floor((((at + tz * 60000) % 86400000) + 86400000) % 86400000 / 60000);
+  const r = m - (m % 5);
+  return r >= MORNING_EARLIEST && r <= MORNING_LATEST ? r : MORNING_USUAL;
+}
 /** Today, by this browser's clock. */
 export const today = (at = Date.now()) => dayOf(at, -new Date(at).getTimezoneOffset());
 /** A clock offset as sent: whole minutes, within the ones the world uses. */

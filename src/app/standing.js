@@ -5,7 +5,7 @@
  * is still to make.
  */
 import gsap from 'gsap';
-import { devoteeKey, streakAlive, today } from '../../shared/rules.js';
+import { devoteeKey, morningMinute, streakAlive, today } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { every } from '../lib/clock.js';
 import { STRINGS, t } from '../lib/strings.js';
@@ -77,14 +77,27 @@ export function dailyFx({ by, daily }) {
 /** The tz the shrine counts my day by: minutes ahead of UTC. */
 export const myTz = () => -new Date().getTimezoneOffset();
 
+/** When the shrine would nudge me tomorrow morning if I bowed now ("9:40 AM"): shared/rules.js morningMinute. */
+export function morningTime(at = Date.now()) {
+  const m = morningMinute(at, myTz());
+  const d = new Date(at);
+  d.setHours(Math.floor(m / 60), m % 60, 0, 0);
+  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
 /* ---------- The Bow key: today's morning bow, while it is still to make ---------- */
 const badge = $('#bow-daily');
 const bowBtn = $('#btn-bow');
 const bowTitle = bowBtn.title;
+// The cue over the incense is the morning bow until you make it: the first thing a shrine teaches is
+// the thing to come back for. After it, the cue lights the incense as before (stats.js shows and hides it).
+const cue = $('#light-cue');
+const cueBow = $('#light-cue-bow');
 export function renderBowBadge() {
   const me = myStanding();
   const open = hasStanding() && !tv && Boolean(state.myId) && !bowedToday(me);
   badge.hidden = !open;
+  if (cue) cue.dataset.mode = open ? 'bow' : '';
   if (!open) {
     bowBtn.title = me && liveStreak(me) > 1 ? `${bowTitle} · ${fmt('dailyKept', { n: liveStreak(me) })}` : bowTitle;
     return;
@@ -92,7 +105,14 @@ export function renderBowBadge() {
   const run = me ? liveStreak(me) : 0; // alive from yesterday: today's bow keeps it
   badge.textContent = run ? `🔥${run}` : '+5';
   bowBtn.title = `${bowTitle} · ${run ? fmt('dailyKeep', { n: run }) : t('dailyOpen')}`;
+  if (cueBow) cueBow.textContent = !state.kami?.fedAt ? t('cueWake') : run > 1 ? fmt('cueKeep', { n: run }) : run ? t('cueDay2') : t('cueMorning');
 }
+cue?.addEventListener('click', (e) => {
+  if (cue.dataset.mode !== 'bow') return; // the incense: the click goes on to the censer
+  e.stopPropagation();
+  sound.unlock();
+  bowBtn.click();
+});
 every(60000, renderBowBadge); // past midnight, a new morning
 
 /** The room's mornings in a row, while the run is alive. */
