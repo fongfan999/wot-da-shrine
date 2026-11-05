@@ -642,7 +642,11 @@ One folder per kind of thing, one file per part of the page, and nothing very lo
   moment that must not be missed is a `setTimeout`, never `gsap.delayedCall` (GSAP sleeps in
   background tabs). The rules are written out at the top of that file.
 - **The Worker** is a Hono app: a route file per area in `worker/routes/`, shared middleware
-  in `worker/middleware.js`, and the Durable Objects in `worker/objects/`.
+  in `worker/middleware.js`, and the Durable Objects in `worker/objects/`. The Shrine, the one
+  that keeps a room, is a folder: `index.js` loads it and takes each message, and every other file
+  is one part of the room (the altar, vigils, deploys, the watch, the kami…) with its `methods`
+  and the `actions` a socket's message can ask for. A new ritual is an action in the part it
+  belongs to; `test/actions.test.js` has a test for each.
 
 A new part of the page usually means a partial, a stylesheet and a module with the same name.
 
@@ -728,7 +732,12 @@ worker/routes/api.js     /api/health, /api/status, /api/world
 worker/routes/rooms.js   /new, /r/:room (link previews), a room's socket, status and badge
 worker/routes/tv.js      /api/tv/ws and casting to a paired TV
 worker/views/            the room page (r/index.html) with its link preview rewritten, the README badge SVG
-worker/objects/shrine.js   Shrine Durable Object: one per room
+worker/objects/shrine/     Shrine Durable Object, one per room: index.js and a file per part
+  state.js                 what a shrine keeps, its limits, the demo's rules
+  people.js, altar.js      who is here; the incense, bowl, bows, offerings, prayers
+  vigils.js, deploys.js, watch.js   incidents, blessed deploys, who holds the pager
+  standing.js, together.js what each person earns; the board, levels, cast and charms
+  kami.js, webhook.js, notifications.js   the kami, the alerts webhook, Web Push
 worker/objects/world.js    World Durable Object: totals across every shrine
 worker/objects/pairing.js  Pairing Durable Object: one per TV code
 wrangler.jsonc           Worker + Durable Object config

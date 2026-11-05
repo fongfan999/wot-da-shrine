@@ -1,7 +1,7 @@
 /**
  * Smoke tests for a shrine: the Worker's routes and the Shrine Durable Object behind them, over real
  * sockets. They pin down what the room does today (who hears what, when a vigil opens and closes, what
- * the demo refuses), so worker/objects/shrine.js can be taken apart without anyone noticing.
+ * the demo refuses), so worker/objects/shrine/ can be rearranged without anyone noticing.
  *
  * Each test kneels in a room of its own. Every socket may act 8 times in a burst (Shrine.allow), so
  * no one here does more than that.
@@ -132,6 +132,7 @@ describe('a shrine', () => {
     ann.send({ t: 'resolve' });
     await bo.act('resolve');
     bo.send({ t: 'unresolve' }); // not Bo's to take back
+    await bo.settled();
     ann.send({ t: 'unresolve' });
     const undone = await bo.act('unresolve');
     assert.equal(undone.by.name, 'Ann');

@@ -9,7 +9,14 @@ import { cloudflare } from '@cloudflare/vite-plugin';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 
-/** Starts the Worker. Returns its `origin` and `close()`. */
+const STARTUP = 30_000;
+
+/**
+ * Starts the Worker and asks it for its health. Returns its `origin` and `close()`. A Worker that
+ * does not load (a name nobody defined, a part defined twice) throws from inside the plugin, where
+ * nobody awaits it, and the server would wait on it forever: that error, or STARTUP going by, is
+ * thrown here instead, after closing the server so the tests can end.
+ */
 export async function startWorker() {
   const server = await createServer({
     root,
@@ -18,9 +25,25 @@ export async function startWorker() {
     plugins: [cloudflare({ persistState: false, inspectorPort: false })],
     server: { host: '127.0.0.1', port: 0 },
   });
-  await server.listen();
-  const { port } = server.httpServer.address();
-  return { origin: `http://127.0.0.1:${port}`, close: () => server.close() };
+  let fail;
+  const failed = new Promise((_, reject) => { fail = reject; });
+  const late = setTimeout(() => fail(new Error(`the Worker did not start within ${STARTUP / 1000}s`)), STARTUP);
+  process.on('uncaughtException', fail);
+  process.on('unhandledRejection', fail);
+  try {
+    await Promise.race([server.listen(), failed]);
+    const origin = `http://127.0.0.1:${server.httpServer.address().port}`;
+    const res = await Promise.race([fetch(`${origin}/api/health`), failed]);
+    if (!res.ok) throw new Error(`the Worker answered its health check with ${res.status}: ${(await res.text()).slice(0, 500)}`);
+    return { origin, close: () => server.close() };
+  } catch (e) {
+    await server.close().catch(() => {});
+    throw e;
+  } finally {
+    clearTimeout(late);
+    process.off('uncaughtException', fail);
+    process.off('unhandledRejection', fail);
+  }
 }
 
 /** A room name nobody else in this run will use: "label-k7qm". */
@@ -37,6 +60,7 @@ export class Devotee {
     const url = new URL(`/api/rooms/${room}/ws`, origin.replace(/^http/, 'ws'));
     url.search = new URLSearchParams({ name, avatar, ...params });
     const d = new Devotee(name, new WebSocket(url));
+    d.room = room;
     d.state = await d.next('state');
     return d;
   }
@@ -78,6 +102,17 @@ export class Devotee {
   /** The next act of `kind` the room hears (light, bow, down, resolve…). */
   act(kind, test = () => true, ms) {
     return this.next('act', (m) => m.kind === kind && test(m), ms);
+  }
+
+  /**
+   * Waits until the room has handled everything this person sent. Two people's messages may reach
+   * the room in either order; one person's arrive in the order sent, so a request that only they
+   * hear back from, and that changes nothing (letting go of a subscription they never had), comes
+   * back after all the rest. Not in the demo, which answers no such request.
+   */
+  async settled() {
+    this.send({ t: 'push', off: true, endpoint: '' });
+    await this.next('push', (m) => m.on === false);
   }
 
   /** Whether a message of type `t` arrives within `ms`: for what the room must not hear. */
