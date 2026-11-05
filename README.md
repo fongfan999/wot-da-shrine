@@ -711,7 +711,8 @@ src/audio/
 src/lib/
   clock.js               the page's one clock, and the rules for anything timed
   config.js              settings: URL params > localStorage > defaults
-  strings.js             brand name, copy and mantras
+  strings.js             every word the page says, by key: t('bowed'), data-i18n="bowed"
+  strings/               …kept by area: dock, heading, vigils, kami, landing, tv, settings… (a key in one file only)
   room.js                room URL, saved name, reconnecting WebSocket
   share.js               the share card: live altar + stats as SVG, rasterised to PNG
   omikuji.js             the fortunes: five levels, three lines each
@@ -731,7 +732,7 @@ worker/objects/shrine.js   Shrine Durable Object: one per room
 worker/objects/world.js    World Durable Object: totals across every shrine
 worker/objects/pairing.js  Pairing Durable Object: one per TV code
 wrangler.jsonc           Worker + Durable Object config
-test/                    smoke tests (node --test): the Worker run through Vite, shrines over real sockets
+test/                    node --test: the Worker run through Vite, shrines over real sockets; every string key used exists
 scripts/check-size.js    the size budget; size-budget.json lists the files waiting to be split
 .github/workflows/ci.yml size budget, tests and build, on every push and pull request
 ```
