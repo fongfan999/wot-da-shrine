@@ -13,12 +13,12 @@
 /*.svg
   Cache-Control: public, max-age=86400
 
-# The link preview cards change rarely; chat apps cache them anyway.
-/og.png
+# Pictures: the link preview cards (og*.png), the chat card's thumbnail of one (og-thumb.jpg, the
+# card is 270 KB and shown 120px wide) and the icons change rarely; chat apps cache them anyway.
+# One rule each: two rules that both match join their values.
+/*.png
   Cache-Control: public, max-age=86400
-/og-down.png
-  Cache-Control: public, max-age=86400
-/og-back.png
+/*.jpg
   Cache-Control: public, max-age=86400
 
 # The service worker is checked for a new version on every visit; it must never be stale for a day.

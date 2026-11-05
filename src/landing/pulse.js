@@ -8,6 +8,6 @@ export function renderLandingWorld(w) {
   if (w.burningNow) proof.push(fmt('heroProofBurning', { n: n(w.burningNow) }));
   if (w.prayers) proof.push(fmt('heroProofPrayers', { n: n(w.prayers) }));
   $('#hero-proof-text').textContent = proof.join(' · ');
-  $('#hero-proof').hidden = !proof.length;
+  $('#hero-proof').toggleAttribute('data-empty', !proof.length);
   if (proof.length) $('#foot-live').textContent = proof.join(' · ');
 }

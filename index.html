@@ -10,6 +10,9 @@
   <link rel="stylesheet" href="/src/styles/home.css" />
 </head>
 <body data-theme="dark" data-state="unlit" data-mode="home" data-fx="full">
+  <!-- The home page's hero is laid out for the landing (body[data-landing]) from the first paint, not when the script
+       arrives, which on a slow connection moved it in front of the visitor; the /tv code screen has no landing -->
+  <script>if (!/^\/tv\/?$/.test(location.pathname) && new URLSearchParams(location.search).get('tv') !== '1') document.body.dataset.landing = '1';</script>
   <include src="src/partials/scene.html">
 
   <include src="src/partials/bar.html">

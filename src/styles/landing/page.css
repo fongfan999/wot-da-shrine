@@ -1,5 +1,8 @@
 /* ---------- The landing page, below the shrine on / ---------- */
 .landing { position: relative; z-index: 3; background: var(--paper); border-top: 1px solid var(--line); }
+/* Until the shrine above has been drawn and its intro is under way, the sections are skipped (landing/index.js):
+   the page is as tall as they will be, so it scrolls from the start, but nobody lays them out yet */
+.landing.is-later { content-visibility: hidden; contain-intrinsic-size: auto 9000px; }
 .land { padding: clamp(56px, 8vw, 104px) var(--gutter); }
 .land--alt { background: var(--paper-sunk); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .land__inner { max-width: 1080px; margin: 0 auto; }

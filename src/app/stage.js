@@ -86,7 +86,8 @@ export function intro() {
  * Run `go` once the page has loaded and frames arrive on time. Browser extensions inject their
  * scripts as the page finishes loading (in Dia, a password manager and a translator blocked the
  * main thread for ~100ms each); an intro started then stutters through its first second.
- * Never waits more than MAX_WAIT.
+ * Never waits more than MAX_WAIT. In lite (phones and slow devices) only for the load: frames there
+ * seldom come calm, and the wait was most of the time before the heading showed.
  */
 const MAX_WAIT = 1200;
 const CALM_FRAMES = 6;
@@ -96,6 +97,7 @@ function whenSettled(go) {
   const start = () => { if (!done) { done = true; go(); } };
   setTimeout(start, MAX_WAIT);
   const watch = () => {
+    if (body.dataset.fx === 'lite') { start(); return; }
     let calm = 0;
     let last = performance.now();
     const frame = (now) => {

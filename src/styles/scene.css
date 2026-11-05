@@ -17,10 +17,11 @@
   position: fixed;
   top: 0;
   bottom: 0;
-  left: var(--altar-x, 50%); /* centered on the altar, wherever the layout puts it */
+  left: 0;
   width: min(100%, max(64%, 640px));
   height: 100%;
-  transform: translateX(-50%);
+  /* centered on the altar, wherever the layout puts it: moved, not laid out again, so finding the altar never shifts the page */
+  transform: translateX(calc(var(--altar-x, 50vw) - 50%));
   z-index: 4;
   pointer-events: none;
   /* feathered on every side, so smoke that drifts out of the column dissolves instead of being cut on a straight edge */

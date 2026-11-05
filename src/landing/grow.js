@@ -47,7 +47,13 @@ const UPKEEP_LOST = 2; // weeds take the last two mats, as in a shrine (kami.js)
 
 const levelName = (level) => STRINGS.shrineLevels[level]?.[1] ?? '';
 
-export function setupGrow() {
+/** The censer: the hero's drawing as it stands before the intro lights it, copied once (setupLanding, at the start). */
+export function copyCenser() {
+  const source = $('#burner-art');
+  return source?.children.length ? [...source.children].map((el) => el.cloneNode(true)) : null;
+}
+
+export function setupGrow(censer) {
   const section = $('#grow');
   if (!section) return;
   const world = $('#grow-world');
@@ -58,11 +64,9 @@ export function setupGrow() {
   const fedEl = $('#grow-fed');
   const cloudsEl = $('#grow-clouds');
 
-  // The censer: the hero's drawing as it stands before the intro lights it, cloned once.
-  const source = $('#burner-art');
-  if (!source?.children.length) return;
+  if (!censer) return;
   const art = Object.assign(document.createElement('div'), { className: 'burner__art' });
-  art.append(...[...source.children].map((el) => el.cloneNode(true)));
+  art.append(...censer);
   burnerEl.append(art);
 
   const temple = buildTemple($('#grow-temple'), burnerEl);

@@ -1,6 +1,8 @@
 /* ---------- The hero on /: one headline, one sentence, one button, and the altar, lit ---------- */
 body[data-landing="1"] :is(.dock, .side, .mantra) { display: none; }
 body[data-landing="1"] .app { min-height: 0; }
+/* The hero's own pieces: only on the landing (index.html sets data-landing before the first paint), never on /tv */
+body:not([data-landing="1"]) :is(.hero-cta, .hero-ribbon) { display: none; }
 body[data-landing="1"] .stage { display: block; padding: 0 var(--gutter); }
 body[data-landing="1"] .center {
   position: static;
@@ -135,7 +137,10 @@ body[data-landing="1"] .subtitle { color: color-mix(in srgb, var(--ink) 76%, tra
 .hero-cta__btn .ico { transition: transform 200ms var(--ease); }
 .hero-cta__btn:hover .ico { transform: translateX(3px); }
 .hero-cta__fine { padding-left: 20px; }
-.hero-proof { flex-basis: 100%; display: inline-flex; align-items: center; gap: 9px; margin: 2px 0 0; padding-left: 20px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; color: var(--ink); font-variant-numeric: tabular-nums; animation: rise-in .8s var(--ease) both; }
+.hero-proof { flex-basis: 100%; display: inline-flex; align-items: center; gap: 9px; margin: 2px 0 0; padding-left: 20px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; color: var(--ink); font-variant-numeric: tabular-nums; }
+/* Its line is kept until the world's numbers come (landing/pulse.js), so they don't push the altar down when they do */
+.hero-proof[data-empty] { visibility: hidden; }
+.hero-proof:not([data-empty]) { animation: rise-in .8s var(--ease) both; }
 .hero-proof__dot { width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: var(--flame); }
 @keyframes rise-in { from { opacity: 0; transform: translateY(6px); } }
 
@@ -150,6 +155,7 @@ body[data-landing="1"] .subtitle { color: color-mix(in srgb, var(--ink) 76%, tra
   padding: 6px 0;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  min-height: 48px; /* one row of prayers: as tall before the script fills it as after, so nothing above moves */
 }
 .hero-ribbon__rail { display: flex; gap: 10px; width: max-content; animation: ribbon-run 70s linear infinite; }
 .hero-ribbon__track:is(:hover, :has(:focus-visible)) .hero-ribbon__rail { animation-play-state: paused; }

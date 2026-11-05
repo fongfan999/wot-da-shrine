@@ -29,5 +29,4 @@ export function setupRibbon() {
     void b.offsetWidth;
     b.classList.add('is-sent');
   });
-  $('#hero-ribbon').hidden = false;
 }

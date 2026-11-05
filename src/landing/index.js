@@ -8,7 +8,7 @@ import { scene } from '../scene/ticker.js';
 import { burner, placeSmoke, smoke } from '../app/engines.js';
 import { setupBuilder } from './builder.js';
 import { setupCrowd } from './crowd.js';
-import { setupGrow } from './grow.js';
+import { copyCenser, setupGrow } from './grow.js';
 import { setupRibbon } from './ribbon.js';
 import { setupRituals } from './rituals.js';
 import { setupShowcase } from './showcase.js';
@@ -21,27 +21,45 @@ export function setupLanding() {
   body.dataset.landing = '1';
   placeSmoke();
   const landingEl = $('#landing');
+  landingEl.classList.add('is-later');
   landingEl.hidden = false;
-  $('#hero-form').hidden = false;
   setupBuilder();
-  setupTv();
   setupCrowd();
-  setupGrow();
+  const censer = copyCenser(); // now, before anyone can light the one it copies
   // The altar is alive when you arrive: lit after the intro, with a hint that it can be touched.
   const hint = $('#hero-hint');
   introStarted.then(() => setTimeout(() => { if (!state.lit) ignite(Date.now()); hint.hidden = false; }, reduceMotion ? 300 : 2200));
   burner.addEventListener('pointerdown', () => { hint.hidden = true; }, { once: true });
   setupScene();
   setupRibbon();
-  setupDay();
-  setupRituals();
-  setupShowcase();
-  setupFooter();
-  // Sections reveal as they scroll in.
-  const seen = new IntersectionObserver((entries) => {
-    for (const en of entries) if (en.isIntersecting) { en.target.classList.add('is-in'); seen.unobserve(en.target); }
-  }, { rootMargin: '0px 0px -12% 0px' });
-  landingEl.querySelectorAll('.land').forEach((el) => seen.observe(el));
+  // Everything below the shrine waits until the intro is under way, or someone heads down to it: laying
+  // it out and setting it up was a third of the time before anything showed, on a page nobody scrolls yet.
+  let below = false;
+  const setupBelow = () => {
+    if (below) return;
+    below = true;
+    near.disconnect();
+    landingEl.classList.remove('is-later');
+    setupTv();
+    setupGrow(censer);
+    setupDay();
+    setupRituals();
+    setupShowcase();
+    setupFooter();
+    // Sections reveal as they scroll in.
+    const seen = new IntersectionObserver((entries) => {
+      for (const en of entries) if (en.isIntersecting) { en.target.classList.add('is-in'); seen.unobserve(en.target); }
+    }, { rootMargin: '0px 0px -12% 0px' });
+    landingEl.querySelectorAll('.land').forEach((el) => seen.observe(el));
+    // Arrived on a link to a section (/#grow): it is there to go to now.
+    if (location.hash.length > 1) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
+  };
+  const near = new IntersectionObserver(([en]) => { if (en.isIntersecting) setupBelow(); }, { rootMargin: '0px 0px -5% 0px' });
+  near.observe(landingEl);
+  introStarted.then(() => setTimeout(setupBelow, reduceMotion ? 0 : 1800));
+  // Heading down to it by a link (the hero's "watch your shrine grow"), or arriving on one: it has to be there first.
+  if (location.hash.length > 1) setupBelow();
+  document.addEventListener('click', (e) => { if (e.target.closest?.('a[href^="#"]')) setupBelow(); }, { capture: true });
   // "Try it": the ritual opens right here, over the section; nothing scrolls.
   landingEl.addEventListener('click', (e) => {
     const b = e.target.closest('[data-try]');
