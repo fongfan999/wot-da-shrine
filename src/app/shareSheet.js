@@ -70,17 +70,20 @@ async function drawCard() {
 }
 
 /**
- * The link preview pictures (public/og-down.png, og-back.png) are this card with a fixed headline,
+ * The link preview pictures (public/og.png, og-down.png, og-back.png) are this card with a fixed headline,
  * drawn once from the dev console: `await __incense.previewCard('down')` returns the PNG blob.
- * Light the altar first for 'down' (and press They're back for 'back') so the drawing matches.
+ * Light the altar first for 'down' (and press They're back for 'back') so the drawing matches;
+ * 'home' is the home page's own, drawn there with the head temple around the altar.
  */
+const PREVIEWS = {
+  home: { eyebrow: 'BEFORE THE SERVERS GO DOWN', headline: ['Pray for uptime,', 'together.'], facts: 'Bow daily. Bless deploys. Keep the kami fed.' },
+  down: { eyebrow: 'THE SERVERS ARE DOWN', headline: ['The servers are', 'down.'], facts: 'The team is at the shrine. Open the link, kneel, and pray with them.' },
+  back: { eyebrow: 'THE SERVERS ARE BACK', headline: ['The servers are', 'back.'], facts: 'The vigil is over. Come and see what the team prayed for.' },
+};
 export async function previewCard(kind) {
-  const down = kind === 'down';
   const svg = cardSvg({
-    room: '', resolved: !down, people: 0, avatars: [], quotes: [], url: 'shrine.wotdafong.dev', plain: true,
-    eyebrow: down ? 'THE SERVERS ARE DOWN' : 'THE SERVERS ARE BACK',
-    headline: down ? ['The servers are', 'down.'] : ['The servers are', 'back.'],
-    facts: down ? 'The team is at the shrine. Open the link, kneel, and pray with them.' : 'The vigil is over. Come and see what the team prayed for.',
+    room: '', resolved: kind === 'back', people: 0, avatars: [], quotes: [], url: 'shrine.wotdafong.dev', plain: true,
+    ...(PREVIEWS[kind] ?? PREVIEWS.down),
   });
   return cardPng(svg);
 }

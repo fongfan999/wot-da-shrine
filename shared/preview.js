@@ -56,5 +56,5 @@ export function previewTitle(st, room, now = Date.now()) {
 export function previewImage(st, now = Date.now()) {
   if (st?.downFor) return { file: 'og-down.png', alt: 'The servers are down. An ink drawing of the altar, incense lit, the team praying.' };
   if (justBack(st, now)) return { file: 'og-back.png', alt: 'The servers are back. An ink drawing of the altar after the vigil.' };
-  return { file: 'og.png', alt: 'An ink drawing of an incense burner on an altar, with the words: pray for uptime, together.' };
+  return { file: 'og.png', alt: 'An ink drawing of an incense burner on an altar inside a temple, with the words: pray for uptime, together. Bow daily. Bless deploys. Keep the kami fed.' };
 }

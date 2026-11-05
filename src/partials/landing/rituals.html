@@ -1,8 +1,62 @@
 <section class="land land--alt" id="rituals">
   <div class="land__inner">
     <p class="eyebrow" data-i18n="landRitualsEyebrow">Rituals</p>
-    <h2 class="land__title"><span data-i18n="landRitualsTitle">Things to do while</span> <em data-i18n="landRitualsAccent">waiting.</em></h2>
+    <h2 class="land__title"><span data-i18n="landRitualsTitle">Things to do before</span> <em data-i18n="landRitualsAccent">anything breaks.</em></h2>
     <div class="rituals" id="rituals-grid">
+      <article class="ritual ritual--deploy">
+        <!-- Bless a deploy: the omens read, the verdict, Ship anyway, and how it went (the prompt's own .omens, vigil.css) -->
+        <div class="ritual__stage" id="bless-stage" aria-hidden="true">
+          <div class="bless-mini" id="bless-mini">
+            <p class="bless-mini__what"><span class="omens__label" data-i18n="landDeployShipping">Shipping</span> <b id="bm-what">payments-api v2.3</b></p>
+            <div class="omens" id="bm-omens">
+              <p class="omens__verdict"><span class="omens__label" data-i18n="omensLabel">The omens</span> <b id="bm-verdict"></b></p>
+              <ul class="omens__list" id="bm-list"></ul>
+            </div>
+            <div class="bless-mini__foot">
+              <span class="bless-mini__go" id="bm-go"></span>
+              <span class="bless-mini__out" id="bm-out"></span>
+            </div>
+          </div>
+        </div>
+        <div class="ritual__body">
+          <h3 data-i18n="landDeploy">Bless a deploy</h3>
+          <p data-i18n="landDeployText">Say what is shipping and the room bows while it goes out. First the shrine reads the omens: Friday, after 4 pm, a hungry kami, a full moon, Mercury retrograde. Shipped rings the bells and keeps the clean run going; It broke opens the vigil, named after the deploy. Nothing is ever stopped.</p>
+          <button class="btn btn--glass btn--sm" type="button" id="bm-try" data-i18n="landDeployTry">Read your omens now</button>
+        </div>
+      </article>
+      <article class="ritual ritual--forecast">
+        <!-- Today's forecast, as the kami gives it (shared/forecast.js): tap for the next day -->
+        <button class="ritual__stage forecast-mini" id="forecast-mini" type="button" aria-label="Show the next day’s forecast">
+          <span class="forecast-mini__card" id="fc-card" aria-live="polite">
+            <span class="forecast-mini__day" id="fc-day">Today</span>
+            <span class="forecast-mini__sky"><span class="forecast-mini__glyph" id="fc-glyph" aria-hidden="true"></span><b id="fc-sky"></b></span>
+            <span class="forecast-mini__why" id="fc-why"></span>
+            <span class="forecast-mini__line" id="fc-line"></span>
+            <span class="forecast-mini__meta" id="fc-meta"></span>
+          </span>
+          <span class="fortune-mini__hint" data-i18n="landForecastHint">tap for the next day</span>
+        </button>
+        <div class="ritual__body">
+          <h3 data-i18n="landForecast">Today’s forecast</h3>
+          <p data-i18n="landForecastText">Every morning the kami reads the sky over your shrine, from Clear skies to Typhoon watch, one worse on a Friday, under a full moon or while Mercury is retrograde. A line about what it watches, a lucky offering, a lucky hour and one thing to avoid. The whole team reads the same one until midnight UTC.</p>
+          <button class="btn btn--glass btn--sm" type="button" id="fc-copy" data-i18n="landForecastCopy">Copy today’s</button>
+        </div>
+      </article>
+      <article class="ritual ritual--fortune">
+        <button class="ritual__stage fortune-mini" id="fortune-mini" type="button" aria-label="Draw a preview fortune">
+          <span class="fortune-mini__slip">
+            <span class="fortune-mini__kanji" id="fm-kanji">吉</span>
+            <span class="fortune-mini__name" id="fm-name">Blessing</span>
+            <span class="fortune-mini__line" id="fm-line">The runbook is correct, for once.</span>
+          </span>
+          <span class="fortune-mini__hint">tap to draw again</span>
+        </button>
+        <div class="ritual__body">
+          <h3 data-i18n="landFortune">Draw a fortune</h3>
+          <p data-i18n="landFortuneText">An omikuji for engineers: five levels from Great blessing to Great curse, with a line about the deploy, the night on call and plain luck. One per person per vigil.</p>
+          <button class="btn btn--glass btn--sm" type="button" data-try="fortune" data-i18n="landTry">Try it</button>
+        </div>
+      </article>
       <article class="ritual ritual--blame">
         <div class="ritual__stage" aria-hidden="true">
           <div class="burnslip" id="burnslip">
@@ -18,53 +72,6 @@
           <h3 data-i18n="landBlame">Burn a blame</h3>
           <p data-i18n="landBlameText">Write what happened and burn it in the censer. The words never leave your browser; the room only learns that a confession was burned. Blameless, with a flame.</p>
           <button class="btn btn--glass btn--sm" type="button" data-try="blame" data-i18n="landTry">Try it</button>
-        </div>
-      </article>
-      <article class="ritual ritual--fortune">
-        <button class="ritual__stage fortune-mini" id="fortune-mini" type="button" aria-label="Draw a preview fortune">
-          <span class="fortune-mini__slip">
-            <span class="fortune-mini__kanji" id="fm-kanji">吉</span>
-            <span class="fortune-mini__name" id="fm-name">Blessing</span>
-            <span class="fortune-mini__line" id="fm-line">The runbook is correct, for once.</span>
-          </span>
-          <span class="fortune-mini__hint">tap to draw again</span>
-        </button>
-        <div class="ritual__body">
-          <h3 data-i18n="landFortune">Draw a fortune</h3>
-          <p data-i18n="landFortuneText">An omikuji for engineers: five levels from Great blessing to Great curse, with a line about the deploy, the night on call and plain luck. One per vigil.</p>
-          <button class="btn btn--glass btn--sm" type="button" data-try="fortune" data-i18n="landTry">Try it</button>
-        </div>
-      </article>
-      <article class="ritual ritual--chorus">
-        <div class="ritual__stage" aria-hidden="true">
-          <div class="chorus" id="chorus">
-            <span class="chorus__bow"><i></i></span><span class="chorus__bow"><i></i></span><span class="chorus__bow"><i></i></span>
-            <span class="chorus__badge">Chorus! +30 karma</span>
-          </div>
-        </div>
-        <div class="ritual__body">
-          <h3 data-i18n="landChorus">Bow in chorus</h3>
-          <p data-i18n="landChorusText">Three or more people bowing within four seconds earn the room a peal of bells and bonus karma. The shrine counts it, so nobody can fake it alone.</p>
-          <a class="btn btn--glass btn--sm" href="/new" rel="nofollow" data-open-shrine data-i18n="landNeedsTeam">Bow with your team →</a>
-        </div>
-      </article>
-      <article class="ritual ritual--remember">
-        <div class="ritual__stage" aria-hidden="true">
-          <div class="remember" id="remember">
-            <div class="remember__lanterns" id="remember-lanterns"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <p class="remember__karma"><b id="remember-karma">0</b> karma</p>
-            <div class="remember__track">
-              <span class="remember__fill" id="remember-fill"></span>
-              <span class="remember__mile" style="--at: 15%"><b>⛩</b>roadside<br>150</span>
-              <span class="remember__mile" style="--at: 40%"><b>🏮</b>village<br>400</span>
-              <span class="remember__mile" style="--at: 100%"><b>🏯</b>temple<br>1,000</span>
-            </div>
-          </div>
-        </div>
-        <div class="ritual__body">
-          <h3 data-i18n="landRemembers">A shrine that remembers</h3>
-          <p data-i18n="landRemembersText">Every vigil survived hangs a paper lantern above the altar. Karma grows the shrine itself, from a bare altar to a roadside shrine, a torii and a village hall, a temple, and one day a head temple with a pagoda. Every tier lays more mats, so more of the team gets to kneel.</p>
-          <a class="btn btn--glass btn--sm" href="/r/demo" data-i18n="landSeeRecords">See the demo shrine’s records</a>
         </div>
       </article>
     </div>

@@ -34,11 +34,22 @@
       <li class="step">
         <span class="step__n">3</span>
         <div class="step__demo" aria-hidden="true">
-          <div class="mini-vigil" id="demo-vigil">
-            <span class="mini-vigil__down"><span class="mini-vigil__dot"></span>Down for <b id="demo-clock">23:41</b></span>
-            <span class="mini-vigil__up"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>They’re back · survived 24 min</span>
+          <p class="mini-quiet"><span class="mini-quiet__dot"></span><b id="demo-days">12</b> days without an incident</p>
+          <div class="kami mini-kami" id="demo-kami" data-mood="peckish" data-fed="1">
+            <span class="kami__btn">
+              <svg class="kami__mask" viewBox="0 0 24 24">
+                <path class="kami__face" d="M4 3.5l3.2 5.5h9.6L20 3.5V13c0 4.5-3.6 8-8 8s-8-3.5-8-8z"/>
+                <g class="kami__eyes kami__eyes--happy"><path d="M7.5 13.5q1.5-2.2 3 0"/><path d="M13.5 13.5q1.5-2.2 3 0"/></g>
+                <g class="kami__eyes kami__eyes--narrow"><path d="M7.4 12l3.2 1.3"/><path d="M16.6 12l-3.2 1.3"/></g>
+                <path class="kami__nose" d="M10.9 16.6h2.2L12 18z"/>
+              </svg>
+              <span class="kami__text" id="demo-kami-text">Peckish</span>
+              <span class="kami__meter"><i class="kami__fill" id="demo-kami-fill"></i></span>
+              <span class="kami__since" id="demo-kami-since">fed yesterday</span>
+            </span>
+            <span class="kami__action" id="demo-kami-bow">Bow to feed it</span>
+            <span class="mini-kami__plus" id="demo-kami-plus">+5 · morning bow</span>
           </div>
-          <div class="mini-lanterns" id="demo-lanterns"><span></span><span></span><span></span><span class="is-new"></span></div>
         </div>
         <h3 data-i18n="landStep3">Bow daily, pray when it breaks</h3>
         <p data-i18n="landStep3Text">A morning bow, a blessed deploy, a quiet watch: each feeds the kami and grows the shrine. When something goes down anyway, the vigil opens and the team prays through it, live.</p>

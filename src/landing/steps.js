@@ -1,6 +1,6 @@
 import { $, reduceMotion } from '../app/context.js';
 
-/** How a vigil works: each step acts itself out, but only while the section is on screen. */
+/** How a shrine works: each step acts itself out, but only while the section is on screen. */
 export function setupSteps() {
   const typed = $('#demo-typed');
   const open = $('#demo-open');
@@ -8,8 +8,13 @@ export function setupSteps() {
   const url = $('#demo-url');
   const avs = [...$('#demo-crowd').querySelectorAll('.mini-crowd__av')];
   const crowdN = $('#demo-crowd-n');
-  const vigilEl = $('#demo-vigil');
-  const clock = $('#demo-clock');
+  const days = $('#demo-days');
+  const kami = $('#demo-kami');
+  const kamiText = $('#demo-kami-text');
+  const kamiSince = $('#demo-kami-since');
+  const kamiFill = $('#demo-kami-fill');
+  const kamiBow = $('#demo-kami-bow');
+  const BOWERS = ['Linh', 'Minh', 'Mai', 'Khoa', 'Vy'];
   const NAMES = ['payments-team', 'platform-squad', 'dns-again', 'friday-deploy', 'prod-is-down'];
   let run = 0; // bumped to stop every loop when the section leaves the screen
   const wait = (ms, id) => new Promise((ok, no) => setTimeout(() => (id === run ? ok() : no()), ms));
@@ -41,21 +46,36 @@ export function setupSteps() {
       await wait(2600, id);
     }
   }
-  async function vigilLoop(id) {
-    for (;;) {
-      vigilEl.classList.remove('is-back');
-      let s = 23 * 60 + 36;
-      for (let i = 0; i < 6; i++) { clock.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; s++; await wait(1000, id); }
-      vigilEl.classList.add('is-back');
-      await wait(3600, id);
+  /** The kami as it is in a shrine: peckish by morning, pleased once someone bows. */
+  const mood = (pleased, by) => {
+    kami.dataset.mood = pleased ? 'pleased' : 'peckish';
+    kami.classList.toggle('is-fed', pleased);
+    kamiText.textContent = pleased ? 'Pleased' : 'Peckish';
+    kamiSince.textContent = pleased ? `fed just now by ${by}` : 'fed yesterday';
+    kamiFill.style.width = pleased ? '100%' : '34%';
+  };
+  /** A quiet day: the kami waits, someone makes the morning bow, and tomorrow the count is one more. */
+  async function quietLoop(id) {
+    for (let k = 0; ; k++) {
+      mood(false);
+      await wait(2000, id);
+      kamiBow.classList.add('is-press');
+      await wait(260, id);
+      kamiBow.classList.remove('is-press');
+      mood(true, BOWERS[k % BOWERS.length]);
+      await wait(3200, id);
+      days.textContent = String(12 + ((k + 1) % 30));
+      days.classList.remove('is-tick');
+      void days.offsetWidth;
+      days.classList.add('is-tick');
     }
   }
 
-  if (reduceMotion) { kneel(avs.length); link.classList.add('is-copied'); return; }
+  if (reduceMotion) { kneel(avs.length); link.classList.add('is-copied'); mood(true, BOWERS[0]); return; }
   new IntersectionObserver(([en]) => {
     run++;
     if (!en.isIntersecting) return;
     const id = run;
-    for (const loop of [nameLoop, linkLoop, vigilLoop]) loop(id).catch(() => {});
+    for (const loop of [nameLoop, linkLoop, quietLoop]) loop(id).catch(() => {});
   }).observe($('#steps'));
 }

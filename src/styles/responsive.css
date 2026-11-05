@@ -67,9 +67,7 @@
   .chat__img { grid-column: 1; grid-row: auto; width: 100%; max-width: 280px; margin-top: 6px; }
   .chat__body { padding: 14px; }
   .showcase__stage { padding: 10px; }
-  .ritual--blame, .ritual--remember { grid-column: 1 / -1; }
-  .pulse { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .pulse__totals { grid-column: 1 / -1; grid-row: 2; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ritual--deploy, .ritual--blame { grid-column: 1 / -1; }
 }
 
 /* Narrow tablet and phone: the dock stacks */
@@ -119,17 +117,14 @@
   body[data-tv-home="1"] .center { display: none; }
   .foot__inner { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .foot__brand { grid-column: 1 / -1; }
-  .pulse { grid-template-columns: minmax(0, 1fr); }
-  .pulse__totals { grid-row: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .pulse__now { min-height: 240px; }
   .tv__bezel { padding: 6px 6px 0; border-radius: 9px; }
   .tv__chin { height: 20px; }
   .tv__brand { visibility: hidden; }
   .tv__neck { height: 24px; width: 44px; }
   .eta-pop { left: 0; right: auto; width: 100%; }
   .eta-pop__grid { grid-template-columns: repeat(3, 1fr); }
-  .ritual--blame, .ritual--remember { flex-direction: column; }
-  .ritual--blame .ritual__stage, .ritual--remember .ritual__stage { flex: none; min-height: 220px; border-right: 0; border-bottom: 1px solid var(--sheet-line); }
+  .ritual--deploy, .ritual--blame { flex-direction: column; }
+  .ritual--deploy .ritual__stage, .ritual--blame .ritual__stage { flex: none; min-height: 220px; border-right: 0; border-bottom: 1px solid var(--sheet-line); }
   .mp__fields { grid-template-columns: 1fr; }
   .land__title { max-width: none; }
   .tray { padding: 10px; }
@@ -163,7 +158,6 @@
   .hero-ribbon__track { overflow-x: auto; }
   body[data-landing="1"] .title .word--accent::after { animation: none; clip-path: none; }
   .mini-bar__caret, .mini-vigil__dot { animation: none; }
-  .pulse__ember span { animation: none; }
   .cta-stick__stick, .cta-stick__ember, .cta-stick__smoke path { animation: none; }
   .tv::before, .tv__poster-mark { animation: none; }
   .readme__badges .facts__badge, .showcase__pane, .showcase__tab .showcase__copy span { animation: none !important; }

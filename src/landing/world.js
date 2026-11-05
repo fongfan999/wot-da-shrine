@@ -5,7 +5,7 @@ import { renderLandingWorld } from './pulse.js';
 
 /* ---------- The world: what every shrine is doing, on the landing page ---------- */
 const worldEl = $('#world');
-const WORLD_EVERY = landing ? 20000 : 45000; // the home page shows the pulse live, so it looks more often
+const WORLD_EVERY = landing ? 20000 : 45000; // the home page shows the numbers under its hero, so it looks more often
 export const WORLD_KINDS = { light: 'worldLight', prayer: 'worldPrayer', bow: 'worldBow', offer: 'worldOffer', resolve: 'worldResolve', blame: 'worldBlame', omikuji: 'worldOmikuji' };
 let worldTimer = 0;
 export function agoShort(s) {

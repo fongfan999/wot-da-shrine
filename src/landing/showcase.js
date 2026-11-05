@@ -1,10 +1,10 @@
 import { describe as describeRoom, previewTitle } from '../../shared/preview.js';
 import { STRINGS, t } from '../lib/strings.js';
-import { $, reduceMotion } from '../app/context.js';
+import { $, fmt, reduceMotion } from '../app/context.js';
 import { copyText } from '../app/ui.js';
 import { every } from '../lib/clock.js';
 
-/** The link does the inviting: three panes that play in turn until the visitor picks one. */
+/** The link does the inviting: four panes that play in turn until the visitor picks one. */
 export function setupShowcase() {
   const ROOM = 'demo'; // the public demo shrine: the same room the war-room TV below is showing
   const el = $('#showcase');
@@ -100,6 +100,42 @@ export function setupShowcase() {
       $('#uf-last').textContent = STRINGS.quickPrayers[live.last];
       bump('#uf-karma', live.karma += 5);
     }
+  });
+
+  // The webhook: a tool fires, the shrine opens the vigil and the room hears it; then it resolves.
+  // Each round is a different tool from the ones it reads.
+  const alertsPane = $('#sc-pane-3');
+  const tools = [...$('#al-tools').children];
+  const ALERTS = [
+    ['Grafana', '{"status":"firing","title":"Payments API is down","alerts":[…]}', '{"status":"resolved","alerts":[…]}'],
+    ['PagerDuty', '{"event":{"event_type":"incident.triggered","data":{"title":"Checkout 5xx"}}}', '{"event":{"event_type":"incident.resolved"}}'],
+    ['Alertmanager', '{"status":"firing","alerts":[{"labels":{"alertname":"DNSDown"}}]}', '{"status":"resolved","alerts":[…]}'],
+    ['Datadog', '{"alert_transition":"Triggered","title":"p99 latency on checkout"}', '{"alert_transition":"Recovered"}'],
+    ['UptimeRobot', '{"alertType":1,"monitorFriendlyName":"api.example.com"}', '{"alertType":2,"monitorFriendlyName":"api.example.com"}'],
+  ];
+  let round = 0;
+  let up = false;
+  const ring = () => {
+    const [from, down, back] = ALERTS[round % ALERTS.length];
+    tools.forEach((li) => li.classList.toggle('is-on', li.textContent === from));
+    $('#al-down').textContent = fmt('landAlertsFeedDown', { from });
+    $('#al-up').textContent = fmt('landAlertsFeedUp', { from });
+    $('#al-body').textContent = up ? back : down;
+    const min = 8 + (round * 7) % 23;
+    $('#al-res').textContent = up
+      ? `→ {"ok":true,"did":"resolved","down":false,"downFor":${min},"people":4}`
+      : '→ {"ok":true,"did":"opened","down":true,"downFor":1,"people":3}';
+    alertsPane.classList.toggle('is-up', up);
+    alertsPane.querySelector('.alerts__item--up time').textContent = `${min} min`;
+  };
+  ring();
+  every(1000, () => {
+    if (!onScreen || panes[current] !== alertsPane || reduceMotion || document.visibilityState !== 'visible') return;
+    alertsPane.dataset.tick = String((Number(alertsPane.dataset.tick) || 0) + 1);
+    if (Number(alertsPane.dataset.tick) % 3) return;
+    if (up) round++;
+    up = !up;
+    ring();
   });
 
   new IntersectionObserver(([en]) => { onScreen = en.isIntersecting; schedule(); }, { threshold: 0.35 }).observe(el);

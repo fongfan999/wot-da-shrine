@@ -1,4 +1,4 @@
-<section class="land" id="channel">
+<section class="land land--alt" id="channel">
   <div class="land__inner">
     <p class="eyebrow" data-i18n="landChannelEyebrow">Made for the incident channel</p>
     <h2 class="land__title"><span data-i18n="landChannelTitle">The link does the</span> <em data-i18n="landChannelAccent">inviting.</em></h2>
@@ -7,6 +7,11 @@
         <button class="showcase__tab" id="sc-tab-0" type="button" role="tab" aria-selected="true" aria-controls="sc-pane-0" data-pane="0">
           <span class="showcase__ico" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg></span>
           <span class="showcase__copy"><b data-i18n="landFact1">Live previews</b><span data-i18n="landFact1Text">Paste the link and it unfurls with the room as it is at that moment: how long you have been down, who is praying, the last prayer.</span></span>
+          <span class="showcase__bar" aria-hidden="true"></span>
+        </button>
+        <button class="showcase__tab" id="sc-tab-3" type="button" role="tab" aria-selected="false" aria-controls="sc-pane-3" data-pane="3" tabindex="-1">
+          <span class="showcase__ico" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/><path d="M3.5 8.5a9 9 0 0 1 2-4M20.5 8.5a9 9 0 0 0-2-4"/></svg></span>
+          <span class="showcase__copy"><b data-i18n="landFact3">Your alerts ring it</b><span data-i18n="landFact3Text">Point Grafana, Alertmanager, PagerDuty, Opsgenie, Datadog, Statuspage, Better Stack or UptimeRobot at the shrine’s webhook. A firing alert opens the vigil, named after it; the resolved one says they’re back, bells and all.</span></span>
           <span class="showcase__bar" aria-hidden="true"></span>
         </button>
         <button class="showcase__tab" id="sc-tab-1" type="button" role="tab" aria-selected="false" aria-controls="sc-pane-1" data-pane="1" tabindex="-1">
@@ -47,6 +52,24 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- 2. The alerts webhook: what the monitoring sends, what the shrine answers, what the room sees -->
+        <div class="showcase__pane alerts" id="sc-pane-3" role="tabpanel" aria-labelledby="sc-tab-3" hidden>
+          <p class="alerts__label" data-i18n="landAlertsTools">Reads what these already send</p>
+          <ul class="alerts__tools" id="al-tools">
+            <li>Grafana</li><li>Alertmanager</li><li>PagerDuty</li><li>Opsgenie</li><li>Datadog</li><li>Statuspage</li><li>Better Stack</li><li>UptimeRobot</li>
+          </ul>
+          <div class="alerts__term" aria-hidden="true">
+            <p class="alerts__req"><span class="alerts__verb">POST</span> /api/rooms/payments-war-room/hook/<i>••••••</i></p>
+            <p class="alerts__body" id="al-body">{"status":"firing","title":"Payments API is down","alerts":[…]}</p>
+            <p class="alerts__res" id="al-res">→ {"ok":true,"did":"opened","down":true,"downFor":1,"people":3}</p>
+          </div>
+          <ol class="alerts__feed" aria-hidden="true">
+            <li class="alerts__item alerts__item--down"><span class="alerts__bell">🔔</span><span id="al-down">Grafana said something is down</span><time>now</time></li>
+            <li class="alerts__item alerts__item--up"><span class="alerts__bell">🔔</span><span id="al-up">Grafana says they’re back</span><time>12 min</time></li>
+          </ol>
+          <p class="alerts__note" data-i18n="landAlertsNote">Phones that asked get a notification either way.</p>
         </div>
 
         <!-- 2. The badge, in a README -->

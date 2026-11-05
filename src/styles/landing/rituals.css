@@ -1,6 +1,6 @@
 /* Rituals: a bento of little scenes, each one playing its ritual */
 .rituals { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
-.ritual--blame, .ritual--remember { grid-column: span 2; }
+.ritual--deploy, .ritual--blame { grid-column: span 2; }
 .ritual {
   --r-c: var(--ember);
   display: flex;
@@ -14,9 +14,9 @@
   transition: transform 260ms var(--ease), border-color 260ms ease;
 }
 .ritual:hover { transform: translateY(-4px); border-color: var(--line-strong); }
-.ritual--blame, .ritual--remember { flex-direction: row; }
-.ritual--chorus { --r-c: var(--accent); }
-.ritual--remember { --r-c: var(--flame); }
+.ritual--deploy, .ritual--blame { flex-direction: row; }
+.ritual--deploy { --r-c: var(--live); }
+.ritual--forecast { --r-c: var(--accent); }
 .ritual__stage {
   position: relative;
   display: grid;
@@ -33,7 +33,7 @@
   color: inherit;
   font: inherit;
 }
-.ritual--blame .ritual__stage, .ritual--remember .ritual__stage { flex: 1.15 1 0; height: auto; min-height: 240px; border-bottom: 0; border-right: 1px solid var(--sheet-line); }
+.ritual--deploy .ritual__stage, .ritual--blame .ritual__stage { flex: 1.15 1 0; height: auto; min-height: 240px; border-bottom: 0; border-right: 1px solid var(--sheet-line); }
 .ritual__body { display: flex; flex-direction: column; flex: 1 1 0; padding: 22px 22px 22px; }
 .ritual p { flex: 1; margin-bottom: 18px; font-size: 15px; }
 .ritual .btn { align-self: flex-start; }
@@ -98,39 +98,45 @@
 .fortune-mini__line { font-family: var(--font-serif); font-style: italic; font-size: 13px; line-height: 1.3; }
 .fortune-mini__hint { position: absolute; bottom: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 
-/* Bow in chorus: three bows drift into one */
-.chorus { position: relative; display: flex; align-items: flex-end; gap: 22px; padding-bottom: 36px; }
-.chorus__bow { display: grid; justify-items: center; width: 34px; }
-.chorus__bow i { position: relative; display: block; width: 30px; height: 34px; margin-top: 22px; border: 2px solid var(--ink); border-radius: 15px 15px 6px 6px; background: var(--paper-raised); transform-origin: 50% 100%; }
-.chorus__bow i::before { content: ""; position: absolute; left: 50%; top: -22px; width: 18px; height: 18px; translate: -50% 0; border: 2px solid var(--ink); border-radius: 50%; background: var(--paper-raised); }
-.chorus__bow:nth-child(1) i { animation: bow-a 6s ease-in-out infinite; }
-.chorus__bow:nth-child(2) i { animation: bow-b 6s ease-in-out infinite; }
-.chorus__bow:nth-child(3) i { animation: bow-c 6s ease-in-out infinite; }
-@keyframes bow-a { 0%, 6%, 16%, 56%, 70%, 100% { transform: none; } 11%, 63% { transform: translateY(5px) scaleY(.78); } }
-@keyframes bow-b { 0%, 20%, 30%, 56%, 70%, 100% { transform: none; } 25%, 63% { transform: translateY(5px) scaleY(.78); } }
-@keyframes bow-c { 0%, 34%, 44%, 56%, 70%, 100% { transform: none; } 39%, 63% { transform: translateY(5px) scaleY(.78); } }
-.chorus__badge { position: absolute; left: 50%; bottom: 0; translate: -50% 0; padding: 4px 12px; border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--note-ink); font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; white-space: nowrap; opacity: 0; animation: chorus-badge 6s ease-out infinite; }
-@keyframes chorus-badge { 0%, 60% { opacity: 0; transform: translateY(6px) scale(.9); } 65%, 86% { opacity: 1; transform: none; } 94%, 100% { opacity: 0; transform: translateY(-4px); } }
-.chorus::before { content: ""; position: absolute; left: 50%; top: 40%; width: 60px; height: 60px; translate: -50% -50%; border: 2px solid var(--accent); border-radius: 50%; opacity: 0; animation: chorus-ring 6s ease-out infinite; }
-@keyframes chorus-ring { 0%, 62% { opacity: 0; transform: scale(.5); } 64% { opacity: .9; } 85%, 100% { opacity: 0; transform: scale(3.4); } }
+/* Bless a deploy: the prompt as the shrine shows it, its omens read one by one, then how it went */
+.bless-mini { display: flex; flex-direction: column; gap: 10px; width: min(88%, 360px); padding: 14px; border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--paper-raised); box-shadow: 0 18px 40px -24px #000a; text-align: left; }
+.bless-mini__what { display: flex; align-items: baseline; gap: 8px; margin: 0 !important; font-size: 14px !important; color: var(--ink) !important; }
+.bless-mini__what b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-weight: 500; font-size: 13px; }
+.bless-mini .omens { min-height: 84px; }
+.bless-mini .omens__verdict b:empty::before { content: "…"; color: var(--muted); }
+.bless-mini .omens__item { animation: rise-in .35s var(--ease) both; }
+.bless-mini__foot { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-height: 64px; }
+.bless-mini__go { padding: 5px 14px; border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); font-size: 12px; font-weight: 600; transition: transform 120ms ease, box-shadow 300ms ease; animation: rise-in .3s var(--ease) both; }
+.bless-mini .omens:is([data-verdict="3"], [data-verdict="4"]) ~ .bless-mini__foot .bless-mini__go { background: var(--ember); color: var(--on-ember); }
+.bless-mini__go.is-press { transform: scale(.92); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 25%, transparent); }
+.bless-mini__go[hidden], .bless-mini__out[hidden] { display: none; }
+.bless-mini__out { margin: 0; font-size: 13px; line-height: 1.4; color: var(--muted); animation: rise-in .4s var(--ease) both; }
+.bless-mini__out.is-shipped { color: var(--live); font-weight: 600; }
+.bless-mini__out.is-broke { color: var(--ember-ink); font-weight: 600; }
+#bless-stage.is-read .bless-mini { animation: slip-draw .6s var(--ease); }
 
-/* A shrine that remembers: lanterns light, karma climbs, the shrine grows */
-.remember { display: flex; flex-direction: column; align-items: center; gap: 12px; width: min(86%, 360px); }
-.remember__lanterns { position: relative; display: flex; justify-content: space-between; width: 100%; padding-top: 10px; }
-.remember__lanterns::before { content: ""; position: absolute; left: -4%; right: -4%; top: 0; height: 14px; border-top: 1px solid var(--line-strong); border-radius: 50% / 100% 100% 0 0; }
-.remember__lanterns span { position: relative; width: 18px; height: 24px; border-radius: 8px 8px 6px 6px; background: var(--paper-sunk); border: 1px solid var(--line-strong); transition: background-color 400ms ease, box-shadow 400ms ease, border-color 400ms ease; }
-.remember__lanterns span::before { content: ""; position: absolute; left: 50%; top: -9px; width: 1px; height: 9px; background: var(--line-strong); }
-.remember__lanterns span.is-lit { background: color-mix(in srgb, var(--flame) 75%, var(--paper)); border-color: var(--flame); box-shadow: 0 0 16px -2px color-mix(in srgb, var(--flame) 70%, transparent); }
-.remember__karma { margin: 0 !important; font-family: var(--font-mono); font-size: 12px !important; color: var(--muted); }
-.remember__karma b { font-size: 22px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
-.remember__track { position: relative; width: 100%; height: 6px; margin: 34px 0 44px; border-radius: 3px; background: var(--paper-sunk); box-shadow: inset 0 0 0 1px var(--line); }
-.remember__fill { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--flame)); }
-.remember__mile { position: absolute; left: var(--at); top: 50%; display: grid; justify-items: center; translate: -50% -50%; font-family: var(--font-mono); font-size: 10px; line-height: 1.3; letter-spacing: .04em; text-align: center; color: var(--muted); white-space: nowrap; }
-.remember__mile:last-child { translate: -85% -50%; justify-items: end; text-align: right; }
-.remember__mile b { display: grid; place-items: center; width: 28px; height: 28px; margin-bottom: 30px; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--paper-raised); font-size: 14px; font-weight: 400; filter: grayscale(1); opacity: .55; transition: filter 300ms ease, opacity 300ms ease, transform 400ms cubic-bezier(.3, 1.6, .5, 1), border-color 300ms ease; }
-.remember__mile:last-child b { margin-right: 14px; }
-.remember__mile { padding-top: 0; }
-.remember__mile.is-on { color: var(--ink); }
-.remember__mile.is-on b { filter: none; opacity: 1; transform: scale(1.15); border-color: var(--flame); }
+/* Today's forecast: a card from the kami, the next day on each tap */
+.forecast-mini { cursor: pointer; perspective: 600px; }
+.forecast-mini__card { --sky: var(--live); display: flex; flex-direction: column; gap: 4px; width: min(86%, 250px); padding: 12px 14px 14px; border: 1px solid var(--line-strong); border-top: 3px solid var(--sky); border-radius: var(--radius-md); background: var(--paper-raised); box-shadow: 0 14px 30px -18px #000a; text-align: left; transition: transform 200ms var(--ease); }
+.forecast-mini[data-sky="fair"] .forecast-mini__card { --sky: var(--accent); }
+.forecast-mini[data-sky="cloudy"] .forecast-mini__card { --sky: var(--muted); }
+.forecast-mini[data-sky="storm"] .forecast-mini__card { --sky: var(--flame); }
+.forecast-mini[data-sky="typhoon"] .forecast-mini__card { --sky: var(--ember); }
+.forecast-mini:hover .forecast-mini__card { transform: translateY(-4px) rotate(-1deg); }
+.forecast-mini.is-drawing .forecast-mini__card { animation: slip-draw .7s var(--ease); }
+.forecast-mini__day { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.forecast-mini__sky { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 16px; }
+.forecast-mini__glyph { font-size: 22px; line-height: 1; }
+.forecast-mini__why { font-size: 11px; color: var(--muted); }
+.forecast-mini__why:empty { display: none; }
+.forecast-mini__line { margin-top: 2px; font-family: var(--font-serif); font-style: italic; font-size: 13px; line-height: 1.3; color: var(--ink); }
+.forecast-mini__meta { margin-top: 2px; font-size: 10.5px; line-height: 1.35; color: var(--muted); }
+.ritual--forecast .ritual__stage { height: 250px; }
+.ritual--forecast .fortune-mini__hint { bottom: 8px; }
 
 .eyebrow--live::before { background: var(--ember); animation: world-beat 2.4s ease-out infinite; }
+/* Stacked, the deploy's stage is as tall as its longest reading, so the tile never jumps while the omens come in */
+@media (max-width: 760px) {
+  .ritual--deploy .ritual__stage { min-height: 310px !important; }
+  .bless-mini { width: min(92%, 360px); }
+}

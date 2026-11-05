@@ -1,0 +1,50 @@
+<section class="land" id="grow">
+  <div class="land__inner">
+    <p class="eyebrow" data-i18n="landGrowEyebrow">The shrine grows</p>
+    <h2 class="land__title"><span data-i18n="landGrowTitle">Karma builds it.</span> <em data-i18n="landGrowAccent">Bows raise it.</em></h2>
+    <div class="grow" id="grow-demo">
+      <!-- The shrine around the altar as a team's grows (scene/temple.js), the team kneeling on its mats (scene/congregation.js) -->
+      <figure class="grow__frame">
+        <div class="grow__stage" id="grow-stage" role="img" aria-label="The shrine at each of its six levels, with the team kneeling on its mats">
+          <div class="grow__world" id="grow-world">
+            <div class="temple grow__temple" id="grow-temple"></div>
+            <div class="grow__burner" id="grow-burner"></div>
+            <div class="congregation grow__crowd" id="grow-crowd"></div>
+          </div>
+        </div>
+        <figcaption class="grow__caption" aria-live="polite">
+          <b class="grow__name" id="grow-name">Head temple</b>
+          <span class="grow__meta" id="grow-meta">5,000 karma · 12 mats</span>
+          <span class="grow__desc" id="grow-desc">A pagoda, a cherry tree and a vending machine that sells Hope.</span>
+        </figcaption>
+      </figure>
+      <ol class="grow__ladder" id="grow-ladder" aria-label="The six levels"></ol>
+
+      <div class="grow__facts">
+        <div class="grow__fact">
+          <h3 data-i18n="landGrowMatsTitle">Earn your mat</h3>
+          <p data-i18n="landGrowMatsText">Each level lays more mats, from one to twelve. The silk one and the cushions go to whoever earned the most karma this week; everyone past the mats stands at the back, and whoever holds the pager gets the on-call stool.</p>
+        </div>
+        <div class="grow__fact">
+          <h3 data-i18n="landGrowRaiseTitle">Three bows raise it</h3>
+          <p data-i18n="landGrowRaiseText">Karma brings the carpenters, not the roof. Scaffolding goes up, and three different people have to bow within a day to raise it. Bow in chorus, three within four seconds, and the bells ring for bonus karma. Every level opens a new sound for the room.</p>
+          <button class="btn btn--glass btn--sm" type="button" id="grow-raise" data-i18n="landGrowRaiseBtn">Raise the next level</button>
+        </div>
+        <div class="grow__fact">
+          <h3 data-i18n="landGrowFedTitle">Keep the kami fed</h3>
+          <p data-i18n="landGrowFedText">Neglect shows on the building: dust after a day, cobwebs after two, weeds over the last two mats after four, and after a week a tanuki moves in. A shrine never shrinks.</p>
+          <div class="grow__row">
+            <button class="btn btn--glass btn--sm" type="button" id="grow-feed" data-i18n="landGrowFedBtn">Skip a day</button>
+            <span class="grow__state" id="grow-fed" aria-live="polite">Fed today</span>
+          </div>
+        </div>
+        <div class="grow__fact">
+          <h3 data-i18n="landGrowCloudTitle">Hang your cloud’s lantern</h3>
+          <p data-i18n="landGrowCloudText">From the village shrine up, the clouds hang from the torii as donor lanterns. Pick yours and its lantern is lit, and the plaque reads its region. Heroku’s free tier hangs there too, dark, with a cobweb.</p>
+          <div class="grow__clouds" id="grow-clouds" role="group" aria-label="Our cloud"></div>
+        </div>
+      </div>
+      <p class="grow__more" data-i18n="landGrowMore">And for the team: Keepers this week, a weekly vow, seventeen charms to collect, and credits that roll for everyone when the servers come back.</p>
+    </div>
+  </div>
+</section>

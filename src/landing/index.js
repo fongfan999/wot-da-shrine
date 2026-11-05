@@ -8,7 +8,7 @@ import { scene } from '../scene/ticker.js';
 import { burner, placeSmoke, smoke } from '../app/engines.js';
 import { setupBuilder } from './builder.js';
 import { setupCrowd } from './crowd.js';
-import { watchPulse } from './pulse.js';
+import { setupGrow } from './grow.js';
 import { setupRibbon } from './ribbon.js';
 import { setupRituals } from './rituals.js';
 import { setupShowcase } from './showcase.js';
@@ -26,6 +26,7 @@ export function setupLanding() {
   setupBuilder();
   setupTv();
   setupCrowd();
+  setupGrow();
   // The altar is alive when you arrive: lit after the intro, with a hint that it can be touched.
   const hint = $('#hero-hint');
   introStarted.then(() => setTimeout(() => { if (!state.lit) ignite(Date.now()); hint.hidden = false; }, reduceMotion ? 300 : 2200));
@@ -36,7 +37,6 @@ export function setupLanding() {
   setupRituals();
   setupShowcase();
   setupFooter();
-  watchPulse();
   // Sections reveal as they scroll in.
   const seen = new IntersectionObserver((entries) => {
     for (const en of entries) if (en.isIntersecting) { en.target.classList.add('is-in'); seen.unobserve(en.target); }

@@ -1,0 +1,87 @@
+/* The shrine grows: the shrine around the altar at each of its six levels (landing/grow.js) */
+.grow { display: flex; flex-direction: column; gap: 20px; }
+.grow__frame {
+  position: relative;
+  margin: 0;
+  border: 1px solid var(--sheet-line);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(70% 60% at 50% 105%, color-mix(in srgb, var(--flame) 14%, transparent), transparent 70%),
+    radial-gradient(circle at 1px 1px, var(--sheet-line) 1px, transparent 0) 0 0 / 14px 14px,
+    var(--paper);
+  box-shadow: var(--shadow-sheet);
+  overflow: hidden;
+}
+/*
+ * The stage is 770 burner units tall (y −300 to 470, as the shrine's own layer) and --a times that wide,
+ * centred on the censer (x 260): the censer sits at its foot, and temple.js lines the rest up with it.
+ */
+.grow__stage { --a: 1.818; position: relative; aspect-ratio: var(--a); overflow: hidden; }
+.grow__world { position: absolute; inset: 0; transform: scale(var(--zoom, 1)); transform-origin: 50% 100%; transition: transform 1.4s cubic-bezier(.5, 0, .2, 1); }
+#grow-stage .grow__temple { inset: 0; left: 0; right: 0; }
+.grow__burner {
+  position: absolute;
+  z-index: 1;
+  left: calc((385 * var(--a) - 260) / (770 * var(--a)) * 100%);
+  top: calc(300 / 770 * 100%);
+  width: calc(520 / (770 * var(--a)) * 100%);
+  height: calc(470 / 770 * 100%);
+  pointer-events: none;
+}
+#grow-stage .burner__svg, #grow-stage .burner__svg * { pointer-events: none !important; cursor: default; }
+/* What the hero's censer gains by level (vigil.css): the cat from the village shrine, bronze from the temple */
+.grow__burner:is([data-level="2"], [data-level="3"], [data-level="4"], [data-level="5"]) .cat { display: block; }
+.grow__burner:is([data-level="3"], [data-level="4"], [data-level="5"]) :is(.censer-body, .censer-rim) { fill: var(--ember-soft); }
+
+/* What the level is, under the drawing: never over it, where the pagoda and the cherry tree stand */
+.grow__caption { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: 12px 18px 14px; border-top: 1px solid var(--sheet-line); background: var(--paper-raised); }
+.grow__name { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 22px; line-height: 1.1; letter-spacing: -.02em; color: var(--ink); }
+.grow__meta { font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em; color: var(--ember-ink); }
+.grow__desc { flex: 1 1 260px; font-size: 14px; line-height: 1.4; color: var(--muted); }
+
+/* The ladder: six rungs on one thread, lit up to the level shown */
+.grow__ladder { --at: 0; position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; }
+.grow__ladder::before, .grow__ladder::after { content: ""; position: absolute; left: calc(100% / 12); top: 15px; height: 2px; border-radius: 2px; }
+.grow__ladder::before { right: calc(100% / 12); background: var(--line-strong); }
+.grow__ladder::after { width: calc((100% - 100% / 6) * var(--at)); background: linear-gradient(90deg, var(--accent), var(--flame)); transition: width .8s var(--ease); }
+.grow__rung { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; padding: 8px 4px 4px; border: 0; border-radius: var(--radius-md); background: none; color: var(--muted); font: inherit; text-align: center; cursor: pointer; }
+.grow__rung:hover b { color: var(--ink); }
+.grow__rung:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.grow__dot { width: 14px; height: 14px; margin-bottom: 4px; border: 2px solid var(--line-strong); border-radius: 50%; background: var(--paper); transition: background-color .3s ease, border-color .3s ease, box-shadow .3s ease; }
+.grow__rung.is-on .grow__dot { border-color: var(--flame); background: var(--flame); }
+.grow__rung[aria-current] .grow__dot { box-shadow: 0 0 0 5px color-mix(in srgb, var(--flame) 24%, transparent); }
+.grow__rung b { font-size: 13px; font-weight: 600; line-height: 1.25; transition: color .2s ease; }
+.grow__rung[aria-current] b { color: var(--ink); }
+.grow__rung span:last-child { font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+
+/* What a team does with it: four short notes, each with its own lever on the drawing above */
+.grow__facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); margin-top: 8px; }
+.grow__fact { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding-top: 16px; border-top: 1px solid var(--line-strong); }
+.grow__fact h3 { margin: 0 !important; font-size: 17px !important; }
+.grow__fact p { flex: 1; font-size: 14.5px !important; }
+.grow__row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.grow__state { font-family: var(--font-mono); font-size: 11px; letter-spacing: .03em; color: var(--live); }
+.grow__state[data-upkeep="1"], .grow__state[data-upkeep="2"] { color: var(--flame); }
+.grow__state[data-upkeep="3"], .grow__state[data-upkeep="4"] { color: var(--ember-ink); }
+.grow__clouds { display: flex; flex-wrap: wrap; gap: 6px; }
+.grow__cloud { padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--paper-raised); color: var(--ink); font: inherit; font-size: 12px; cursor: pointer; transition: background-color 160ms, border-color 160ms, color 160ms; }
+.grow__cloud:hover { border-color: var(--ink); }
+.grow__cloud[aria-pressed="true"] { border-color: var(--ember); background: var(--ember-soft); color: var(--ember-ink); }
+.grow__more { margin-top: 8px !important; text-align: center; font-size: 15px !important; }
+
+@media (max-width: 1099px) {
+  .grow__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 899px) {
+  .grow__stage { --a: 1.5; }
+}
+@media (max-width: 760px) {
+  .grow__stage { --a: 1.4; }
+  .grow__caption { padding: 10px 14px 12px; }
+  .grow__name { font-size: 20px; }
+  .grow__rung b { display: none; }
+  .grow__facts { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grow__world, .grow__ladder::after { transition: none; }
+}

@@ -26,8 +26,12 @@ shrine.
   the one thing to do here, open a shrine for your team. Rituals, vigils,
   records and sharing only exist in a shrine, and
   nothing done on the demo is counted in the world totals. Below it: how a
-  vigil works, the rituals, how the link travels through Slack, and the
-  live world count.
+  shrine works (open it, send the link, bow daily), the daily rituals (a
+  deploy blessed against the omens, today's forecast, a fortune, a burned
+  blame), the shrine growing through its six levels (its own copy of the
+  temple and a team on its mats: raise a level, skip feeding the kami, hang
+  your cloud's lantern), how the link and the alerts reach the incident
+  channel, and the war-room TV.
 - There is no solo page: praying alone is a shrine with one person in it.
   For planned downtime the landing page's builder makes a shrine of its own,
   `/r/<slug>?title=…&eta=…`, whose first visit gives the room that title and
@@ -480,9 +484,10 @@ The shrine is built to travel from one incident channel to the next:
 - **Previews that show the state**: the unfurl's picture is one of three drawn
   in advance (`public/og.png`, `og-down.png`, `og-back.png`): a room with an
   open vigil shows the lit altar, one that came back within the hour the
-  celebration, any other the shrine's own card. In dev,
-  `await __incense.previewCard('down' | 'back')` draws them again from the live
-  altar.
+  celebration, any other the shrine's own card, which is also the home page's.
+  In dev, `await __incense.previewCard('home' | 'down' | 'back')` draws them
+  again from the live altar ('home' on the home page, in the light theme, for
+  the head temple around it), at twice the size: scale them to 1200×630.
 - **The share card**: a PNG of this shrine as it is right now, drawn from the
   live altar (every offering on the table), the team's avatars, how long
   you prayed, the karma and the last prayers. Share it, copy it or download
@@ -491,10 +496,11 @@ The shrine is built to travel from one incident channel to the next:
   shower of petals, +20 karma for the room, the heading becomes "The servers
   are back", and the share card is offered at the one moment people want to
   post it. Everyone in the room sees the celebration.
-- **The world**: the landing page shows what every shrine is doing: prayers
-  sent, shrines opened, how many are burning right now, and the last thing
-  that happened (only the ready-made prayers are ever echoed, never free
-  text, and no room name leaves the counter).
+- **The world**: the landing page says what every shrine is doing, under its
+  Open a shrine button and in its side card: prayers sent, shrines opened,
+  how many are burning right now, and the last thing that happened (only the
+  ready-made prayers are ever echoed, never free text, and no room name
+  leaves the counter).
 - **For the retro**: the share sheet also hands out the vigil as a few lines
   of Markdown (down for how long, people at the peak, prayers, blames,
   fortunes, karma, the link) for the postmortem doc.
@@ -667,7 +673,7 @@ src/app/                 the shrine
   vigilStart.js          saying something is down: the button, the question on lighting
   etaPicker.js           the Back at picker, in the heading and the builder
   openShrine.js          name fields and the Open sheet
-src/landing/             the home page's sections (pulse, showcase, steps, builder, TV…) and its world line
+src/landing/             the home page's sections (steps, rituals, grow, showcase, builder, TV…) and its world line
 src/scene/               what is drawn
   burner.js              inline-SVG incense burner (burn-down, embers, offerings)
   serverRoom.js          procedural SVG server room with blinking LEDs

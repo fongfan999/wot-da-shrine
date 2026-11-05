@@ -116,7 +116,7 @@ function altarMarkup(host, plain = false) {
   // The shrine around the altar (temple.js), in the same units, kept to the card's right side so the words stay clear.
   const temple = document.querySelector('.temple__svg');
   const around = temple ? `<svg class="temple-copy" x="-440" y="-300" width="1400" height="770" viewBox="${temple.getAttribute('viewBox')}" overflow="visible">${temple.innerHTML}</svg>` : '';
-  return `<g clip-path="url(#altarSide)"><svg viewBox="0 0 520 470" x="650" y="86" width="500" height="452" overflow="visible" data-level="${level}" data-resolved="${resolved}">${around}${inner}</svg></g>`;
+  return `<g mask="url(#altarSide)"><svg viewBox="0 0 520 470" x="650" y="86" width="500" height="452" overflow="visible" data-level="${level}" data-resolved="${resolved}">${around}${inner}</svg></g>`;
 }
 
 /**
@@ -182,7 +182,9 @@ export function cardSvg(data) {
   <style>${drawingCss(c)}</style>
   <defs>
     <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="${c['line-strong']}" opacity=".6"/></pattern>
-    <clipPath id="altarSide"><rect x="612" y="0" width="${W - 612}" height="${H}"/></clipPath>
+    <!-- the altar's side of the card: the shrine around it fades out before the words, never a hard edge -->
+    <linearGradient id="altarFade" gradientUnits="userSpaceOnUse" x1="600" y1="0" x2="720" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff"/></linearGradient>
+    <mask id="altarSide" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect x="600" y="0" width="${W - 600}" height="${H}" fill="url(#altarFade)"/></mask>
   </defs>
   <rect width="${W}" height="${H}" fill="${c.paper}"/>
   <rect width="${W}" height="${H}" fill="url(#dots)"/>
@@ -203,7 +205,7 @@ export function cardSvg(data) {
     <g transform="translate(0 -2) scale(1.55)" style="stroke-linecap:round;stroke-linejoin:round;stroke-width:4.2;fill:none">${brandMark.replace(/<svg[^>]*>/, '<svg viewBox="8 2 48 54" width="21" height="24">')}</g>
     <g transform="translate(38 0)">${brandWord.replace(/<svg[^>]*>/, '<svg viewBox="-3.4 -69.4 466 78" width="226" height="38">')}</g>
   </g>
-  ${data.link ? linkSvg(data.link, data.url, c) : `<text x="${W - 72}" y="84" text-anchor="end" font-family="${MONO}" font-size="17" letter-spacing="1" fill="${c.muted}">${esc(data.url)}</text>`}
+  ${data.link ? linkSvg(data.link, data.url, c) : `<text x="${W - 72}" y="${data.plain ? H - 62 : 84}" text-anchor="end" font-family="${MONO}" font-size="${data.plain ? 20 : 17}" letter-spacing="1" fill="${data.plain ? c.ink : c.muted}">${esc(data.url)}</text>`}
 </svg>`;
 }
 

@@ -80,7 +80,8 @@ const bell = (cx, top) => `
     <rect class="d-paper" x="${cx - 7}" y="${top + 134}" width="14" height="13" rx="2"/>
     <path class="d-thin" d="M ${cx - 3} ${top + 147} v 3 M ${cx} ${top + 147} v 3 M ${cx + 3} ${top + 147} v 3"/>`;
 
-export function buildTemple(host) {
+/** Draw it into `host`, lined up with `burnerEl`, or the `.burner` beside it. */
+export function buildTemple(host, burnerEl = null) {
   host.innerHTML = `
 <svg class="temple__svg" viewBox="${X0} ${Y0} ${W} ${H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <defs>
@@ -324,7 +325,7 @@ export function buildTemple(host) {
 
   const svg = host.querySelector('svg');
   const altar = host.parentElement;
-  let burner = null;
+  let burner = burnerEl;
 
   /** Line the drawing up with the censer: the same units, the same origin. */
   function layout() {

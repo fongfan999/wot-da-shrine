@@ -103,18 +103,23 @@
 .mini-crowd__av { transition-property: opacity, transform, width, margin; transition-duration: 250ms, 400ms, 300ms, 300ms; }
 .mini-crowd__n { margin-left: 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-/* 3. Pray, then they're back */
-.mini-vigil { display: grid; }
-.mini-vigil > span { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 16px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--paper-raised); font-size: 13px; color: var(--muted); white-space: nowrap; transition: opacity 350ms ease, transform 450ms var(--ease); box-shadow: 0 10px 24px -16px #0008; }
-.mini-vigil b { font-family: var(--font-mono); font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
-.mini-vigil__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--flame); animation: world-beat 2.4s ease-out infinite; }
-.mini-vigil__up { border-color: color-mix(in srgb, var(--live) 50%, transparent) !important; background: var(--live-soft) !important; color: var(--live) !important; font-weight: 600; opacity: 0; transform: translateY(10px) scale(.96); }
-.mini-vigil.is-back .mini-vigil__down { opacity: 0; transform: translateY(-10px) scale(.96); }
-.mini-vigil.is-back .mini-vigil__up { opacity: 1; transform: none; }
-.mini-lanterns { display: flex; gap: 12px; height: 34px; align-items: flex-start; }
-.mini-lanterns span { width: 16px; height: 22px; border-radius: 7px 7px 6px 6px; background: color-mix(in srgb, var(--flame) 70%, var(--paper)); box-shadow: 0 0 14px -2px color-mix(in srgb, var(--flame) 60%, transparent); position: relative; }
-.mini-lanterns span::before { content: ""; position: absolute; left: 50%; top: -8px; width: 1px; height: 8px; background: var(--line-strong); }
-.mini-lanterns .is-new { opacity: 0; transform: translateY(14px) scale(.5); transition: opacity 400ms ease, transform 700ms cubic-bezier(.3, 1.5, .5, 1); }
-.mini-vigil.is-back + .mini-lanterns .is-new { opacity: 1; transform: none; }
+/* 3. A quiet day: the count of days, and the kami waiting for its morning bow (the real kami pill, kami.css) */
+.mini-quiet { display: inline-flex; align-items: center; gap: 8px; margin: 0 !important; padding: 8px 16px; border: 1px solid color-mix(in srgb, var(--live) 45%, transparent); border-radius: var(--radius-pill); background: var(--live-soft); color: var(--live) !important; font-size: 13px !important; font-weight: 600; white-space: nowrap; box-shadow: 0 10px 24px -16px #0008; }
+.mini-quiet b { font-family: var(--font-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+.mini-quiet b.is-tick { animation: tick-up .5s var(--ease); }
+@keyframes tick-up { 0% { opacity: 0; translate: 0 6px; } 100% { opacity: 1; translate: none; } }
+.mini-quiet__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live); animation: world-beat 2.4s ease-out infinite; }
+.mini-kami { z-index: auto; max-width: min(100%, 320px); box-shadow: 0 10px 24px -16px #0008; }
+.mini-kami .kami__btn { cursor: default; }
+.mini-kami .kami__text { overflow: visible; }
+.mini-kami .kami__since { overflow: hidden; text-overflow: ellipsis; }
+.mini-kami:not(.is-fed) .kami__since { display: none; }
+.mini-kami .kami__action { transition: transform 120ms ease, opacity 200ms ease, background-color 160ms, color 160ms; }
+.mini-kami .kami__action.is-press { transform: scale(.9); background: var(--accent); color: var(--paper); }
+.mini-kami.is-fed .kami__action { display: none; }
+.mini-kami__plus { position: absolute; right: 8px; top: 0; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--ember-soft); color: var(--ember-ink); font-family: var(--font-mono); font-size: 11px; white-space: nowrap; opacity: 0; translate: 0 -50%; pointer-events: none; }
+.mini-kami.is-fed .mini-kami__plus { animation: plus-rise 2.4s var(--ease) forwards; }
+@keyframes plus-rise { 0% { opacity: 0; translate: 0 -20%; } 15%, 70% { opacity: 1; translate: 0 -110%; } 100% { opacity: 0; translate: 0 -150%; } }
+@media (prefers-reduced-motion: reduce) { .mini-kami.is-fed .mini-kami__plus { animation: none; opacity: 0; } }
 
 .step__ico, .ritual__ico { width: 28px; height: 28px; margin-bottom: 14px; fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
