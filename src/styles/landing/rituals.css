@@ -35,7 +35,7 @@
 }
 .ritual--deploy .ritual__stage, .ritual--blame .ritual__stage { flex: 1.15 1 0; height: auto; min-height: 240px; border-bottom: 0; border-right: 1px solid var(--sheet-line); }
 .ritual__body { display: flex; flex-direction: column; flex: 1 1 0; padding: 22px 22px 22px; }
-.ritual p { flex: 1; margin-bottom: 18px; font-size: 15px; }
+.ritual__body p { flex: 1; margin-bottom: 18px; font-size: 15px; }
 .ritual .btn { align-self: flex-start; }
 
 /* Burn a blame: the confession burns from the bottom up, ember edge first */
@@ -99,7 +99,9 @@
 .fortune-mini__hint { position: absolute; bottom: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 
 /* Bless a deploy: the prompt as the shrine shows it, its omens read one by one, then how it went */
-.bless-mini { display: flex; flex-direction: column; gap: 10px; width: min(88%, 360px); padding: 14px; border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--paper-raised); box-shadow: 0 18px 40px -24px #000a; text-align: left; }
+/* The card is as tall as its longest reading (five omens, the verdict and Shipped clean in Vietnamese, at its narrowest: 337px), so it never
+   grows around its centre while the omens come in; each line lands below the last and nothing above it moves */
+.bless-mini { display: flex; flex-direction: column; gap: 10px; width: min(88%, 360px); min-height: 340px; padding: 14px; border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--paper-raised); box-shadow: 0 18px 40px -24px #000a; text-align: left; }
 .bless-mini__what { display: flex; align-items: baseline; gap: 8px; margin: 0 !important; font-size: 14px !important; color: var(--ink) !important; }
 .bless-mini__what b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-weight: 500; font-size: 13px; }
 .bless-mini .omens { min-height: 84px; }
@@ -136,7 +138,7 @@
 
 .eyebrow--live::before { background: var(--ember); animation: world-beat-shadow 2.4s ease-out infinite; }
 /* With a row to itself (the forecast no longer beside it), the deploy's stage is as tall as its longest reading,
-   five omens, the verdict and how it went (355px in Vietnamese), so the tile never pushes the page while the omens come in */
+   the 340px card and room around it, so the tile never pushes the page while the omens come in */
 @media (max-width: 1099px) {
   .ritual--deploy .ritual__stage { min-height: 372px; }
 }
