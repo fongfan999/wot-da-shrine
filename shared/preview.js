@@ -7,6 +7,7 @@
  * with the ready-made prayers in its words, in the same order as QUICK_PRAYERS.
  */
 import { QUICK_PRAYERS, prayerIn } from './prayers.js';
+import { fill } from './fill.js';
 
 /** Every word a preview says, in English. */
 export const PREVIEW_WORDS = {
@@ -43,11 +44,13 @@ export const PREVIEW_WORDS = {
   altDown: 'The servers are down. An ink drawing of the altar, incense lit, the team praying.',
   altBack: 'The servers are back. An ink drawing of the altar after the vigil.',
   alt: 'An ink drawing of an incense burner on an altar inside a temple, with the words: pray for uptime, together. Bow daily. Bless deploys. Keep the kami fed.',
+  /** The demo shrine's title (DEMO_META in the shrine is English): a preview of the demo says it in its own words. */
+  demoTitle: 'The demo rack is down',
   quickPrayers: QUICK_PRAYERS,
 };
 
 /** A sentence of `w` with its {placeholders} filled. */
-const say = (w, key, vars = {}) => Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), w[key]);
+const say = (w, key, vars = {}) => fill(w[key], vars);
 
 const DAY_MIN = 1440;
 /** Days without an incident, as the preview says it: whole days once there is one, else hours. '' before an hour. */

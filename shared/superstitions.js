@@ -9,6 +9,7 @@
  * [{ id, text, strength }]. `tz` is the reader's clock, minutes ahead of UTC: days and hours are theirs.
  * `words` is how the beliefs are said: BELIEF_WORDS in English, or another language's (shared/vi/).
  */
+import { fill } from './fill.js';
 
 /** Every sentence a belief can be, in English, with its {numbers} and {names} to fill. */
 export const BELIEF_WORDS = {
@@ -49,7 +50,7 @@ export const BELIEVE_AFTER = 3;
 const local = (at, tz) => new Date(at + tz * 60000);
 const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
 /** A sentence of `w` with its {placeholders} filled. */
-const say = (w, key, vars) => Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), w[key]);
+const say = (w, key, vars) => fill(w[key], vars);
 /** "2x", "1.5x": a ratio worth saying, to a half. */
 const times = (w, r) => say(w, 'times', { x: Math.round(r * 2) / 2 });
 

@@ -6,10 +6,8 @@
  * fires a bubbling `input` event whenever it changes, like a form field.
  * With `label: false` the trigger's text is left to the caller.
  */
-import { t } from '../lib/strings.js';
+import { fmt as fill, t } from '../lib/strings.js';
 import { INTL } from '../lib/locale.js';
-
-const fill = (key, vars) => Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), t(key));
 
 const QUICK = [
   { label: 'etaQuick30', at: () => roundUp(Date.now() + 30 * 60e3, 5) },

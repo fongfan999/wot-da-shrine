@@ -226,8 +226,15 @@ describe('a shrine', () => {
     await linh.settled();
     assert.equal((await (await get(`/api/rooms/${room}/status`)).json()).lang, 'vi');
     assert.equal(await lang({ 'Accept-Language': 'en-US' }), 'vi'); // the room's now, whoever unfurls it
+    // Someone in another language acts while Linh is still here: the room keeps speaking hers
     const ann = await arrive(room, { name: 'Ann', lang: 'en' });
     ann.send({ t: 'bow', tz: 0 });
+    await ann.settled();
+    assert.equal(await lang({ 'Accept-Language': 'en' }), 'vi');
+    // and once nobody here speaks it, the next act sets the room's language
+    linh.leave();
+    await ann.next('leave', () => true, 10_000);
+    ann.send({ t: 'bowl', note: 0 });
     await ann.settled();
     assert.equal(await lang({ 'Accept-Language': 'vi' }), 'en');
   });

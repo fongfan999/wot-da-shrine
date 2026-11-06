@@ -1,11 +1,12 @@
 /**
- * The page for a room, its link preview describing the room as it is right now, in the room's language:
- * the one it was last acted in (lang in its status), whoever unfurls the link. A room nobody has acted
+ * The page for a room, its link preview describing the room as it is right now, in the room's language
+ * (lang in its status: the one it is acted in, kept while anyone kneeling speaks it), whoever unfurls the link. A room nobody has acted
  * in yet, or one we can't ask (past the read limit), goes by who is asking: Vietnamese for a browser
  * that prefers it, or one in Vietnam.
  */
 import { describe, previewImage, previewTitle, PREVIEW_WORDS } from '../../shared/preview.js';
 import { PREVIEW_WORDS as PREVIEW_VI } from '../../shared/vi/preview.js';
+import { DEMO_ROOM } from '../objects/shrine/state.js';
 
 const WORDS = { en: PREVIEW_WORDS, vi: PREVIEW_VI };
 
@@ -25,6 +26,7 @@ export async function roomPage(c, room, st) {
   if (!page.ok) return page;
   const lang = previewLang(c, st);
   const w = WORDS[lang];
+  if (st && room === DEMO_ROOM) st = { ...st, title: w.demoTitle }; // its fixed title, in the preview's language
   const title = previewTitle(st, room, Date.now(), w);
   const description = st ? describe(st, w) : w.idle;
   const image = previewImage(st, Date.now(), w);

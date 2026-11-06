@@ -72,7 +72,7 @@ export function setupShowcase() {
     tag.textContent = t(isLive ? 'landUfLive' : 'landUfExample');
     exampleEl.hidden = isLive;
     liveEl.hidden = !isLive;
-    $('#uf-title').textContent = isLive ? previewTitle(st, ROOM, Date.now(), t('previewWords')) : fmt('demoUfTitle', { room: ROOM });
+    $('#uf-title').textContent = isLive ? previewTitle({ ...st, title: t('previewWords').demoTitle }, ROOM, Date.now(), t('previewWords')) : fmt('demoUfTitle', { room: ROOM }); // the demo's fixed title, in this page's words
     if (isLive) liveEl.textContent = describeRoom(st, t('previewWords'));
   }
   every(1000, () => { if (onScreen && current === 0 && document.visibilityState === 'visible' && Date.now() - polledAt > 10000) poll(); });

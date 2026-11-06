@@ -5,6 +5,7 @@
  */
 import { KAMI_WORDS } from '../../../shared/kami.js';
 import { KAMI_WORDS as KAMI_VI } from '../../../shared/vi/kami.js';
+import { fill } from '../../../shared/fill.js';
 
 export const WORDS = {
   en: {
@@ -81,7 +82,7 @@ export const WORDS = {
 export const cleanLang = (lang) => (Object.hasOwn(WORDS, lang) ? lang : 'en');
 
 /** `key` in `lang`, with its {placeholders} filled. */
-export const say = (lang, key, vars = {}) => Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), WORDS[cleanLang(lang)][key]);
+export const say = (lang, key, vars = {}) => fill(WORDS[cleanLang(lang)][key], vars);
 
 /** How long, as a notification says it: "12 min", "2h 5m", "3h", "1d 4h". */
 export function lasted(lang, m) {

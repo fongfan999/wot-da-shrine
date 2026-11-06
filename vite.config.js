@@ -26,13 +26,35 @@ export function partials() {
 }
 
 /**
+ * A page in another language than English waits for its words (src/lib/strings.js imports the pack once
+ * the main bundle runs). The build tells the head where each pack is, so a page that speaks one starts
+ * fetching it with the main bundle instead of after it: the <!-- l10n-packs --> line in head.html.
+ */
+export function l10nPreload() {
+  return {
+    name: 'l10n-preload',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html, ctx) {
+        if (!ctx.bundle) return html; // development: nothing is bundled, nothing to fetch early
+        const packs = Object.fromEntries(Object.values(ctx.bundle)
+          .filter((c) => c.type === 'chunk' && /\/strings\/(\w+)\/index\.js$/.test(c.facadeModuleId ?? ''))
+          .map((c) => [c.facadeModuleId.match(/\/strings\/(\w+)\/index\.js$/)[1], `/${c.fileName}`]));
+        const script = `<script>{ const pack = ${JSON.stringify(packs)}[document.documentElement.lang]; if (pack) document.head.append(Object.assign(document.createElement('link'), { rel: 'modulepreload', href: pack, crossOrigin: '' })); }</script>`;
+        return html.replace('<!-- l10n-packs -->', script);
+      },
+    },
+  };
+}
+
+/**
  * Two pages: index.html is the home page (/ and /tv), r/index.html a shared shrine,
  * which the Worker serves for every /r/:room. What they share is built into common chunks.
  */
 const root = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [partials(), cloudflare()],
+  plugins: [partials(), l10nPreload(), cloudflare()],
   publicDir: 'public',
   build: {
     outDir: 'dist',

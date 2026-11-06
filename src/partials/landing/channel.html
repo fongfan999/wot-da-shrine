@@ -42,7 +42,7 @@
                 <p class="chat__who"><b>phong</b> <time data-i18n="demoChatTime2">2:14 PM</time></p>
                 <p class="chat__text"><span data-i18n="demoChatInvite">The servers are down. The shrine is open, come pray with us:</span> <a class="chat__link" id="unfurl-link" href="/r/demo" tabindex="-1">shrine.wotda.app/r/demo</a></p>
                 <div class="chat__card">
-                  <p class="chat__site">Wot Da Shrine <span class="chat__tag" id="uf-tag" data-live="0" data-i18n="landUfExample">Example</span></p>
+                  <p class="chat__site">Wot Da Shrine <span class="chat__tag" id="uf-tag" data-live="0" data-i18n="landUfExample" data-i18n-once>Example</span></p>
                   <p class="chat__title" id="uf-title"></p>
                   <p class="chat__desc" id="uf-example"><span data-i18n="demoUfDown">down for </span><b id="uf-min">23</b><span data-i18n="demoUfMin"> min · </span><b id="uf-praying">4</b><span data-i18n="demoUfPraying"> praying · incense burning · </span><b id="uf-karma">212</b><span data-i18n="demoUfKarma"> karma. Last prayer: “</span><span id="uf-last"></span>”</p>
                   <p class="chat__desc" id="uf-live" hidden></p>
@@ -91,7 +91,7 @@
           <div class="mp__browser" aria-hidden="true">
             <div class="mp__chrome"><i></i><i></i><i></i><span class="mp__addr"><span id="mp-host">shrine.wotda.app</span>/r/<b id="mp-show-slug">checkout-is-taking-a-nap</b></span></div>
             <div class="mp__page">
-              <span class="mp__eyebrow" data-i18n="eyebrow">Scheduled maintenance</span>
+              <span class="mp__eyebrow" data-i18n="demoMpEyebrow">Scheduled maintenance</span>
               <b class="mp__title" id="mp-show-title">Checkout is taking a nap</b>
               <span class="mp__eta" id="mp-show-eta">Back soon · the ops team is praying</span>
               <span class="mp__altar">🪔</span>
@@ -99,7 +99,7 @@
           </div>
           <div class="mp__fields">
             <label class="mp__field mp__field--wide"><span data-i18n="mpTitle">What’s down</span><input type="text" id="mp-title" maxlength="60" /></label>
-            <div class="mp__field mp__field--eta"><span id="mp-eta-label" data-i18n="mpEta">Back at</span><button class="eta-trigger" id="mp-eta" type="button" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="mp-eta-label mp-eta-text mp-eta-sub" data-value=""><span class="eta-trigger__val"><span class="eta-trigger__text" id="mp-eta-text" data-i18n="etaAnyMoment">Any moment now</span><span class="eta-trigger__sub" id="mp-eta-sub" data-i18n="etaNoneSub">no ETA</span></span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg></button></div>
+            <div class="mp__field mp__field--eta"><span id="mp-eta-label" data-i18n="mpEta">Back at</span><button class="eta-trigger" id="mp-eta" type="button" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="mp-eta-label mp-eta-text mp-eta-sub" data-value=""><span class="eta-trigger__val"><span class="eta-trigger__text" id="mp-eta-text" data-i18n="etaAnyMoment" data-i18n-once>Any moment now</span><span class="eta-trigger__sub" id="mp-eta-sub" data-i18n="etaNoneSub" data-i18n-once>no ETA</span></span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg></button></div>
             <label class="mp__field mp__field--slug"><span data-i18n="mpSlug">Its link</span><span class="mp__slug"><span aria-hidden="true">/r/</span><input type="text" id="mp-slug" maxlength="48" spellcheck="false" /></span></label>
           </div>
           <div class="mp__actions">

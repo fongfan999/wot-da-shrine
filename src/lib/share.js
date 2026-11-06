@@ -10,12 +10,12 @@
  */
 import qrcode from 'qrcode-generator';
 import { t } from './strings.js';
+import { fill } from '../../shared/fill.js';
 
 /** A string from STRINGS with its {placeholders} filled: one line, or a headline's two. */
 const say = (key, vars = {}) => {
-  const fill = (str) => Object.entries(vars).reduce((out, [k, v]) => out.replaceAll(`{${k}}`, v), str);
   const val = t(key);
-  return Array.isArray(val) ? val.map(fill) : fill(val);
+  return Array.isArray(val) ? val.map((line) => fill(line, vars)) : fill(val, vars);
 };
 
 const W = 1200;

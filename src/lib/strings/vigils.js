@@ -1,5 +1,4 @@
 /** Vigils: saying something is down, the vigil itself, the watch, They're back, and the shrine's records of it all. A part of STRINGS (src/lib/strings.js). */
-import { SHRINE_LEVELS } from '../../../shared/rules.js';
 
 export default {
   // Vigils
@@ -36,7 +35,7 @@ export default {
   shrineLevel: '{name} · {next}',
   shrineLevelMax: '{name}',
   shrineNext: '{n} karma to {name}',
-  shrineLevels: ['The altar', 'Roadside shrine', 'Village shrine', 'Temple', 'Grand temple', 'Head temple'].map((name, i) => [SHRINE_LEVELS[i], name]), // the karma each starts at is the shrine's rule
+  shrineLevels: ['The altar', 'Roadside shrine', 'Village shrine', 'Temple', 'Grand temple', 'Head temple'], // strings.js pairs each with the karma it starts at (SHRINE_LEVELS, the shrine's rule)
   shrineUnlocked: 'The shrine grew: {name}.',
   lanternsTitle: 'A lantern for each of the {n} vigils this shrine survived',
   lanternsTitleOne: 'A lantern for the vigil this shrine survived',

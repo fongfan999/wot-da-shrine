@@ -3,15 +3,14 @@
  * the visitor's settings and counters, and the little state that more than one part changes.
  */
 import { loadSettings, saveSettings, clearSettings, loadCounters, DEFAULTS } from '../lib/config.js';
-import { t } from '../lib/strings.js';
+import { fmt, t } from '../lib/strings.js';
 import { roomFromPath, loadMe } from '../lib/room.js';
 import { DEFAULT_MIX, PRESETS, TRACKS, layersOn, mixFromParam, presetOf } from '../../shared/rules.js';
 
 export const $ = (sel) => document.querySelector(sel);
 export const body = document.body;
 export const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-/** t() with {placeholders} filled in. */
-export const fmt = (key, vars = {}) => Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), t(key));
+export { fmt }; // t() with {placeholders} filled in (src/lib/strings.js)
 /** How long, as the page says it: "12 min", "1h 5m"; with `days`, "2d 3h" past a day. */
 export const minutesText = (m, { days = false } = {}) => {
   if (m < 60) return fmt('durMin', { n: m });

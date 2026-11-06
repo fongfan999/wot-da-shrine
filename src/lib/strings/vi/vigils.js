@@ -1,5 +1,4 @@
 /** Tiếng Việt cho strings/vigils.js. */
-import { SHRINE_LEVELS } from '../../../../shared/rules.js';
 
 export default {
   // Đàn cầu
@@ -36,7 +35,7 @@ export default {
   shrineLevel: '{name} · {next}',
   shrineLevelMax: '{name}',
   shrineNext: 'thêm {n} công đức lên {name}',
-  shrineLevels: ['Bàn thờ', 'Miếu ven đường', 'Đình làng', 'Chùa', 'Đại tự', 'Tổ đình'].map((name, i) => [SHRINE_LEVELS[i], name]), // mốc công đức là luật của miếu
+  shrineLevels: ['Bàn thờ', 'Miếu ven đường', 'Đình làng', 'Chùa', 'Đại tự', 'Tổ đình'], // strings.js ghép mỗi cấp với mốc công đức của nó
   shrineUnlocked: 'Miếu đã lên đời: {name}.',
   lanternsTitle: '{n} đèn lồng cho {n} đàn cầu miếu này đã vượt qua',
   lanternsTitleOne: 'Một đèn lồng cho đàn cầu miếu này đã vượt qua',

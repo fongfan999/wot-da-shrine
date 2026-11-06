@@ -40,5 +40,6 @@ export const PREVIEW_WORDS = {
   altDown: 'Server đang sập. Tranh mực vẽ bàn thờ, nhang đã thắp, cả team đang khấn.',
   altBack: 'Server sống lại rồi. Tranh mực vẽ bàn thờ sau đàn cầu.',
   alt: 'Tranh mực vẽ bát nhang trên bàn thờ trong chùa, kèm dòng chữ: cùng nhau cầu uptime. Ngày vái một lần. Cầu an cho deploy. Nhớ cho kami ăn.',
+  demoTitle: 'Dàn rack demo toang rồi',
   quickPrayers: QUICK_PRAYERS,
 };

@@ -6,8 +6,10 @@
  * Customize (saved), then a guess from where the browser is: Vietnamese for a browser whose first
  * language of ours is Vietnamese, or whose clock is set to Vietnam. Everyone else gets English.
  *
- * The page's head (src/partials/head.html) makes the same guess before the first paint, to set
- * <html lang> and keep the English it was served from showing: change both together.
+ * The page's head (src/partials/head.html) makes this choice before the first paint, sets <html lang>
+ * and keeps the English it was served in from showing, and the page goes by what it chose
+ * (data-locale), so the two can never disagree. pickLocale is the rule written out, and the tests
+ * hold the head to it: change both together.
  */
 
 /** Every language the page speaks, by its code, named in itself (as the picker shows it). */
@@ -40,6 +42,8 @@ export function savedLocale() {
 
 function browserLocale() {
   if (typeof window === 'undefined') return BASE; // the tests, and the Worker: English unless told
+  const chosen = known(document.documentElement.dataset.locale); // what the head chose before the first paint
+  if (chosen) return chosen;
   let timeZone = '';
   try { timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? ''; } catch { /* no clock to go by */ }
   return pickLocale({

@@ -55,6 +55,7 @@ export default {
   demoUfMin: ' min · ',
   demoUfPraying: ' praying · incense burning · ',
   demoUfKarma: ' karma. Last prayer: “',
+  demoMpEyebrow: 'Scheduled maintenance', // the maintenance page's own, not the heading's eyebrow (which the home page sets)
   demoReadme: 'The service that takes the money. When it is down, the team prays at the shrine; the badge above says whether incense is burning.',
   // The demo shrine's heading (DEMO_META in worker/objects/shrine/state.js; src/app/context.js says it in the page's words)
   demoRoomTitle: 'The demo rack is down',

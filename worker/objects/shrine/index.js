@@ -94,10 +94,10 @@ export class Shrine extends DurableObject {
       avatar: AVATARS.includes(url.searchParams.get('avatar')) ? url.searchParams.get('avatar') : '🧘',
       role: cleanRole(url.searchParams.get('role')),
       tone: cleanTone(url.searchParams.get('tone')),
-      lang: cleanLang(url.searchParams.get('lang')), // the page's language: the room's previews speak the last one acted in
+      lang: url.searchParams.has('lang') ? cleanLang(url.searchParams.get('lang')) : undefined, // the page's language, for the room's previews (an older page says none)
       from: clientOf(request), // never told to anyone (pub): only what the limits go by
     };
-    for (const k of ['role', 'tone']) if (person[k] === undefined) delete person[k];
+    for (const k of ['role', 'tone', 'lang']) if (person[k] === undefined) delete person[k];
     // A screen on the wall: sees everything, counts as nobody, and is never anyone's other tab.
     const watcher = url.searchParams.get('watch') === '1';
     // The browser keeps one token for everyone it is: another tab, a refresh or a dropped connection
@@ -196,7 +196,10 @@ export class Shrine extends DurableObject {
     const { opens } = act;
 
     if (!s.since) s.since = Date.now();
-    if (self.lang) s.lang = self.lang;
+    // The room's language, for its previews: the one acted in, kept while anyone here still speaks it, so one
+    // teammate in another language (or an older page, which says none) doesn't flip a whole team's links.
+    const speaks = (lang) => this.ctx.getWebSockets().some((w) => { const p = w.deserializeAttachment(); return p && !p.watcher && !p.replaced && p.lang === lang; });
+    if (self.lang && self.lang !== s.lang && !speaks(s.lang)) s.lang = self.lang;
     s.karma += KARMA[msg.t] ?? 0;
     const fed = this.feed(by, msg.t);
     if (fed) { out.fed = fed; s.karma += fed.karma ?? 0; }

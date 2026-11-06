@@ -28,7 +28,9 @@ import standing from './strings/standing.js';
 import tv from './strings/tv.js';
 import vigils from './strings/vigils.js';
 import words from './strings/words.js';
-import { QUICK_PRAYERS, prayerFrom, prayerIn } from '../../shared/prayers.js';
+import { prayerFrom, prayerIn } from '../../shared/prayers.js';
+import { SHRINE_LEVELS } from '../../shared/rules.js';
+import { fill } from '../../shared/fill.js';
 import { BASE, LOCALE } from './locale.js';
 
 export { LOCALE };
@@ -55,33 +57,48 @@ function merge(parts) {
 
 export const STRINGS = merge({ common, heading, dock, cards, standing, rooms, settings, landing, share, vigils, deploys, kami, tv, mantras, fortunes, demos, labels, words });
 
-/** The packs, each its own chunk. */
+/** The packs, each its own chunk. One that will not load (a dropped connection, a deploy since the page came) leaves the page in English, not dead. */
 const PACKS = { vi: () => import('./strings/vi/index.js') };
-if (LOCALE !== BASE && PACKS[LOCALE]) Object.assign(STRINGS, (await PACKS[LOCALE]()).default);
+if (LOCALE !== BASE && PACKS[LOCALE]) {
+  try { Object.assign(STRINGS, (await PACKS[LOCALE]()).default); } catch (err) { console.warn(`The ${LOCALE} words did not load; the page stays in English.`, err); }
+}
+// The levels' names, in whichever language, each with the karma it starts at: [[0, 'The altar'], …]. Paired
+// here, not in the parts, so a pack needs nothing from the main bundle and loads as one file.
+STRINGS.shrineLevels = STRINGS.shrineLevels.map((name, i) => [SHRINE_LEVELS[i], name]);
 
 export const t = (key) => STRINGS[key] ?? key;
+/** t() with {placeholders} filled in. */
+export const fmt = (key, vars = {}) => fill(t(key), vars);
 
 /** A prayer as this page says it: a ready-made one in its words, whatever language it was sent in; anything typed as typed. */
 export const prayerText = (text) => prayerIn(text, STRINGS.quickPrayers);
 /** A prayer as the shrine knows it: a ready-made one in its English words (shared/prayers.js), anything typed as typed. */
 export const prayerSent = (text) => prayerFrom(text, STRINGS.quickPrayers);
-export { QUICK_PRAYERS };
 
 /** The attributes a partial can ask for by key: data-i18n-label sets aria-label, data-i18n-title the title, and so on. */
 const ATTRS = { placeholder: 'placeholder', label: 'aria-label', title: 'title', alt: 'alt' };
 const ATTR_SELECTOR = Object.keys(ATTRS).map((a) => `[data-i18n-${a}]`).join(',');
 
-/** Apply strings to every [data-i18n] element, and every attribute asked for by key (ATTRS). */
+let applied = false;
+/**
+ * Apply strings to every [data-i18n] element, and every attribute asked for by key (ATTRS). The page
+ * calls this whenever its heading may have changed; the attributes, and an element marked
+ * data-i18n-once (a script changes its words from then on), get their words the first time only,
+ * so a later call never takes back what a script said there.
+ */
 export function applyStrings(overrides = {}) {
-  document.querySelectorAll('[data-i18n]').forEach((el) => {
+  document.querySelectorAll(applied ? '[data-i18n]:not([data-i18n-once])' : '[data-i18n]').forEach((el) => {
     const key = el.dataset.i18n;
     const val = overrides[key] || t(key);
     if (el.textContent !== val) el.textContent = val;
   });
-  document.querySelectorAll(ATTR_SELECTOR).forEach((el) => {
-    for (const [a, attr] of Object.entries(ATTRS)) {
-      const key = el.dataset[`i18n${a[0].toUpperCase()}${a.slice(1)}`];
-      if (key && el.getAttribute(attr) !== t(key)) el.setAttribute(attr, t(key));
-    }
-  });
+  if (!applied) {
+    document.querySelectorAll(ATTR_SELECTOR).forEach((el) => {
+      for (const [a, attr] of Object.entries(ATTRS)) {
+        const key = el.dataset[`i18n${a[0].toUpperCase()}${a.slice(1)}`];
+        if (key) el.setAttribute(attr, t(key));
+      }
+    });
+  }
+  applied = true;
 }

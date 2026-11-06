@@ -55,6 +55,7 @@ export default {
   demoUfMin: ' phút · ',
   demoUfPraying: ' người đang khấn · nhang đang cháy · ',
   demoUfKarma: ' công đức. Lời khấn mới nhất: “',
+  demoMpEyebrow: 'Bảo trì định kỳ',
   demoReadme: 'Service gánh việc thu tiền. Khi nó sập, cả team lên miếu khấn; badge phía trên cho biết nhang có đang cháy không.',
   // Tiêu đề miếu demo (DEMO_META trong worker/objects/shrine/state.js; src/app/context.js nói bằng chữ của trang)
   demoRoomTitle: 'Dàn rack demo toang rồi',

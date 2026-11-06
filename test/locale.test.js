@@ -20,6 +20,7 @@ const CASES = [
   [{ languages: ['en-GB'], timeZone: 'Asia/Saigon' }, 'vi'], // Windows' SE Asia zone, there
   [{ languages: ['th-TH'], timeZone: 'Asia/Bangkok' }, 'en'],
   [{ languages: [], timeZone: '' }, 'en'],
+  [{ languages: [], language: 'vi', timeZone: 'UTC' }, 'vi'], // a browser that lists no languages still has one
   [{ saved: 'en', languages: ['vi-VN'], timeZone: 'Asia/Ho_Chi_Minh' }, 'en'], // chosen in Customize
   [{ saved: 'vi', languages: ['en-US'], timeZone: 'UTC' }, 'vi'],
   [{ asked: 'en', saved: 'vi', languages: ['vi'], timeZone: 'Asia/Saigon' }, 'en'], // ?lang= beats them all
@@ -28,7 +29,7 @@ const CASES = [
 ];
 
 test('pickLocale: the address, then Customize, then where the browser is', () => {
-  for (const [input, want] of CASES) assert.equal(pickLocale(input), want, JSON.stringify(input));
+  for (const [{ language, ...input }, want] of CASES) assert.equal(pickLocale({ ...input, languages: input.languages.length ? input.languages : [language].filter(Boolean) }), want, JSON.stringify(input));
 });
 
 test('outside a browser (the tests, the Worker) the page speaks English', () => {
@@ -39,18 +40,19 @@ test('the head of every page guesses as pickLocale does', () => {
   const head = readFileSync(new URL('../src/partials/head.html', import.meta.url), 'utf8');
   const script = [...head.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).find((s) => s.includes('incense:lang'));
   assert.ok(script, 'head.html picks the language');
-  for (const [{ asked, saved, languages, timeZone }, want] of CASES) {
-    const html = { lang: '', classList: new Set() };
+  for (const [{ asked, saved, languages, language = languages[0], timeZone }, want] of CASES) {
+    const html = { lang: '', dataset: {}, classList: new Set() };
     vm.runInNewContext(script, {
       location: { search: asked ? `?lang=${asked}` : '' },
       localStorage: { getItem: () => saved ?? null },
-      navigator: { languages, language: languages[0] },
+      navigator: { languages, language },
       Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone }) }) },
       URLSearchParams,
       String,
-      document: { documentElement: { set lang(v) { html.lang = v; }, classList: { add: (c) => html.classList.add(c) } } },
+      document: { documentElement: { set lang(v) { html.lang = v; }, dataset: html.dataset, classList: { add: (c) => html.classList.add(c) } } },
     });
     assert.equal(html.lang, want, JSON.stringify({ asked, saved, languages, timeZone }));
+    assert.equal(html.dataset.locale, want);
     assert.equal(html.classList.has('l10n'), want !== 'en');
   }
 });
