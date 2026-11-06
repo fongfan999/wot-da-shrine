@@ -21,7 +21,7 @@
         </button>
         <button class="showcase__tab" id="sc-tab-2" type="button" role="tab" aria-selected="false" aria-controls="mp-form" data-pane="2" tabindex="-1">
           <span class="showcase__ico" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8h18"/><path d="M12 12v3l2 1"/></svg></span>
-          <span class="showcase__copy"><b data-i18n="mpLabel">Make it your maintenance page</b><span data-i18n="mpText">Planned downtime gets its own shrine. Link it from your status page and your users wait at the altar with you.</span></span>
+          <span class="showcase__copy"><b><span data-i18n="mpLabel">Make it your maintenance page</span> <i class="showcase__soon" data-i18n="mpSoon">Soon</i></b><span data-i18n="mpText">Planned downtime with its own shrine for your status page.</span></span>
           <span class="showcase__bar" aria-hidden="true"></span>
         </button>
       </div>
@@ -86,7 +86,7 @@
           </div>
         </div>
 
-        <!-- 3. The maintenance page builder, with a live preview -->
+        <!-- 3. The maintenance page, coming soon: a preview to play with that hands out no link (a shrine is whoever has its link, so a public one waits for sign-in) -->
         <form class="showcase__pane mp" id="mp-form" role="tabpanel" aria-labelledby="sc-tab-2" autocomplete="off" hidden>
           <div class="mp__browser" aria-hidden="true">
             <div class="mp__chrome"><i></i><i></i><i></i><span class="mp__addr"><span id="mp-host">shrine.wotda.app</span>/r/<b id="mp-show-slug">checkout-is-taking-a-nap</b></span></div>
@@ -100,13 +100,8 @@
           <div class="mp__fields">
             <label class="mp__field mp__field--wide"><span data-i18n="mpTitle">What’s down</span><input type="text" id="mp-title" maxlength="60" /></label>
             <div class="mp__field mp__field--eta"><span id="mp-eta-label" data-i18n="mpEta">Back at</span><button class="eta-trigger" id="mp-eta" type="button" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="mp-eta-label mp-eta-text mp-eta-sub" data-value=""><span class="eta-trigger__val"><span class="eta-trigger__text" id="mp-eta-text" data-i18n="etaAnyMoment" data-i18n-once>Any moment now</span><span class="eta-trigger__sub" id="mp-eta-sub" data-i18n="etaNoneSub" data-i18n-once>no ETA</span></span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg></button></div>
-            <label class="mp__field mp__field--slug"><span data-i18n="mpSlug">Its link</span><span class="mp__slug"><span aria-hidden="true">/r/</span><input type="text" id="mp-slug" maxlength="48" spellcheck="false" /></span></label>
           </div>
-          <div class="mp__actions">
-            <button class="btn btn--accent btn--sm" type="submit" data-i18n="mpCopy">Copy link</button>
-            <a class="btn btn--glass btn--sm" id="mp-preview" href="/r/checkout-is-taking-a-nap" target="_blank" rel="noopener" data-i18n="mpPreview">Open it ↗</a>
-            <span class="mp__note" data-i18n="mpNote">The title and time ride in the link, so everyone who opens it sees them.</span>
-          </div>
+          <p class="mp__soon"><i class="showcase__soon" data-i18n="mpSoon">Soon</i> <span data-i18n="mpNote">It comes with sign-in, so only your team can change it.</span></p>
         </form>
       </div>
     </div>

@@ -43,11 +43,6 @@
 .eta-pop__foot { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--line); }
 .eta-pop__clear { padding: 6px 4px; border: 0; background: none; color: var(--muted); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
 .eta-pop__clear:hover { color: var(--ink); }
-.mp__slug { display: flex; align-items: center; min-height: 42px; padding-left: 12px; border: 1px solid var(--field-line); border-radius: var(--radius-md); background: var(--paper); font-family: var(--font-mono); font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--muted); }
-.mp__slug:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.mp__slug input { flex: 1; min-width: 0; min-height: 40px; padding: 8px 12px 8px 1px; border: 0 !important; box-shadow: none !important; background: transparent; font-family: var(--font-mono); font-size: 14px; color: var(--ink); }
-.mp__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
-.mp__note { flex: 1 1 180px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .02em; color: var(--muted); }
 .mp__addr { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mp__addr b { font-weight: 600; color: var(--accent); display: inline-block; }
 .mp__addr b.is-tick { animation: tick .45s var(--ease); }

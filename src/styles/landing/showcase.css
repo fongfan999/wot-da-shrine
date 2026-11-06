@@ -24,8 +24,12 @@
    the one on the stage is lit, the others wait a step back */
 .showcase__copy b { font-size: 17px; font-weight: 650; letter-spacing: -.02em; color: var(--muted); transition: color 220ms ease; }
 .showcase__tab:hover .showcase__copy b, .showcase__tab[aria-selected="true"] .showcase__copy b { color: var(--ink); }
-.showcase__copy span { font-size: 14px; line-height: 1.5; color: var(--muted); opacity: .7; transition: opacity 220ms ease; }
-.showcase__tab:hover .showcase__copy span, .showcase__tab[aria-selected="true"] .showcase__copy span { opacity: 1; }
+.showcase__copy > span { font-size: 14px; line-height: 1.5; color: var(--muted); opacity: .7; transition: opacity 220ms ease; }
+.showcase__tab:hover .showcase__copy > span, .showcase__tab[aria-selected="true"] .showcase__copy > span { opacity: 1; }
+/* What is on its way, not here yet: the maintenance page waits for sign-in */
+.showcase__soon { display: inline-block; margin-left: 4px; padding: 1px 8px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); font-family: var(--font-mono); font-size: 10px; font-style: normal; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); vertical-align: 3px; }
+.mp__soon { display: flex; align-items: center; gap: 10px; margin: 0 !important; font-size: 13px !important; color: var(--muted) !important; }
+.mp__soon .showcase__soon { margin: 0; flex: none; vertical-align: 0; }
 /* how long until the next pane, while the showcase plays itself */
 .showcase__bar { position: absolute; left: 18px; right: 18px; bottom: 8px; height: 2px; border-radius: 2px; background: var(--line); opacity: 0; }
 .showcase__bar::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--accent); transform: scaleX(0); transform-origin: left; }
@@ -109,7 +113,6 @@
 .mp__field { display: flex; flex-direction: column; gap: 5px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .mp__field input { min-height: 42px; padding: 8px 12px; border: 1px solid var(--field-line); border-radius: var(--radius-md); background: var(--paper); color: var(--ink); font: inherit; font-family: var(--font-sans); font-size: 15px; text-transform: none; letter-spacing: 0; outline: 0; }
 .mp__field input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.mp__field--slug { grid-column: 1 / -1; }
 
 /* 2. The alerts webhook: the tools it reads, what one sends, what the shrine answers, and the room's feed */
 .alerts { display: flex; flex-direction: column; gap: 14px; padding: 18px; }

@@ -37,7 +37,7 @@ export function setupShowcase() {
       tab.tabIndex = on ? 0 : -1;
       panes[k].hidden = !on;
     });
-    caption.textContent = tabs[i].querySelector('.showcase__copy span').textContent;
+    caption.textContent = tabs[i].querySelector('.showcase__copy > span').textContent;
     if (focus) tabs[i].focus();
     // restart the progress bar on the newly selected tab (rewound, not re-laid-out to restart it)
     for (const a of tabs[i].querySelector('.showcase__bar').getAnimations({ subtree: true })) a.currentTime = 0;

@@ -55,7 +55,7 @@
   .showcase__tab { flex: 0 0 auto; padding: 10px 14px 14px; grid-template-columns: auto auto; align-items: center; }
   .showcase__ico { width: 30px; height: 30px; }
   .showcase__copy b { font-size: 15px; white-space: nowrap; }
-  .showcase__tab .showcase__copy span { display: none; } /* pills: the caption under them says it */
+  .showcase__tab .showcase__copy > span { display: none; } /* pills: the caption under them says it */
   .showcase__bar { left: 14px; right: 14px; bottom: 5px; }
   .showcase__stage { min-height: 0; }
   .showcase__caption { display: block; margin: -6px 0 0 !important; font-size: 15px !important; }
@@ -258,7 +258,7 @@
 /* On a touch screen every field we type into is 16px at least: iOS Safari zooms the page in on a smaller one as it
    takes the focus, and leaves it zoomed after (the alternative, maximum-scale, would stop anyone pinching to zoom) */
 @media (hover: none) and (pointer: coarse) {
-  .name-form__input, .down-pop__input, .kami-pop__form .down-pop__input, .mp__field input, .mp__slug input { font-size: 16px; }
+  .name-form__input, .down-pop__input, .kami-pop__form .down-pop__input, .mp__field input { font-size: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
