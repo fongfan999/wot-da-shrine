@@ -27,6 +27,9 @@ export default {
   tagline: 'Pray for uptime, together.',
   madeBy: 'Made by',
   openSource: 'Open source on GitHub',
+  feedback: 'Report a bug or ask for a feature',
+  feedbackHint: 'Write to hey@wotdafong.dev',
+  feedbackFoot: 'Report a bug, ask for a feature',
 
   // A shrine with nothing down: the heading counts the days, and the kami has its say
   quietEyebrow: 'Under the shrine’s protection',

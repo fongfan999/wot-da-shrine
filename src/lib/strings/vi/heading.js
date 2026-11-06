@@ -27,6 +27,9 @@ export default {
   tagline: 'Cùng nhau khấn cho uptime.',
   madeBy: 'Làm bởi',
   openSource: 'Mã nguồn mở trên GitHub',
+  feedback: 'Báo lỗi hay xin thêm tính năng',
+  feedbackHint: 'Gửi thư tới hey@wotdafong.dev',
+  feedbackFoot: 'Báo lỗi, xin tính năng',
 
   // A shrine with nothing down: the heading counts the days, and the kami has its say
   quietEyebrow: 'Có miếu phù hộ',
