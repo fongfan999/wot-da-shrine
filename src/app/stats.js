@@ -366,14 +366,17 @@ const etaText = $('#eta-text');
 const etaBtn = $('#eta-btn');
 export function updateEta() {
   etaBtn.dataset.value = meta('eta') || ''; // the picker opens on the room's time, not a stale one
-  if (!meta('eta')) { etaText.textContent = t('etaAny'); return; }
+  // In parts, so a phone can show only how long: "25m", and "any moment" not at all (the rest is still read out)
+  const part = (cls, text) => Object.assign(document.createElement('span'), { className: cls, textContent: text });
+  if (!meta('eta')) { etaText.replaceChildren(part('eta__any', t('etaAny'))); return; }
   const d = new Date(meta('eta'));
   const diff = d - Date.now();
-  if (diff <= 0) { etaText.textContent = t('etaAny'); return; }
+  if (diff <= 0) { etaText.replaceChildren(part('eta__any', t('etaAny'))); return; }
   const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   const rel = h > 0 ? `${h}h ${m}m` : `${m}m`;
   const abs = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-  etaText.textContent = fmt('etaIn', { rel, at: abs });
+  const [before, after] = fmt('etaIn', { rel: '\u0000', at: abs }).split('\u0000');
+  etaText.replaceChildren(part('eta__at', before), rel, part('eta__at', after));
 }
 every(15000, updateEta);

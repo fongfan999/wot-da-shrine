@@ -6,7 +6,8 @@ const menus = [...document.querySelectorAll('.menu')].map((wrap) => ({
   list: wrap.querySelector('.menu__list'),
 }));
 let current = null;
-const items = (m) => [...m.list.querySelectorAll('.menu__item')].filter((el) => !el.hidden);
+/** The items on show: not hidden, and not left out at this width (GitHub moves into More on a phone, Cast to TV into Share) */
+const items = (m) => [...m.list.querySelectorAll('.menu__item')].filter((el) => !el.hidden && el.getClientRects().length);
 
 export const menuOpen = () => Boolean(current);
 

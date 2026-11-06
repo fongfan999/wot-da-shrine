@@ -61,6 +61,8 @@
 
 /* GitHub sits in the bar on a wide screen and in More on a phone, never both */
 #btn-github, .menu__sep:has(+ #btn-github) { display: none; }
+/* Cast to TV is the bar's own icon, and a line in Share only on a phone (responsive.css) */
+#menu-cast { display: none; }
 .bar__right { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
 /* In a shrine the chip pushes the rest right, so the incident pill sits beside the bar's buttons */
 .room-chip:not([hidden]) { margin-right: auto; }

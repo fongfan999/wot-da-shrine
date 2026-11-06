@@ -42,6 +42,7 @@ body[data-blessing] .incident .eta { display: none; }
 /* Says what it is: when the servers are due back */
 .eta__label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; color: var(--ink); }
 .eta__edit { display: none; flex-shrink: 0; width: 13px; height: 13px; opacity: .6; }
+.eta__clock { display: none; flex-shrink: 0; width: 16px; height: 16px; } /* a phone's ETA: the clock instead of the word */
 body[data-meta-editable="1"] .eta__edit { display: block; }
 body[data-meta-editable="1"] .eta__btn { cursor: pointer; }
 body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { background: var(--paper-sunk); color: var(--ink); }
@@ -72,7 +73,7 @@ body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { 
 /* The title leaves the corner to the clock */
 body:is([data-vigil], [data-resolved], [data-blessing], [data-shipped]) .title { max-width: calc(100% - 15rem); }
 /* and so does the line under it, where the clock's own lines reach down past a one-line title */
-body:is([data-vigil], [data-resolved], [data-blessing], [data-shipped]) .subtitle { max-width: min(60ch, calc(100% - 15rem)); }
+@media (min-width: 761px) { body:is([data-vigil], [data-resolved], [data-blessing], [data-shipped]) .subtitle { max-width: min(60ch, calc(100% - 15rem)); } }
 body[data-resolved="1"] .vigil__dot { background: var(--live); }
 body[data-resolved="1"] .vigil__dot::after { animation: none; }
 body[data-resolved="1"] .vigil__time { font-size: 22px; letter-spacing: 0; color: var(--live); }

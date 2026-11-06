@@ -50,3 +50,28 @@ test('on a short phone the censer is whole above the dock, and a vigil from star
   await expect(page.locator('#btn-unresolve')).toBeVisible();
   expect(await laidOut(page)).toBe(PHONE.width);
 });
+
+test('on a phone the bar is one row of icons, still named, and Cast to TV is in Share', async ({ page, room }) => {
+  await page.goto(`/r/${room}`);
+  await page.locator('#join-form [type="submit"]').tap();
+  await expect(page.locator('body')).toHaveAttribute('data-conn', 'open');
+
+  const down = page.getByRole('button', { name: 'Something’s down' });
+  await expect(down).toBeVisible(); // an icon on screen, its name for whoever cannot see it
+  expect((await down.boundingBox()).width).toBeLessThan(48);
+  const oneRow = async () => (await page.locator('.bar').boundingBox()).height < 72;
+  await expect.poll(oneRow).toBe(true);
+  await expect.poll(async () => (await page.locator('#watch').boundingBox()).y).toBe((await page.locator('#kami').boundingBox()).y); // one row too
+
+  await expect(page.locator('#btn-cast')).toBeHidden();
+  await page.locator('#btn-share').tap();
+  await page.locator('#menu-cast').tap();
+  await expect(page.locator('#cast')).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  await down.tap();
+  await page.locator('#down-title').fill('Payments API');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('body')).toHaveAttribute('data-vigil', '1');
+  await expect.poll(oneRow).toBe(true); // the ETA is a clock, They're back a tick
+});

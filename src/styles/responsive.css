@@ -186,6 +186,42 @@
   .burner { min-height: 110px; }
 }
 
+/* A phone: a key says what it does with its icon, and its name stays for screen readers. What the words took goes to
+   the altar. The bar is one row: the incident pill's keys are icons beside the others, Cast to TV moves into Share,
+   and the ETA says only how long. The watch and the kami share a row, each a lantern or a mask and its chip (their
+   sentences are in their pop-ups). The dock's keys are icons; the incense's key still counts down. A phone on its
+   side too, where the bar would take two of its few rows. */
+@media (max-width: 760px), (max-height: 500px) and (max-width: 1099px) and (orientation: landscape) {
+  .incident > .btn > [data-i18n], .eta__label, .eta__any, .eta__at, .watch__text, .kami__text, .act__label:not(.act__label--lit) {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  .bar { gap: 6px; }
+  .bar__right { gap: 6px; }
+  .room-chip { padding-inline: 6px; }
+  /* in the row, beside the bar's buttons, with its pop-ups hanging from the bar, the width of the screen */
+  .incident { order: 0; flex: none; position: static; justify-content: flex-start; }
+  body[data-mode="room"] .eta { flex: none; }
+  .bar .eta-pop { top: calc(100% + 4px); left: 12px; right: auto; width: min(420px, calc(100% - 24px)); }
+  .incident > .btn { min-width: 32px; min-height: 32px; padding: 0 8px; gap: 4px; justify-content: center; }
+  .incident > .btn .ico { width: 16px; height: 16px; }
+  /* the ETA is a clock, and how long when there is one: "25m" (the hour it means is read out, and in the picker) */
+  .eta__btn { min-height: 32px; min-width: 32px; justify-content: center; gap: 4px; padding: 4px 8px; color: var(--ink); }
+  .eta__clock { display: block; }
+  body[data-meta-editable="1"] .eta__edit { display: none; }
+  #eta-text { font-family: var(--font-mono); font-size: 12px; }
+  #btn-cast { display: none; }
+  .bar:has(#btn-cast:not([hidden])) #menu-cast { display: grid; }
+  /* the watch and the kami: one row, the kami's meter giving way first when it is tight */
+  .heading__lines { flex-wrap: wrap; }
+  .kami { min-width: 0; }
+  .kami__btn { gap: 6px; padding-right: 6px; }
+  .kami__meter { flex: 0 1 44px; min-width: 18px; }
+  /* their pop-ups hang from the heading's edge at its width, not from a pill halfway along the row */
+  .watch, .kami { position: static; }
+  .watch-pop, .kami-pop { left: 0; right: auto; width: min(380px, 100%); }
+  .act { min-height: 44px; }
+}
+
 /* A phone on its side: too short for the bar, the heading, the altar and a dock of three rows at once. The bar
    scrolls away with the page, the dock is one row (the prayer field and the keys, the quick prayers left out), and
    the heading and the altar take the rest of the screen */
@@ -211,6 +247,10 @@
 @media (max-width: 374px) {
   .bar { gap: 6px; padding-inline: 12px; }
   .bar__right { gap: 4px; }
+  .bar .icon-btn { width: 32px; height: 32px; }
+  .presence { min-height: 32px; padding: 1px; }
+  .heading__lines { column-gap: 6px; }
+  .watch__action, .kami__action { padding-inline: 8px; }
   .dock { padding-inline: 10px; }
   .actions { gap: 4px; }
 }

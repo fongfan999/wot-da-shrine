@@ -21,7 +21,7 @@
   <!-- The incident: when it is due back, and the button that ends it, as one control. It waits for the vigil to open. -->
   <div class="incident" id="incident">
     <p class="eta">
-      <button class="eta__btn" id="eta-btn" type="button" aria-haspopup="dialog" aria-expanded="false" data-value=""><span class="eta__label" data-i18n="etaLabel">ETA</span><span id="eta-text"></span><svg class="ico eta__edit" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
+      <button class="eta__btn" id="eta-btn" type="button" aria-haspopup="dialog" aria-expanded="false" data-value=""><svg class="ico eta__clock" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span class="eta__label" data-i18n="etaLabel">ETA</span><span id="eta-text"></span><svg class="ico eta__edit" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
     </p>
     <!-- No vigil open: say something is down, and the vigil begins. They're back takes its place once it does. -->
     <button class="btn btn--ember btn--sm incident__down" id="btn-down" type="button" hidden>
@@ -101,6 +101,11 @@
         <button class="menu__item" id="menu-card" type="button" role="menuitem">
           <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg>
           <span class="menu__text"><b data-i18n="menuCard">Share a picture</b><small data-i18n="menuCardHint">The altar as it is right now</small></span>
+        </button>
+        <!-- On a phone Cast to TV leaves the bar for this line, so the bar keeps one row -->
+        <button class="menu__item" id="menu-cast" type="button" role="menuitem" data-cast>
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><path d="M3 12a8 8 0 0 1 8 8M3 16a4 4 0 0 1 4 4"/><path d="M3 20h.01"/></svg>
+          <span class="menu__text"><b data-i18n="castBtn">Cast to TV</b><small data-i18n="menuCastHint">Type the code the war-room screen shows</small></span>
         </button>
       </div>
     </div>
