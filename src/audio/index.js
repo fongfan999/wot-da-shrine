@@ -6,6 +6,8 @@
 import { AmbientMusic } from './music.js';
 
 const MUSIC_VOLUME = 0.8;
+// what a person does to a page they are still on; a leave that goes through never sends these
+const GESTURES = ['pointerdown', 'keydown', 'touchstart'];
 
 class SoundKit {
   constructor() {
@@ -81,8 +83,15 @@ class SoundKit {
       g.setTargetAtTime(0, t, 0.008);
       this.hushedAt = t;
     }
-    // a navigation that never happens (a cancelled leave, a download): bring the sound back
-    this.unhushAt = setTimeout(() => this.unhush(), 2500);
+    // a navigation that never happens (a cancelled leave): bring the sound back when the person
+    // touches the page again, which a leave that does happen never sees, or after a long while.
+    // A timer alone (2.5 s) brought it back in the middle of a slow load, and the new page then
+    // cut it off at full level after all.
+    if (!this.unhushOnGesture) {
+      this.unhushOnGesture = () => this.unhush();
+      for (const ev of GESTURES) window.addEventListener(ev, this.unhushOnGesture, { capture: true, passive: true });
+    }
+    this.unhushAt = setTimeout(() => this.unhush(), 20000);
   }
 
   /**
@@ -96,7 +105,8 @@ class SoundKit {
    */
   settle() {
     if (this.hushedAt == null || this.ctx.state !== 'running') return;
-    const latency = (this.ctx.outputLatency || 0.06) + (this.ctx.baseLatency || 0);
+    // browsers under-report the latency of some outputs (Bluetooth above all): wait at least 100 ms
+    const latency = Math.max(0.1, (this.ctx.outputLatency || 0) + (this.ctx.baseLatency || 0));
     const until = this.hushedAt + 0.05 + latency;
     const stop = performance.now() + 400;
     while (this.ctx.currentTime < until && performance.now() < stop) { /* let the fade play out */ }
@@ -105,6 +115,11 @@ class SoundKit {
   unhush() {
     if (!this.out) return;
     clearTimeout(this.unhushAt);
+    if (this.unhushOnGesture) {
+      for (const ev of GESTURES) window.removeEventListener(ev, this.unhushOnGesture, { capture: true });
+      this.unhushOnGesture = null;
+    }
+    if (this.hushedAt == null) return;
     this.hushedAt = null;
     const g = this.out.gain; const t = this.ctx.currentTime;
     g.cancelScheduledValues(t);
