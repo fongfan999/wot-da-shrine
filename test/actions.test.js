@@ -90,6 +90,10 @@ describe('the room', () => {
     assert.equal(meta.screen.theme, 'light');
     assert.equal(meta.screen.fx, 'auto');
     assert.equal(await bo.hears('act'), false, 'mixing is not an act');
+    ann.send({ t: 'meta', cloud: 'all' });
+    assert.equal((await bo.next('meta')).meta.cloud, 'all', 'All of them is a pick of its own, not the nothing a new room starts with');
+    ann.send({ t: 'meta', cloud: 'heroku' });
+    assert.equal((await bo.next('meta')).meta.cloud, null, 'a cloud we draw no lantern for is no pick');
   });
 
   test('hears who renames, and a late arrival sees the new name', async () => {

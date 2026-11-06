@@ -251,7 +251,8 @@ export const cleanScene = (v, level, charms) => (SCENES.includes(v) && isOpen(v,
  * lit, bigger, and its region is on the torii's plaque. Names only, lettered in the shrine's own ink.
  */
 export const CLOUDS = ['aws', 'azure', 'gcp', 'cloudflare', 'dc'];
-export const cleanCloud = (v) => (CLOUDS.includes(v) ? v : null);
+/** A room's pick: one of CLOUDS, 'all' (every lantern alike, picked), or null (nothing picked yet, drawn the same as 'all'). */
+export const cleanCloud = (v) => (v === 'all' || CLOUDS.includes(v) ? v : null);
 
 /** A few mixes with names. The first is what a shrine plays until its room mixes its own. */
 export const PRESETS = {

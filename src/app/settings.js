@@ -276,13 +276,16 @@ const cloudShut = () => (roomName && roomName !== 'demo' && shrineAt() < TORII_L
   ? fmt('lockedLevel', { name: STRINGS.shrineLevels[TORII_LEVEL][1], n: Math.max(0, SHRINE_LEVELS[TORII_LEVEL] - counters.karma) })
   : '');
 function applyCloud() {
-  temple.setCloud(cloudNow() || null);
+  const now = cloudNow(); // '' until the room picks: then no button is checked
+  const one = now && now !== 'all';
+  temple.setCloud(one ? now : null);
   const shut = cloudShut();
-  $('#cloud-note').textContent = shut || t(cloudNow() ? 'cloudNote' : 'cloudNoteAll');
-  for (const b of cloudPick.querySelectorAll('[data-cloud]')) {
-    const on = b.dataset.cloud === cloudNow();
+  $('#cloud-note').textContent = shut || t(one ? 'cloudNote' : 'cloudNoteAll');
+  const picks = [...cloudPick.querySelectorAll('[data-cloud]')];
+  for (const [i, b] of picks.entries()) {
+    const on = b.dataset.cloud === now;
     b.setAttribute('aria-checked', String(on));
-    b.tabIndex = on ? 0 : -1;
+    b.tabIndex = on || (!now && i === 0) ? 0 : -1; // with none checked, the first takes the Tab
     b.disabled = Boolean(shut);
     b.title = shut ? fmt('lockedTip', { how: shut }) : '';
   }
@@ -290,7 +293,7 @@ function applyCloud() {
 cloudPick.addEventListener('click', (e) => {
   const b = e.target.closest('[data-cloud]');
   if (!b || !roomName || roomName === 'demo' || cloudShut() || b.dataset.cloud === cloudNow()) return;
-  state.roomMeta.cloud = b.dataset.cloud || null;
+  state.roomMeta.cloud = b.dataset.cloud;
   state.shrine?.send('meta', { cloud: state.roomMeta.cloud });
   applyCloud();
   sound.tick(740, 0.06);
