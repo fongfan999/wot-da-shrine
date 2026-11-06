@@ -3,7 +3,10 @@
     <p class="eyebrow" data-i18n="landGrowEyebrow">The shrine grows</p>
     <h2 class="land__title"><span data-i18n="landGrowTitle">Karma builds it.</span> <em data-i18n="landGrowAccent">Bows raise it.</em></h2>
     <div class="grow" id="grow-demo">
-      <!-- The shrine around the altar as a team's grows (scene/temple.js), the team kneeling on its mats (scene/congregation.js) -->
+      <!-- The shrine around the altar as a team's grows (scene/temple.js), the team kneeling on its mats (scene/congregation.js).
+           The track is as tall as six levels of scrolling; the pin stays on screen while it passes, and each stretch raises the next level. -->
+      <div class="grow__track" id="grow-track">
+      <div class="grow__pin" id="grow-pin">
       <figure class="grow__frame">
         <div class="grow__stage" id="grow-stage" role="img" aria-label="The shrine at each of its six levels, with the team kneeling on its mats" data-i18n-label="labelTheShrineAtEach">
           <div class="grow__world" id="grow-world">
@@ -19,6 +22,8 @@
         </figcaption>
       </figure>
       <ol class="grow__ladder" id="grow-ladder" aria-label="The six levels" data-i18n-label="labelTheSixLevels"></ol>
+      </div>
+      </div>
 
       <div class="grow__facts">
         <div class="grow__fact">
