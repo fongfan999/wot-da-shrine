@@ -102,21 +102,27 @@ export function setupShowcase() {
   });
 
   // The webhook: a tool fires, the shrine opens the vigil and the room hears it; then it resolves.
-  // Each round is a different tool from the ones it reads.
+  // Each round is the next tool it reads (what worker/alerts.js reads from each), until the visitor
+  // picks one: then that one fires and resolves for as long as they watch.
   const alertsPane = $('#sc-pane-3');
-  const tools = [...$('#al-tools').children];
-  const ALERTS = [
-    ['Grafana', '{"status":"firing","title":"Payments API is down","alerts":[…]}', '{"status":"resolved","alerts":[…]}'],
-    ['PagerDuty', '{"event":{"event_type":"incident.triggered","data":{"title":"Checkout 5xx"}}}', '{"event":{"event_type":"incident.resolved"}}'],
-    ['Alertmanager', '{"status":"firing","alerts":[{"labels":{"alertname":"DNSDown"}}]}', '{"status":"resolved","alerts":[…]}'],
-    ['Datadog', '{"alert_transition":"Triggered","title":"p99 latency on checkout"}', '{"alert_transition":"Recovered"}'],
-    ['UptimeRobot', '{"alertType":1,"monitorFriendlyName":"api.example.com"}', '{"alertType":2,"monitorFriendlyName":"api.example.com"}'],
-  ];
+  const tools = [...$('#al-tools').querySelectorAll('button')];
+  const ALERTS = {
+    Grafana: ['{"status":"firing","title":"Payments API is down","alerts":[…]}', '{"status":"resolved","orgId":1,"alerts":[…]}'],
+    Alertmanager: ['{"status":"firing","alerts":[{"labels":{"alertname":"DNSDown"}}]}', '{"status":"resolved","alerts":[…]}'],
+    PagerDuty: ['{"event":{"event_type":"incident.triggered","data":{"title":"Checkout 5xx"}}}', '{"event":{"event_type":"incident.resolved"}}'],
+    Opsgenie: ['{"action":"Create","alert":{"message":"Queue backlog over 10k"}}', '{"action":"Close","alert":{"message":"Queue backlog over 10k"}}'],
+    Datadog: ['{"alert_transition":"Triggered","title":"p99 latency on checkout"}', '{"alert_transition":"Recovered"}'],
+    Statuspage: ['{"incident":{"name":"Login is failing","status":"investigating"}}', '{"incident":{"name":"Login is failing","status":"resolved"}}'],
+    'Better Stack': ['{"data":{"attributes":{"status":"Started","name":"api.example.com"}}}', '{"data":{"attributes":{"status":"Resolved","name":"api.example.com"}}}'],
+    UptimeRobot: ['{"alertType":1,"monitorFriendlyName":"api.example.com"}', '{"alertType":2,"monitorFriendlyName":"api.example.com"}'],
+  };
   let round = 0;
   let up = false;
+  let picked = false;
   const ring = () => {
-    const [from, down, back] = ALERTS[round % ALERTS.length];
-    tools.forEach((li) => li.classList.toggle('is-on', li.textContent === from));
+    const from = tools[round % tools.length].textContent;
+    const [down, back] = ALERTS[from];
+    tools.forEach((b) => b.setAttribute('aria-pressed', String(b.textContent === from)));
     $('#al-down').textContent = fmt('landAlertsFeedDown', { from });
     $('#al-up').textContent = fmt('landAlertsFeedUp', { from });
     $('#al-body').textContent = up ? back : down;
@@ -128,11 +134,18 @@ export function setupShowcase() {
     alertsPane.querySelector('.alerts__item--up time').textContent = minutesText(min);
   };
   ring();
+  tools.forEach((b, i) => b.addEventListener('click', () => {
+    picked = true;
+    round = i;
+    up = false;
+    alertsPane.dataset.tick = '0'; // a full beat on firing before it resolves
+    ring();
+  }));
   every(1000, () => {
     if (!onScreen || panes[current] !== alertsPane || reduceMotion || document.visibilityState !== 'visible') return;
     alertsPane.dataset.tick = String((Number(alertsPane.dataset.tick) || 0) + 1);
     if (Number(alertsPane.dataset.tick) % 3) return;
-    if (up) round++;
+    if (up && !picked) round++;
     up = !up;
     ring();
   });
