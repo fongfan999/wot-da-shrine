@@ -58,6 +58,20 @@ describe('the Worker', () => {
 });
 
 describe('a shrine', () => {
+  test('takes what is down from the link that names it, at the first look, before anyone kneels', async () => {
+    const room = freshRoom('nap');
+    const eta = new Date(Date.now() + 3600e3).toISOString();
+    await get(`/r/${room}?title=${encodeURIComponent('Checkout is taking a nap')}&eta=${eta}`);
+    let status = await (await get(`/api/rooms/${room}/status`)).json();
+    assert.equal(status.title, 'Checkout is taking a nap', 'a status page visitor only looks, and the shrine says it anyway');
+    assert.ok(status.downFor >= 1, 'naming what is down in a quiet room opens the vigil');
+    await get(`/r/${room}?title=Something+else&eta=not-a-date`);
+    status = await (await get(`/api/rooms/${room}/status`)).json();
+    assert.equal(status.title, 'Checkout is taking a nap', 'a link never changes what the room already says');
+    const d = await arrive(room);
+    assert.equal(d.state.meta.eta, eta, 'and the ETA came with it');
+  });
+
   test('gives whoever kneels the room as it is', async () => {
     const room = freshRoom('state');
     const ann = await arrive(room, { name: 'Ann' });

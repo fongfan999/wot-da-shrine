@@ -2,6 +2,8 @@
 import { BLESSING_BLAME, CAST_SIZE, CELEBRATE_FOR, cleanCloud, cleanMix, cleanScene, cleanScreen, KARMA, MAX_HISTORY, openMix, QUICK_FIX, QUICK_MIN, RESOLVE_UNDO, VIGIL_IDLE } from '../../../shared/rules.js';
 import { clean, META_MAX } from './state.js';
 
+const LINK = { id: 'link', name: 'A link', avatar: '🔗' }; // who opened a vigil that a link named (seed)
+
 /** Methods of the Shrine: `this` is the shrine. */
 export const methods = {
   /**
@@ -97,6 +99,26 @@ export const methods = {
     if (Date.now() - last < VIGIL_IDLE) return false;
     this.closeVigil(last, 'forgotten');
     return true;
+  },
+  /**
+   * A link that says what is down (?title=, ?subtitle=, ?eta=: the maintenance page builder's, or
+   * /new's) gives the shrine whichever of those it has none of yet, at the first look, before anyone
+   * kneels: a status page's visitors only look, and the link preview, the badge and the world feed
+   * should say what is down too. Then it is a name given from inside: naming what is down in a quiet
+   * room opens the vigil, "A link" having said so. What the room already says, a link never changes.
+   * Answers the room's status, with what it now says.
+   */
+  async seed(room, fields) {
+    const s = this.state;
+    const msg = {};
+    if (!this.demo) for (const k of Object.keys(META_MAX)) if (fields[k] && !s.meta[k]) msg[k] = fields[k];
+    if (msg.eta && Number.isNaN(Date.parse(msg.eta))) delete msg.eta;
+    if (Object.keys(msg).length) {
+      this.settle();
+      this.forget();
+      await actions.meta.call(this, { msg, by: LINK, s });
+    }
+    return this.status(room);
   },
 };
 

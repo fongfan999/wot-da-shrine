@@ -128,7 +128,7 @@ export default {
   mpTitle: 'Cái gì đang sập',
   mpTitleExample: 'Checkout xin ngủ tí',
   mpSlug: 'Link của nó',
-  mpNote: 'Lần mở đầu tiên sẽ đặt tiêu đề và giờ cho miếu.',
+  mpNote: 'Tiêu đề và giờ nằm sẵn trong link, ai mở cũng thấy.',
   mpEta: 'Quay lại lúc',
   mpCopy: 'Copy link',
   mpPreview: 'Mở thử ↗',

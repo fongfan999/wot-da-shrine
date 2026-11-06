@@ -128,7 +128,7 @@ export default {
   mpTitle: 'What’s down',
   mpTitleExample: 'Checkout is taking a nap',
   mpSlug: 'Its link',
-  mpNote: 'The first visit gives the shrine its title and time.',
+  mpNote: 'The title and time ride in the link, so everyone who opens it sees them.',
   mpEta: 'Back at',
   mpCopy: 'Copy link',
   mpPreview: 'Open it ↗',

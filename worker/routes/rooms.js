@@ -32,6 +32,9 @@ function statusOf(c, room) {
   return room === DEMO_ROOM ? shared(c, `/api/rooms/${room}/status`, 5, ask) : ask();
 }
 
+/** The room's status after a link gave it the words it had none of; within the same READ_LIMIT as a look. */
+const seeded = async (c, room, fields) => ((await allowed(c, 'READ_LIMIT')) ? c.env.SHRINE.getByName(room).seed(room, fields) : null);
+
 const tooMany = (c) => c.json({ error: TOO_MANY }, 429, { 'Retry-After': '60' });
 
 const rooms = new Hono();
@@ -73,7 +76,10 @@ rooms.get('/r', (c) => c.redirect('/new'));
 rooms.get('/r/:room', async (c) => {
   const room = roomOf(c);
   if (!room) return c.redirect('/new');
-  const st = await statusOf(c, room).catch(() => null); // the page still works without it
+  // A link that says what is down gives a shrine that says nothing yet its words, before anyone kneels (seed)
+  const q = new URL(c.req.url).searchParams;
+  const fields = Object.fromEntries(['title', 'subtitle', 'eta'].filter((k) => q.get(k)?.trim()).map((k) => [k, q.get(k)]));
+  const st = await (Object.keys(fields).length && room !== DEMO_ROOM ? seeded(c, room, fields) : statusOf(c, room)).catch(() => null); // the page still works without it
   return roomPage(c, room, st);
 });
 
