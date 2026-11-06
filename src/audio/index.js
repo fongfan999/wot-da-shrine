@@ -87,13 +87,18 @@ class SoundKit {
 
   /**
    * Closing the tab destroys the context right after pagehide returns, before the fade above has
-   * been rendered, so the mix is still cut off at full level. Hold the main thread until the audio
-   * clock has played the fade down to silence (about 50 ms), never longer than 150 ms.
+   * been heard, so the mix is still cut off at full level. The audio clock runs ahead of the
+   * speakers: a sample is rendered, then sits in the output buffer for the output latency (tens of
+   * milliseconds on built-in speakers, hundreds on Bluetooth) before it plays, and tearing the
+   * context down throws that buffer away. Waiting for the clock alone threw away the fade itself.
+   * Hold the main thread until the fade has been rendered (about 50 ms) and then played through
+   * the latency, never longer than 400 ms.
    */
   settle() {
     if (this.hushedAt == null || this.ctx.state !== 'running') return;
-    const until = this.hushedAt + 0.05;
-    const stop = performance.now() + 150;
+    const latency = (this.ctx.outputLatency || 0.06) + (this.ctx.baseLatency || 0);
+    const until = this.hushedAt + 0.05 + latency;
+    const stop = performance.now() + 400;
     while (this.ctx.currentTime < until && performance.now() < stop) { /* let the fade play out */ }
   }
 
