@@ -3,8 +3,8 @@
 export default {
   // Side cards
   inShrine: 'Đang trong miếu',
-  openLabel: 'Khấn một mình',
-  openText: 'Lập một miếu chung rồi gửi link cho cả team. Nhang, lễ vật và lời khấn của mọi người đổ về cùng một bàn thờ, ngay tức thì.',
+  openLabel: 'Khấn một mình thì không thiêng',
+  openText: 'Lập miếu chung, thả link vào group. Nhang, lễ vật, lời khấn của cả team đổ về một bàn thờ, real-time, khỏi F5.',
   openCta: 'Lập miếu cho team',
   demoLabel: 'Miếu của team bạn',
   demoText: 'Bàn thờ này chỉ là bản demo. Lập miếu của bạn, đặt tên theo cái đang sập, gửi link, rồi cả team cùng quỳ trước một bàn thờ.',
@@ -12,7 +12,7 @@ export default {
   nameLabel: 'Đặt tên miếu',
   openTitle: 'Lập',
   openTitleAccent: 'miếu',
-  openHint: 'Đây là link team bạn sẽ bấm vào. Giữ tên tụi mình chọn sẵn, hoặc đặt theo cái đang sập.',
+  openHint: 'Đây là link cả team sẽ bấm. Giữ tên tụi mình đặt sẵn, hoặc đặt theo thứ đang sập, kiểu /r/checkout-lai-sap.',
   openGo: 'Lập luôn',
   worldPrayers: '{n} đã bay lên cloud',
   worldBurning: '{n} đang đỏ nhang',
