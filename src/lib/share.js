@@ -139,13 +139,21 @@ function wrap(text, max, lines = 2) {
 /** Strip the live altar of anything that would not survive as a standalone SVG. `plain` also clears the tablet (a picture for every room). */
 /**
  * People kneeling at the altar, backs to us, incense raised, laid out as the congregation lays them
- * (congregation.js): the closest pair either side of the middle first, in the burner's units, feet on its floor.
+ * (congregation.js), in the burner's units, feet on its floor: the closest pair either side of the middle;
+ * a crowd squeezes in front of the candles and every other pair kneels a step back, smaller, behind them.
  */
 function kneelersMarkup(looks = []) {
-  return looks.map((look, i) => {
-    const x = 260 + (i % 2 ? 1 : -1) * (226 + Math.floor(i / 2) * 76);
-    return `<g data-tone="${look.tone}" transform="translate(${x} 460.6) scale(1.062)">${kneeling('kneeler', { look })}</g>`;
-  }).join('');
+  const crowded = looks.length > 2;
+  const inner = crowded ? 150 : 226;
+  const gap = crowded ? 66 : 76;
+  const slots = looks.map((look, i) => {
+    const k = Math.floor(i / 2);
+    const back = crowded && k % 2 === 1;
+    const x = 260 + (i % 2 ? 1 : -1) * (inner + k * gap);
+    const s = 1.062 * (back ? 0.8 : 1);
+    return { back, svg: `<g data-tone="${look.tone}" transform="translate(${x} ${460.6 - (back ? 42 : 0)}) scale(${s})">${kneeling('kneeler', { look })}</g>` };
+  });
+  return [...slots.filter((o) => o.back), ...slots.filter((o) => !o.back)].map((o) => o.svg).join('');
 }
 
 function altarMarkup(host, plain = false, kneelers = []) {

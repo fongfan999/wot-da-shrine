@@ -82,8 +82,8 @@ const PREVIEWS = {
   down: { eyebrow: 'THE SERVERS ARE DOWN', headline: ['The servers are', 'down.'], facts: 'The team is at the shrine. Open the link, kneel, and pray with them.' },
   back: { eyebrow: 'THE SERVERS ARE BACK', headline: ['The servers are', 'back.'], facts: 'The vigil is over. Come and see what the team prayed for.' },
 };
-/** Who kneels in the pictures: the same two of the team every time, the closest mats (the next pair would sit past the card's edge). */
-const PREVIEW_CAST = [['dev', 1], ['devops', 2]];
+/** Who kneels in the pictures: the same four of the team every time, as many as the home page's chat card says are praying. */
+const PREVIEW_CAST = [['dev', 1], ['devops', 2], ['boss', 3], ['pm', 0]];
 export async function previewCard(kind) {
   const svg = cardSvg({
     room: '', resolved: kind === 'back', people: 0, avatars: [], quotes: [], url: 'shrine.wotda.app', plain: true,
