@@ -143,12 +143,16 @@ function comboHit() {
   clearTimeout(comboTimer);
   comboTimer = setTimeout(comboEnd, 2200);
   if (combo < 2) return;
-  const r = bowlBtn.getBoundingClientRect();
-  Object.assign(comboEl.style, { left: `${r.left + r.width / 2}px`, top: `${r.top - 6}px` });
   comboEl.querySelector('.combo__n').textContent = `×${combo}`;
   comboEl.querySelector('.combo__cap').textContent = STRINGS.comboCaptions.reduce((c, [at, text]) => (combo >= at ? text : c), '');
   comboEl.dataset.heat = String(Math.min(4, Math.floor(combo / 5)));
   comboEl.hidden = false;
+  // Over the bowl's key, or over the dock where the prayer field sits above the keys (a phone): never on the field, never off the screen
+  const r = bowlBtn.getBoundingClientRect();
+  const top = $('.pray').getBoundingClientRect().bottom <= r.top ? $('.dock').getBoundingClientRect().top : r.top;
+  const half = comboEl.offsetWidth / 2 + 8;
+  const x = Math.min(Math.max(r.left + r.width / 2, half), innerWidth - half);
+  Object.assign(comboEl.style, { left: `${x}px`, top: `${top - 6}px` });
   gsap.fromTo(comboEl, { scale: 1.3, opacity: 1, y: 0 }, { scale: 1, duration: 0.5, ease: 'elastic.out(1, 0.4)', overwrite: true });
   if (STRINGS.comboCaptions.some(([at]) => at === combo)) {
     petals.burst(6 + combo);

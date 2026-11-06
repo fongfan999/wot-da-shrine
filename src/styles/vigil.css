@@ -71,6 +71,8 @@ body[data-meta-editable="1"] .eta__btn:hover, .eta__btn[aria-expanded="true"] { 
 .vigil__meta:empty { display: none; }
 /* The title leaves the corner to the clock */
 body:is([data-vigil], [data-resolved], [data-blessing], [data-shipped]) .title { max-width: calc(100% - 15rem); }
+/* and so does the line under it, where the clock's own lines reach down past a one-line title */
+body:is([data-vigil], [data-resolved], [data-blessing], [data-shipped]) .subtitle { max-width: min(60ch, calc(100% - 15rem)); }
 body[data-resolved="1"] .vigil__dot { background: var(--live); }
 body[data-resolved="1"] .vigil__dot::after { animation: none; }
 body[data-resolved="1"] .vigil__time { font-size: 22px; letter-spacing: 0; color: var(--live); }

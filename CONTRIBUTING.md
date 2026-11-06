@@ -35,7 +35,7 @@ npm run test:page  # the pages in a browser: CI runs these too, in a job of thei
   shrine does gets a test; a new action gets one in `test/actions.test.js`.
 - **Page tests**: `npm run test:page` takes about fifteen seconds. It opens the pages in
   headless Chromium (Playwright) against the same Worker: the join card, someone else's acts
-  in the feed, renaming, a second tab, TV mode and the home page, and no tab may log an error.
+  in the feed, renaming, a second tab, TV mode, the home page and a phone, and no tab may log an error.
   The first time, `npx playwright install chromium` fetches the browser. A change to one of
   those flows, or to what the page does with a shrine's messages, gets a test in `test/page/`.
 - **The size budget**: no code file may grow past 400 lines or 24 KB (`npm run check:size`).

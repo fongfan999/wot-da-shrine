@@ -208,10 +208,11 @@
   box-shadow: 0 0 0 2px var(--paper);
 }
 
-/* Something opened: a card under the bar, with a button to try it. It stays while the pointer or focus is on it. */
+/* Something opened: a card under the bar, with a button to try it. It stays while the pointer or focus is on it.
+   Over the shrine, under the bar's menus and the dock's tray, which open over it (on a phone they share its spot). */
 .unlock-card {
   position: fixed;
-  z-index: 52;
+  z-index: 5;
   top: calc(var(--bar-h, 70px) + 12px);
   left: 50%;
   translate: -50% 0;

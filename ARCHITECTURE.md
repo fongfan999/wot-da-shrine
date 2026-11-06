@@ -142,7 +142,8 @@ throws, except the 404 from `/api/push/key` (there is no VAPID key locally). `jo
 covers the join card and kneeling; `acts.spec.js` another person's acts reaching the feed;
 `rename.spec.js` renaming from the More menu; `tabs.spec.js` a second tab of the same browser
 stepping the first aside; `slow.spec.js` a socket that opens late (you kneel at once, and what you
-do meanwhile reaches the shrine when it opens); `screens.spec.js` TV mode's QR code and the home page. CI runs them in
+do meanwhile reaches the shrine when it opens); `screens.spec.js` TV mode's QR code and the home page; `phone.spec.js` a short phone (touch, no wider than the screen,
+the censer above the dock, the bar's pop-ups on screen through a vigil). CI runs them in
 a job of their own. The first time on your machine, `npx playwright install chromium` fetches
 the browser.
 

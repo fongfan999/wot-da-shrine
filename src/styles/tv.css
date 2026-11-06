@@ -61,6 +61,18 @@ body[data-paired="lost"] .pair-screen__code, body[data-paired="lost"] .pair-scre
 body[data-paired="lost"] .tv-join__cast { opacity: .4; }
 @media (max-height: 620px) { .pair-screen__fine { display: none; } }
 .pair-screen__fine { max-width: 54ch; margin: 0; font-size: clamp(13px, 1vw, 16px); color: var(--muted); }
+/* The code screen opened on a phone (the home page links to it): the six tiles share the width and the steps wrap.
+   It still never scrolls, so the QR, for a phone to scan, makes way: this is the phone. */
+@media (max-width: 760px) {
+  .pair-screen { min-width: 0; padding-inline: var(--gutter); }
+  .pair-screen__card { min-width: 0; }
+  .pair-screen__title { font-size: clamp(2rem, 9.5vw, 2.6rem); }
+  .pair-screen__code { min-height: 0; gap: 6px; }
+  .pair-screen__tile { flex: 1 1 0; min-width: 0; width: auto; max-width: 64px; font-size: clamp(24px, 8.5vw, 40px); }
+  .pair-screen__gap { flex: none; width: 10px; }
+  .pair-screen__scan { display: none; }
+  .pair-screen__steps li { white-space: normal; }
+}
 
 /* On the TV: casting, and someone arriving from their phone */
 .tv-casting { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; background: var(--backdrop); }

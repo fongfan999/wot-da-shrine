@@ -21,7 +21,13 @@ body {
   grid-template-rows: minmax(0, 1fr) auto;
   min-height: calc(100dvh - var(--bar-h, 70px));
 }
+/* Nothing drawn may make the page wider than the screen (the altar's halo, the temple's eaves, the TV's glow):
+   a phone sizes the page to fit it whatever the body's overflow says, zoomed out on Android, panning sideways
+   on iOS. Clip, unlike hidden, makes no scroll box, so the dock and the altar still stick. */
+.app, .landing { overflow-x: clip; }
 button { font: inherit; color: inherit; cursor: pointer; }
+/* Tapped as fast as a thumb can (the bowl's combos), a key is a key: a quick second tap is never a zoom */
+button, a, label, summary, [role="button"], .burner { touch-action: manipulation; }
 a { color: inherit; }
 ::selection { background: var(--selection); color: var(--selection-ink); }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: var(--radius-xs); }

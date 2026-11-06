@@ -6,6 +6,9 @@ import { $, body, landing, reduceMotion, state } from './context.js';
 import { every } from '../lib/clock.js';
 
 const toastEl = $('#toast');
+// Centred by xPercent, not the stylesheet's translate(-50%): GSAP would read that once, in pixels, as half the first
+// toast's width, and every longer one after it would sit off centre, past a phone's right edge.
+gsap.set(toastEl, { xPercent: -50, x: 0, y: 20 });
 
 /* ---------- Toast ---------- */
 let toastTl;

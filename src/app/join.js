@@ -93,7 +93,9 @@ export function openJoin() {
   joinEl.inert = false;
   gsap.fromTo(joinEl, { opacity: 0 }, { opacity: 1, duration: 0.4 });
   gsap.fromTo('.join__card', { y: 24, opacity: 0, scale: 0.97 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out', delay: 0.1 });
-  setTimeout(() => { joinName.focus(); joinName.select(); }, 50);
+  // Ready for a name, except on a touch screen: there focusing it would raise the keyboard over the card before anyone
+  // has read it, when most just keep the name they were given and pick what they do
+  if (!matchMedia('(hover: none) and (pointer: coarse)').matches) setTimeout(() => { joinName.focus(); joinName.select(); }, 50);
 }
 
 /** What the card has picked: your avatar, what you do, your colour. */

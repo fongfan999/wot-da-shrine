@@ -104,6 +104,16 @@
   .vigil__time { grid-column: auto; font-size: 18px; letter-spacing: 0; }
   .vigil { top: .6em; }
   body:is([data-vigil], [data-resolved], [data-blessing], [data-shipped]) .title { max-width: calc(100% - 6.5rem); }
+  /* After They're back or Shipped the corner says how long it took, in words: two short lines beside the title, never over it */
+  body[data-resolved="1"] .vigil__time, .vigil[data-mode="shipped"] .vigil__time { max-width: 6.6rem; font-size: 13px; line-height: 1.25; white-space: normal; text-align: left; }
+  body:is([data-resolved], [data-shipped]) .title { max-width: calc(100% - 7.6rem); }
+  /* The minute to take They're back back is all the pill holds on a phone, so it fits the row */
+  .incident:has(#btn-unresolve:not([hidden])) :is(#btn-down, #btn-bless) { display: none; }
+  /* The offerings open above the dock and scroll under the bar rather than slipping behind it */
+  .tray { max-height: calc(100dvh - var(--bar-h, 104px) - var(--dock-h, 180px) - 4px); overflow-y: auto; overscroll-behavior: contain; }
+  /* This shrine opens from its whole card, not a line of small type */
+  .card--shrine { padding: 0; }
+  .shrine-sum { min-height: 48px; padding: 0 var(--space-4); }
   .tv-join { display: none; }
   .rituals { grid-template-columns: 1fr; }
   .mp__fields { grid-template-columns: minmax(0, 1fr); }
@@ -140,11 +150,75 @@
   .act kbd { display: none; }
   .act__label { font-size: 11px; }
   .act__label--lit [data-i18n] { display: none; }
-  .toast { top: 62px; font-size: 13px; }
+  .toast { top: calc(var(--bar-h, 62px) + 8px); font-size: 13px; } /* under the bar, never over its buttons */
   .sheet { padding: 0; align-items: end; }
   .sheet__card { max-height: 100dvh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border-bottom: 0; }
   .sheet__title { font-size: 26px; }
   .credit { font-size: 11px; }
+}
+
+/* A phone, or a phone on its side: the bar's pop-ups end above the bottom of the screen and scroll inside, so their
+   buttons are always in reach */
+@media (max-width: 760px), (max-height: 500px) {
+  .bar .eta-pop { max-height: calc(100dvh - var(--bar-h, 104px) - 12px); overflow-y: auto; overscroll-behavior: contain; }
+  .bar .eta-pop > * { flex-shrink: 0; }
+}
+
+/* Phone, in a shrine: the altar takes what the bar and the dock leave, measured from the stage's own padding */
+@media (max-width: 760px) {
+  body[data-mode="room"] .center { height: max(300px, calc(100dvh - var(--bar-h, 104px) - var(--dock-h, 180px) - 24px)); }
+}
+
+/* A short phone (an SE, a mini, a phone with its browser's bars out): the heading and the dock give up their
+   spare lines and padding so the censer is on the first screen, whole, above the dock */
+@media (max-width: 760px) and (max-height: 700px) {
+  .mantra { display: none; }
+  .title { font-size: clamp(1.75rem, 8.6vw, 2.15rem); }
+  body[data-mode="room"] .center { height: max(250px, calc(100dvh - var(--bar-h, 104px) - var(--dock-h, 160px) - 16px)); }
+  .dock { padding-top: 8px; row-gap: 6px; }
+  .quick { min-height: 32px; }
+  .pray { min-height: 46px; padding-block: 3px; }
+  .pray__send { width: 36px; height: 36px; }
+  .act { min-height: 48px; padding-block: 4px; }
+  .tray__item { padding: 6px 4px 5px; gap: 3px; }
+  .tray__emoji { height: 30px; }
+  /* the censer fits the altar rather than rising into the heading */
+  .burner { min-height: 110px; }
+}
+
+/* A phone on its side: too short for the bar, the heading, the altar and a dock of three rows at once. The bar
+   scrolls away with the page, the dock is one row (the prayer field and the keys, the quick prayers left out), and
+   the heading and the altar take the rest of the screen */
+@media (max-height: 500px) and (max-width: 1099px) and (orientation: landscape) {
+  .bar { position: relative; }
+  .dock { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "pray actions"; padding-top: 8px; padding-bottom: max(8px, env(safe-area-inset-bottom)); row-gap: 0; }
+  .quick { display: none; }
+  .pray { min-height: 46px; padding-block: 3px; }
+  .pray__send { width: 36px; height: 36px; }
+  .actions { display: flex; gap: 6px; }
+  .act { flex: none; grid-template-columns: 1fr; justify-items: center; min-width: 60px; min-height: 46px; padding: 4px 6px; border-radius: 12px; }
+  .act--primary { min-width: 104px; }
+  .act__icon { grid-row: auto; }
+  .act kbd { display: none; }
+  .act__label { font-size: 11px; }
+  .act__label--lit [data-i18n] { display: none; }
+  body[data-mode="room"] .center { height: max(220px, calc(100dvh - var(--dock-h, 64px) - 16px)); }
+  .tray { max-height: calc(100dvh - var(--dock-h, 64px) - 8px); overflow-y: auto; overscroll-behavior: contain; }
+  .toast { top: 12px; }
+}
+
+/* The narrowest phones: the bar's buttons sit closer so they keep one row beside the mark */
+@media (max-width: 374px) {
+  .bar { gap: 6px; padding-inline: 12px; }
+  .bar__right { gap: 4px; }
+  .dock { padding-inline: 10px; }
+  .actions { gap: 4px; }
+}
+
+/* On a touch screen every field we type into is 16px at least: iOS Safari zooms the page in on a smaller one as it
+   takes the focus, and leaves it zoomed after (the alternative, maximum-scale, would stop anyone pinching to zoom) */
+@media (hover: none) and (pointer: coarse) {
+  .name-form__input, .down-pop__input, .kami-pop__form .down-pop__input, .mp__field input, .mp__slug input { font-size: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
