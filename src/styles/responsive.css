@@ -55,7 +55,7 @@
   .showcase__tab { flex: 0 0 auto; padding: 10px 14px 14px; grid-template-columns: auto auto; align-items: center; }
   .showcase__ico { width: 30px; height: 30px; }
   .showcase__copy b { font-size: 15px; white-space: nowrap; }
-  .showcase__tab[aria-selected="true"] .showcase__copy span { display: none; }
+  .showcase__tab .showcase__copy span { display: none; } /* pills: the caption under them says it */
   .showcase__bar { left: 14px; right: 14px; bottom: 5px; }
   .showcase__stage { min-height: 0; }
   .showcase__caption { display: block; margin: -6px 0 0 !important; font-size: 15px !important; }

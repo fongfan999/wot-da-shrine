@@ -20,10 +20,12 @@
 .showcase__ico { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--paper-sunk); color: var(--muted); transition: background-color 220ms ease, color 220ms ease; }
 .showcase__tab[aria-selected="true"] .showcase__ico { background: var(--accent-soft); color: var(--accent); }
 .showcase__copy { display: flex; flex-direction: column; gap: 4px; }
+/* Every tab says what it is, so the four read at a glance and nothing moves when the tour turns a page;
+   the one on the stage is lit, the others wait a step back */
 .showcase__copy b { font-size: 17px; font-weight: 650; letter-spacing: -.02em; color: var(--muted); transition: color 220ms ease; }
-.showcase__tab[aria-selected="true"] .showcase__copy b { color: var(--ink); }
-.showcase__copy span { font-size: 14px; line-height: 1.5; color: var(--muted); display: none; }
-.showcase__tab[aria-selected="true"] .showcase__copy span { display: block; animation: rise-in .4s var(--ease) both; }
+.showcase__tab:hover .showcase__copy b, .showcase__tab[aria-selected="true"] .showcase__copy b { color: var(--ink); }
+.showcase__copy span { font-size: 14px; line-height: 1.5; color: var(--muted); opacity: .7; transition: opacity 220ms ease; }
+.showcase__tab:hover .showcase__copy span, .showcase__tab[aria-selected="true"] .showcase__copy span { opacity: 1; }
 /* how long until the next pane, while the showcase plays itself */
 .showcase__bar { position: absolute; left: 18px; right: 18px; bottom: 8px; height: 2px; border-radius: 2px; background: var(--line); opacity: 0; }
 .showcase__bar::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--accent); transform: scaleX(0); transform-origin: left; }
@@ -61,7 +63,7 @@
 .chat__who time { margin-left: 6px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
 .chat__text { margin: 0 !important; font-size: 14px !important; line-height: 1.45 !important; color: var(--ink) !important; }
 .chat__link { color: var(--accent); text-decoration: underline; overflow-wrap: anywhere; }
-.chat__card { display: grid; grid-template-columns: minmax(0, 1fr) 120px; gap: 4px 14px; margin-top: 10px; padding: 2px 0 2px 12px; border-left: 4px solid var(--accent); }
+.chat__card { display: grid; grid-template-columns: minmax(0, 1fr) 160px; gap: 4px 14px; margin-top: 10px; padding: 2px 0 2px 12px; border-left: 4px solid var(--accent); }
 .chat__tag { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px; padding: 1px 7px; border-radius: var(--radius-pill); background: var(--paper-sunk); font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); vertical-align: 1px; }
 .chat__tag[data-live="1"] { background: var(--live-soft); color: var(--live); }
 .chat__tag[data-live="1"]::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: world-beat-shadow 2.4s ease-out infinite; }
@@ -71,7 +73,7 @@
 .chat__desc b { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; display: inline-block; }
 .chat__desc b.is-tick, .chat__react b.is-tick { animation: tick .5s var(--ease); }
 @keyframes tick { 0% { transform: translateY(-6px); opacity: 0; color: var(--flame); } 100% { transform: none; opacity: 1; } }
-.chat__img { grid-column: 2; grid-row: 1 / span 3; align-self: start; width: 120px; height: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.chat__img { grid-column: 2; grid-row: 1 / span 3; align-self: start; width: 160px; height: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); }
 .chat__reacts { display: flex; gap: 6px; margin: 10px 0 0 !important; }
 .chat__react { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--paper-sunk); font-size: 12px; color: var(--muted); }
 .chat__react b { font-weight: 600; font-variant-numeric: tabular-nums; display: inline-block; }
