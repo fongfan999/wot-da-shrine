@@ -130,7 +130,8 @@
   .eta-pop { left: 0; right: auto; width: 100%; }
   .eta-pop__grid { grid-template-columns: repeat(3, 1fr); }
   .ritual--deploy, .ritual--blame { flex-direction: column; }
-  .ritual--deploy .ritual__stage, .ritual--blame .ritual__stage { flex: none; min-height: 220px; border-right: 0; border-bottom: 1px solid var(--sheet-line); }
+  .ritual--deploy .ritual__stage, .ritual--blame .ritual__stage { flex: none; border-right: 0; border-bottom: 1px solid var(--sheet-line); }
+  .ritual--blame .ritual__stage { min-height: 220px; } /* the deploy's keeps the height of its longest reading (rituals.css) */
   .mp__fields { grid-template-columns: 1fr; }
   .land__title { max-width: none; }
   .tray { padding: 10px; }

@@ -135,8 +135,11 @@
 .ritual--forecast .fortune-mini__hint { bottom: 8px; }
 
 .eyebrow--live::before { background: var(--ember); animation: world-beat-shadow 2.4s ease-out infinite; }
-/* Stacked, the deploy's stage is as tall as its longest reading, so the tile never jumps while the omens come in */
+/* With a row to itself (the forecast no longer beside it), the deploy's stage is as tall as its longest reading,
+   five omens, the verdict and how it went (355px in Vietnamese), so the tile never pushes the page while the omens come in */
+@media (max-width: 1099px) {
+  .ritual--deploy .ritual__stage { min-height: 372px; }
+}
 @media (max-width: 760px) {
-  .ritual--deploy .ritual__stage { min-height: 310px !important; }
   .bless-mini { width: min(92%, 360px); }
 }
