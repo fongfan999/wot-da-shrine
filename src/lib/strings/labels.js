@@ -11,6 +11,15 @@ export default {
     usb: { short: 'The backups', label: 'a USB stick with the backups' },
     laptop: { short: 'Sticker laptop', label: 'a laptop covered in stickers' },
   },
+  // Words drawn into the scene (src/scene/): the altar's tablet and note, the temple's signs, the vitals' readout
+  sceneVigil: 'VIGIL',
+  sceneBack: ['THEY', 'ARE', 'BACK'], // on the tablet, a line each
+  sceneNoReboot: ['DO NOT', 'REBOOT'],
+  sceneEst: ['EST.', 'LAST SPRINT'],
+  sceneHope: 'HOPE ¥100', // what the vending machine sells
+  sceneCoffee: 'to the coffee machine', // the extension cord off the bare altar
+  vitalsFlat: 'flatlining',
+  vitalsBpm: '{n} bpm',
   agoSec: '{n}s', // how long ago, under a minute (the world line; the rest are in common.js)
   labelBadge: 'Shrine status badge',
   labelBlessIt: 'Bless it',

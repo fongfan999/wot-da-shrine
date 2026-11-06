@@ -70,6 +70,8 @@ export default {
   etaToday: 'Today',
   etaTomorrow: 'Tomorrow',
   etaDayAt: '{day}, {time}',
+  etaWeekDay: '{weekday} {day}', // a day in the picker's row: "Wed 11"
+  etaWeekdayStyle: 'short', // how its weekday is written (Intl's weekday option: short "Wed", narrow "W")
   etaAnyMoment: 'Any moment now',
   etaPassed: 'passed',
   etaInMin: 'in {n} min',

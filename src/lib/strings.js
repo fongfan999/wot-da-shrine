@@ -69,6 +69,8 @@ STRINGS.shrineLevels = STRINGS.shrineLevels.map((name, i) => [SHRINE_LEVELS[i], 
 export const t = (key) => STRINGS[key] ?? key;
 /** t() with {placeholders} filled in. */
 export const fmt = (key, vars = {}) => fill(t(key), vars);
+/** A phrase for the middle of a sentence: its first letter lowered if it is only capitalised ("Birds, crickets"), never a name or an acronym that is all capitals, nor anything after it ("Đàn tranh Nhật" keeps its Nhật). */
+export const lowerFirst = (s) => (/^\p{Lu}\p{Ll}/u.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
 
 /** A prayer as this page says it: a ready-made one in its words, whatever language it was sent in; anything typed as typed. */
 export const prayerText = (text) => prayerIn(text, STRINGS.quickPrayers);

@@ -1,7 +1,7 @@
 /* The stage around the altar: layout, the split title and intro, parallax, mantras. */
 import gsap from 'gsap';
 import { STRINGS } from '../lib/strings.js';
-import { $, body, landing, reduceMotion } from './context.js';
+import { $, body, embedded, landing, reduceMotion, roomName } from './context.js';
 import { every } from '../lib/clock.js';
 
 export const title = $('#title');
@@ -37,9 +37,41 @@ export function splitTitle(replay = false) {
     title.appendChild(w);
     if (wi < words.length - 1) title.appendChild(document.createTextNode(' '));
   });
-  if (replay && !reduceMotion) {
+  if (held) gsap.set('.title .ch', HIDDEN_CH); // still waiting to be shown (showHeading)
+  else if (replay && !reduceMotion) {
     gsap.fromTo('.title .ch', { y: 30, opacity: 0, rotateX: -60 }, { y: 0, opacity: 1, rotateX: 0, duration: 0.8, stagger: 0.02, ease: 'power3.out' });
   }
+}
+
+/*
+ * A shrine's heading waits for the shrine to say what it is. Until its first state, the page can only show
+ * the stock "something is down" headline, and a quiet shrine would then turn it into its own a moment
+ * later, on every load. So the heading (eyebrow, title, subtitle) stays hidden until the room's heading is
+ * in place (showHeading, from quiet.js once the room has said how it is), or HOLD_FOR after the socket
+ * started (a far network), and then comes in once. Not the demo, whose heading is fixed, nor the home
+ * page's TV frame.
+ */
+const HOLD_FOR = 3000;
+const HIDDEN_CH = { y: 40, opacity: 0, rotateX: -70, transformOrigin: '50% 100%' };
+let held = Boolean(roomName) && roomName !== 'demo' && !embedded;
+let headingDue = false; // the intro reached the heading while it waited
+const HEADING = () => (landing ? ['.eyebrow'] : ['.eyebrow', '.subtitle']); // the home page's sentence is there from the first paint
+function headingIn() {
+  if (reduceMotion) { gsap.set([...HEADING(), '.title'], { opacity: 1, y: 0 }); gsap.set('.title .ch', { y: 0, opacity: 1, rotateX: 0 }); return; }
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+    .to('.eyebrow', { y: 0, opacity: 1, duration: 0.7 }, 0)
+    .to('.title .ch', { y: 0, opacity: 1, rotateX: 0, duration: 1, stagger: 0.022, onComplete: () => gsap.set('.title .ch', { clearProps: 'willChange' }) }, 0.1);
+  if (!landing) tl.to('.subtitle', { y: 0, opacity: 1, duration: 0.8 }, 0.55);
+}
+/** The room's heading is in place: let it be seen. */
+export function showHeading() {
+  if (!held) return;
+  held = false;
+  if (headingDue) headingIn();
+}
+/** However long the room takes to answer, the heading shows HOLD_FOR after the socket started (shrine.js), not while the join card waits for a name. */
+export function holdHeadingAtMost() {
+  if (held) setTimeout(showHeading, HOLD_FOR);
 }
 
 /** Resolves when the intro starts playing: what's timed from the intro waits on this, not on page load. */
@@ -47,12 +79,17 @@ let introStarts;
 export const introStarted = new Promise((resolve) => { introStarts = resolve; });
 
 export function intro() {
-  if (reduceMotion) { reveal(); introStarts(); return; }
+  if (reduceMotion) {
+    if (held) { gsap.set([...HEADING(), '.title'], { opacity: 0 }); headingDue = true; }
+    reveal();
+    introStarts();
+    return;
+  }
   const dock = ['.quick', '.pray', '.actions', '.credit'];
-  gsap.set('.title .ch', { y: 40, opacity: 0, rotateX: -70, transformOrigin: '50% 100%' });
+  gsap.set('.title .ch', HIDDEN_CH);
   // On the home page the sentence under the title is there from the first paint (altar.css): it stays put
-  const rise = landing ? ['.vigil', '.mantra'] : ['.vigil', '.subtitle', '.mantra'];
-  gsap.set(['.eyebrow', ...rise], { y: 14, opacity: 0 });
+  const rise = ['.vigil', '.mantra'];
+  gsap.set([...HEADING(), ...rise], { y: 14, opacity: 0 });
   gsap.set('.bar', { y: -12, opacity: 0 });
   gsap.set('.side .card', { y: 20, opacity: 0 });
   gsap.set(dock, { y: 24, opacity: 0 });
@@ -67,8 +104,7 @@ export function intro() {
     // Camera pushes down the server corridor.
     .to('.layer--bg', { scale: 1, opacity: 1, duration: 3.6, ease: 'power2.out' }, 0)
     .to('.bar', { y: 0, opacity: 1, duration: 0.8 }, 0.1)
-    .to('.eyebrow', { y: 0, opacity: 1, duration: 0.7 }, 0.25)
-    .to('.title .ch', { y: 0, opacity: 1, rotateX: 0, duration: 1, stagger: 0.022, onComplete: () => gsap.set('.title .ch', { clearProps: 'willChange' }) }, 0.35)
+    .call(() => { if (held) headingDue = true; else headingIn(); }, null, 0.25) // the heading, unless the room has not said yet what it is
     .to(rise, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 }, 0.8)
     .to('.burner', { y: 0, opacity: 1, scale: 1, duration: 1.3, ease: 'elastic.out(1, 0.7)' }, 0.5)
     .to('.temple', { opacity: 1, duration: 1.6, ease: 'power2.out' }, 0.6)

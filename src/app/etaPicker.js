@@ -26,7 +26,13 @@ function roundUp(ms, minutes) {
 const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 // One formatter each, made once: toLocaleTimeString with options builds a new one on every call, and the grid has hundreds of times
 const TIME = new Intl.DateTimeFormat(INTL, { hour: 'numeric', minute: '2-digit' });
-const WEEKDAY = new Intl.DateTimeFormat(INTL, { weekday: 'short', day: 'numeric' });
+// A day as the picker says it, "Wed 11": its weekday and date only, put together by the page's words, since a
+// language's own pattern can run long ("Thứ 4, ngày 11" in Vietnamese, which pushed the row off the screen).
+const WEEKDAY = new Intl.DateTimeFormat(INTL, { weekday: t('etaWeekdayStyle'), day: 'numeric' });
+const dayLabel = (d) => {
+  const part = Object.fromEntries(WEEKDAY.formatToParts(d).map((p) => [p.type, p.value]));
+  return fill('etaWeekDay', { weekday: part.weekday, day: part.day });
+};
 const timeLabel = (d) => TIME.format(d);
 
 /** "in 2h 30m", "in 45 min" or "passed": how far away the time is. */
@@ -45,7 +51,7 @@ export function etaLabel(iso) {
   const d = new Date(iso);
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const day = sameDay(d, new Date()) ? t('etaToday') : sameDay(d, tomorrow) ? t('etaTomorrow') : WEEKDAY.format(d);
+  const day = sameDay(d, new Date()) ? t('etaToday') : sameDay(d, tomorrow) ? t('etaTomorrow') : dayLabel(d);
   return fill('etaDayAt', { day, time: timeLabel(d) });
 }
 
@@ -98,7 +104,7 @@ export function etaPicker(trigger, { label = true } = {}) {
     const days = Array.from({ length: DAYS }, (_, i) => {
       const d = new Date(now);
       d.setDate(now.getDate() + i);
-      const label = i === 0 ? t('etaToday') : i === 1 ? t('etaTomorrow') : WEEKDAY.format(d);
+      const label = i === 0 ? t('etaToday') : i === 1 ? t('etaTomorrow') : dayLabel(d);
       return button(label, 'eta-day', () => { day = d; render(); }, { pressed: sameDay(d, day) });
     });
     const slots = [];

@@ -15,6 +15,7 @@ import { arrivedFromTv } from './screen.js';
 import { toast } from './ui.js';
 import { closeJoin, DEFAULT_NAMES, joinName, joinOpen, openJoin, picked } from './join.js';
 import { onShrineMessage } from './messages.js';
+import { holdHeadingAtMost } from './stage.js';
 
 const roomStatus = $('#room-status');
 
@@ -81,6 +82,7 @@ $('#btn-elsewhere').addEventListener('click', () => location.reload());
 function connect() {
   // You kneel at once; the shrine confirms when the socket opens. The demo names you itself, and a TV is nobody.
   if (!tv && roomName !== 'demo') kneelNow(state.me);
+  holdHeadingAtMost(); // the heading waits for the room's first word, but not for ever
   state.shrine = connectRoom(roomName, state.me, {
     watch: tv,
     arrival: arrivedFromTv() ? { via: 'tv', hello: urlParams.get('hello') } : null,

@@ -7,7 +7,7 @@
 import gsap from 'gsap';
 import { CHARM_KARMA, CHARMS } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
-import { t } from '../lib/strings.js';
+import { lowerFirst, t } from '../lib/strings.js';
 import { $, fmt, records, reduceMotion, state, tv } from './context.js';
 import { petals } from './engines.js';
 import { openRitual } from './rituals.js';
@@ -60,7 +60,7 @@ export function renderCharms() {
   const ids = Object.keys(have);
   count.textContent = fmt('charmsCount', { n: ids.length, of: CHARMS.length });
   const c = closest();
-  next.textContent = c ? fmt('charmsNext', { name: t(`charm_${c.id}`), p: c.of > 1 ? progressText(c) : t(`charmHow_${c.id}`).toLowerCase() }) : t('charmsAll');
+  next.textContent = c ? fmt('charmsNext', { name: t(`charm_${c.id}`), p: c.of > 1 ? progressText(c) : lowerFirst(t(`charmHow_${c.id}`)) }) : t('charmsAll');
   // What the next charm brings, on a line of its own under the shelf, when it brings a scene.
   const opens = c ? opensWithCharm(c.id) : [];
   const reward = $('#charms-reward');

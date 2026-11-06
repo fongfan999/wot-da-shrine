@@ -14,6 +14,7 @@ import { quietStreak, shippedShown } from './deploy.js';
 import { forecastHeadline, kamiHeadline } from './kami.js';
 import { roomMornings } from './standing.js';
 import { vowHeadline } from './vow.js';
+import { showHeading } from './stage.js';
 
 const DAY = 86400000;
 const HOUR = 3600000;
@@ -74,21 +75,37 @@ function renderNow() {
   nowEl.dataset.held = held ? '1' : '';
 }
 
+let ready = false;
+let shown = false;
+/**
+ * Quiet or not, and the heading to match: every second, and the moment the room says how it is
+ * (messages.js), so a quiet shrine's heading is its own from the start. Once the room has said, the
+ * heading is in place and may be seen (stage.js holds it until then). True when it changed.
+ */
+export function renderQuiet() {
+  if (!ready) return false;
+  const quiet = quietNow();
+  const changed = quiet !== shown;
+  if (changed) {
+    shown = quiet;
+    if (quiet) body.dataset.quiet = '1'; else delete body.dataset.quiet;
+    nowEl.hidden = !quiet || !tv;
+    applySettings(true);
+  }
+  if (state.greeted) showHeading();
+  return changed;
+}
+
 export function setupQuiet() {
   if (!roomName || embedded) return;
   const screen = tv; // the war-room wall: the now-playing card, and a try for sound straight away (a screen this browser has played on before is often let through)
   if (screen) { sound.unlock(); document.addEventListener('soundstate', renderNow); }
-  let shown = false;
+  ready = true;
   let minute = 0;
   document.addEventListener('kamimood', () => { if (shown) applySettings(); }); // a meal, or hunger: the heading's line changes with it
+  renderQuiet(); // the room may have answered before this part was set up
   every(1000, () => {
-    const quiet = quietNow();
-    if (quiet !== shown) {
-      shown = quiet;
-      if (quiet) body.dataset.quiet = '1'; else delete body.dataset.quiet;
-      nowEl.hidden = !quiet || !screen;
-      applySettings(true);
-    } else if (quiet && ++minute % 60 === 0) applySettings(); // "Quiet for 3 hours" moves on, and so does the kami
-    if (quiet && screen) renderNow();
+    if (!renderQuiet() && shown && ++minute % 60 === 0) applySettings(); // "Quiet for 3 hours" moves on, and so does the kami
+    if (shown && screen) renderNow();
   });
 }

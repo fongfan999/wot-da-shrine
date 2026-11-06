@@ -13,6 +13,7 @@
  * (data-upkeep); setLevel and setUpkeep show and hide them, here and in the burner's own drawing.
  */
 import gsap from 'gsap';
+import { t } from '../lib/strings.js';
 
 const X0 = -440;
 const Y0 = -300;
@@ -142,8 +143,8 @@ export function buildTemple(host, burnerEl = null) {
     <path class="d-thin" d="M 497 67 v 3 M 500 67 v 3 M 503 67 v 3"/>
     <path class="d-line" stroke-width="3" d="M -150 452 V 330"/>
     <rect class="d-paper" x="-206" y="276" width="112" height="56" rx="3"/>
-    <text class="d-mono t-sign" x="-150" y="298" text-anchor="middle">EST.</text>
-    <text class="d-mono t-sign" x="-150" y="318" text-anchor="middle">LAST SPRINT</text>
+    <text class="d-mono t-sign" x="-150" y="298" text-anchor="middle">${t('sceneEst')[0]}</text>
+    <text class="d-mono t-sign" x="-150" y="318" text-anchor="middle">${t('sceneEst')[1]}</text>
   </g>
 
   <!-- village shrine: a small hall -->
@@ -224,7 +225,7 @@ export function buildTemple(host, burnerEl = null) {
     <rect class="d-raised" x="-232" y="160" width="190" height="10" rx="2"/>
     <rect class="d-raised" x="560" y="290" width="192" height="10" rx="2"/>
     <rect class="d-raised" x="-256" y="186" width="232" height="58" rx="3"/>
-    <text class="d-mono t-sign-big" x="-140" y="210" text-anchor="middle">UNDER CONSTRUCTION</text>
+    <text class="d-mono t-sign-big" x="-140" y="210" text-anchor="middle">${t('raiseSign')}</text>
     <text class="d-mono t-sign t-raise-line" x="-140" y="232" text-anchor="middle"></text>
   </g>
 
@@ -237,7 +238,7 @@ export function buildTemple(host, burnerEl = null) {
     <rect class="d-raised" x="821" y="302" width="50" height="70"/>
     <path class="d-sunk" stroke-width="1.4" d="M 826 308 h 8 v 16 h -8 Z M 838 308 h 8 v 16 h -8 Z M 850 308 h 8 v 16 h -8 Z M 862 308 h 6 v 16 h -6 Z M 826 330 h 8 v 16 h -8 Z M 838 330 h 8 v 16 h -8 Z M 850 330 h 8 v 16 h -8 Z M 862 330 h 6 v 16 h -6 Z M 826 352 h 8 v 14 h -8 Z M 838 352 h 8 v 14 h -8 Z M 850 352 h 8 v 14 h -8 Z M 862 352 h 6 v 14 h -6 Z"/>
     <circle class="d-accent" cx="830" cy="382" r="2.6"/><circle class="d-accent" cx="842" cy="382" r="2.6"/><circle class="d-accent" cx="854" cy="382" r="2.6"/><circle class="d-accent" cx="866" cy="382" r="2.6"/>
-    <text class="d-mono t-tiny" x="846" y="402" text-anchor="middle">HOPE ¥100</text>
+    <text class="d-mono t-tiny" x="846" y="402" text-anchor="middle">${t('sceneHope')}</text>
     <rect class="d-sunk" x="824" y="420" width="44" height="16" rx="2"/>
   </g>
 
@@ -284,7 +285,7 @@ export function buildTemple(host, burnerEl = null) {
     <path class="d-line" stroke-width="3" d="M 656 448.5 h 5 M 670 448.5 h 5 M 684 448.5 h 5"/>
     <circle class="d-accent" cx="647" cy="448.5" r="2.4"/>
     <path class="d-line" d="M 696 449 C 760 452 790 436 960 440"/>
-    <text class="d-mono t-note" x="636" y="432">to the coffee machine</text>
+    <text class="d-mono t-note" x="636" y="432">${t('sceneCoffee')}</text>
   </g>
 
   <!-- from the village shrine: the torii, the frame you look through -->

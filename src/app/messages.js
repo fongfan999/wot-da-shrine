@@ -28,6 +28,7 @@ import { applySettings, onHook } from './settings.js';
 import { askPush, onPush, syncPush } from './push.js';
 import { karmaBeat, renderRecords, statKarma, tickVigil, updateStats } from './stats.js';
 import { bump, logEvent, toast } from './ui.js';
+import { renderQuiet } from './quiet.js';
 
 const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow', offer: 'offering', prayer: 'lantern', puff: 'breathe', blame: 'fire', omikuji: 'slip', resolve: 'check', unresolve: 'incense', bless: 'bow', ship: 'check', broke: 'fire', watch: 'lantern', unwatch: 'lantern', thank: 'bow', vow: 'lantern', hang: 'lantern', unhang: 'lantern', purify: 'breathe' };
 
@@ -79,6 +80,7 @@ export function onShrineMessage(msg) {
         if (arrivedFromTv()) greetFromTv(people.get(msg.me)?.name ?? state.me.name);
         renderRecords();
         renderKami(); // now that the room has said where it stands, the kami has a mood
+        renderQuiet(); // and the heading is the room's own: a quiet shrine's at once, then it may be seen
         msg.prayers.slice(-6).forEach((p, i) => gsap.delayedCall(1.2 + i * 0.12, () => wishes.hang(p.text, p.name, false)));
         msg.prayers.slice(-3).forEach((p, i) => gsap.delayedCall(2.4 + i * 1.8, () => prayerFx(p.text, `${p.avatar} ${p.name}`, true)));
       } else {

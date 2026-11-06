@@ -124,11 +124,11 @@ export function buildBurner(host) {
     <rect class="d-raised" x="98" y="390" width="52" height="8" rx="1"/>
     <path class="d-raised" d="M 104 392 V 170 Q 104 152 124 148 Q 144 152 144 170 V 392 Z"/>
     <path class="d-thin" d="M 109 386 V 172 Q 109 158 124 154 Q 139 158 139 172 V 386" opacity=".6"/>
-    <text class="d-mono tablet__vigil" x="124" y="183" text-anchor="middle">VIGIL</text>
+    <text class="d-mono tablet__vigil" x="124" y="183" text-anchor="middle">${t('sceneVigil')}</text>
     <text class="d-mono tablet__no" x="124" y="195" text-anchor="middle"></text>
     <path class="d-thin" d="M 115 202 H 133" opacity=".6"/>
     <text class="d-mono tablet__title" x="124" y="217" text-anchor="middle"></text>
-    <text class="d-mono tablet__back" x="124" y="217" text-anchor="middle"><tspan x="124" dy="0">THEY</tspan><tspan x="124" dy="10">ARE</tspan><tspan x="124" dy="10">BACK</tspan></text>
+    <text class="d-mono tablet__back" x="124" y="217" text-anchor="middle">${t('sceneBack').map((line, i) => `<tspan x="124" dy="${i ? 10 : 0}">${line}</tspan>`).join('')}</text>
   </g>
 
   <!-- chrysanthemums -->
@@ -228,8 +228,8 @@ export function buildBurner(host) {
   <!-- the altar before it grows: someone left a note (temple.js shows it, by data-max) -->
   <g class="lv0-note" data-max="0" transform="rotate(-5 420 416)">
     <rect class="d-raised" x="396" y="401" width="50" height="32"/>
-    <text class="d-mono" x="421" y="414" text-anchor="middle">DO NOT</text>
-    <text class="d-mono" x="421" y="425" text-anchor="middle">REBOOT</text>
+    <text class="d-mono" x="421" y="414" text-anchor="middle">${t('sceneNoReboot')[0]}</text>
+    <text class="d-mono" x="421" y="425" text-anchor="middle">${t('sceneNoReboot')[1]}</text>
   </g>
 
   <!-- upkeep, from the kami's mood (temple.js shows them, by data-upkeep): dust, a cobweb, a vine, a tanuki -->

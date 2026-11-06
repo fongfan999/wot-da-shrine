@@ -2,7 +2,7 @@
 
 export default {
   // Cầu an cho deploy: miếu trong một ngày bình thường
-  blessBtn: 'Cầu an cho deploy',
+  blessBtn: 'Cầu an deploy',
   blessWhat: 'Bạn sắp deploy cái gì?',
   blessWhatPh: 'payments-api v2.3, cái migration…',
   blessWhatNote: 'Cả miếu vái cùng bạn. Lên prod xong thì bấm Lên prod rồi, còn toang thì bấm Toang rồi, đàn cầu sẽ được lập.',

@@ -7,7 +7,7 @@
 import gsap from 'gsap';
 import { RAISE_FED, RAISE_WINDOW, devoteeKey } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
-import { STRINGS, t } from '../lib/strings.js';
+import { lowerFirst, STRINGS, t } from '../lib/strings.js';
 import { $, counters, fmt, minutesText, people, records, reduceMotion, roomName, state, tv } from './context.js';
 import { congregation, petals, temple } from './engines.js';
 import { hasStanding, liveStreak, myStanding, rankName } from './standing.js';
@@ -143,7 +143,7 @@ export function renderBuild() {
     const opens = opensAtLevel(r.level);
     const reward = $('#build-reward');
     reward.hidden = !opens.length;
-    reward.textContent = opens.map((id) => fmt('rewardLevel', { name: nameOf(id), hint: t(`layerHint_${id}`).toLowerCase() })).join(' · ');
+    reward.textContent = opens.map((id) => fmt('rewardLevel', { name: nameOf(id), hint: lowerFirst(t(`layerHint_${id}`)) })).join(' · ');
     return;
   }
   const [from] = levels[b.level];
@@ -178,7 +178,7 @@ export function renderBuild() {
   const opens = opensAtLevel(b.level + 1);
   const reward = $('#build-reward');
   reward.hidden = !opens.length;
-  reward.textContent = opens.map((id) => fmt('rewardLevel', { name: nameOf(id), hint: t(`layerHint_${id}`).toLowerCase() })).join(' · ');
+  reward.textContent = opens.map((id) => fmt('rewardLevel', { name: nameOf(id), hint: lowerFirst(t(`layerHint_${id}`)) })).join(' · ');
   buildEl.title = b.shares.length ? fmt('buildBy', { name: next[1], names: nameList(b.shares.map((s) => s.name), b.shares.length + (b.rest ? 1 : 0)) }) : '';
 }
 

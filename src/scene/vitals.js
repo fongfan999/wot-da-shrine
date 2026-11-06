@@ -8,6 +8,7 @@
  */
 import gsap from 'gsap';
 import { onPalette } from './palette.js';
+import { fmt, t } from '../lib/strings.js';
 import { onFrame, scene } from './ticker.js';
 
 const SPEED = 70; // px per second
@@ -162,7 +163,7 @@ export class Vitals {
     const shown = Math.round(this.bpm);
     if (shown === this.shown) return;
     this.shown = shown;
-    this.readoutEl.textContent = shown ? `${shown} bpm` : 'flatlining';
+    this.readoutEl.textContent = shown ? fmt('vitalsBpm', { n: shown }) : t('vitalsFlat');
     this.readoutEl.dataset.flat = String(!shown);
   }
 

@@ -35,7 +35,7 @@ export default {
   boardTip: '{name} · {rank} · {n} công đức tuần này',
   boardMe: 'Bạn: {n} công đức tuần này',
   buildWhat: 'Đang xây {name}',
-  buildLeft: 'còn {n} công đức nữa',
+  buildLeft: 'còn {n} công đức',
   buildTip: '{name}: {n} công đức',
   buildBy: '{name}, do {names} góp công xây',
   buildEarlier: 'Từ hồi chưa ai đếm',

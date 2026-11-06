@@ -22,7 +22,7 @@ export default {
   beliefsYoungOne: 'Miếu cần {need} sự cố mới bắt đầu đổ lỗi được. Hiện mới có một.',
   beliefsYoungNone: 'Miếu cần {need} sự cố mới bắt đầu đổ lỗi được. Hiện chưa có cái nào, và miếu thấy thế là đáng ngờ.',
   beliefsNone: 'Chưa có gì khớp. Kami vẫn đang soi pattern.',
-  thisShrine: 'Miếu nhà mình',
+  thisShrine: 'Miếu mình',
   shrineSheetTitle: 'Miếu',
   shrineSheetAccent: 'nhà mình',
   karmaUnit: 'công đức',
@@ -44,7 +44,7 @@ export default {
   lanternTipTitled: '“{title}”: qua được sau {t}, {date}',
   lanternOlder: 'Một đàn cầu xưa, đã qua',
   resolveHint: 'Chưa có gì để kết thúc. Đàn cầu chỉ được lập khi có người báo có gì đó toang.',
-  undo: 'Chưa sống lại? Hoàn tác',
+  undo: 'Mừng hụt? Hoàn tác',
   undoHint: 'Mừng hụt à?',
   undoneToast: 'Đã rút lại. Đàn cầu tiếp tục.',
   unresolvedToast: '{name} đã rút lại. Đàn cầu tiếp tục.',
@@ -70,6 +70,8 @@ export default {
   etaToday: 'Hôm nay',
   etaTomorrow: 'Ngày mai',
   etaDayAt: '{day}, {time}',
+  etaWeekDay: '{weekday} {day}', // "T4 11"
+  etaWeekdayStyle: 'narrow', // CN, T2 … T7: the short ones ("Thứ 4") ran the row off the screen
   etaAnyMoment: 'Sắp rồi, sắp rồi',
   etaPassed: 'quá giờ rồi',
   etaInMin: 'còn {n} phút',
