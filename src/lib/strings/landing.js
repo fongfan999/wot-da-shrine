@@ -4,7 +4,7 @@ export default {
   // Landing page (the home page, below and around the demo altar)
   landEyebrow: 'Before the servers go down',
   landTitle: 'Pray for uptime, together',
-  landSubtitle: 'A 30-second daily ritual for engineering teams. Bow at standup, bless every deploy, keep the kami (a fox spirit with opinions) fed, and watch your shrine grow with every quiet day. When something breaks anyway, the whole team prays through it, live.',
+  landSubtitle: 'A 30-second daily ritual for engineering teams. Bow at standup, bless every deploy, and when prod goes down anyway, pray through it together, live.',
   heroCta: 'Open a shrine',
   heroFine: 'Free, no account, ready in one click.',
   heroHow: 'New: watch your shrine grow ↓',

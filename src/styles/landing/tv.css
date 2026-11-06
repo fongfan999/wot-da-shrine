@@ -62,12 +62,16 @@
 .pair-card__fine { margin: 2px 0 0 !important; font-size: 13px !important; }
 .pair-card__fine code { padding: 1px 6px; border-radius: var(--radius-xs); background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font-mono); font-size: 12px; color: var(--ink); }
 /* the picture: a TV showing its code, a beam, a laptop typing it */
-.pair-flow { display: flex; align-items: center; gap: 10px; padding: 14px; border-radius: var(--radius-md); background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); }
-.pair-flow__screen, .pair-flow__laptop { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+/* Two rows, the boxes then their captions, so the beam runs between the boxes' middles, not the columns' */
+.pair-flow { display: grid; grid-template-columns: auto minmax(24px, 1fr) auto; grid-template-rows: auto auto; align-items: center; column-gap: 10px; row-gap: 6px; padding: 14px; border-radius: var(--radius-md); background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); }
+.pair-flow__screen, .pair-flow__laptop { display: grid; grid-row: span 2; grid-template-rows: subgrid; justify-items: center; align-items: center; }
+.pair-flow__screen { grid-column: 1; }
+.pair-flow__beam { grid-area: 1 / 2; }
+.pair-flow__laptop { grid-column: 3; }
 .pair-flow__tiles { display: flex; align-items: center; gap: 3px; padding: 9px 10px; border: 3px solid #1a1c19; border-radius: 6px; background: #151713; }
 .pair-flow__tiles i { display: grid; place-items: center; width: 17px; height: 22px; border-radius: 3px; background: #ebeae2; font-family: var(--font-mono); font-size: 13px; font-style: normal; font-weight: 600; color: #151713; }
 .pair-flow__tiles b { width: 6px; height: 2px; background: #6b6e66; }
-.pair-flow__beam { flex: 1; min-width: 24px; height: 2px; background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 11px); }
+.pair-flow__beam { height: 2px; background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 11px); }
 .land.is-on .pair-flow__beam { animation: beam-back 0.8s linear infinite; }
 @keyframes beam-back { to { background-position: -11px 0; } }
 .pair-flow__field { padding: 8px 12px; border: 1.5px solid var(--accent); border-radius: 6px; background: var(--paper-raised); font-family: var(--font-mono); font-size: 14px; font-weight: 600; letter-spacing: .14em; color: var(--ink); }

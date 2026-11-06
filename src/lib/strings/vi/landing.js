@@ -4,7 +4,7 @@ export default {
   // Trang chủ (dưới và quanh bàn thờ demo)
   landEyebrow: 'Trước khi server toang',
   landTitle: 'Có thờ có thiêng, có kiêng có uptime',
-  landSubtitle: 'Nghi lễ 30 giây mỗi ngày cho team kỹ thuật. Vái một cái trước standup, cầu an cho mỗi lần deploy, cho kami (thần cáo giữ server, hơi lắm ý kiến) ăn no, và ngắm miếu lớn dần qua từng ngày bình yên. Lỡ vẫn toang, cả team cùng lập đàn khấn qua cơn bĩ cực, trực tiếp.',
+  landSubtitle: 'Nghi lễ 30 giây mỗi ngày cho team kỹ thuật. Vái một cái trước standup, cầu an cho mỗi lần deploy, và lỡ prod vẫn toang thì cả team cùng lập đàn, trực tiếp.',
   heroCta: 'Lập miếu',
   heroFine: 'Miễn phí, không cần tài khoản, một click là xong.',
   heroHow: 'Mới: xem miếu lớn dần ↓',
