@@ -50,7 +50,7 @@ export const WORDS = {
     dh: '{d} ngày {h} giờ',
     someone: 'Ai đó',
     theServers: 'server',
-    downTitle: 'Có gì đó toang rồi',
+    downTitle: 'Có gì đó sập rồi',
     downPraying: '{n} người đang khấn.',
     downNobody: 'Chưa ai quỳ cả.',
     downAlarm: '{name} vừa báo động ở {room}. {kneeling} Vào quỳ đi.',

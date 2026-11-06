@@ -32,7 +32,7 @@ export const PREVIEW_WORDS = {
   titleDown: '{title} · vào {room} khấn cùng',
   titleBack: '{title} · sống lại rồi · {room}',
   titleQuiet: '{title} · {room}',
-  plainDown: 'Server toang rồi · vào {room} khấn cùng',
+  plainDown: 'Server sập rồi · vào {room} khấn cùng',
   plainBack: 'Server sống lại rồi · {room}',
   plain: 'Cầu cho server chạy ngon · {room}',
   /** Trang của một miếu nói gì khi chưa ai làm gì ở đó, hoặc khi đã quá giới hạn đọc. */
@@ -40,6 +40,6 @@ export const PREVIEW_WORDS = {
   altDown: 'Server đang sập. Tranh mực vẽ bàn thờ, nhang đã thắp, cả team đang khấn.',
   altBack: 'Server sống lại rồi. Tranh mực vẽ bàn thờ sau đàn cầu.',
   alt: 'Tranh mực vẽ bát nhang trên bàn thờ trong chùa, kèm dòng chữ: cùng nhau cầu uptime. Ngày vái một lần. Cầu an cho deploy. Nhớ cho kami ăn.',
-  demoTitle: 'Dàn rack demo toang rồi',
+  demoTitle: 'Dàn rack demo sập rồi',
   quickPrayers: QUICK_PRAYERS,
 };

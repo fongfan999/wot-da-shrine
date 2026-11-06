@@ -1,9 +1,9 @@
 /** Tiếng Việt cho strings/heading.js. */
 
 export default {
-  eyebrow: 'Bảo trì định kỳ',
+  eyebrow: 'Bảo trì “định kỳ”',
   title: 'Server đang thiền, đừng ping',
-  subtitle: 'Team ops đang khấn rồi. Thắp nén nhang, cúng chút gì đó, rồi dàn rack sẽ lại chạy ro ro thôi.',
+  subtitle: 'Team ops đang khấn, sếp đang hỏi “bao giờ xong”. Thắp nén nhang phụ một tay.',
   // A shrine that has not named what is down gets one of these (headlineFor). The title's last word
   // (its last syllable, in Vietnamese) is set in italics, so each ends on the one worth leaning on.
   headlines: [
@@ -32,13 +32,13 @@ export default {
   feedbackFoot: 'Báo lỗi, xin tính năng',
 
   // A shrine with nothing down: the heading counts the days, and the kami has its say
-  quietEyebrow: 'Có miếu phù hộ',
-  quietDays: '{n} ngày không toang',
-  quietDay: 'Trọn một ngày không toang',
-  quietHours: '{n} tiếng không toang',
-  quietHour: 'Một tiếng không toang',
-  quietMinutes: 'Yên được {n} phút',
-  quietMinute: 'Mới yên được một phút',
-  quietNever: 'Chưa có gì toang. Còn sớm.',
-  quietNeverSub: 'Màn hình này canh miếu. Khi có gì đó sập, bấm “Có gì đó toang” trên bất kỳ điện thoại nào trong miếu.',
+  quietEyebrow: 'Có kami chống lưng',
+  quietDays: '{n} ngày không sập',
+  quietDay: 'Trọn một ngày không sập',
+  quietHours: '{n} tiếng không sập',
+  quietHour: 'Một tiếng không sập',
+  quietMinutes: 'Yên được {n} phút, đừng nói gở',
+  quietMinute: 'Mới yên được một phút, nín thở',
+  quietNever: 'Chưa có gì sập. Còn sớm để kết luận.',
+  quietNeverSub: 'Màn hình này canh miếu. Khi có gì đó sập, bấm “Có gì đó sập” trên bất kỳ điện thoại nào trong miếu.',
 };

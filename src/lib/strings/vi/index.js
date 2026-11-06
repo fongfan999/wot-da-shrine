@@ -7,7 +7,7 @@
  * The words that make it this shrine and not another, so every part says them the same way:
  * shrine miếu · altar bàn thờ · incense nhang · bow vái · karma công đức · kami kami ·
  * vigil đàn cầu (lập đàn) · the watch ca trực · bless a deploy cầu an · fortune quẻ xăm ·
- * blame sớ · offering lễ vật (cúng) · They're back Sống lại rồi. Tech words stay in English, as
+ * blame sớ · offering lễ vật (cúng) · down sập (toang only for a rhyme) · They're back Sống lại rồi. Tech words stay in English, as
  * Vietnamese engineers say them: deploy, prod, rollback, on-call, PR, cache.
  */
 import cards from './cards.js';

@@ -155,7 +155,7 @@ export default {
         'Sẽ có người nói “chắc lại DNS”. Đúng là DNS.',
         'Alert không có runbook. Bạn chính là runbook.',
         'Log của đúng khung giờ cần xem vừa bị rotate mất.',
-        'Monitoring sập, nên không alert nào kêu, nên mới toang.',
+        'Monitoring sập, nên không alert nào kêu, nên mới tệ thế này.',
         'Call sự cố có hai mươi người. Người biết câu trả lời đang tắt mic.',
         'Laptop chọn đúng đêm nay để cài update. Còn 40 phút.',
         'VPN không vào được. Không phải cá mập cắn cáp, VPN nằm sau đúng cái đang sập.',

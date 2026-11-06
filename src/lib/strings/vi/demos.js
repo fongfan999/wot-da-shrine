@@ -21,7 +21,7 @@ export default {
   demoPushBody: 'Hôm nay bạn chưa vái ở payments. Vái một cái trước nửa đêm là giữ được chuỗi.',
   demoDownFor: 'Đã sập',
   demoBack: 'Sống lại rồi · qua được sau 24 phút',
-  demoAlert: '🔔 Grafana báo có gì đó toang',
+  demoAlert: '🔔 Grafana báo có gì đó sập',
   demoKeepers: 'Thủ từ tuần này',
   demoForecastNext: 'Xem dự báo ngày kế tiếp',
   demoFortuneDraw: 'Xin thử một quẻ',
@@ -42,7 +42,7 @@ export default {
   /** Ba bản deploy của demo, và những service bản tin thời tiết demo canh (landing/rituals.js). */
   demoDeploys: ['payments-api v2.3', 'màn onboarding mới', 'một thay đổi DNS “nhỏ xíu”'],
   demoWatched: ['payments-api', 'cái DNS', 'con máy chạy cron', 'Postgres', 'bản build'],
-  demoUfTitle: 'Dàn rack demo toang rồi · vào {room} khấn cùng',
+  demoUfTitle: 'Dàn rack demo sập rồi · vào {room} khấn cùng',
   demoTvIdle: 'Live',
   demoTvLive: 'Live · {n} người đang quỳ',
   demoTvLiveLit: 'Live · {n} người đang quỳ · nhang đang cháy',
@@ -50,7 +50,7 @@ export default {
   demoChatTime1: '14:13',
   demoChatBot: 'error rate 34%. Đang gọi người trực on-call.',
   demoChatTime2: '14:14',
-  demoChatInvite: 'Server toang rồi. Miếu đã mở, anh em vào khấn cùng:',
+  demoChatInvite: 'Server sập rồi. Miếu đã mở, anh em vào khấn cùng:',
   demoUfDown: 'đã sập ',
   demoUfMin: ' phút · ',
   demoUfPraying: ' người đang khấn · nhang đang cháy · ',
@@ -58,7 +58,7 @@ export default {
   demoMpEyebrow: 'Bảo trì định kỳ',
   demoReadme: 'Service gánh việc thu tiền. Khi nó sập, cả team lên miếu khấn; badge phía trên cho biết nhang có đang cháy không.',
   // Tiêu đề miếu demo (DEMO_META trong worker/objects/shrine/state.js; src/app/context.js nói bằng chữ của trang)
-  demoRoomTitle: 'Dàn rack demo toang rồi',
+  demoRoomTitle: 'Dàn rack demo sập rồi',
   demoRoomSubtitle: 'Đây là miếu demo công khai. Thắp nhang, thỉnh chuông, chọn một lời khấn soạn sẵn: trang chủ hiện lên ngay, live.',
   // Mọi miếu đang làm gì, dưới tiêu đề trang chủ (landing/world.js)
   worldNPrayer: '{n} lời khấn',

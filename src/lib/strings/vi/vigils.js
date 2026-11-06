@@ -2,7 +2,7 @@
 
 export default {
   // Đàn cầu
-  vigilDown: 'Đã toang',
+  vigilDown: 'Đã sập',
   vigilNone: 'Chưa lập đàn',
   lightCue: 'Bấm vào bát nhang để thắp nhang',
   lightCueTap: 'Chạm vào bát nhang để thắp nhang',
@@ -29,7 +29,7 @@ export default {
   recSurvived: 'Đã qua',
   recLongest: 'Dài nhất {t}',
   recPrayers: 'Lời khấn',
-  recEmpty: 'Chưa qua đàn cầu nào. Có gì toang thì báo, sống lại thì cũng báo luôn nhé.',
+  recEmpty: 'Chưa qua đàn cầu nào. Có gì sập thì báo, sống lại thì cũng báo luôn nhé.',
   recForgotten: 'bị bỏ quên',
   recPeople: '{n} người khấn',
   shrineLevel: '{name} · {next}',
@@ -43,7 +43,7 @@ export default {
   lanternTip: 'Qua được sau {t}, {date}',
   lanternTipTitled: '“{title}”: qua được sau {t}, {date}',
   lanternOlder: 'Một đàn cầu xưa, đã qua',
-  resolveHint: 'Chưa có gì để kết thúc. Đàn cầu chỉ được lập khi có người báo có gì đó toang.',
+  resolveHint: 'Chưa có gì để kết thúc. Đàn cầu chỉ được lập khi có người báo có gì đó sập.',
   undo: 'Mừng hụt? Hoàn tác',
   undoHint: 'Mừng hụt à?',
   undoneToast: 'Đã rút lại. Đàn cầu tiếp tục.',
@@ -82,17 +82,17 @@ export default {
   etaNoneSub: 'chưa có ETA',
   etaDone: 'Xong',
   metaChanged: '{name} đổi tên đàn cầu: “{title}”',
-  // Báo có gì đó toang: đàn cầu chỉ được lập khi có người báo
-  downBtn: 'Có gì đó toang',
-  downWhat: 'Cái gì toang?',
+  // Báo có gì đó sập: đàn cầu chỉ được lập khi có người báo
+  downBtn: 'Có gì đó sập',
+  downWhat: 'Cái gì sập?',
   downWhatPh: 'Payments API, VPN, prod…',
   downWhatNote: 'Cả miếu đều thấy, và hồ sơ đàn cầu sẽ ghi lại.',
   downSkip: 'Bỏ qua',
   downSave: 'Đặt tên',
   downToast: 'Đàn cầu đã được lập. Sống lại thì nhớ báo anh em.',
-  downRemote: '{name} báo có gì đó toang. Đàn cầu đã được lập.',
-  askTitle: 'Có gì toang à?',
-  askText: '“Có” sẽ lập đàn: bật đồng hồ Đã toang, và ghi hồ sơ khi sống lại. “Không” thì chỉ thắp nhang thôi.',
+  downRemote: '{name} báo có gì đó sập. Đàn cầu đã được lập.',
+  askTitle: 'Có gì sập à?',
+  askText: '“Có” sẽ lập đàn: bật đồng hồ Đã sập, và ghi hồ sơ khi sống lại. “Không” thì chỉ thắp nhang thôi.',
   askYes: 'Có, lập đàn',
   askNo: 'Không, chỉ thắp nhang',
   // Ca trực: ai cầm cái pager
