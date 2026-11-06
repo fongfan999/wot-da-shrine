@@ -13,6 +13,8 @@
 .booting :is(.bar, .heading, .temple, .burner, .side .card, .quick, .pray, .actions, .credit, .plantern-row, .hero-ribbon) { visibility: hidden; }
 /* The home page's own heading is in the page already: its sentence shows from the first paint, the intro raises the rest around it */
 .booting body[data-landing="1"] .subtitle { visibility: visible; }
+/* Unless the page speaks another language than the English it is written in (l10n, set in the head): then it waits for its words */
+.booting.l10n body[data-landing="1"] .subtitle { visibility: hidden; }
 /* Nor does anything there start animating: an animation that starts unseen never moves to the
    compositor, and ticks on the main thread, restyling every frame, for as long as the page is open */
 .booting :is(.bar, .heading, .temple, .burner, .side .card, .quick, .pray, .actions, .credit, .plantern-row, .hero-ribbon) :is(*, *::before, *::after),

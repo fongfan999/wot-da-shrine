@@ -216,6 +216,22 @@ describe('a shrine', () => {
     assert.equal(unreadable.status, 422);
   });
 
+  test('unfurls in the language it was last acted in, and before that in the asker\'s', async () => {
+    const room = freshRoom('lang');
+    const lang = async (headers = {}) => (await (await get(`/r/${room}`, { headers })).text()).match(/<html lang="(\w+)"/)?.[1];
+    // Nobody has done anything here: the preview goes by who is asking (where they are too, which differs from machine to machine)
+    assert.equal(await lang({ 'Accept-Language': 'vi-VN,vi;q=0.9' }), 'vi');
+    const linh = await arrive(room, { name: 'Linh', lang: 'vi' });
+    linh.send({ t: 'bow', tz: 420 });
+    await linh.settled();
+    assert.equal((await (await get(`/api/rooms/${room}/status`)).json()).lang, 'vi');
+    assert.equal(await lang({ 'Accept-Language': 'en-US' }), 'vi'); // the room's now, whoever unfurls it
+    const ann = await arrive(room, { name: 'Ann', lang: 'en' });
+    ann.send({ t: 'bow', tz: 0 });
+    await ann.settled();
+    assert.equal(await lang({ 'Accept-Language': 'vi' }), 'en');
+  });
+
   test('draws its README badge', async () => {
     const res = await get(`/api/rooms/${freshRoom('badge')}/badge.svg`);
     assert.equal(res.status, 200);

@@ -30,7 +30,7 @@ export const FLOOD_FOR = 60_000; // an address caught flooding can't kneel in th
 export const FLOODED = 1008; // the close code for a socket sending far more than a person could
 
 /** A person as the others see them: never their resume token, nor where they came from. */
-export const pub = ({ token, replaced, from, ...person }) => person;
+export const pub = ({ token, replaced, from, lang, ...person }) => person;
 
 /**
  * The public demo shrine, streamed onto the landing page. Anyone can kneel
@@ -79,6 +79,7 @@ export const EMPTY = {
   charms: {}, // the charms the room has earned: id → when (0: earned before the shrine kept charms)
   feats: { ...EMPTY_FEATS }, // what the shrine tallies only for charms (see CHARMS in shared/rules.js)
   kami: { fedAt: 0, by: '', avatar: '' }, // the spirit of the shrine: when it last ate, and who fed it (shared/kami.js)
+  lang: '', // the language the room was last acted in (a page's, src/lib/locale.js): what its link previews say. '' before any act
   guarded: [], // the services the kami watches: { id, name, by, avatar, at, cracked, cracks } (cracked: pointed at, since this vigil named it)
 };
 

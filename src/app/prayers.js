@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { KARMA } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { releaseLantern } from '../scene/lanterns.js';
-import { STRINGS, t } from '../lib/strings.js';
+import { STRINGS, prayerSent, t } from '../lib/strings.js';
 import { puff } from './altar.js';
 import { $, myName, recentPrayers, reduceMotion, roomName, state } from './context.js';
 import { congregation, petals, wishes } from './engines.js';
@@ -28,7 +28,7 @@ export function sendPrayer(text) {
   remember(text, roomName ? myName() : '');
   addKarma(KARMA.prayer);
   logMine('prayer', t('fPrayer'), { quote: text, toastText: t('wishSent') });
-  state.shrine?.send('prayer', { text });
+  state.shrine?.send('prayer', { text: prayerSent(text) }); // a ready-made one goes in the words the shrine knows it by
 }
 
 export function remember(text, name) {

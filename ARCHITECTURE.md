@@ -255,8 +255,10 @@ src/audio/
 src/lib/
   clock.js               the page's one clock, and the rules for anything timed
   config.js              settings: URL params > localStorage > defaults
-  strings.js             every word the page says, by key: t('bowed'), data-i18n="bowed"
+  locale.js              which language the page speaks: ?lang=, then Customize, then a guess (Vietnamese in Vietnam)
+  strings.js             every word the page says, by key: t('bowed'), data-i18n="bowed"; another language's pack laid over it
   strings/               …kept by area: dock, heading, vigils, kami, landing, tv, settings… (a key in one file only)
+  strings/vi/            Tiếng Việt: the same files, the same keys, loaded only by a page that speaks it
   room.js                room URL, saved name, reconnecting WebSocket
   share.js               the share card: live altar + stats as SVG, rasterised to PNG
   omikuji.js             the fortunes: five levels, three lines each
@@ -266,6 +268,7 @@ public/logo.svg          the Gate, full size
 public/og*.png           the link preview cards (1200×630): the shrine, a room that is down, one that is back
 public/wotdafong-*.svg   the Wot Da Fong P?! mark for the credit line
 shared/                  used by the page and the Worker: the rules (burn time, karma, vigils, the kami), the kami’s lines, ready-made prayers, room names, link previews
+shared/vi/               their words in Vietnamese: the page's pack and the Worker read them (notifications, a room's preview in the language it was last acted in)
 worker/index.js          Cloudflare Worker: a Hono app that mounts the routes below
 worker/middleware.js     security headers, API headers, rate limits, socket-only
 worker/routes/api.js     /api/health, /api/status, /api/world

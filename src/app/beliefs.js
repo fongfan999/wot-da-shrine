@@ -17,7 +17,7 @@ const SHOW = 3;
 export function renderBeliefs() {
   wrap.hidden = !roomName || roomName === 'demo' || !state.greeted;
   if (wrap.hidden) return;
-  const held = superstitions({ history: records.history, blessings: records.blessings, tz: -new Date().getTimezoneOffset() }).slice(0, SHOW);
+  const held = superstitions({ history: records.history, blessings: records.blessings, tz: -new Date().getTimezoneOffset(), words: t('beliefWords') }).slice(0, SHOW);
   list.replaceChildren(...held.map((b) => Object.assign(document.createElement('li'), { className: 'beliefs__item', textContent: b.text })));
   const n = records.history.filter((v) => v.outcome !== 'unsaid').length;
   empty.hidden = held.length > 0;

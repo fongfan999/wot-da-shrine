@@ -43,6 +43,7 @@ import * as together from './together.js';
 import * as vigils from './vigils.js';
 import * as watch from './watch.js';
 import * as webhook from './webhook.js';
+import { cleanLang } from './words.js';
 
 export class Shrine extends DurableObject {
   constructor(ctx, env) {
@@ -93,6 +94,7 @@ export class Shrine extends DurableObject {
       avatar: AVATARS.includes(url.searchParams.get('avatar')) ? url.searchParams.get('avatar') : '🧘',
       role: cleanRole(url.searchParams.get('role')),
       tone: cleanTone(url.searchParams.get('tone')),
+      lang: cleanLang(url.searchParams.get('lang')), // the page's language: the room's previews speak the last one acted in
       from: clientOf(request), // never told to anyone (pub): only what the limits go by
     };
     for (const k of ['role', 'tone']) if (person[k] === undefined) delete person[k];
@@ -194,6 +196,7 @@ export class Shrine extends DurableObject {
     const { opens } = act;
 
     if (!s.since) s.since = Date.now();
+    if (self.lang) s.lang = self.lang;
     s.karma += KARMA[msg.t] ?? 0;
     const fed = this.feed(by, msg.t);
     if (fed) { out.fed = fed; s.karma += fed.karma ?? 0; }
@@ -280,6 +283,7 @@ export class Shrine extends DurableObject {
       downFor: s.vigil ? Math.max(1, Math.round((now - s.vigil.startedAt) / 60000)) : 0, // at least 1: an open vigil is always "down"
       survived: s.survived,
       title: s.meta.title,
+      lang: s.lang || '', // what language its preview is in ('' before anyone acted: the preview goes by who asks)
       blessing: Boolean(s.blessing), // a deploy is going out
       streak: s.deploys.streak,
       lastPrayer: s.prayers.at(-1)?.text ?? '',

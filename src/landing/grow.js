@@ -15,6 +15,7 @@ import { Congregation } from '../scene/congregation.js';
 import { STRINGS, t } from '../lib/strings.js';
 import { $, fmt, reduceMotion } from '../app/context.js';
 import { lite } from '../app/fx.js';
+import { INTL } from '../lib/locale.js';
 
 // name tag (or none), avatar, what they do, colour, rank, mornings in a row. In the order they take the mats.
 const TEAM = [
@@ -99,7 +100,7 @@ export function setupGrow(censer) {
     b.className = 'grow__rung';
     b.innerHTML = '<span class="grow__dot" aria-hidden="true"></span><b></b><span></span>';
     b.querySelector('b').textContent = levelName(i);
-    b.querySelector('span:last-child').textContent = i ? karma.toLocaleString() : '0';
+    b.querySelector('span:last-child').textContent = i ? karma.toLocaleString(INTL) : '0';
     b.addEventListener('click', () => { takeOver(); show(i); });
     li.append(b);
     ladder.append(li);
@@ -143,7 +144,7 @@ export function setupGrow(censer) {
     seat();
     $('#grow-name').textContent = levelName(level);
     const mats = MATS[level] === 1 ? t('landGrowMat') : fmt('landGrowMats', { n: MATS[level] });
-    $('#grow-meta').textContent = fmt('landGrowLevel', { karma: SHRINE_LEVELS[level].toLocaleString(), mats });
+    $('#grow-meta').textContent = fmt('landGrowLevel', { karma: SHRINE_LEVELS[level].toLocaleString(INTL), mats });
     $('#grow-desc').textContent = t(`landTier_${level}`);
     rungs.forEach((b, i) => {
       b.classList.toggle('is-on', i <= level);

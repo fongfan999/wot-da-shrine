@@ -3,7 +3,8 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { saveCounters } from '../lib/config.js';
 import { STRINGS, t } from '../lib/strings.js';
-import { $, body, BURN_SECONDS, counters, fmt, meta, people, reduceMotion, roomName, records, state, tv } from './context.js';
+import { $, body, BURN_SECONDS, counters, fmt, meta, minutesText, people, records, reduceMotion, roomName, state, tv } from './context.js';
+import { INTL } from '../lib/locale.js';
 import { art, burner, congregation, kick, petals, temple } from './engines.js';
 import { ago, bump, shockwave, toast } from './ui.js';
 import { every } from '../lib/clock.js';
@@ -136,10 +137,9 @@ const hhmmss = (ms) => {
   const h = Math.floor(s / 3600);
   return `${h ? `${h}:` : ''}${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 };
-/** 1st, 2nd, 3rd, 4th … 11th, 12th, 13th … 21st */
+/** 1st, 2nd, 3rd, 4th … 11th, 12th, 13th … 21st: English's, which a language that has no such endings leaves out of vigilNoHint. */
 const nth = (n) => `${n}${[11, 12, 13].includes(n % 100) ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
 const vigilHint = (n) => fmt('vigilNoHint', { n, nth: nth(n) });
-const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
 export function tickVigil() {
   // The scene reads this: the down rack's lights go out while a vigil is open.
   data(body, 'vigil', state.vigil ? '1' : null);
@@ -301,11 +301,11 @@ export function renderRecords() {
 const lanternRow = $('#planterns');
 const LANTERN_SVG = '<svg viewBox="0 0 34 60"><path class="plantern__cord" d="M17 -8V0"/><rect class="plantern__cap" x="11" y="0" width="12" height="4" rx="1"/><path class="plantern__glow" d="M17 8c12 0 15 10 15 22s-3 22-15 22S2 42 2 30 5 8 17 8z"/><path class="plantern__body" d="M17 6c11 0 15 11 15 24s-4 24-15 24S2 43 2 30 6 6 17 6z"/><ellipse class="plantern__core" cx="17" cy="30" rx="7" ry="12"/><path class="plantern__rib" d="M9 10v40M17 6v48M25 10v40M3 22h28M3 38h28"/><rect class="plantern__cap" x="11" y="52" width="12" height="4" rx="1"/><path class="plantern__rib" d="M17 56v4"/></svg>';
 const MAX_LANTERNS = 10;
-const lanternMinutes = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${Math.max(1, m)} min`);
+const lanternMinutes = (m) => minutesText(Math.max(1, m));
 /** What one lantern stands for: the vigil it was lit for, as the shrine remembers it. */
 function lanternTip(r) {
   if (!r) return t('lanternOlder');
-  const vars = { title: r.title, t: lanternMinutes(r.minutes ?? 0), date: new Date(r.endedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) };
+  const vars = { title: r.title, t: lanternMinutes(r.minutes ?? 0), date: new Date(r.endedAt).toLocaleDateString(INTL, { month: 'short', day: 'numeric' }) };
   const tip = fmt(r.title ? 'lanternTipTitled' : 'lanternTip', vars);
   if (unpurified(r)) return `${tip}\n${t(purifyDue() ? 'lanternDarkClick' : 'lanternDark')}`;
   if (r.purified?.length) return `${tip}\n${fmt('lanternLitBy', { names: nameList(r.purified.map((p) => p.name), r.purifiedN ?? r.purified.length, 3) })}`;
@@ -375,7 +375,7 @@ export function updateEta() {
   const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   const rel = h > 0 ? `${h}h ${m}m` : `${m}m`;
-  const abs = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  const abs = d.toLocaleTimeString(INTL, { hour: 'numeric', minute: '2-digit' });
   const [before, after] = fmt('etaIn', { rel: '\u0000', at: abs }).split('\u0000');
   etaText.replaceChildren(part('eta__at', before), rel, part('eta__at', after));
 }

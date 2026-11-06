@@ -1,6 +1,6 @@
 <!-- Top bar -->
 <header class="bar">
-  <a class="brand" href="/" aria-label="Wot Da Shrine home">
+  <a class="brand" href="/" aria-label="Wot Da Shrine home" data-i18n-label="labelWotDaShrineHome">
     <svg class="brand__mark" viewBox="2 5.5 28 23.7" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path class="brand__wisp" pathLength="1" stroke-width="1.6" d="M16 15.2c-1.6-1.6 1.2-2.8-.4-4.4c-1.4-1.4 1-2.6-.2-4.2c-1-1.3.8-2.2-.1-3.6" />
       <path class="brand__gate" stroke-width="3" d="M3.5 7.2Q16 10.4 28.5 7.2" />
@@ -53,7 +53,7 @@
       <p class="down-pop__note" data-i18n="blessWhatNote">The room bows with you. Say Shipped when it is out, or It broke, and the vigil begins.</p>
       <div class="down-pop__actions">
         <button class="btn btn--glass btn--sm" id="bless-cancel" type="button" data-i18n="blessCancel">Cancel</button>
-        <button class="btn btn--accent btn--sm" id="bless-go" type="submit">Bless it</button>
+        <button class="btn btn--accent btn--sm" id="bless-go" type="submit" data-i18n="labelBlessIt">Bless it</button>
       </div>
     </form>
     <button class="btn btn--live btn--sm incident__ship" id="btn-ship" type="button" hidden>
@@ -75,21 +75,21 @@
     </button>
   </div>
   <div class="bar__right">
-    <button class="presence" id="presence" type="button" hidden aria-label="People in the shrine"></button>
+    <button class="presence" id="presence" type="button" hidden aria-label="People in the shrine" data-i18n-label="labelPeopleInTheShrine"></button>
     <a class="btn btn--accent btn--sm" id="btn-together" href="/new" rel="nofollow" data-open-shrine>
       <span class="hide-sm" data-i18n="together">Pray with your team</span>
       <span class="show-sm" data-i18n="togetherShort">Team</span>
     </a>
     <!-- Cast to TV: a main feature, so it has its own icon (shown once inside a shrine) -->
-    <button class="icon-btn" id="btn-cast" type="button" hidden data-cast aria-label="Cast to TV" title="Cast to TV">
+    <button class="icon-btn" id="btn-cast" type="button" hidden data-cast aria-label="Cast to TV" data-i18n-label="castBtn" title="Cast to TV" data-i18n-title="castBtn">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><path d="M3 12a8 8 0 0 1 8 8M3 16a4 4 0 0 1 4 4"/><path d="M3 20h.01"/></svg>
     </button>
     <!-- Share: everything that sends the shrine somewhere else -->
     <div class="menu" id="share-menu-wrap">
-      <button class="icon-btn menu__btn" id="btn-share" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="share-menu" aria-label="Share the shrine" title="Share the shrine">
+      <button class="icon-btn menu__btn" id="btn-share" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="share-menu" aria-label="Share the shrine" data-i18n-label="shareTitle" title="Share the shrine" data-i18n-title="shareTitle">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M5 13v6h14v-6"/></svg>
       </button>
-      <div class="menu__list menu__list--end" id="share-menu" role="menu" aria-label="Share the shrine" hidden>
+      <div class="menu__list menu__list--end" id="share-menu" role="menu" aria-label="Share the shrine" data-i18n-label="shareTitle" hidden>
         <button class="menu__item" id="menu-copy-link" type="button" role="menuitem">
           <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
           <span class="menu__text"><b data-i18n="menuCopyLink">Copy the link</b><small data-i18n="menuCopyLinkHint">Paste it in the incident channel</small></span>
@@ -110,22 +110,22 @@
       </div>
     </div>
     <!-- The code: one icon beside the controls (on a phone it waits in More) -->
-    <a class="icon-btn" id="bar-github" href="https://github.com/fongfan999/wot-da-shrine" target="_blank" rel="noopener" aria-label="Open source on GitHub" title="Open source on GitHub">
+    <a class="icon-btn" id="bar-github" href="https://github.com/fongfan999/wot-da-shrine" target="_blank" rel="noopener" aria-label="Open source on GitHub" data-i18n-label="openSource" title="Open source on GitHub" data-i18n-title="openSource">
       <svg class="ico ico--fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.24c0 4.52 2.87 8.36 6.84 9.71.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.73-2.78.62-3.37-1.21-3.37-1.21-.45-1.18-1.11-1.5-1.11-1.5-.91-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.57 2.34 1.12 2.91.85.09-.66.35-1.12.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.4 9.4 0 0 1 12 6.96c.85 0 1.71.12 2.51.35 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.59.69.49A10.25 10.25 0 0 0 22 12.24C22 6.58 17.52 2 12 2z"/></svg>
     </a>
-    <button class="icon-btn" id="btn-fullscreen" type="button" hidden aria-label="Full screen" title="Full screen (F)">
+    <button class="icon-btn" id="btn-fullscreen" type="button" hidden aria-label="Full screen" data-i18n-label="labelFullScreen" title="Full screen (F)" data-i18n-title="labelFullScreenF">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
     </button>
-    <button class="icon-btn" id="btn-sound" type="button" aria-label="Sound" aria-pressed="true" title="Sound (M)">
+    <button class="icon-btn" id="btn-sound" type="button" aria-label="Sound" data-i18n-label="fTrack" aria-pressed="true" title="Sound (M)" data-i18n-title="labelSoundM">
       <svg class="ico ico--on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7"/><path class="wave" d="M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
       <svg class="ico ico--off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l5 6M21 9l-5 6"/></svg>
     </button>
     <!-- More: the things you reach for once -->
     <div class="menu" id="more-menu-wrap">
-      <button class="icon-btn menu__btn" id="btn-more" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="more-menu" aria-label="More" title="More">
+      <button class="icon-btn menu__btn" id="btn-more" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="more-menu" aria-label="More" data-i18n-label="landFootMore" title="More" data-i18n-title="landFootMore">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg>
       </button>
-      <div class="menu__list menu__list--end" id="more-menu" role="menu" aria-label="More" hidden>
+      <div class="menu__list menu__list--end" id="more-menu" role="menu" aria-label="More" data-i18n-label="landFootMore" hidden>
         <button class="menu__item" id="btn-settings" type="button" role="menuitem">
           <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
           <span class="menu__text"><b data-i18n="panelTitle">Customize</b><small data-i18n="menuCustomizeHint">Theme, effects, what is down</small></span>

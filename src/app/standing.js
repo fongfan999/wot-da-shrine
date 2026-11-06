@@ -15,6 +15,7 @@ import { renderPeople } from './people.js';
 import { updateStats } from './stats.js';
 import { renderBoard } from './together.js';
 import { logEvent, toast } from './ui.js';
+import { INTL } from '../lib/locale.js';
 
 /** Where people have standing: a shrine of your own, not the public demo or a screen on the wall. */
 export const hasStanding = () => Boolean(roomName) && roomName !== 'demo';
@@ -82,13 +83,13 @@ export function morningTime(at = Date.now()) {
   const m = morningMinute(at, myTz());
   const d = new Date(at);
   d.setHours(Math.floor(m / 60), m % 60, 0, 0);
-  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return d.toLocaleTimeString(INTL, { hour: 'numeric', minute: '2-digit' });
 }
 
 /* ---------- The Bow key: today's morning bow, while it is still to make ---------- */
 const badge = $('#bow-daily');
 const bowBtn = $('#btn-bow');
-const bowTitle = bowBtn.title;
+const bowTitle = t(bowBtn.dataset.i18nTitle); // the markup's own title is English until the page's words are in
 // The cue over the incense is the morning bow until you make it: the first thing a shrine teaches is
 // the thing to come back for. After it, the cue lights the incense as before (stats.js shows and hides it).
 const cue = $('#light-cue');

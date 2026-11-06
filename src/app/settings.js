@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { syncPalette } from '../scene/palette.js';
 import { BRAND, STRINGS, applyStrings, t } from '../lib/strings.js';
+import { savedLocale, setLocale } from '../lib/locale.js';
 import { $, body, fmt, landing, meta, mix, mixName, persist, resetSettings, roomName, settings, state, tv, urlParams } from './context.js';
 import { LAYERS, PRESETS, cleanMix, presetOf, sameMix } from '../../shared/rules.js';
 import { fog, petals, temple } from './engines.js';
@@ -194,6 +195,17 @@ $('#theme-seg').addEventListener('click', (e) => {
   persist();
   applySettings();
   sound.tick(740, 0.06);
+});
+
+// The language reloads the page in it: every part reads its words as it starts (src/lib/locale.js)
+const langSeg = $('#lang-seg');
+const langChosen = savedLocale();
+langSeg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.lang === langChosen)));
+langSeg.addEventListener('click', (e) => {
+  const lang = e.target.closest('button[data-lang]')?.dataset.lang;
+  if (!lang || lang === langChosen) return;
+  sound.tick(740, 0.06);
+  setLocale(lang);
 });
 
 for (const k of ['theme', 'fx']) {

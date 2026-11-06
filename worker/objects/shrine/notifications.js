@@ -2,11 +2,13 @@
 import { cleanSub, send as sendPush, topicOf } from '../../push.js';
 import { kamiLine, kamiMood } from '../../../shared/kami.js';
 import { cleanTz, dayOf, devoteeKey, KAMI_HUNGRY, MORNING_LATE, morningMinute } from '../../../shared/rules.js';
+import { cleanLang, lasted, say, WORDS } from './words.js';
 
 /**
  * Notifications: browsers that asked to hear from this shrine while nobody has it open. Each is kept
  * under its push endpoint, with whose it is (name and avatar, as the ledger knows them), what they
- * want to hear about and their clock, for the evening reminder.
+ * want to hear about, their clock, for the evening reminder, and their language (words.js): each
+ * hears every message in the one their page spoke when it last said who it was.
  */
 const MAX_SUBS = 100;
 const PUSH_TOPICS = ['down', 'watch', 'morning', 'kami'];
@@ -14,11 +16,10 @@ const PUSH_COOLDOWN = 10 * 60 * 1000; // a flapping monitor opens vigil after vi
 const REMIND_AT = 19 * 3600 * 1000; // a run waiting on today's bow is mentioned at 7 in the evening, their time
 const DAY = 86400000;
 const cleanTopics = (raw) => Object.fromEntries(PUSH_TOPICS.map((k) => [k, raw?.[k] !== false]));
-/** The morning nudge for a run of `streak` mornings that today's bow would keep. */
-const morningNudge = (streak, room) => (streak > 1
-  ? { title: `Day ${streak + 1} of your run`, body: `Your ${streak}-morning run at ${room} is waiting on today's bow. The kami is up.`, tag: `${room}:morning`, url: `/r/${room}` }
-  : { title: 'Day 2 starts with a bow', body: `You bowed at ${room} yesterday. One bow this morning makes it a run.`, tag: `${room}:morning`, url: `/r/${room}` });
-const minutes = (m) => (m < 60 ? `${m} min` : m < 1440 ? `${Math.floor(m / 60)}h ${m % 60 ? `${m % 60}m` : ''}`.trim() : `${Math.floor(m / 1440)}d ${Math.floor((m % 1440) / 60)}h`);
+/** The morning nudge for a run of `streak` mornings that today's bow would keep, in `lang`. */
+const morningNudge = (lang, streak, room) => (streak > 1
+  ? { title: say(lang, 'runTitle', { next: streak + 1 }), body: say(lang, 'runBody', { n: streak, room }), tag: `${room}:morning`, url: `/r/${room}` }
+  : { title: say(lang, 'secondTitle'), body: say(lang, 'secondBody', { room }), tag: `${room}:morning`, url: `/r/${room}` });
 
 /** Methods of the Shrine: `this` is the shrine. */
 export const methods = {
@@ -51,27 +52,37 @@ export const methods = {
       s.pushedAt = now;
       s.vigil.pushed = true;
       const alert = by?.id === 'hook';
-      const kneeling = n ? `${n} praying.` : alert ? 'Nobody is kneeling yet.' : '';
-      const body = `${by?.name ?? 'Someone'} ${alert ? 'raised the alarm' : 'opened the vigil'} in ${room}. ${kneeling} Come kneel.`.replace(/\s+/g, ' ');
-      this.pushTo(subs.filter(away), { title: s.meta.title || 'Something is down', body, tag: `${room}:vigil`, url, urgent: true }, { urgency: 'high', topic: topicOf('vigil', room) });
+      // Each browser hears it in its own language: a message is made for each (pushTo).
+      this.pushTo(subs.filter(away), ({ lang }) => {
+        const kneeling = n ? say(lang, 'downPraying', { n }) : alert ? say(lang, 'downNobody') : '';
+        const body = say(lang, alert ? 'downAlarm' : 'downOpened', { name: by?.name ?? say(lang, 'someone'), room, kneeling }).replace(/\s+/g, ' ');
+        return { title: s.meta.title || say(lang, 'downTitle'), body, tag: `${room}:vigil`, url, urgent: true };
+      }, { urgency: 'high', topic: topicOf('vigil', room) });
     } else if (kind === 'back') {
       // The title is whatever the room called it ("Payments API", "Payments API is down"): quoted, it reads either way.
-      const what = record?.title ? `The vigil for “${record.title}”` : 'The vigil';
-      const who = by?.name ? ` ${by.id === 'hook' ? `${by.name} says it cleared.` : `${by.name} said so.`}` : '';
-      this.pushTo(subs.filter(away), { title: "They're back!", body: `${what} ended after ${minutes(record?.minutes ?? 1)}.${who}`, tag: `${room}:vigil`, url }, { topic: topicOf('vigil', room) });
+      this.pushTo(subs.filter(away), ({ lang }) => {
+        const what = record?.title ? say(lang, 'backFor', { title: record.title }) : say(lang, 'backPlain');
+        const who = by?.name ? ` ${say(lang, by.id === 'hook' ? 'backHook' : 'backBy', { name: by.name })}` : '';
+        return { title: say(lang, 'backTitle'), body: `${say(lang, 'backBody', { what, t: lasted(lang, record?.minutes ?? 1) })}${who}`, tag: `${room}:vigil`, url };
+      }, { topic: topicOf('vigil', room) });
     } else if (kind === 'unback') {
-      this.pushTo(subs.filter(away), { title: 'Not back after all', body: `${by?.name ?? 'Someone'} took it back: ${s.meta.title || 'the servers'} still down in ${room}.`, tag: `${room}:vigil`, url, urgent: true }, { urgency: 'high', topic: topicOf('vigil', room) });
+      this.pushTo(subs.filter(away), ({ lang }) => ({ title: say(lang, 'unbackTitle'), body: say(lang, 'unbackBody', { name: by?.name ?? say(lang, 'someone'), what: s.meta.title || say(lang, 'theServers'), room }), tag: `${room}:vigil`, url, urgent: true }), { urgency: 'high', topic: topicOf('vigil', room) });
     } else if (kind === 'watch') {
       const mine = subs.filter((sub) => sub.topics.watch && devoteeKey(sub) === devoteeKey(to));
-      this.pushTo(mine, { title: 'You hold the watch', body: `${by.name} handed you the watch in ${room}. Sleep lightly.`, tag: `${room}:watch`, url }, { topic: topicOf('watch', room) });
+      this.pushTo(mine, ({ lang }) => ({ title: say(lang, 'watchTitle'), body: say(lang, 'watchBody', { name: by.name, room }), tag: `${room}:watch`, url }), { topic: topicOf('watch', room) });
     }
   },
 
-  /** Send one message to these subscriptions, in the background, forgetting any the browser has dropped. */
+  /**
+   * Send one message to these subscriptions, in the background, forgetting any the browser has dropped.
+   * `msg` is the message, or makes each subscription's from it (in its language).
+   */
   pushTo(list, msg, opts = {}) {
     if (!list.length) return;
-    const ttl = opts.ttl ?? (msg.urgent ? 6 * 3600 : 12 * 3600);
-    const p = Promise.all(list.map(async (sub) => [sub.endpoint, await sendPush(this.env, sub, msg, { ...opts, ttl })])).then(async (results) => {
+    const p = Promise.all(list.map(async (sub) => {
+      const m = typeof msg === 'function' ? msg(sub) : msg;
+      return [sub.endpoint, await sendPush(this.env, sub, m, { ...opts, ttl: opts.ttl ?? (m.urgent ? 6 * 3600 : 12 * 3600) })];
+    })).then(async (results) => {
       const gone = results.filter(([, r]) => r === 'gone');
       if (!gone.length) return;
       for (const [endpoint] of gone) delete this.subs[endpoint];
@@ -124,7 +135,7 @@ export const methods = {
         const at = day * DAY + morningMinute(d.at, sub.tz) * 60000 - shift;
         if (now + 1000 >= at) {
           sub.morningTold = day;
-          if (away && d.day === day - 1 && now - at < MORNING_LATE) due.push([sub, morningNudge(d.streak, room), 'morning']);
+          if (away && d.day === day - 1 && now - at < MORNING_LATE) due.push([sub, morningNudge(sub.lang, d.streak, room), 'morning']);
         }
       }
       if (sub.reminded === day || now + 1000 < day * DAY + REMIND_AT - shift) continue;
@@ -132,12 +143,13 @@ export const methods = {
       if (!away) continue;
       if (sub.topics.kami && hungry && sub.kamiTold !== k.fedAt) {
         sub.kamiTold = k.fedAt;
-        due.push([sub, { title: 'The kami is hungry', body: `${kamiLine(kamiMood(k, now), k, room, { now, tz: sub.tz, things: this.state.guarded.map((o) => o.name) })} One bow at ${room} will do.`, tag: `${room}:kami`, url: `/r/${room}` }, 'kami']);
+        const line = kamiLine(kamiMood(k, now), k, room, { now, tz: sub.tz, things: this.state.guarded.map((o) => o.name), words: WORDS[cleanLang(sub.lang)].kami });
+        due.push([sub, { title: say(sub.lang, 'kamiTitle'), body: say(sub.lang, 'kamiBody', { line, room }), tag: `${room}:kami`, url: `/r/${room}` }, 'kami']);
         continue;
       }
       if (!sub.topics.morning) continue;
       if (!d || d.streak < 2 || d.day !== day - 1) continue;
-      due.push([sub, { title: `Keep your ${d.streak}-morning run`, body: `You haven't bowed at ${room} today. One bow before midnight keeps it going.`, tag: `${room}:morning`, url: `/r/${room}` }, 'morning']);
+      due.push([sub, { title: say(sub.lang, 'eveningTitle', { n: d.streak }), body: say(sub.lang, 'eveningBody', { room }), tag: `${room}:morning`, url: `/r/${room}` }, 'morning']);
     }
     await this.ctx.storage.put('push', this.subs);
     for (const [sub, msg, topic] of due) this.pushTo([sub], msg, { ttl: 4 * 3600, topic: topicOf(topic, room) });
@@ -160,7 +172,7 @@ export const actions = {
     const sub = cleanSub(msg.sub);
     if (!sub) { ws.send(JSON.stringify({ t: 'push', error: 'bad-subscription' })); return; }
     const was = this.subs[sub.endpoint];
-    this.subs[sub.endpoint] = { ...sub, name: self.name, avatar: self.avatar, tz: cleanTz(msg.tz), topics: cleanTopics(msg.topics), at: Date.now(), reminded: was?.reminded ?? 0 };
+    this.subs[sub.endpoint] = { ...sub, name: self.name, avatar: self.avatar, tz: cleanTz(msg.tz), lang: cleanLang(msg.lang), topics: cleanTopics(msg.topics), at: Date.now(), reminded: was?.reminded ?? 0 };
     // A full list lets go of whoever subscribed, or last came back, longest ago.
     const all = Object.values(this.subs);
     if (all.length > MAX_SUBS) delete this.subs[all.reduce((a, b) => (a.at <= b.at ? a : b)).endpoint];
@@ -168,6 +180,7 @@ export const actions = {
     await this.savePush();
     ws.send(JSON.stringify({ t: 'push', on: true, topics: this.subs[sub.endpoint].topics }));
     // The first time: one right away, so they know it works.
-    if (!was && msg.hello === true) this.pushTo([this.subs[sub.endpoint]], { title: 'Notifications are on', body: `You'll hear from ${this.ctx.id.name} when it needs you.`, tag: `${this.ctx.id.name}:hello`, url: `/r/${this.ctx.id.name}` });
+    const room = this.ctx.id.name;
+    if (!was && msg.hello === true) this.pushTo([this.subs[sub.endpoint]], ({ lang }) => ({ title: say(lang, 'helloTitle'), body: say(lang, 'helloBody', { room }), tag: `${room}:hello`, url: `/r/${room}` }));
   },
 };

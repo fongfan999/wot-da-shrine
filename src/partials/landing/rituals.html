@@ -26,9 +26,9 @@
       </article>
       <article class="ritual ritual--forecast">
         <!-- Today's forecast, as the kami gives it (shared/forecast.js): tap for the next day -->
-        <button class="ritual__stage forecast-mini" id="forecast-mini" type="button" aria-label="Show the next day’s forecast">
+        <button class="ritual__stage forecast-mini" id="forecast-mini" type="button" aria-label="Show the next day’s forecast" data-i18n-label="demoForecastNext">
           <span class="forecast-mini__card" id="fc-card" aria-live="polite">
-            <span class="forecast-mini__day" id="fc-day">Today</span>
+            <span class="forecast-mini__day" id="fc-day" data-i18n="landForecastDay">Today</span>
             <span class="forecast-mini__sky"><span class="forecast-mini__glyph" id="fc-glyph" aria-hidden="true"></span><b id="fc-sky"></b></span>
             <span class="forecast-mini__why" id="fc-why"></span>
             <span class="forecast-mini__line" id="fc-line"></span>
@@ -43,13 +43,13 @@
         </div>
       </article>
       <article class="ritual ritual--fortune">
-        <button class="ritual__stage fortune-mini" id="fortune-mini" type="button" aria-label="Draw a preview fortune">
+        <button class="ritual__stage fortune-mini" id="fortune-mini" type="button" aria-label="Draw a preview fortune" data-i18n-label="demoFortuneDraw">
           <span class="fortune-mini__slip">
             <span class="fortune-mini__kanji" id="fm-kanji">吉</span>
-            <span class="fortune-mini__name" id="fm-name">Blessing</span>
-            <span class="fortune-mini__line" id="fm-line">The runbook is correct, for once.</span>
+            <span class="fortune-mini__name" id="fm-name" data-i18n="demoFortuneName">Blessing</span>
+            <span class="fortune-mini__line" id="fm-line" data-i18n="demoFortuneLine">The runbook is correct, for once.</span>
           </span>
-          <span class="fortune-mini__hint">tap to draw again</span>
+          <span class="fortune-mini__hint" data-i18n="demoFortuneHint">tap to draw again</span>
         </button>
         <div class="ritual__body">
           <h3 data-i18n="landFortune">Draw a fortune</h3>
@@ -61,8 +61,8 @@
         <div class="ritual__stage" aria-hidden="true">
           <div class="burnslip" id="burnslip">
             <div class="burnslip__paper">
-              <p class="burnslip__text" id="burnslip-text">I ran the migration on prod at 5pm on a Friday.</p>
-              <span class="burnslip__sig">— anonymous, blamelessly</span>
+              <p class="burnslip__text" id="burnslip-text" data-i18n="demoBlame">I ran the migration on prod at 5pm on a Friday.</p>
+              <span class="burnslip__sig" data-i18n="demoSigAnon">— anonymous, blamelessly</span>
             </div>
             <span class="burnslip__edge"></span>
           </div>

@@ -5,10 +5,18 @@
  *
  * A key belongs to one file. Two files saying the same key is a mistake: in development and in the
  * tests it stops the page loading, so it is found at once; a production build keeps the later one.
+ *
+ * English is the page's own. Another language (src/lib/locale.js) is a pack in strings/<lang>/,
+ * the same files saying the same keys, laid over the English before anything reads a word: a key
+ * the pack leaves out stays English. Only a page that speaks it loads it.
  */
 import cards from './strings/cards.js';
+import common from './strings/common.js';
 import deploys from './strings/deploys.js';
+import demos from './strings/demos.js';
+import labels from './strings/labels.js';
 import dock from './strings/dock.js';
+import fortunes from './strings/fortunes.js';
 import heading from './strings/heading.js';
 import kami from './strings/kami.js';
 import landing from './strings/landing.js';
@@ -19,6 +27,11 @@ import share from './strings/share.js';
 import standing from './strings/standing.js';
 import tv from './strings/tv.js';
 import vigils from './strings/vigils.js';
+import words from './strings/words.js';
+import { QUICK_PRAYERS, prayerFrom, prayerIn } from '../../shared/prayers.js';
+import { BASE, LOCALE } from './locale.js';
+
+export { LOCALE };
 
 export const BRAND = 'Wot Da Shrine';
 
@@ -40,18 +53,35 @@ function merge(parts) {
   return out;
 }
 
-export const STRINGS = merge({ heading, dock, cards, standing, rooms, settings, landing, share, vigils, deploys, kami, tv, mantras });
+export const STRINGS = merge({ common, heading, dock, cards, standing, rooms, settings, landing, share, vigils, deploys, kami, tv, mantras, fortunes, demos, labels, words });
+
+/** The packs, each its own chunk. */
+const PACKS = { vi: () => import('./strings/vi/index.js') };
+if (LOCALE !== BASE && PACKS[LOCALE]) Object.assign(STRINGS, (await PACKS[LOCALE]()).default);
 
 export const t = (key) => STRINGS[key] ?? key;
 
-/** Apply strings to every [data-i18n] / [data-i18n-placeholder] element. */
+/** A prayer as this page says it: a ready-made one in its words, whatever language it was sent in; anything typed as typed. */
+export const prayerText = (text) => prayerIn(text, STRINGS.quickPrayers);
+/** A prayer as the shrine knows it: a ready-made one in its English words (shared/prayers.js), anything typed as typed. */
+export const prayerSent = (text) => prayerFrom(text, STRINGS.quickPrayers);
+export { QUICK_PRAYERS };
+
+/** The attributes a partial can ask for by key: data-i18n-label sets aria-label, data-i18n-title the title, and so on. */
+const ATTRS = { placeholder: 'placeholder', label: 'aria-label', title: 'title', alt: 'alt' };
+const ATTR_SELECTOR = Object.keys(ATTRS).map((a) => `[data-i18n-${a}]`).join(',');
+
+/** Apply strings to every [data-i18n] element, and every attribute asked for by key (ATTRS). */
 export function applyStrings(overrides = {}) {
   document.querySelectorAll('[data-i18n]').forEach((el) => {
     const key = el.dataset.i18n;
     const val = overrides[key] || t(key);
     if (el.textContent !== val) el.textContent = val;
   });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
-    el.placeholder = t(el.dataset.i18nPlaceholder);
+  document.querySelectorAll(ATTR_SELECTOR).forEach((el) => {
+    for (const [a, attr] of Object.entries(ATTRS)) {
+      const key = el.dataset[`i18n${a[0].toUpperCase()}${a.slice(1)}`];
+      if (key && el.getAttribute(attr) !== t(key)) el.setAttribute(attr, t(key));
+    }
   });
 }

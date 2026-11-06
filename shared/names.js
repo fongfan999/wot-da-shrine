@@ -7,6 +7,13 @@
 /** What a room may be called: the slug in /r/<room>. */
 export const ROOM_RE = /^[a-z0-9-]{3,48}$/;
 
+/**
+ * Words as a room's slug: "Prod is DOWN!!" → "prod-is-down", "Server đang thiền" → "server-dang-thien".
+ * Accents go (NFKD splits them off a letter, then they are dropped), and đ is a d of its own.
+ */
+export const slugify = (text) => String(text ?? '').toLowerCase().replaceAll('đ', 'd').normalize('NFKD').replace(/\p{M}/gu, '')
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
 const ADJECTIVES = ['quiet', 'sleepy', 'humble', 'patient', 'serene', 'devout', 'stoic', 'mellow', 'eternal', 'golden', 'gentle', 'lucky'];
 const NOUNS = ['lotus', 'rack', 'kernel', 'daemon', 'uptime', 'pagoda', 'packet', 'monk', 'cache', 'socket', 'shrine', 'pod'];
 

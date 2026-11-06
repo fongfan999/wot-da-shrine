@@ -67,12 +67,12 @@ export function kamiMoodNow() {
 /** What it has to say, for the heading: the same line everyone in the room reads today. */
 export function kamiHeadline() {
   const mood = kamiMoodNow();
-  return mood ? kamiLine(mood, state.kami, roomName, { now: serverNow(), tz: myTz(), things: watched().map((o) => o.name), at: pointedAt() }) : '';
+  return mood ? kamiLine(mood, state.kami, roomName, { now: serverNow(), tz: myTz(), things: watched().map((o) => o.name), at: pointedAt(), words: t('kamiWords') }) : '';
 }
 
 /* ---------- Today's forecast: the kami's word on the day, the same for the whole room ---------- */
 /** Today's forecast for this shrine, for the services it watches; null where there is no kami. */
-export const todaysForecast = () => (hasKami() ? forecast(roomName, serverNow(), watched().map((o) => o.name)) : null);
+export const todaysForecast = () => (hasKami() ? forecast(roomName, serverNow(), watched().map((o) => o.name), t('forecastWords')) : null);
 const whyText = (why) => why.map((w) => t(`forecastWhy_${w}`)).join(', ');
 /** The forecast as one line, for the TV's heading: "Storm warning: heavy alerts expected near payments-api." */
 export function forecastHeadline() {
@@ -131,7 +131,7 @@ export function renderKami() {
   wrap.dataset.fed = k.fedAt ? '1' : ''; // never fed: no meter and no "fed …", the line above already says so
   textEl.textContent = t(`kami_${mood}`);
   const when = k.fedAt ? ago(k.fedAt - state.clockSkew) : '';
-  sinceEl.textContent = k.fedAt ? fmt(when === 'now' ? 'kamiFedNow' : 'kamiFedAgo', { t: when, name: k.by || t('someone') }) : '';
+  sinceEl.textContent = k.fedAt ? fmt(when === t('agoNow') ? 'kamiFedNow' : 'kamiFedAgo', { t: when, name: k.by || t('someone') }) : '';
   // What is left of its protection: full at a meal, gone once it starves.
   const left = k.fedAt && mood !== 'vigil' ? Math.max(0, 1 - (serverNow() - k.fedAt) / KAMI_STARVE) : 0;
   fillEl.style.width = `${Math.round(left * 100)}%`;

@@ -3,12 +3,13 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { AVATARS } from '../lib/room.js';
 import { t } from '../lib/strings.js';
-import { $, fmt, reduceMotion, roomName, state } from './context.js';
+import { $, fmt, minutesText, reduceMotion, roomName, state } from './context.js';
 import { RESOLVED_FOR } from './resolve.js';
 import { DEVOTEE_ROLES, devoteeKey, TONES } from '../../shared/rules.js';
 import { kneeling, lookOf, walking } from '../scene/devotee.js';
 
-export const DEFAULT_NAMES = ['Sleepy sysadmin', 'On-call monk', 'Intern of the week', 'Senior YAML engineer', 'Database whisperer', 'Kubernetes pilgrim', 'Release shaman', 'Log reader'];
+/** What someone is called until they say: one of these, in the page's language (strings/rooms.js). */
+export const DEFAULT_NAMES = t('defaultNames');
 
 export const joinEl = $('#join');
 /** The join sheet is up and waiting: not merely fading out after you joined. */
@@ -22,7 +23,6 @@ const joinRoleTip = $('#join-role-tip');
 
 /* ---------- The join card: what you are walking into, before you kneel ---------- */
 const joinState = $('#join-state');
-const minutes = (m) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)}h ${m % 60}m`);
 let joinStatus = null; // fetched once: the room as it was when you arrived
 
 async function loadJoinState() {
@@ -41,7 +41,7 @@ function renderJoinState(st) {
   const back = !down && st.resolvedAt && st.now - st.resolvedAt < RESOLVED_FOR;
   $('#join-what').textContent = st.title || (down ? t('joinDown') : back ? t('joinBack') : '');
   const facts = [];
-  if (st.downFor) facts.push(fmt('joinDownFor', { t: minutes(st.downFor) }));
+  if (st.downFor) facts.push(fmt('joinDownFor', { t: minutesText(st.downFor) }));
   facts.push(st.lit ? fmt('joinBurning', { n: Math.max(1, Math.ceil(st.burnLeft / 60)) }) : t('joinCold'));
   const line = facts.join(' · ');
   $('#join-facts').textContent = line.charAt(0).toUpperCase() + line.slice(1);
@@ -108,7 +108,7 @@ export const picked = () => ({
 /** You as the room will see you: kneeling from behind, and from the side carrying incense. */
 function renderPreview() {
   const { avatar, role, tone } = picked();
-  const name = joinName.value.trim() || 'You';
+  const name = joinName.value.trim() || t('you');
   const look = lookOf(devoteeKey({ name, avatar }), role, tone);
   joinPreview.dataset.tone = String(look.tone);
   joinPreview.innerHTML = `<svg viewBox="-62 -232 124 240">${kneeling('kneeler', { look })}</svg><svg viewBox="-46 -236 92 244">${walking('walker', { look }, { sticks: true })}</svg>`;

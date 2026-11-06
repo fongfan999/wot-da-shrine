@@ -9,6 +9,7 @@
  */
 import gsap from 'gsap';
 import { t } from '../lib/strings.js';
+import { LOCALE } from '../lib/locale.js';
 import { $, fmt, roomName, state, tv } from './context.js';
 import { toast } from './ui.js';
 
@@ -61,7 +62,7 @@ async function subscription(make) {
 }
 
 function tell(sub, topics, hello = false) {
-  state.shrine?.send('push', { sub: sub.toJSON(), topics, tz: myTz(), hello });
+  state.shrine?.send('push', { sub: sub.toJSON(), topics, tz: myTz(), lang: LOCALE, hello }); // its notifications come in this page's language
 }
 
 /* ---------- Turning them on and off ---------- */

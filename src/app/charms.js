@@ -13,6 +13,7 @@ import { petals } from './engines.js';
 import { openRitual } from './rituals.js';
 import { logEvent, shockwave, toast } from './ui.js';
 import { nameOf, opensWithCharm } from './unlocks.js';
+import { INTL } from '../lib/locale.js';
 
 const shelf = $('#charms');
 const row = $('#charms-row');
@@ -81,7 +82,7 @@ export function renderCharms() {
 
 /* ---------- The sheet: every charm, and how far the room has come ---------- */
 const sheet = $('#charms-sheet');
-const day = (at) => new Date(at - state.clockSkew).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+const day = (at) => new Date(at - state.clockSkew).toLocaleDateString(INTL, { month: 'short', day: 'numeric', year: 'numeric' });
 function renderSheet() {
   const have = got();
   grid.replaceChildren(...CHARMS.map((c) => {

@@ -7,6 +7,7 @@
 const ME_KEY = 'incense:me:v1';
 
 import { AVATARS, cleanRole, cleanTone } from '../../shared/rules.js';
+import { LOCALE } from './locale.js';
 
 export { AVATARS };
 
@@ -116,7 +117,7 @@ export function connectRoom(room, me, { onMessage, onStatus, watch = false, arri
   const open = () => {
     onStatus('connecting');
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const q = new URLSearchParams({ name: me.name, avatar: me.avatar });
+    const q = new URLSearchParams({ name: me.name, avatar: me.avatar, lang: LOCALE }); // the room's previews speak the language it was last acted in
     if (me.role) q.set('role', me.role);
     if (me.tone !== undefined) q.set('tone', String(me.tone));
     if (watch) q.set('watch', '1');

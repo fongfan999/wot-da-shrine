@@ -3,7 +3,7 @@
   <div class="sheet__card">
     <div class="sheet__head">
       <h2 class="sheet__title" id="share-title" data-i18n="shareTitle">Share the shrine</h2>
-      <button class="icon-btn" id="btn-close-share" type="button" aria-label="Close">
+      <button class="icon-btn" id="btn-close-share" type="button" aria-label="Close" data-i18n-label="labelClose">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
@@ -17,7 +17,7 @@
         <h3 class="label" data-i18n="inviteLabel">Invite the team</h3>
         <p class="sheet__hint" data-i18n="inviteHint">Drop the link in the incident channel. Anyone who opens it kneels at this altar.</p>
         <div class="linkbox">
-          <input class="linkbox__input" id="share-url" type="text" readonly aria-label="Shrine link" />
+          <input class="linkbox__input" id="share-url" type="text" readonly aria-label="Shrine link" data-i18n-label="labelShrineLink" />
           <button class="btn btn--accent btn--sm" id="btn-share-copy" type="button" data-i18n="copy">Copy</button>
         </div>
         <div class="sheet__row">
@@ -48,7 +48,7 @@
       <section class="sheet__section">
         <h3 class="label" id="card-label" data-i18n="cardLabel">Show them what happened</h3>
         <figure class="sharecard">
-          <img class="sharecard__img" id="share-img" alt="A picture of this shrine: the altar, the team and what they prayed for" />
+          <img class="sharecard__img" id="share-img" alt="A picture of this shrine: the altar, the team and what they prayed for" data-i18n-alt="labelAPictureOfThis" />
           <div class="sharecard__loading" id="share-loading" data-i18n="cardLoading">Drawing the altar…</div>
         </figure>
         <div class="sheet__row">

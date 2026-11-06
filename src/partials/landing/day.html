@@ -8,7 +8,7 @@
       <li class="moment" style="--m-c: var(--accent)">
         <p class="moment__time"><b data-i18n="landDay1Time">09:30</b><span data-i18n="landDay1When">Standup</span></p>
         <div class="moment__demo" aria-hidden="true">
-          <p class="mini-quiet"><span class="mini-quiet__dot"></span><b id="demo-days">12</b> days without an incident</p>
+          <p class="mini-quiet"><span class="mini-quiet__dot"></span><b id="demo-days">12</b> <span data-i18n="demoQuietDays">days without an incident</span></p>
           <div class="kami mini-kami" id="demo-kami" data-mood="peckish" data-fed="1">
             <span class="kami__btn">
               <svg class="kami__mask" viewBox="0 0 24 24">
@@ -17,12 +17,12 @@
                 <g class="kami__eyes kami__eyes--narrow"><path d="M7.4 12l3.2 1.3"/><path d="M16.6 12l-3.2 1.3"/></g>
                 <path class="kami__nose" d="M10.9 16.6h2.2L12 18z"/>
               </svg>
-              <span class="kami__text" id="demo-kami-text">Peckish</span>
+              <span class="kami__text" id="demo-kami-text" data-i18n="demoKamiPeckish">Peckish</span>
               <span class="kami__meter"><i class="kami__fill" id="demo-kami-fill"></i></span>
-              <span class="kami__since" id="demo-kami-since">fed yesterday</span>
+              <span class="kami__since" id="demo-kami-since" data-i18n="demoKamiFedYesterday">fed yesterday</span>
             </span>
-            <span class="kami__action" id="demo-kami-bow">Bow to feed it</span>
-            <span class="mini-plus" id="demo-kami-plus">+5 · morning bow</span>
+            <span class="kami__action" id="demo-kami-bow" data-i18n="demoKamiBow">Bow to feed it</span>
+            <span class="mini-plus" id="demo-kami-plus" data-i18n="demoKamiPlus">+5 · morning bow</span>
           </div>
         </div>
         <h3 data-i18n="landDay1">Bow before standup</h3>
@@ -32,9 +32,9 @@
         <p class="moment__time"><b data-i18n="landDay2Time">11:00</b><span data-i18n="landDay2When">Deploy</span></p>
         <div class="moment__demo" aria-hidden="true">
           <div class="mini-omens" id="demo-omens">
-            <p class="mini-omens__what"><span>Shipping</span> <b>checkout v4</b></p>
-            <ul class="omens__list"><li class="omens__item" data-bad="1">It is Friday</li><li class="omens__item" data-bad="1">Mercury is retrograde</li><li class="omens__item" data-bad="0">Someone bowed today</li></ul>
-            <p class="mini-omens__foot"><i>Mostly fine. Bow first.</i> <span class="mini-omens__go">Bless it</span><span class="mini-omens__done">✓ Shipped · 5 clean in a row</span></p>
+            <p class="mini-omens__what"><span data-i18n="demoShipping">Shipping</span> <b>checkout v4</b></p>
+            <ul class="omens__list"><li class="omens__item" data-bad="1" data-i18n="omen_friday">It is Friday</li><li class="omens__item" data-bad="1" data-i18n="omen_mercury">Mercury is retrograde</li><li class="omens__item" data-bad="0" data-i18n="omen_bowed">Someone bowed today</li></ul>
+            <p class="mini-omens__foot"><i data-i18n="demoOmensVerdict">Mostly fine. Bow first.</i> <span class="mini-omens__go" data-i18n="demoBlessIt">Bless it</span><span class="mini-omens__done" data-i18n="demoShipped">✓ Shipped · 5 clean in a row</span></p>
           </div>
         </div>
         <h3 data-i18n="landDay2">Bless what ships</h3>
@@ -46,11 +46,11 @@
           <div class="watch mini-watch" id="demo-watch" data-state="theirs">
             <span class="watch__btn">
               <svg class="watch__lantern" viewBox="0 0 24 24"><path d="M12 2v2"/><rect x="9" y="4" width="6" height="2" rx=".5"/><path d="M12 6c4.5 0 6 3 6 7s-1.5 7-6 7-6-3-6-7 1.5-7 6-7z"/><path d="M7 10h10M7 16h10"/><rect x="9" y="20" width="6" height="2" rx=".5"/></svg>
-              <span class="watch__text" id="demo-watch-text">Linh is on call</span>
-              <span class="watch__since" id="demo-watch-since">since 09:02</span>
-              <span class="watch__action" id="demo-watch-action">Hand over</span>
+              <span class="watch__text" id="demo-watch-text" data-i18n="demoLinhOnCall">Linh is on call</span>
+              <span class="watch__since" id="demo-watch-since" data-i18n="demoSinceMorning">since 09:02</span>
+              <span class="watch__action" id="demo-watch-action" data-i18n="demoHandOver">Hand over</span>
             </span>
-            <span class="mini-plus" id="demo-watch-plus">+10 · quiet watch</span>
+            <span class="mini-plus" id="demo-watch-plus" data-i18n="demoWatchPlus">+10 · quiet watch</span>
           </div>
         </div>
         <h3 data-i18n="landDay3">Hand over the watch</h3>
@@ -62,9 +62,9 @@
           <div class="mini-push">
             <img class="mini-push__icon" src="/icon-192.png" alt="" width="28" height="28" loading="lazy" decoding="async" />
             <div class="mini-push__copy">
-              <p class="mini-push__head"><b>Wot Da Shrine</b><time>7:00 PM</time></p>
-              <p class="mini-push__title">Keep your 6-morning run</p>
-              <p class="mini-push__body">You haven't bowed at payments today. One bow before midnight keeps it going.</p>
+              <p class="mini-push__head"><b>Wot Da Shrine</b><time data-i18n="demoPushTime">7:00 PM</time></p>
+              <p class="mini-push__title" data-i18n="demoPushTitle">Keep your 6-morning run</p>
+              <p class="mini-push__body" data-i18n="demoPushBody">You haven't bowed at payments today. One bow before midnight keeps it going.</p>
             </div>
           </div>
         </div>
@@ -75,10 +75,10 @@
         <p class="moment__time"><b data-i18n="landDay5Time">02:13</b><span data-i18n="landDay5When">Rarely</span></p>
         <div class="moment__demo" aria-hidden="true">
           <div class="mini-vigil" id="demo-vigil">
-            <span class="mini-vigil__down"><span class="mini-vigil__dot"></span>Down for <b id="demo-clock">23:41</b></span>
-            <span class="mini-vigil__up"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg>They’re back · survived 24 min</span>
+            <span class="mini-vigil__down"><span class="mini-vigil__dot"></span><span data-i18n="demoDownFor">Down for</span> <b id="demo-clock">23:41</b></span>
+            <span class="mini-vigil__up"><svg class="ico" viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></svg><span data-i18n="demoBack">They’re back · survived 24 min</span></span>
           </div>
-          <p class="mini-alert">🔔 Grafana said something is down</p>
+          <p class="mini-alert" data-i18n="demoAlert">🔔 Grafana said something is down</p>
         </div>
         <h3 data-i18n="landDay5">When it breaks anyway</h3>
         <p data-i18n="landDay5Text">Your alerts open the vigil and the phones that asked ring. The team prays through it together, on the war-room TV too, and when it is back the credits roll.</p>
@@ -87,11 +87,11 @@
         <p class="moment__time"><b data-i18n="landDay6Time">Monday</b><span data-i18n="landDay6When">Every week</span></p>
         <div class="moment__demo" aria-hidden="true">
           <div class="mini-board" id="demo-board">
-            <p class="mini-board__label">Keepers this week</p>
+            <p class="mini-board__label" data-i18n="demoKeepers">Keepers this week</p>
             <ol class="mini-board__list">
               <li data-row="vy"><span class="mini-board__n">1</span><span class="mini-board__av">🦆</span><b>Vy</b><span class="mini-board__run">🔥 6</span><span class="mini-board__k">84</span></li>
               <li data-row="minh"><span class="mini-board__n">2</span><span class="mini-board__av">🧑‍💻</span><b>Minh</b><span class="mini-board__run">🔥 3</span><span class="mini-board__k">61</span></li>
-              <li data-row="you" class="is-you"><span class="mini-board__n">3</span><span class="mini-board__av">🙇</span><b>You</b><span class="mini-board__run">🔥 2</span><span class="mini-board__k" id="demo-board-k">40</span></li>
+              <li data-row="you" class="is-you"><span class="mini-board__n">3</span><span class="mini-board__av">🙇</span><b data-i18n="you">You</b><span class="mini-board__run">🔥 2</span><span class="mini-board__k" id="demo-board-k">40</span></li>
             </ol>
           </div>
         </div>

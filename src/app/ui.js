@@ -2,7 +2,7 @@
 import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { t } from '../lib/strings.js';
-import { $, body, landing, reduceMotion, state } from './context.js';
+import { $, body, fmt, landing, reduceMotion, state } from './context.js';
 import { every } from '../lib/clock.js';
 
 const toastEl = $('#toast');
@@ -48,10 +48,10 @@ export const feedVisible = () => {
 
 export function ago(at) {
   const s = Math.max(0, Math.round((Date.now() - at) / 1000));
-  if (s < 45) return 'now';
-  if (s < 3600) return `${Math.round(s / 60)}m`;
-  if (s < 86400) return `${Math.round(s / 3600)}h`;
-  return `${Math.round(s / 86400)}d`;
+  if (s < 45) return t('agoNow');
+  if (s < 3600) return fmt('agoMin', { n: Math.round(s / 60) });
+  if (s < 86400) return fmt('agoHour', { n: Math.round(s / 3600) });
+  return fmt('agoDay', { n: Math.round(s / 86400) });
 }
 every(30000, () => feedEl.querySelectorAll('time').forEach((el) => { el.textContent = ago(+el.dataset.at); }));
 
@@ -151,7 +151,7 @@ export function shockwave() {
 }
 
 export async function copyText(text, done) {
-  try { await navigator.clipboard.writeText(text); } catch { prompt('Copy this:', text); }
+  try { await navigator.clipboard.writeText(text); } catch { prompt(t('copyThis'), text); }
   toast(done);
   sound.tick(990, 0.08);
 }

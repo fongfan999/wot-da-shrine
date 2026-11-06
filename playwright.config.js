@@ -22,6 +22,10 @@ export default defineConfig({
   reporter: CI ? [['list'], ['github']] : 'list',
   use: {
     ...devices['Desktop Chrome'],
+    // The page picks its language from where the browser is (src/lib/locale.js): every test is in English,
+    // as in CI, wherever it runs; locale.spec.js puts a browser in Vietnam itself.
+    locale: 'en-US',
+    timezoneId: 'UTC',
     trace: 'retain-on-failure',
   },
 });

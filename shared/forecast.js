@@ -7,6 +7,7 @@
  * sounds like it knows.
  */
 import { fullMoon, mercury } from './omens.js';
+import { fillThing } from './kami.js';
 
 const DAY = 86400000;
 const hash = (str) => { let h = 2166136261; for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0; return h; };
@@ -57,11 +58,17 @@ const AVOID = [
 ];
 
 /**
- * Today's forecast for `room`, picked by the UTC day of `now`, and `things` (the services the room
- * named for the kami, if any) to forecast for. Returns { sky, level, line, why: ['friday' | 'mercury'
- * | 'moon'], lucky: { kind, name }, hour: 'HH:MM', avoid }.
+ * Every word the forecast says, in English. Another language passes its own (shared/vi/forecast.js):
+ * as many lines for each sky and things to avoid, in the same order, so a room reads one forecast.
  */
-export function forecast(room, now = Date.now(), things = []) {
+export const FORECAST_WORDS = { conditions: CONDITIONS, lucky: LUCKY, avoid: AVOID, production: 'production' };
+
+/**
+ * Today's forecast for `room`, picked by the UTC day of `now`, and `things` (the services the room
+ * named for the kami, if any) to forecast for, said in `words`. Returns { sky, level, line, why:
+ * ['friday' | 'mercury' | 'moon'], lucky: { kind, name }, hour: 'HH:MM', avoid }.
+ */
+export function forecast(room, now = Date.now(), things = [], words = FORECAST_WORDS) {
   const day = utcDay(now);
   const seed = (salt) => hash(`${room}:${day}:${salt}`);
   // Chance first, then the almanac: each thing it notices makes the sky one worse.
@@ -74,15 +81,13 @@ export function forecast(room, now = Date.now(), things = []) {
   if (fullMoon(now)) why.push('moon');
   level = Math.min(SKIES.length - 1, level + why.length);
   const sky = SKIES[level];
-  const list = things.length ? things : ['production'];
+  const list = things.length ? things : [words.production];
   const thing = list[seed('thing') % list.length];
-  const lines = CONDITIONS[sky];
-  const line = lines[seed('line') % lines.length]
-    .replaceAll('{Thing}', thing.charAt(0).toUpperCase() + thing.slice(1))
-    .replaceAll('{thing}', thing);
+  const lines = words.conditions[sky];
+  const line = fillThing(lines[seed('line') % lines.length], thing);
   const kind = LUCKY_KINDS[seed('lucky') % LUCKY_KINDS.length];
   const minutes = 9 * 60 + (seed('hour') % 42) * 10; // between 09:00 and 15:50, on the ten
   const hour = `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
-  const avoid = AVOID[seed('avoid') % AVOID.length];
-  return { sky, level, line, why, lucky: { kind, name: LUCKY[kind] }, hour, avoid };
+  const avoid = words.avoid[seed('avoid') % words.avoid.length];
+  return { sky, level, line, why, lucky: { kind, name: words.lucky[kind] }, hour, avoid };
 }

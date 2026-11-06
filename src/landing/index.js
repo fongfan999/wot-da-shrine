@@ -4,6 +4,7 @@ import { ignite } from '../app/altar.js';
 import { $, body, landing, reduceMotion, state } from '../app/context.js';
 import { introStarted } from '../app/stage.js';
 import { breathe } from '../lib/clock.js';
+import { LOCALE, LOCALES, setLocale } from '../lib/locale.js';
 import { onPalette } from '../scene/palette.js';
 import { scene } from '../scene/ticker.js';
 import { burner, placeSmoke, smoke } from '../app/engines.js';
@@ -127,10 +128,12 @@ function paintVeil(p) {
   body.style.setProperty('--hero-veil-sm', draw([1.2, 0.8, 0.5, 0.7, 0.4], false));
 }
 
-/** The footer: the header's wordmark signed huge across the bottom, and a way back up to the altar. */
+/** The footer: the header's wordmark signed huge across the bottom, a way back up to the altar, and the other language. */
 function setupFooter() {
   const foot = $('.foot');
   $('#foot-sign').append($('.brand__word').cloneNode(true));
+  const other = Object.keys(LOCALES).find((l) => l !== LOCALE);
+  Object.assign($('#foot-lang'), { textContent: LOCALES[other], lang: other, hidden: false, onclick: () => setLocale(other) });
   new IntersectionObserver(([en], obs) => { if (en.isIntersecting) { foot.classList.add('is-in'); obs.disconnect(); } }, { threshold: 0.2 }).observe(foot);
   $('#foot-top').addEventListener('click', () => {
     sound.unlock();

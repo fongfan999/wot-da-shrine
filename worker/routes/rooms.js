@@ -1,6 +1,6 @@
 /** Rooms: open one, its page, and its socket, status and README badge. */
 import { Hono } from 'hono';
-import { ROOM_RE, roomName, roomTag } from '../../shared/names.js';
+import { ROOM_RE, roomName, roomTag, slugify } from '../../shared/names.js';
 import { readAlert } from '../alerts.js';
 import { allowed, rateLimit, shared, socketOnly, TOO_MANY } from '../middleware.js';
 import { DEMO_ROOM } from '../objects/shrine/state.js';
@@ -9,7 +9,7 @@ import { roomPage } from '../views/roomPage.js';
 
 /** "Prod is DOWN!!" → "prod-is-down". Too short to be a room, and you get a generated name. */
 function slug(text) {
-  const s = String(text ?? '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48).replace(/-+$/, '');
+  const s = slugify(text).slice(0, 48).replace(/-+$/, '');
   return ROOM_RE.test(s) ? s : roomName();
 }
 

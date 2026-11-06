@@ -1,4 +1,5 @@
-import { $, reduceMotion } from '../app/context.js';
+import { $, fmt, reduceMotion } from '../app/context.js';
+import { t } from '../lib/strings.js';
 
 /**
  * A day at the shrine: six moments of one team's day, each acting itself out while the section is on
@@ -19,8 +20,8 @@ export function setupDay() {
   const mood = (pleased, by) => {
     kami.dataset.mood = pleased ? 'pleased' : 'peckish';
     kami.classList.toggle('is-fed', pleased);
-    $('#demo-kami-text').textContent = pleased ? 'Pleased' : 'Peckish';
-    $('#demo-kami-since').textContent = pleased ? `just fed by ${by}` : 'fed yesterday';
+    $('#demo-kami-text').textContent = t(pleased ? 'demoKamiPleased' : 'demoKamiPeckish');
+    $('#demo-kami-since').textContent = pleased ? fmt('demoKamiFedBy', { name: by }) : t('demoKamiFedYesterday');
     $('#demo-kami-fill').style.width = pleased ? '100%' : '34%';
   };
   async function morning(id) {
@@ -54,8 +55,8 @@ export function setupDay() {
   // 18:00: Linh hands the pager to Minh, and a quiet day's watch pays the room.
   const watch = $('#demo-watch');
   const holder = (name, since) => {
-    $('#demo-watch-text').textContent = `${name} is on call`;
-    $('#demo-watch-since').textContent = `since ${since}`;
+    $('#demo-watch-text').textContent = fmt('demoOnCall', { name });
+    $('#demo-watch-since').textContent = fmt('demoSince', { at: since });
   };
   async function handover(id) {
     for (;;) {

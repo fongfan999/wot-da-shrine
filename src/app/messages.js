@@ -2,7 +2,7 @@
 import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { LEVELS as FORTUNE_LEVELS } from '../lib/omikuji.js';
-import { t } from '../lib/strings.js';
+import { prayerText, t } from '../lib/strings.js';
 import { bowFx, bowlFx, burnOut, chorusFx, ignite, puffFx, scheduleBurnOut } from './altar.js';
 import { $, body, counters, fmt, meta, mix, mixName, people, recentPrayers, records, state, tv, urlMix, urlParams } from './context.js';
 import { art, congregation, wishes } from './engines.js';
@@ -34,6 +34,9 @@ const ACT_ICONS = { down: 'incense', light: 'incense', bowl: 'bowl', bow: 'bow',
 export function onShrineMessage(msg) {
   switch (msg.t) {
     case 'state': {
+      // A ready-made prayer arrives in the words the shrine knows it by: this page shows its own
+      msg.prayers = (msg.prayers ?? []).map((p) => ({ ...p, text: prayerText(p.text) }));
+      msg.log = (msg.log ?? []).map((e) => (e.text ? { ...e, text: prayerText(e.text) } : e));
       state.myId = msg.me;
       state.clockSkew = msg.now - Date.now();
       claimStandIn(msg.me); // the figure drawn while connecting is you
@@ -224,7 +227,8 @@ function replayFeed(log, prayers) {
 }
 
 function remoteAct(msg) {
-  const { kind, by, note, item, text, level, down } = msg;
+  const { kind, by, note, item, level, down } = msg;
+  const text = msg.text && prayerText(msg.text);
   const log = (what, extra = {}) => logEvent({ key: `${by.id}:${kind}${item ? `:${item}` : ''}`, avatar: by.avatar, who: by.name, what, toastText: `${by.name} ${what}.`, ...extra });
   if (kind === 'light') { if (!congregation.walk(by.id)) congregation.bow(by.id, 3); log(t(down ? 'fLightDown' : 'fLight')); }
   else if (kind === 'down') { sound.bowl(174); log(t('fDown'), { toastText: fmt('downRemote', { name: by.name }) }); }

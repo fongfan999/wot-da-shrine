@@ -20,6 +20,8 @@ export default {
   fxAuto: 'Auto',
   fxFull: 'Full',
   fxLite: 'Lite',
+  fLang: 'Language',
+  langAuto: 'Auto',
   fxNoteLite: 'Lite effects: no blur, fewer particles. Smooth on phones.',
   fxNoteFull: 'Full effects: every blur, particle and reflection.',
   fxNoteAuto: 'Auto drops to lite on phones, or when the frame rate falls. It is using {fx} right now.',

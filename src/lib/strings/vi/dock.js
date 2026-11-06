@@ -1,0 +1,53 @@
+/** Tiếng Việt cho strings/dock.js. */
+
+export default {
+  // Dock
+  light: 'Thắp nhang',
+  burning: 'Còn',
+  bowl: 'Thỉnh chuông',
+  bow: 'Vái',
+  offer: 'Cúng',
+  breathe: 'Hít thở',
+  wishLabel: 'Khấn server một câu',
+  wishPlaceholder: 'Khấn server một câu…',
+  surprise: 'Tùy duyên',
+  trayTitle: 'Chọn lễ vật',
+
+  // Rituals
+  ritualsLabel: 'Nghi lễ',
+  blame: 'Đốt sớ',
+  blameTitle: 'Đốt sớ',
+  blameTitleAccent: 'nhận lỗi',
+  blameHint: 'Viết ra chuyện đã xảy ra. Sớ đốt ngay trong bát nhang, không gửi đi đâu, và không ai nhắc lại nữa.',
+  blamePlaceholder: 'Con lỡ chạy migration trên prod lúc 17:00 chiều thứ Sáu…',
+  blameBtn: 'Đốt luôn',
+  blameBurned: 'Đốt rồi. Coi như chưa từng có chuyện gì. +5 công đức.',
+  blameEmpty: 'Sớ trắng thì thánh biết đọc gì? Viết vài chữ đã.',
+  fBlame: 'đốt một lá sớ nhận lỗi',
+  fortune: 'Xin xăm',
+  fortuneTitle: 'Quẻ xăm',
+  fortuneTitleAccent: 'của bạn',
+  fortuneHint: 'Mỗi đàn cầu một quẻ. Lắc ống xăm, rơi ra một que, đọc lời giải.',
+  fortuneTie: 'Buộc lên dây',
+  fortuneTied: 'Đã buộc lên dây. Linh hay không, tùy duyên.',
+  fortuneCopy: 'Sao chép',
+  fortuneCopied: 'Đã chép quẻ.',
+  fortuneAgain: 'Đàn cầu này bạn xin xăm rồi. Quẻ của bạn đây.',
+  fOmikuji: 'xin được quẻ {level}',
+  chorus: 'Đồng thanh ×{n}! Cả miếu cùng vái. +{bonus} công đức.',
+  fChorus: 'vái cùng cả miếu',
+
+  // Toasts
+  litToast: 'Nhang đã thắp. Server cảm nhận được rồi.',
+  wishSent: 'Lời khấn của bạn đang bay lên cloud.',
+  wishEmpty: 'Khấn thầm cũng được tính.',
+  bowed: 'Team ops cúi đầu. Prod kêu ro ro, ra chiều hài lòng.',
+  offered: 'Server hoan hỉ nhận {item}.',
+  offeringBy: '{name} vừa cúng {item}.',
+  offeringAnon: 'Có người vừa cúng {item}.',
+  tabletDefault: 'Prod',
+  candleCold: 'Thắp nhang trước đã, nến tính sau.',
+  inhale: 'Hít vào',
+  hold: 'Nín thở',
+  exhale: 'Thở ra',
+};

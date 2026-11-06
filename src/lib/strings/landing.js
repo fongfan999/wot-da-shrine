@@ -133,6 +133,8 @@ export default {
   mpCopy: 'Copy link',
   mpPreview: 'Open it ↗',
   mpCopied: 'Maintenance page link copied.',
+  mpBackAt: 'Back at {at} · the ops team is praying',
+  mpBackSoon: 'Back soon · the ops team is praying',
   liveEyebrow: 'TV pairing · live from the war room',
   liveTitle: 'Pair a phone,',
   liveAccent: 'light up the wall.',

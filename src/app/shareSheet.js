@@ -3,7 +3,8 @@ import gsap from 'gsap';
 import { sound } from '../audio/index.js';
 import { canCopyImage, canShareFiles, cardPng, cardSvg, copyImage, download, shareFile } from '../lib/share.js';
 import { BRAND, t } from '../lib/strings.js';
-import { $, body, counters, fmt, meta, people, recentPrayers, roomName, roomUrl, records, state } from './context.js';
+import { $, body, counters, fmt, meta, minutesText, people, recentPrayers, records, roomName, roomUrl, state } from './context.js';
+import { INTL } from '../lib/locale.js';
 import { openTray } from './offerings.js';
 import { minutesPrayed } from './resolve.js';
 import { openPanel } from './settings.js';
@@ -27,13 +28,13 @@ function cardText() {
   const url = roomUrl();
   const mins = minutesPrayed();
   if (body.dataset.resolved) return fmt('cardTextResolved', { minutes: Math.max(1, mins), url });
-  if (body.dataset.quiet) return fmt('cardTextQuiet', { days: quietDays() === 1 ? 'A whole day' : quietDays() ? `${quietDays()} days` : 'A day so far', mood: t(`kamiMood_${kamiMoodNow() || 'content'}`), url });
+  if (body.dataset.quiet) return fmt('cardTextQuiet', { days: quietDays() === 1 ? t('cardTextDay') : quietDays() ? fmt('cardTextDays', { n: quietDays() }) : t('cardTextDayFirst'), mood: t(`kamiMood_${kamiMoodNow() || 'content'}`), url });
   const facts = [];
-  if (people.size > 1) facts.push(`${people.size} devotees`);
-  if (mins >= 1) facts.push(`${mins} min of incense`);
-  if (counters.karma) facts.push(`${counters.karma} karma`);
-  if (state.roomPrayed) facts.push(`${state.roomPrayed} prayer${state.roomPrayed === 1 ? '' : 's'}`);
-  return fmt('cardText', { facts: facts.join(', ') || 'the incense is lit', url });
+  if (people.size > 1) facts.push(fmt('cardDevotees', { n: people.size }));
+  if (mins >= 1) facts.push(fmt('cardTextMinutes', { n: mins }));
+  if (counters.karma) facts.push(fmt('cardKarma', { n: counters.karma }));
+  if (state.roomPrayed) facts.push(fmt(state.roomPrayed === 1 ? 'cardPrayer' : 'cardPrayers', { n: state.roomPrayed }));
+  return fmt('cardText', { facts: facts.join(', ') || t('cardTextLit'), url });
 }
 
 async function drawCard() {
@@ -91,8 +92,8 @@ export async function previewCard(kind) {
 /* ---------- For the retro: the vigil as a few lines of Markdown, for the postmortem doc ---------- */
 const retroEl = $('#share-retro');
 const retroText = $('#retro-md');
-const clock = (at) => new Date(at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-const span = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
+const clock = (at) => new Date(at).toLocaleTimeString(INTL, { hour: '2-digit', minute: '2-digit' });
+const span = (m) => minutesText(m);
 
 /** The vigil to write up: the open one, or the one that just ended. Null when the altar has seen none. */
 function retroVigil() {

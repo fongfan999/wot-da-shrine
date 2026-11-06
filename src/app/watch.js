@@ -9,7 +9,8 @@ import gsap from 'gsap';
 import { holdsWatch } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { t } from '../lib/strings.js';
-import { $, fmt, people, reduceMotion, roomName, state, tv } from './context.js';
+import { $, fmt, minutesText, people, reduceMotion, roomName, state, tv } from './context.js';
+import { INTL } from '../lib/locale.js';
 import { petals } from './engines.js';
 import { activity } from './fx.js';
 import { renderPeople } from './people.js';
@@ -41,17 +42,12 @@ const DAY = 86400000;
 /** When the watch began: a time today, or a day and a time before that. */
 function sinceText(at) {
   const d = new Date(at);
-  const time = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  const time = d.toLocaleTimeString(INTL, { hour: 'numeric', minute: '2-digit' });
   if (new Date().toDateString() === d.toDateString()) return time;
-  if (Date.now() - at < 6 * DAY) return `${d.toLocaleDateString(undefined, { weekday: 'short' })} ${time}`;
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  if (Date.now() - at < 6 * DAY) return `${d.toLocaleDateString(INTL, { weekday: 'short' })} ${time}`;
+  return d.toLocaleDateString(INTL, { month: 'short', day: 'numeric' });
 }
-const lasted = (ms) => {
-  const m = Math.max(1, Math.round(ms / 60000));
-  if (m < 60) return `${m} min`;
-  const h = Math.floor(m / 60);
-  return h < 24 ? `${h}h ${m % 60}m` : `${Math.floor(h / 24)}d ${h % 24}h`;
-};
+const lasted = (ms) => minutesText(Math.max(1, Math.round(ms / 60000)), { days: true });
 
 /* ---------- The line under the heading ---------- */
 /** Also renders the people (`newId` just arrived): who holds the watch changes how they look. */

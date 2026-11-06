@@ -3,19 +3,19 @@
   <form class="sheet__card cast-form" id="cast-form" autocomplete="off" novalidate>
     <div class="sheet__head">
       <h2 class="sheet__title" id="cast-title"><span data-i18n="castTitle">Put it on the</span> <em data-i18n="castTitleAccent">TV</em></h2>
-      <button class="icon-btn" type="button" data-close="cast" aria-label="Close">
+      <button class="icon-btn" type="button" data-close="cast" aria-label="Close" data-i18n-label="labelClose">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
     <div class="sheet__body">
       <ol class="cast-form__how">
-        <li><span class="cast-form__n">1</span><span><span data-i18n="castHow1">On the big screen, open</span> <button class="cast-form__url" id="cast-url" type="button" title="Copy the address">/tv</button></span></li>
+        <li><span class="cast-form__n">1</span><span><span data-i18n="castHow1">On the big screen, open</span> <button class="cast-form__url" id="cast-url" type="button" title="Copy the address" data-i18n-title="labelCopyTheAddress">/tv</button></span></li>
         <li><span class="cast-form__n">2</span><span data-i18n="castHow2">Type the six-letter code it shows</span></li>
-        <li><span class="cast-form__n">3</span><span id="cast-how3">Send it: the TV switches to this shrine</span></li>
+        <li><span class="cast-form__n">3</span><span id="cast-how3" data-i18n="castHow3">Pick a shrine and send it: the TV switches to it and stays on it</span></li>
       </ol>
       <label class="cast-form__code">
         <span class="sr-only" data-i18n="castCodeLabel">The code on the TV</span>
-        <input id="cast-code" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="7" placeholder="TV code" aria-describedby="cast-status" />
+        <input id="cast-code" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="7" placeholder="TV code" data-i18n-placeholder="labelTvCode" aria-describedby="cast-status" />
       </label>
       <label class="cast-form__shrine" id="cast-shrine" hidden>
         <span class="cast-form__shrine-label" data-i18n="castShrine">The shrine to show</span>

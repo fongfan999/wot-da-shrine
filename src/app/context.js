@@ -12,6 +12,12 @@ export const body = document.body;
 export const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 /** t() with {placeholders} filled in. */
 export const fmt = (key, vars = {}) => Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), t(key));
+/** How long, as the page says it: "12 min", "1h 5m"; with `days`, "2d 3h" past a day. */
+export const minutesText = (m, { days = false } = {}) => {
+  if (m < 60) return fmt('durMin', { n: m });
+  const h = Math.floor(m / 60);
+  return days && h >= 24 ? fmt('durDh', { d: Math.floor(h / 24), h: h % 24 }) : fmt('durHm', { h, m: m % 60 });
+};
 
 export { BURN_SECONDS } from '../../shared/rules.js';
 
@@ -76,7 +82,9 @@ const fromUrl = (k) => {
   const v = urlParams.get(k);
   return k === 'eta' && v && Number.isNaN(Date.parse(v)) ? '' : v;
 };
-export const meta = (k) => (roomName ? (urlParams.has(k) ? fromUrl(k) : state.roomMeta[k]) : '') || '';
+export const meta = (k) => (roomName ? (urlParams.has(k) ? fromUrl(k) : DEMO_SAYS[k] ? t(DEMO_SAYS[k]) : state.roomMeta[k]) : '') || '';
+/** The demo's title and subtitle are fixed (DEMO_META in the shrine, never editable): this page says them in its own words. */
+const DEMO_SAYS = roomName === 'demo' ? { title: 'demoRoomTitle', subtitle: 'demoRoomSubtitle' } : {};
 
 /** A mix this URL brings: ?mix=sacred:80,rain:40, or a preset's name, ?track=rain. */
 export const urlMix = () => (urlParams.has('mix') ? mixFromParam(urlParams.get('mix')) : PRESETS[urlParams.get('track')] ?? null);

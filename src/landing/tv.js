@@ -23,7 +23,7 @@ export function setupTv() {
     if (!onScreen || document.visibilityState !== 'visible') return;
     try {
       const st = await fetch('/api/rooms/demo/status', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null));
-      if (st) liveText.textContent = `Live · ${st.people} kneeling${st.lit ? ' · burning' : ''}`;
+      if (st) liveText.textContent = fmt(st.lit ? 'demoTvLiveLit' : 'demoTvLive', { n: st.people });
     } catch { /* the chip just says Live */ }
   };
   every(15000, poll);

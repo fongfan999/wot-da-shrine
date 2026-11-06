@@ -3,7 +3,7 @@
     <p class="eyebrow" data-i18n="landChannelEyebrow">Made for the incident channel</p>
     <h2 class="land__title"><span data-i18n="landChannelTitle">The link does the</span> <em data-i18n="landChannelAccent">inviting.</em></h2>
     <div class="showcase" id="showcase">
-      <div class="showcase__tabs" role="tablist" aria-label="Where the link lands">
+      <div class="showcase__tabs" role="tablist" aria-label="Where the link lands" data-i18n-label="labelWhereTheLinkLands">
         <button class="showcase__tab" id="sc-tab-0" type="button" role="tab" aria-selected="true" aria-controls="sc-pane-0" data-pane="0">
           <span class="showcase__ico" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg></span>
           <span class="showcase__copy"><b data-i18n="landFact1">Live previews</b><span data-i18n="landFact1Text">Paste the link and it unfurls with the room as it is at that moment: how long you have been down, who is praying, the last prayer.</span></span>
@@ -30,21 +30,21 @@
       <div class="showcase__stage">
         <!-- 1. The link, unfurled in the incident channel -->
         <div class="showcase__pane chat" id="sc-pane-0" role="tabpanel" aria-labelledby="sc-tab-0">
-          <div class="chat__head" aria-hidden="true"><b># incidents</b><span>14 members</span></div>
+          <div class="chat__head" aria-hidden="true"><b># incidents</b><span data-i18n="demoChatMembers">14 members</span></div>
           <div class="chat__body" aria-hidden="true">
             <div class="chat__msg chat__msg--bot">
               <span class="chat__av chat__av--bot">!</span>
-              <div><p class="chat__who"><b>pagerbot</b> <time>2:13 PM</time></p><p class="chat__text">🔴 <b>Payments API</b> error rate 34%. Paging on-call.</p></div>
+              <div><p class="chat__who"><b>pagerbot</b> <time data-i18n="demoChatTime1">2:13 PM</time></p><p class="chat__text">🔴 <b>Payments API</b> <span data-i18n="demoChatBot">error rate 34%. Paging on-call.</span></p></div>
             </div>
             <div class="chat__msg">
               <span class="chat__av">🧑‍💻</span>
               <div>
-                <p class="chat__who"><b>phong</b> <time>2:14 PM</time></p>
-                <p class="chat__text">The servers are down. The shrine is open, come pray with us: <a class="chat__link" id="unfurl-link" href="/r/demo" tabindex="-1">shrine.wotda.app/r/demo</a></p>
+                <p class="chat__who"><b>phong</b> <time data-i18n="demoChatTime2">2:14 PM</time></p>
+                <p class="chat__text"><span data-i18n="demoChatInvite">The servers are down. The shrine is open, come pray with us:</span> <a class="chat__link" id="unfurl-link" href="/r/demo" tabindex="-1">shrine.wotda.app/r/demo</a></p>
                 <div class="chat__card">
-                  <p class="chat__site">Wot Da Shrine <span class="chat__tag" id="uf-tag" data-live="0">Example</span></p>
-                  <p class="chat__title" id="uf-title">The demo rack is down · pray at demo</p>
-                  <p class="chat__desc" id="uf-example">down for <b id="uf-min">23</b> min · <b id="uf-praying">4</b> praying · incense burning · <b id="uf-karma">212</b> karma. Last prayer: “<span id="uf-last">Rollback, I beg you</span>”</p>
+                  <p class="chat__site">Wot Da Shrine <span class="chat__tag" id="uf-tag" data-live="0" data-i18n="landUfExample">Example</span></p>
+                  <p class="chat__title" id="uf-title"></p>
+                  <p class="chat__desc" id="uf-example"><span data-i18n="demoUfDown">down for </span><b id="uf-min">23</b><span data-i18n="demoUfMin"> min · </span><b id="uf-praying">4</b><span data-i18n="demoUfPraying"> praying · incense burning · </span><b id="uf-karma">212</b><span data-i18n="demoUfKarma"> karma. Last prayer: “</span><span id="uf-last"></span>”</p>
                   <p class="chat__desc" id="uf-live" hidden></p>
                   <img class="chat__img" src="/og-thumb.jpg" alt="" width="240" height="126" loading="lazy" decoding="async" />
                 </div>
@@ -77,8 +77,8 @@
           <div class="readme__head" aria-hidden="true"><svg class="ico" viewBox="0 0 24 24"><path d="M5 4h10l4 4v12H5z"/><path d="M15 4v4h4"/></svg><b>README.md</b></div>
           <div class="readme__body">
             <p class="readme__h1" aria-hidden="true">payments-api</p>
-            <p class="readme__badges"><img class="facts__badge" id="land-badge" alt="Shrine status badge" height="20" /><span class="readme__fake" aria-hidden="true">build passing</span><span class="readme__fake readme__fake--cov" aria-hidden="true">coverage 81%</span></p>
-            <p class="readme__p" aria-hidden="true">The service that takes the money. When it is down, the team prays at the shrine; the badge above says whether incense is burning.</p>
+            <p class="readme__badges"><img class="facts__badge" id="land-badge" alt="Shrine status badge" data-i18n-alt="labelBadge" height="20" /><span class="readme__fake" aria-hidden="true">build passing</span><span class="readme__fake readme__fake--cov" aria-hidden="true">coverage 81%</span></p>
+            <p class="readme__p" aria-hidden="true" data-i18n="demoReadme">The service that takes the money. When it is down, the team prays at the shrine; the badge above says whether incense is burning.</p>
             <div class="readme__code">
               <code id="badge-md"></code>
               <button class="btn btn--glass btn--sm" id="badge-copy" type="button" data-i18n="landBadgeCopy">Copy</button>
@@ -91,7 +91,7 @@
           <div class="mp__browser" aria-hidden="true">
             <div class="mp__chrome"><i></i><i></i><i></i><span class="mp__addr"><span id="mp-host">shrine.wotda.app</span>/r/<b id="mp-show-slug">checkout-is-taking-a-nap</b></span></div>
             <div class="mp__page">
-              <span class="mp__eyebrow">Scheduled maintenance</span>
+              <span class="mp__eyebrow" data-i18n="eyebrow">Scheduled maintenance</span>
               <b class="mp__title" id="mp-show-title">Checkout is taking a nap</b>
               <span class="mp__eta" id="mp-show-eta">Back soon · the ops team is praying</span>
               <span class="mp__altar">🪔</span>
@@ -99,7 +99,7 @@
           </div>
           <div class="mp__fields">
             <label class="mp__field mp__field--wide"><span data-i18n="mpTitle">What’s down</span><input type="text" id="mp-title" maxlength="60" /></label>
-            <div class="mp__field mp__field--eta"><span id="mp-eta-label" data-i18n="mpEta">Back at</span><button class="eta-trigger" id="mp-eta" type="button" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="mp-eta-label mp-eta-text mp-eta-sub" data-value=""><span class="eta-trigger__val"><span class="eta-trigger__text" id="mp-eta-text">Any moment now</span><span class="eta-trigger__sub" id="mp-eta-sub">no ETA</span></span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg></button></div>
+            <div class="mp__field mp__field--eta"><span id="mp-eta-label" data-i18n="mpEta">Back at</span><button class="eta-trigger" id="mp-eta" type="button" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="mp-eta-label mp-eta-text mp-eta-sub" data-value=""><span class="eta-trigger__val"><span class="eta-trigger__text" id="mp-eta-text" data-i18n="etaAnyMoment">Any moment now</span><span class="eta-trigger__sub" id="mp-eta-sub" data-i18n="etaNoneSub">no ETA</span></span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg></button></div>
             <label class="mp__field mp__field--slug"><span data-i18n="mpSlug">Its link</span><span class="mp__slug"><span aria-hidden="true">/r/</span><input type="text" id="mp-slug" maxlength="48" spellcheck="false" /></span></label>
           </div>
           <div class="mp__actions">

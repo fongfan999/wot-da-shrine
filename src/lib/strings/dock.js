@@ -1,5 +1,4 @@
 /** The dock and what it does: light, bowl, bow, offer, breathe, the rituals, and the toasts they raise. A part of STRINGS (src/lib/strings.js). */
-import { QUICK_PRAYERS } from '../../../shared/prayers.js';
 
 export default {
   // Dock
@@ -11,7 +10,6 @@ export default {
   breathe: 'Breathe',
   wishLabel: 'Say a prayer to the servers',
   wishPlaceholder: 'Say a prayer to the servers…',
-  quickPrayers: QUICK_PRAYERS,
   surprise: 'Surprise me',
   trayTitle: 'Choose an offering',
 

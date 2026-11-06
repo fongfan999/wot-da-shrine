@@ -9,6 +9,7 @@
 import gsap from 'gsap';
 import { kneeling } from './devotee.js';
 import { stepped } from './stepped.js';
+import { t } from '../lib/strings.js';
 
 const CX = 260;
 const RIM_Y = 236;
@@ -25,44 +26,31 @@ const CANDLES = [{ x: 72 }, { x: 448 }];
 const TABLE_Y = 398;
 const SLOTS = [148, 186, 334, 372]; // x positions for offerings on the table
 
-/* ---------- offerings: small vector icons, drawn with their base at (0,0) ---------- */
+/* ---------- offerings: small vector icons, drawn with their base at (0,0); their names are in strings/labels.js ---------- */
 export const OFFERINGS = {
   energy: {
-    short: 'Energy drink',
-    label: 'an energy drink',
     svg: `<rect class="d-paper" x="-8" y="-34" width="16" height="34" rx="3"/><path class="d-thin" d="M-8 -29h16M-8 -6h16"/><path class="d-ink" d="M-1 -24 l4 0 l-2 4 l3 0 l-5 7 l1 -5 l-3 0 z"/>`,
   },
   noodles: {
-    short: 'Instant noodles',
-    label: 'a cup of instant noodles',
     svg: `<path class="d-paper" d="M-13 -30 L13 -30 L10 0 L-10 0 Z"/><path class="d-thin" d="M-12.4 -23 h24.8M-5 -14 h10M-4 -9 h8"/><ellipse class="d-sunk" cx="0" cy="-30" rx="13" ry="3.5"/><path class="d-thin" d="M-4 -35 q2 -4 0 -8M3 -35 q2 -4 0 -8M6 -32 L17 -44"/>`,
   },
   duck: {
-    short: 'Rubber duck',
-    label: 'a rubber duck',
     svg: `<ellipse class="d-paper" cx="0" cy="-9" rx="13" ry="9"/><path class="d-paper" d="M13 -21 l8 2 l-8 3 z"/><circle class="d-paper" cx="7" cy="-20" r="7.5"/><circle class="d-ink" cx="9" cy="-22" r="1.4"/><path class="d-thin" d="M-7 -11 q5 4 11 0"/>`,
   },
   coffee: {
-    short: 'Coffee',
-    label: 'a cup of coffee',
     svg: `<path class="d-line" d="M10 -18 q8 0 6 8 q-2 6 -8 5"/><path class="d-paper" d="M-10 -22 L10 -22 L8 0 L-8 0 Z"/><path class="d-thin" d="M-9.6 -17 h19.2"/><path class="d-thin" d="M-3 -27 q2 -4 0 -8M3 -27 q2 -4 0 -8"/>`,
   },
   keyboard: {
-    short: 'Mech keyboard',
-    label: 'a mechanical keyboard',
     svg: `<rect class="d-paper" x="-22" y="-11" width="44" height="11" rx="2"/><path class="d-thin" d="M-18 -7.5h36M-18 -3.5h36" stroke-dasharray="3 2"/>`,
   },
   usb: {
-    short: 'The backups',
-    label: 'a USB stick with the backups',
     svg: `<rect class="d-sunk" x="-4" y="-31" width="8" height="8" rx="1"/><rect class="d-paper" x="-6" y="-24" width="12" height="24" rx="2.5"/><path class="d-thin" d="M-2 -28h4"/><circle class="d-ink" cx="0" cy="-8" r="1.6"/>`,
   },
   laptop: {
-    short: 'Sticker laptop',
-    label: 'a laptop covered in stickers',
     svg: `<rect class="d-paper" x="-17" y="-25" width="34" height="22" rx="2"/><rect class="d-paper" x="-21" y="-4" width="42" height="4" rx="1.5"/><circle class="d-thin" cx="-8" cy="-14" r="3.5"/><rect class="d-thin" x="2" y="-20" width="7" height="7" rx="1" transform="rotate(15 5 -16)"/><circle class="d-ink" cx="8" cy="-9" r="1.8"/>`,
   },
 };
+for (const [kind, def] of Object.entries(OFFERINGS)) Object.assign(def, t('offerings')[kind]); // { short, label }
 
 /**
  * The two from the ops team who kneel at the home page's altar (devotee.js): a dev in a hoodie with a

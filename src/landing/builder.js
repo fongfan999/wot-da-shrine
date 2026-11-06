@@ -1,6 +1,8 @@
 import { etaPicker } from '../app/etaPicker.js';
+import { slugify } from '../../shared/names.js';
 import { t } from '../lib/strings.js';
-import { $ } from '../app/context.js';
+import { INTL } from '../lib/locale.js';
+import { $, fmt } from '../app/context.js';
 import { copyText } from '../app/ui.js';
 
 /** The maintenance-page builder: what is down and when it is back become a shrine of its own, /r/<slug>. */
@@ -9,7 +11,6 @@ export function setupBuilder() {
   const eta = etaPicker($('#mp-eta'));
   const slugEl = $('#mp-slug');
   const open = $('#mp-preview');
-  const slugify = (text) => text.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   // The slug follows the title (its first five words) until the visitor writes their own.
   const fromTitle = (title) => slugify(title).split('-').slice(0, 5).join('-').slice(0, 48);
   let ownSlug = false;
@@ -38,8 +39,8 @@ export function setupBuilder() {
     }
     $('#mp-show-title').textContent = titleEl.value.trim() || t('title');
     $('#mp-show-eta').textContent = eta.value()
-      ? `Back at ${eta.value().toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' })} · the ops team is praying`
-      : 'Back soon · the ops team is praying';
+      ? fmt('mpBackAt', { at: eta.value().toLocaleString(INTL, { weekday: 'short', hour: 'numeric', minute: '2-digit' }) })
+      : t('mpBackSoon');
   };
   $('#mp-host').textContent = location.host;
   titleEl.addEventListener('input', () => { if (!ownSlug) slugEl.value = fromTitle(titleEl.value); });

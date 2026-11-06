@@ -6,13 +6,17 @@
  * fires a bubbling `input` event whenever it changes, like a form field.
  * With `label: false` the trigger's text is left to the caller.
  */
+import { t } from '../lib/strings.js';
+import { INTL } from '../lib/locale.js';
+
+const fill = (key, vars) => Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), t(key));
 
 const QUICK = [
-  { label: 'In 30 min', at: () => roundUp(Date.now() + 30 * 60e3, 5) },
-  { label: 'In 1 hour', at: () => roundUp(Date.now() + 60 * 60e3, 15) },
-  { label: 'In 2 hours', at: () => roundUp(Date.now() + 120 * 60e3, 30) },
-  { label: 'In 4 hours', at: () => roundUp(Date.now() + 240 * 60e3, 30) },
-  { label: 'Tomorrow 9 AM', at: () => { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(9, 0, 0, 0); return d; } },
+  { label: 'etaQuick30', at: () => roundUp(Date.now() + 30 * 60e3, 5) },
+  { label: 'etaQuick1h', at: () => roundUp(Date.now() + 60 * 60e3, 15) },
+  { label: 'etaQuick2h', at: () => roundUp(Date.now() + 120 * 60e3, 30) },
+  { label: 'etaQuick4h', at: () => roundUp(Date.now() + 240 * 60e3, 30) },
+  { label: 'etaQuickMorning', at: () => { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(9, 0, 0, 0); return d; } },
 ];
 const DAYS = 7;
 const SLOT = 30; // minutes between times in the grid
@@ -23,35 +27,35 @@ function roundUp(ms, minutes) {
 }
 const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 // One formatter each, made once: toLocaleTimeString with options builds a new one on every call, and the grid has hundreds of times
-const TIME = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit' });
-const WEEKDAY = new Intl.DateTimeFormat([], { weekday: 'short', day: 'numeric' });
+const TIME = new Intl.DateTimeFormat(INTL, { hour: 'numeric', minute: '2-digit' });
+const WEEKDAY = new Intl.DateTimeFormat(INTL, { weekday: 'short', day: 'numeric' });
 const timeLabel = (d) => TIME.format(d);
 
 /** "in 2h 30m", "in 45 min" or "passed": how far away the time is. */
 export function fromNow(d) {
   const min = Math.round((d - Date.now()) / 60e3);
-  if (min <= 0) return 'passed';
-  if (min < 60) return `in ${min} min`;
+  if (min <= 0) return t('etaPassed');
+  if (min < 60) return fill('etaInMin', { n: min });
   const h = Math.floor(min / 60);
   const m = min % 60;
-  return h < 24 ? `in ${h}h${m ? ` ${m}m` : ''}` : `in ${Math.round(h / 24)}d`;
+  return h < 24 ? fill(m ? 'etaInHm' : 'etaInH', { h, m }) : fill('etaInD', { n: Math.round(h / 24) });
 }
 
 /** The trigger's text: "Tomorrow, 12:00 AM", "Wed 4, 9:30 AM". */
 export function etaLabel(iso) {
-  if (!iso) return 'Any moment now';
+  if (!iso) return t('etaAnyMoment');
   const d = new Date(iso);
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const day = sameDay(d, new Date()) ? 'Today' : sameDay(d, tomorrow) ? 'Tomorrow' : WEEKDAY.format(d);
-  return `${day}, ${timeLabel(d)}`;
+  const day = sameDay(d, new Date()) ? t('etaToday') : sameDay(d, tomorrow) ? t('etaTomorrow') : WEEKDAY.format(d);
+  return fill('etaDayAt', { day, time: timeLabel(d) });
 }
 
 export function etaPicker(trigger, { label = true } = {}) {
   const pop = document.createElement('div');
   pop.className = 'eta-pop';
   pop.setAttribute('role', 'dialog');
-  pop.setAttribute('aria-label', 'Back at');
+  pop.setAttribute('aria-label', t('etaBackAt'));
   pop.hidden = true;
   trigger.after(pop);
   const text = trigger.querySelector('.eta-trigger__text') ?? trigger;
@@ -62,7 +66,7 @@ export function etaPicker(trigger, { label = true } = {}) {
   function set(d) {
     trigger.dataset.value = d ? d.toISOString() : '';
     if (label) text.textContent = etaLabel(trigger.dataset.value);
-    if (label && sub) sub.textContent = d ? fromNow(d) : 'no ETA';
+    if (label && sub) sub.textContent = d ? fromNow(d) : t('etaNoneSub');
     trigger.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
@@ -92,11 +96,11 @@ export function etaPicker(trigger, { label = true } = {}) {
   function render() {
     const now = new Date();
     const current = value();
-    const quick = QUICK.map((q) => button(q.label, 'eta-chip', () => { const d = q.at(); day = d; set(d); close(true); }));
+    const quick = QUICK.map((q) => button(t(q.label), 'eta-chip', () => { const d = q.at(); day = d; set(d); close(true); }));
     const days = Array.from({ length: DAYS }, (_, i) => {
       const d = new Date(now);
       d.setDate(now.getDate() + i);
-      const label = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : WEEKDAY.format(d);
+      const label = i === 0 ? t('etaToday') : i === 1 ? t('etaTomorrow') : WEEKDAY.format(d);
       return button(label, 'eta-day', () => { day = d; render(); }, { pressed: sameDay(d, day) });
     });
     const slots = [];
@@ -109,10 +113,10 @@ export function etaPicker(trigger, { label = true } = {}) {
     const foot = document.createElement('div');
     foot.className = 'eta-pop__foot';
     foot.append(
-      button('No ETA', 'eta-pop__clear', () => { set(null); close(true); }),
-      button('Done', 'btn btn--accent btn--sm', () => close(true)),
+      button(t('etaNone'), 'eta-pop__clear', () => { set(null); close(true); }),
+      button(t('etaDone'), 'btn btn--accent btn--sm', () => close(true)),
     );
-    pop.replaceChildren(section('Quick', 'eta-pop__row', quick), section('Day', 'eta-pop__row eta-pop__row--days', days), section('Time', 'eta-pop__grid', slots), foot);
+    pop.replaceChildren(section(t('etaQuick'), 'eta-pop__row', quick), section(t('etaDay'), 'eta-pop__row eta-pop__row--days', days), section(t('etaTime'), 'eta-pop__grid', slots), foot);
   }
 
   const onOutside = (e) => { if (!pop.contains(e.target) && !trigger.contains(e.target)) close(); };

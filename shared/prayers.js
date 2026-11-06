@@ -69,3 +69,17 @@ export const QUICK_PRAYERS = [
   'Off, on, and please stay on',
   'Let the dashboard be wrong',
 ];
+
+/**
+ * The shrine knows a ready-made prayer by its English words: that is what a page sends and what the
+ * world ticker and link previews may echo. A page in another language shows its own words for it,
+ * the one at the same place in its list (`list`), and sends the English back.
+ */
+export const prayerIn = (text, list = QUICK_PRAYERS) => {
+  const i = QUICK_PRAYERS.indexOf(text);
+  return i >= 0 && list[i] ? list[i] : text;
+};
+export const prayerFrom = (text, list = QUICK_PRAYERS) => {
+  const i = list.indexOf(text);
+  return i >= 0 ? QUICK_PRAYERS[i] : text;
+};

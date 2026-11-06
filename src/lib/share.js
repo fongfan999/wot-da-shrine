@@ -9,6 +9,14 @@
  * a QR code to scan and the address written out beside it.
  */
 import qrcode from 'qrcode-generator';
+import { t } from './strings.js';
+
+/** A string from STRINGS with its {placeholders} filled: one line, or a headline's two. */
+const say = (key, vars = {}) => {
+  const fill = (str) => Object.entries(vars).reduce((out, [k, v]) => out.replaceAll(`{${k}}`, v), str);
+  const val = t(key);
+  return Array.isArray(val) ? val.map(fill) : fill(val);
+};
 
 const W = 1200;
 const H = 630;
@@ -127,10 +135,10 @@ function altarMarkup(host, plain = false) {
 function headline(data) {
   if (data.headline) return data.headline;
   // Nothing down: the count of days leads, and what the title names is what was down last time.
-  if (data.quietDays != null) return data.quietDays >= 2 ? [`${data.quietDays} days without`, 'an incident.'] : data.quietDays === 1 ? ['A whole day without', 'an incident.'] : ['Nothing has gone', 'down. Yet.'];
+  if (data.quietDays != null) return data.quietDays >= 2 ? say('cardQuietDays', { n: data.quietDays }) : data.quietDays === 1 ? say('cardQuietDay') : say('cardQuietNever');
   const title = String(data.title ?? '').trim();
-  if (title) return [title, data.resolved ? 'Back online.' : data.open ? 'The team is praying.' : 'The team prayed.'];
-  return data.resolved ? ['The servers are', 'back.'] : ['We prayed for', 'the servers.'];
+  if (title) return [title, say(data.resolved ? 'cardBackOnline' : data.open ? 'cardPraying' : 'cardPrayed')];
+  return say(data.resolved ? 'cardBack' : 'cardPrayedFor');
 }
 
 /** A font size at which `text` fits `width`, at most `base` (`em` is the font's average width per character). */
@@ -149,19 +157,19 @@ export function cardSvg(data) {
   const brandWord = document.querySelector('.brand__word')?.outerHTML ?? '';
   const altar = altarMarkup(document.querySelector('#burner-art'), Boolean(data.plain));
 
-  const eyebrow = data.eyebrow ?? `SHARED SHRINE / ${data.room}`;
+  const eyebrow = data.eyebrow ?? say('cardEyebrow', { room: data.room });
   const title = headline(data);
   const size1 = fit(title[0], 78, 580, 0.46);
   const size2 = fit(title[1], 82, 580, 0.4);
   const facts = [];
-  if (data.people > 1) facts.push(`${data.people} devotees`);
-  else if (data.people === 1 && data.room) facts.push('1 devotee');
-  if (data.minutes >= 1) facts.push(`${data.minutes} min of prayer`);
-  if (data.incense) facts.push(`${data.incense} incense lit`);
-  if (data.karma) facts.push(`${data.karma} karma`);
-  if (data.prayers) facts.push(`${data.prayers} prayer${data.prayers === 1 ? '' : 's'}`);
-  if (data.survived) facts.push(data.quietDays != null ? `${data.survived} vigil${data.survived === 1 ? '' : 's'} survived` : `vigil #${data.survived + (data.resolved ? 0 : 1)}`);
-  const factsLine = data.facts ?? (facts.join(' · ') || (data.quietDays != null ? 'The kami is fed. The rack hums on.' : 'The incense is lit. The rack is listening.'));
+  if (data.people > 1) facts.push(say('cardDevotees', { n: data.people }));
+  else if (data.people === 1 && data.room) facts.push(say('cardDevotee'));
+  if (data.minutes >= 1) facts.push(say('cardMinutes', { n: data.minutes }));
+  if (data.incense) facts.push(say('cardIncense', { n: data.incense }));
+  if (data.karma) facts.push(say('cardKarma', { n: data.karma }));
+  if (data.prayers) facts.push(say(data.prayers === 1 ? 'cardPrayer' : 'cardPrayers', { n: data.prayers }));
+  if (data.survived) facts.push(data.quietDays != null ? say(data.survived === 1 ? 'cardSurvived' : 'cardSurviveds', { n: data.survived }) : say('cardVigilNo', { n: data.survived + (data.resolved ? 0 : 1) }));
+  const factsLine = data.facts ?? (facts.join(' · ') || say(data.quietDays != null ? 'cardFactsQuiet' : 'cardFactsLit'));
 
   const quotes = (data.quotes ?? []).slice(-3).reverse();
   let y = 330;

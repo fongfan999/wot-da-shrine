@@ -1,13 +1,13 @@
 <!-- Settings panel -->
-<aside class="panel" id="panel" aria-hidden="true" inert aria-label="Customize">
+<aside class="panel" id="panel" aria-hidden="true" inert aria-label="Customize" data-i18n-label="panelTitle">
   <div class="panel__head">
     <h2 data-i18n="panelTitle">Customize</h2>
-    <button class="icon-btn" id="btn-close-panel" type="button" aria-label="Close">
+    <button class="icon-btn" id="btn-close-panel" type="button" aria-label="Close" data-i18n-label="labelClose">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div>
   <!-- Three scopes, one at a time: the shrine's (everyone), the TV's (every screen), yours (this browser). Tabs show only where the shrine can be changed. -->
-  <div class="panel__tabs" id="panel-tabs" role="tablist" aria-label="Settings for" hidden>
+  <div class="panel__tabs" id="panel-tabs" role="tablist" aria-label="Settings for" data-i18n-label="labelSettingsFor" hidden>
     <button type="button" role="tab" id="tab-shrine" data-tab="shrine" aria-controls="panel-shrine" aria-selected="true" data-i18n="panelShrine">This shrine</button>
     <button type="button" role="tab" id="tab-tv" data-tab="tv" aria-controls="panel-tv" aria-selected="false" tabindex="-1" data-i18n="fScreen">On the TV</button>
     <button type="button" role="tab" id="tab-you" data-tab="you" aria-controls="panel-you" aria-selected="false" tabindex="-1" data-i18n="panelYou">Just for you</button>
@@ -27,7 +27,7 @@
       <!-- The sound: a mix of eleven synthesized layers, the whole room's; five open as the shrine grows. Presets are a few mixes with names. -->
       <div class="field mixer" id="mixer">
         <span class="field__label" data-i18n="fTrack">Sound</span>
-        <div class="mixer__presets" id="mix-presets" role="group" aria-label="Presets">
+        <div class="mixer__presets" id="mix-presets" role="group" aria-label="Presets" data-i18n-label="mixPresets">
           <button class="chip" type="button" data-preset="vigil" aria-pressed="true" data-i18n="track_vigil">Vigil</button>
           <button class="chip" type="button" data-preset="focus" aria-pressed="false" data-i18n="track_focus">Focus</button>
           <button class="chip" type="button" data-preset="chant" aria-pressed="false" data-i18n="track_chant">Temple</button>
@@ -38,47 +38,47 @@
         <div class="mixer__layers" id="mix-layers">
           <label class="mixer__layer" data-layer="sacred" data-on="1">
             <span class="mixer__name"><span data-i18n="layer_sacred">Sacred</span><small data-i18n="layerHint_sacred">Drone, chords, temple bells</small></span>
-            <input type="range" min="0" max="100" step="5" value="80" data-layer="sacred" aria-label="Sacred" style="--v: 80%" />
+            <input type="range" min="0" max="100" step="5" value="80" data-layer="sacred" aria-label="Sacred" data-i18n-label="layer_sacred" style="--v: 80%" />
           </label>
           <label class="mixer__layer" data-layer="chant" data-on="">
             <span class="mixer__name"><span data-i18n="layer_chant">Chant</span><small data-i18n="layerHint_chant">Om over a hand drum</small></span>
-            <input type="range" min="0" max="100" step="5" value="0" data-layer="chant" aria-label="Chant" style="--v: 0%" />
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="chant" aria-label="Chant" data-i18n-label="layer_chant" style="--v: 0%" />
           </label>
           <label class="mixer__layer" data-layer="rain" data-on="">
             <span class="mixer__name"><span data-i18n="layer_rain">Rain</span><small data-i18n="layerHint_rain">Roof, drops, far thunder</small></span>
-            <input type="range" min="0" max="100" step="5" value="0" data-layer="rain" aria-label="Rain" style="--v: 0%" />
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="rain" aria-label="Rain" data-i18n-label="layer_rain" style="--v: 0%" />
           </label>
           <label class="mixer__layer" data-layer="noise" data-on="">
             <span class="mixer__name"><span data-i18n="layer_noise">White noise</span><small data-i18n="layerHint_noise">Soft, wide, for deep work</small></span>
-            <input type="range" min="0" max="100" step="5" value="0" data-layer="noise" aria-label="White noise" style="--v: 0%" />
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="noise" aria-label="White noise" data-i18n-label="layer_noise" style="--v: 0%" />
           </label>
           <label class="mixer__layer" data-layer="spa" data-on="">
             <span class="mixer__name"><span data-i18n="layer_spa">Spa</span><small data-i18n="layerHint_spa">Water, chimes, a bowl</small></span>
-            <input type="range" min="0" max="100" step="5" value="0" data-layer="spa" aria-label="Spa" style="--v: 0%" />
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="spa" aria-label="Spa" data-i18n-label="layer_spa" style="--v: 0%" />
           </label>
           <label class="mixer__layer" data-layer="garden" data-on="">
             <span class="mixer__name"><span data-i18n="layer_garden">Garden</span><small data-i18n="layerHint_garden">Birds, crickets, frog, owl</small></span>
-            <input type="range" min="0" max="100" step="5" value="0" data-layer="garden" aria-label="Garden" style="--v: 0%" />
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="garden" aria-label="Garden" data-i18n-label="layer_garden" style="--v: 0%" />
           </label>
           <label class="mixer__layer" data-layer="koto" data-on="">
             <span class="mixer__name"><span data-i18n="layer_koto">Koto</span><small data-i18n="layerHint_koto">A plucked zither, a few notes</small></span>
-            <input type="range" min="0" max="100" step="5" value="0" data-layer="koto" aria-label="Koto" style="--v: 0%" />
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="koto" aria-label="Koto" data-i18n-label="layer_koto" style="--v: 0%" />
           </label>
           <label class="mixer__layer" data-layer="flute" data-on="">
             <span class="mixer__name"><span data-i18n="layer_flute">Shakuhachi</span><small data-i18n="layerHint_flute">Bamboo flute, long and breathy</small></span>
-            <input type="range" min="0" max="100" step="5" value="0" data-layer="flute" aria-label="Shakuhachi" style="--v: 0%" />
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="flute" aria-label="Shakuhachi" data-i18n-label="layer_flute" style="--v: 0%" />
           </label>
           <label class="mixer__layer" data-layer="rack" data-on="">
             <span class="mixer__name"><span data-i18n="layer_rack">The rack</span><small data-i18n="layerHint_rack">Fans, hum, disks, a UPS</small></span>
-            <input type="range" min="0" max="100" step="5" value="0" data-layer="rack" aria-label="The rack" style="--v: 0%" />
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="rack" aria-label="The rack" data-i18n-label="layer_rack" style="--v: 0%" />
           </label>
           <label class="mixer__layer" data-layer="bonsho" data-on="">
             <span class="mixer__name"><span data-i18n="layer_bonsho">Great bell</span><small data-i18n="layerHint_bonsho">Struck every half minute</small></span>
-            <input type="range" min="0" max="100" step="5" value="0" data-layer="bonsho" aria-label="Great bell" style="--v: 0%" />
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="bonsho" aria-label="Great bell" data-i18n-label="layer_bonsho" style="--v: 0%" />
           </label>
           <label class="mixer__layer" data-layer="sho" data-on="">
             <span class="mixer__name"><span data-i18n="layer_sho">Shō</span><small data-i18n="layerHint_sho">Reed chords that breathe</small></span>
-            <input type="range" min="0" max="100" step="5" value="0" data-layer="sho" aria-label="Shō" style="--v: 0%" />
+            <input type="range" min="0" max="100" step="5" value="0" data-layer="sho" aria-label="Shō" data-i18n-label="layer_sho" style="--v: 0%" />
           </label>
         </div>
         <p class="field__note" id="mix-note"></p>
@@ -142,7 +142,7 @@
         <button class="btn btn--accent btn--sm hook__get" type="button" id="btn-hook" data-i18n="hookShow">Get the link</button>
         <div class="hook__ready" id="hook-ready" hidden>
           <div class="linkbox">
-            <input class="linkbox__input" id="hook-url" type="text" readonly aria-label="Webhook link" spellcheck="false" />
+            <input class="linkbox__input" id="hook-url" type="text" readonly aria-label="Webhook link" data-i18n-label="labelWebhookLink" spellcheck="false" />
             <button class="btn btn--accent btn--sm" id="btn-hook-copy" type="button" data-i18n="copy">Copy</button>
           </div>
           <ul class="hook__how">
@@ -162,7 +162,7 @@
       <p class="panel__scope" data-i18n="screenNote">Every screen showing this shrine follows these, live.</p>
       <div class="field">
         <span class="field__label" data-i18n="fTheme">Theme</span>
-        <div class="seg" id="screen-theme" role="radiogroup" aria-label="TV theme">
+        <div class="seg" id="screen-theme" role="radiogroup" aria-label="TV theme" data-i18n-label="labelTvTheme">
           <button type="button" role="radio" data-screen-theme="auto" aria-checked="false" data-i18n="themeAuto">Auto</button>
           <button type="button" role="radio" data-screen-theme="light" aria-checked="false" data-i18n="themeLight">Light</button>
           <button type="button" role="radio" data-screen-theme="dark" aria-checked="true" data-i18n="themeDark">Dark</button>
@@ -170,7 +170,7 @@
       </div>
       <div class="field">
         <span class="field__label" data-i18n="fFx">Effects</span>
-        <div class="seg" id="screen-fx" role="radiogroup" aria-label="TV effects">
+        <div class="seg" id="screen-fx" role="radiogroup" aria-label="TV effects" data-i18n-label="labelTvEffects">
           <button type="button" role="radio" data-screen-fx="auto" aria-checked="true" data-i18n="fxAuto">Auto</button>
           <button type="button" role="radio" data-screen-fx="full" aria-checked="false" data-i18n="fxFull">Full</button>
           <button type="button" role="radio" data-screen-fx="lite" aria-checked="false" data-i18n="fxLite">Lite</button>
@@ -187,7 +187,7 @@
       <p class="panel__scope" data-i18n="panelYouNote">Only on this device. Saved in this browser.</p>
       <div class="field">
         <span class="field__label" data-i18n="fTheme">Theme</span>
-        <div class="seg" id="theme-seg" role="radiogroup" aria-label="Theme">
+        <div class="seg" id="theme-seg" role="radiogroup" aria-label="Theme" data-i18n-label="fTheme">
           <button type="button" role="radio" data-theme="auto" aria-checked="false" data-i18n="themeAuto">Auto</button>
           <button type="button" role="radio" data-theme="light" aria-checked="false" data-i18n="themeLight">Light</button>
           <button type="button" role="radio" data-theme="dark" aria-checked="true" data-i18n="themeDark">Dark</button>
@@ -195,12 +195,21 @@
       </div>
       <div class="field">
         <span class="field__label" data-i18n="fFx">Effects</span>
-        <div class="seg" id="fx-seg" role="radiogroup" aria-label="Effects">
+        <div class="seg" id="fx-seg" role="radiogroup" aria-label="Effects" data-i18n-label="fFx">
           <button type="button" role="radio" data-fx="auto" aria-checked="true" data-i18n="fxAuto">Auto</button>
           <button type="button" role="radio" data-fx="full" aria-checked="false" data-i18n="fxFull">Full</button>
           <button type="button" role="radio" data-fx="lite" aria-checked="false" data-i18n="fxLite">Lite</button>
         </div>
         <p class="field__note" id="fx-note"></p>
+      </div>
+      <!-- The language: each named in itself, so whoever cannot read this one still finds theirs (src/lib/locale.js) -->
+      <div class="field">
+        <span class="field__label" data-i18n="fLang">Language</span>
+        <div class="seg" id="lang-seg" role="radiogroup" aria-label="Language" data-i18n-label="fLang">
+          <button type="button" role="radio" data-lang="auto" aria-checked="true" data-i18n="langAuto">Auto</button>
+          <button type="button" role="radio" data-lang="en" aria-checked="false" lang="en">English</button>
+          <button type="button" role="radio" data-lang="vi" aria-checked="false" lang="vi">Tiếng Việt</button>
+        </div>
       </div>
       <div class="toggles">
         <label class="toggle"><span data-i18n="fMusic">Background music</span><input type="checkbox" name="music" checked /></label>
@@ -237,7 +246,7 @@
   <span class="unlock-card__icon" aria-hidden="true">🔓</span>
   <span class="unlock-card__text"><small id="unlock-card-kind"></small><b id="unlock-card-name"></b></span>
   <span class="unlock-card__actions" id="unlock-card-actions"></span>
-  <button class="icon-btn unlock-card__close" id="unlock-card-close" type="button" aria-label="Not now">
+  <button class="icon-btn unlock-card__close" id="unlock-card-close" type="button" aria-label="Not now" data-i18n-label="unlockDismiss">
     <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
   </button>
 </div>
@@ -246,7 +255,7 @@
   <span class="unlock-card__icon" aria-hidden="true">🔔</span>
   <span class="unlock-card__text"><small data-i18n="pushAskKicker">Notifications</small><b id="push-ask-text"></b></span>
   <span class="unlock-card__actions"><button class="btn btn--accent btn--sm" type="button" id="push-ask-yes" data-i18n="pushAskYes">Notify me</button></span>
-  <button class="icon-btn unlock-card__close" id="push-ask-close" type="button" aria-label="Not now">
+  <button class="icon-btn unlock-card__close" id="push-ask-close" type="button" aria-label="Not now" data-i18n-label="unlockDismiss">
     <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
   </button>
 </div>

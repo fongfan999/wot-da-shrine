@@ -8,12 +8,13 @@ import gsap from 'gsap';
 import { RAISE_FED, RAISE_WINDOW, devoteeKey } from '../../shared/rules.js';
 import { sound } from '../audio/index.js';
 import { STRINGS, t } from '../lib/strings.js';
-import { $, counters, fmt, people, records, reduceMotion, roomName, state, tv } from './context.js';
+import { $, counters, fmt, minutesText, people, records, reduceMotion, roomName, state, tv } from './context.js';
 import { congregation, petals, temple } from './engines.js';
 import { hasStanding, liveStreak, myStanding, rankName } from './standing.js';
 import { logEvent, toast } from './ui.js';
 import { purify, purifyDue } from './kami.js';
 import { nameOf, opensAtLevel } from './unlocks.js';
+import { INTL } from '../lib/locale.js';
 
 /** "Linh", "Linh and An", "Linh, An and Huy", "Linh, An and 3 more". */
 export function nameList(names, total = names.length, max = 3) {
@@ -53,7 +54,7 @@ export function raiseFx({ by, raise }) {
 
 /** When the scaffolding's bows run out: a day after the first that still counts. */
 const raiseBy = (r) => (r.bows.length ? Math.min(...r.bows.map((b) => b.at)) + RAISE_WINDOW - state.clockSkew : 0);
-const clock = (at) => new Date(at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const clock = (at) => new Date(at).toLocaleTimeString(INTL, { hour: '2-digit', minute: '2-digit' });
 
 /** The bows so far, as faces, and the ones still to come, as empty dashed rings. */
 function bowSlots(r) {
@@ -201,7 +202,6 @@ let creditsDone = null;
 let creditsTimer = 0;
 export const creditsOpen = () => Boolean(creditsEl);
 
-const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
 
 /** Roll the credits for a vigil's record; `then` runs once they are gone. Nothing to roll: `then` runs now. */
 export function creditsFx(record, then = null) {

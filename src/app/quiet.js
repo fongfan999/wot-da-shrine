@@ -8,7 +8,7 @@
 import { sound } from '../audio/index.js';
 import { every } from '../lib/clock.js';
 import { t } from '../lib/strings.js';
-import { $, body, embedded, fmt, mix, mixName, records, roomName, settings, state, tv } from './context.js';
+import { $, body, embedded, fmt, minutesText, mix, mixName, records, roomName, settings, state, tv } from './context.js';
 import { applySettings } from './settings.js';
 import { quietStreak, shippedShown } from './deploy.js';
 import { forecastHeadline, kamiHeadline } from './kami.js';
@@ -21,7 +21,6 @@ const HOUR = 3600000;
 /** A shrine of your own, joined, with nothing down, going out or just back. Not the public demo, which is always down. */
 const quietNow = () => Boolean(roomName) && roomName !== 'demo' && !embedded && state.greeted && !state.vigil && !body.dataset.resolved && !state.blessing && !shippedShown();
 
-const minutesText = (m) => (m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`);
 
 /** How long it has been quiet, as the headline. Its last word is the one set in italics. */
 function quietTitle(since) {

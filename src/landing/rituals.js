@@ -12,7 +12,7 @@ import { copyText } from '../app/ui.js';
 export function burnInTile(text) {
   const stage = $('#burnslip').parentElement;
   $('#burnslip-text').textContent = text;
-  $('#burnslip .burnslip__sig').textContent = '— you, blamelessly';
+  $('#burnslip .burnslip__sig').textContent = t('demoSigYou');
   stage.classList.remove('is-yours');
   void stage.offsetWidth;
   stage.classList.add('is-yours');
@@ -24,14 +24,7 @@ export function burnInTile(text) {
 export function setupRituals() {
   // The visitor is down in the Rituals section: their words burn on the slip there, not in the censer.
   burnBlameOn(burnInTile);
-  const BLAMES = [
-    'I ran the migration on prod at 5pm on a Friday.',
-    'I said “it’s just a config change”.',
-    'I force-pushed to main. Twice.',
-    'I let the certificate expire. I set a reminder. I ignored it.',
-    'I wrote DELETE and forgot the WHERE.',
-    'I approved my own PR with a 👍.',
-  ];
+  const BLAMES = t('demoBlames');
   let blame = 0;
   $('#burnslip').addEventListener('animationiteration', (e) => {
     if (e.animationName !== 'burn') return;
@@ -43,7 +36,7 @@ export function setupRituals() {
     if (e.animationName !== 'burn-now') return;
     $('#burnslip').parentElement.classList.remove('is-yours');
     $('#burnslip-text').textContent = BLAMES[blame];
-    $('#burnslip .burnslip__sig').textContent = '— anonymous, blamelessly';
+    $('#burnslip .burnslip__sig').textContent = t('demoSigAnon');
   });
 
   const mini = $('#fortune-mini');
@@ -73,9 +66,9 @@ export function setupRituals() {
  * (the day, the hour, the moon, Mercury) by the visitor's own clock, and the tour stops there.
  */
 const DEPLOYS = [
-  { what: 'payments-api v2.3', omens: ['friday', 'late', 'mercury', 'hungry', 'bowed'], out: 'defied' },
-  { what: 'the new onboarding', omens: ['bowed', 'pleased', 'run'], out: 'shipped' },
-  { what: 'a “small” DNS change', omens: ['moon', 'broke', 'recent', 'unbowed'], out: 'broke' },
+  { what: t('demoDeploys')[0], omens: ['friday', 'late', 'mercury', 'hungry', 'bowed'], out: 'defied' },
+  { what: t('demoDeploys')[1], omens: ['bowed', 'pleased', 'run'], out: 'shipped' },
+  { what: t('demoDeploys')[2], omens: ['moon', 'broke', 'recent', 'unbowed'], out: 'broke' },
 ];
 const BAD = new Set(OMENS.filter((o) => o.bad).map((o) => o.id));
 /** The omens a page can read with no shrine behind it: the visitor's day and hour, the moon, Mercury. */
@@ -162,14 +155,14 @@ function setupBlessing() {
 
 /** Today's forecast as a shrine's kami would give it, and the days after it, one tap at a time. */
 const DAY = 86400000;
-const WATCHED = ['payments-api', 'the DNS', 'the cron box', 'Postgres', 'the build'];
+const WATCHED = t('demoWatched');
 function setupForecast() {
   const mini = $('#forecast-mini');
   let ahead = 0;
   const at = () => Date.now() + ahead * DAY;
   const whyText = (why) => why.map((w) => t(`forecastWhy_${w}`)).join(', ');
   const show = () => {
-    const f = forecast('home', at(), WATCHED);
+    const f = forecast('home', at(), WATCHED, t('forecastWords'));
     mini.dataset.sky = f.sky;
     $('#fc-day').textContent = ahead === 0 ? t('landForecastDay') : ahead === 1 ? t('landForecastTomorrow') : fmt('landForecastDayN', { n: ahead });
     $('#fc-glyph').textContent = t(`forecastGlyph_${f.sky}`);
@@ -187,7 +180,7 @@ function setupForecast() {
     setTimeout(show, reduceMotion ? 0 : 300); // swap while the card is edge-on
   });
   $('#fc-copy').addEventListener('click', () => {
-    const f = forecast('home', Date.now(), WATCHED);
+    const f = forecast('home', Date.now(), WATCHED, t('forecastWords'));
     const text = [
       fmt('forecastCopyHead', { room: location.host }),
       `${t(`forecastGlyph_${f.sky}`)} ${t(`forecastSky_${f.sky}`)}${f.why.length ? ` (${whyText(f.why)})` : ''}. ${f.line}`,

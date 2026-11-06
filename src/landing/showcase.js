@@ -1,6 +1,6 @@
 import { describe as describeRoom, previewTitle } from '../../shared/preview.js';
 import { STRINGS, t } from '../lib/strings.js';
-import { $, fmt, reduceMotion } from '../app/context.js';
+import { $, fmt, minutesText, reduceMotion } from '../app/context.js';
 import { copyText } from '../app/ui.js';
 import { every } from '../lib/clock.js';
 
@@ -72,13 +72,15 @@ export function setupShowcase() {
     tag.textContent = t(isLive ? 'landUfLive' : 'landUfExample');
     exampleEl.hidden = isLive;
     liveEl.hidden = !isLive;
-    $('#uf-title').textContent = isLive ? previewTitle(st, ROOM) : `The demo rack is down · pray at ${ROOM}`;
-    if (isLive) liveEl.textContent = describeRoom(st);
+    $('#uf-title').textContent = isLive ? previewTitle(st, ROOM, Date.now(), t('previewWords')) : fmt('demoUfTitle', { room: ROOM });
+    if (isLive) liveEl.textContent = describeRoom(st, t('previewWords'));
   }
   every(1000, () => { if (onScreen && current === 0 && document.visibilityState === 'visible' && Date.now() - polledAt > 10000) poll(); });
 
   // The example is alive too: its minutes, people and 🙏 keep counting while it is on screen.
   const live = { min: 23, praying: 4, karma: 212, pray: 4, last: 0 };
+  $('#uf-title').textContent = fmt('demoUfTitle', { room: ROOM });
+  $('#uf-last').textContent = STRINGS.quickPrayers[live.last];
   const bump = (id, value) => {
     const b = $(id);
     b.textContent = value;
@@ -123,7 +125,7 @@ export function setupShowcase() {
       ? `→ {"ok":true,"did":"resolved","down":false,"downFor":${min},"people":4}`
       : '→ {"ok":true,"did":"opened","down":true,"downFor":1,"people":3}';
     alertsPane.classList.toggle('is-up', up);
-    alertsPane.querySelector('.alerts__item--up time').textContent = `${min} min`;
+    alertsPane.querySelector('.alerts__item--up time').textContent = minutesText(min);
   };
   ring();
   every(1000, () => {
