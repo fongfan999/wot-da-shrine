@@ -79,6 +79,8 @@ async function drawCard() {
  */
 const PREVIEWS = {
   home: { eyebrow: 'BEFORE THE SERVERS GO DOWN', headline: ['Pray for uptime,', 'together.'], facts: 'Bow daily. Bless deploys. Keep the kami fed.' },
+  // What public/og.png is for the Vietnamese launch (src/partials/head.html), drawn like 'home'
+  'home-vi': { eyebrow: 'TRƯỚC KHI SERVER TOANG', headline: ['Cả team cùng lạy,', 'server lại chạy.'], facts: 'Vái mỗi ngày. Cầu an deploy. Nhớ cho kami ăn.' },
   down: { eyebrow: 'THE SERVERS ARE DOWN', headline: ['The servers are', 'down.'], facts: 'The team is at the shrine. Open the link, kneel, and pray with them.' },
   back: { eyebrow: 'THE SERVERS ARE BACK', headline: ['The servers are', 'back.'], facts: 'The vigil is over. Come and see what the team prayed for.' },
 };

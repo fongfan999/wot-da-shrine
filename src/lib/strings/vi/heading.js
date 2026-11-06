@@ -24,7 +24,7 @@ export default {
     ['Server tự ý nghỉ phép', 'Chẳng nộp đơn, chẳng báo ai. Khấn đi, mời ly cà phê sữa đá, biết đâu tụi nó đi làm lại sớm.'],
     ['Status page vẫn sống ảo', 'Nó vẫn ghi All Systems Operational. Cả team biết thừa, nhưng vẫn khấn.'],
   ],
-  tagline: 'Cùng nhau khấn cho uptime.',
+  tagline: 'Cả team cùng lạy, server lại chạy.',
   madeBy: 'Làm bởi',
   openSource: 'Mã nguồn mở trên GitHub',
   feedback: 'Báo lỗi hay xin thêm tính năng',
