@@ -48,7 +48,8 @@ export default {
   tone_0: 'Giấy', tone_1: 'Đất nung', tone_2: 'Ngọc bích', tone_3: 'Oải hương',
   // Cloud mà miếu thờ (CLOUDS trong shared/rules.js)
   fCloud: 'Cloud nhà mình',
-  cloudNote: 'Từ Đình làng trở lên, đèn lồng treo trên cổng torii. Đèn của bạn đang sáng.',
+  cloudNote: 'Đèn lồng của nó treo trên cổng torii, đang sáng, region ghi trên biển.',
+  cloudNoteAll: 'Đèn lồng mọi cloud treo trên cổng torii, như nhau.',
   cloudAll: 'Tất cả', cloudAllHint: 'Multi-cloud. Đèn nào cũng như đèn nào',
   cloud_aws: 'AWS', cloudHint_aws: 'us-east-1, chứ còn gì nữa',
   cloud_azure: 'Azure', cloudHint_azure: 'East US',

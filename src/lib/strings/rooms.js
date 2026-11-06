@@ -48,7 +48,8 @@ export default {
   tone_0: 'Paper', tone_1: 'Clay', tone_2: 'Jade', tone_3: 'Lavender',
   // The cloud a shrine prays to (CLOUDS in shared/rules.js)
   fCloud: 'Our cloud',
-  cloudNote: 'Lanterns hang from the torii from the village shrine up. Yours is lit.',
+  cloudNote: 'Its lantern hangs from the torii, lit, and its region is on the plaque.',
+  cloudNoteAll: 'Every cloud’s lantern hangs from the torii alike.',
   cloudAll: 'All of them', cloudAllHint: 'Multi-cloud. Every lantern alike',
   cloud_aws: 'AWS', cloudHint_aws: 'us-east-1, of course',
   cloud_azure: 'Azure', cloudHint_azure: 'East US',

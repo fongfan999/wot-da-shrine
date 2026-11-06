@@ -4,8 +4,8 @@ import { sound } from '../audio/index.js';
 import { syncPalette } from '../scene/palette.js';
 import { BRAND, STRINGS, applyStrings, t } from '../lib/strings.js';
 import { LOCALES, savedLocale, setLocale } from '../lib/locale.js';
-import { $, body, fmt, landing, meta, mix, mixName, persist, resetSettings, roomName, settings, state, tv, urlParams } from './context.js';
-import { LAYERS, PRESETS, cleanMix, presetOf, sameMix } from '../../shared/rules.js';
+import { $, body, counters, fmt, landing, meta, mix, mixName, persist, resetSettings, roomName, settings, state, tv, urlParams } from './context.js';
+import { LAYERS, PRESETS, SHRINE_LEVELS, cleanMix, presetOf, sameMix } from '../../shared/rules.js';
 import { fog, petals, temple } from './engines.js';
 import { applyFx, lite } from './fx.js';
 import { splitTitle, title } from './stage.js';
@@ -14,7 +14,7 @@ import { copyText, toast } from './ui.js';
 import { quietHeading } from './quiet.js';
 import { blessingHeading } from './deploy.js';
 import { cleanScreen } from '../../shared/rules.js';
-import { applyScene, howToOpen, nameOf, nextToOpen, onTry, onUnlocks, opened, playable, scene } from './unlocks.js';
+import { applyScene, howToOpen, nameOf, nextToOpen, onTry, onUnlocks, opened, playable, scene, shrineAt } from './unlocks.js';
 
 /** The stock headline a shrine gets until someone names what is down: picked from its name, so everyone in it reads the same one. */
 function headlineFor(room) {
@@ -116,7 +116,11 @@ export function openPanel(open) {
   panel.inert = !open; // closed, nothing in it takes the focus either
   backdrop.classList.toggle('open', open);
   gsap.to(panel, { x: open ? '0%' : '100%', duration: 0.5, ease: open ? 'power3.out' : 'power3.in' });
-  if (open) { sound.tick(660, 0.06); for (const id of ['#btn-more', '#btn-settings']) $(id).removeAttribute('data-new'); }
+  if (open) {
+    sound.tick(660, 0.06);
+    for (const id of ['#btn-more', '#btn-settings']) $(id).removeAttribute('data-new');
+    renderScenes(); applyCloud(); // "N karma to go" as of now, not as of the last time the settings changed
+  }
 }
 /* Tabs: the shrine's settings, the TV's, yours. Only yours where the shrine can't be changed (the home page, the demo, a TV). */
 const tabs = [...panel.querySelectorAll('[role=tab]')];
@@ -266,17 +270,26 @@ $('#mix-layers').addEventListener('input', (e) => {
 /* ---------- The cloud the shrine prays to: its lantern lit on the torii ---------- */
 const cloudPick = $('#cloud-pick');
 const cloudNow = () => (roomName && roomName !== 'demo' ? state.roomMeta.cloud ?? '' : '');
+const TORII_LEVEL = 2; // the lanterns hang from the torii, which the temple draws from the Village shrine up (data-min="2")
+/** Shut until the shrine has a torii to hang them from: how far it has to go, in words like a locked scene's. */
+const cloudShut = () => (roomName && roomName !== 'demo' && shrineAt() < TORII_LEVEL
+  ? fmt('lockedLevel', { name: STRINGS.shrineLevels[TORII_LEVEL][1], n: Math.max(0, SHRINE_LEVELS[TORII_LEVEL] - counters.karma) })
+  : '');
 function applyCloud() {
   temple.setCloud(cloudNow() || null);
+  const shut = cloudShut();
+  $('#cloud-note').textContent = shut || t(cloudNow() ? 'cloudNote' : 'cloudNoteAll');
   for (const b of cloudPick.querySelectorAll('[data-cloud]')) {
     const on = b.dataset.cloud === cloudNow();
     b.setAttribute('aria-checked', String(on));
     b.tabIndex = on ? 0 : -1;
+    b.disabled = Boolean(shut);
+    b.title = shut ? fmt('lockedTip', { how: shut }) : '';
   }
 }
 cloudPick.addEventListener('click', (e) => {
   const b = e.target.closest('[data-cloud]');
-  if (!b || !roomName || roomName === 'demo' || b.dataset.cloud === cloudNow()) return;
+  if (!b || !roomName || roomName === 'demo' || cloudShut() || b.dataset.cloud === cloudNow()) return;
   state.roomMeta.cloud = b.dataset.cloud || null;
   state.shrine?.send('meta', { cloud: state.roomMeta.cloud });
   applyCloud();
@@ -313,6 +326,7 @@ onUnlocks(() => {
   sound.setMix(playable(mix()));
   renderMixer();
   renderScenes();
+  applyCloud();
 });
 // Play it, from the card when something opens: the layer joins the room's mix at a level it can be heard; Show it puts the scene on.
 onTry((id) => {
