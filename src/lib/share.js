@@ -11,6 +11,7 @@
 import qrcode from 'qrcode-generator';
 import { t } from './strings.js';
 import { fill } from '../../shared/fill.js';
+import { kneeling } from '../scene/devotee.js';
 
 /** A string from STRINGS with its {placeholders} filled: one line, or a headline's two. */
 const say = (key, vars = {}) => {
@@ -22,7 +23,7 @@ const W = 1200;
 const H = 630;
 const SCALE = 2; // retina PNG
 
-const TOKENS = ['paper', 'paper-raised', 'paper-sunk', 'ink', 'muted', 'line', 'line-strong', 'sheet-line', 'accent', 'accent-soft', 'note-ink', 'ember', 'ember-soft', 'ember-ink', 'flame', 'live', 'sheet-label', 'tone-1-soft', 'tone-2-soft', 'tone-3-soft'];
+const TOKENS = ['paper', 'paper-raised', 'paper-sunk', 'ink', 'muted', 'line', 'line-strong', 'sheet-line', 'accent', 'accent-soft', 'note-ink', 'ember', 'ember-soft', 'ember-ink', 'flame', 'live', 'sheet-label', 'tone-1-soft', 'tone-2-soft', 'tone-3-soft', 'tone-1', 'tone-2', 'tone-3'];
 const SANS = `ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`;
 const SERIF = `'Iowan Old Style', 'Palatino Linotype', Palatino, Charter, Georgia, 'Times New Roman', serif`;
 const MONO = `ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace`;
@@ -88,6 +89,32 @@ function drawingCss(c) {
     .temple-copy .t-note { font-size: 13px; fill: ${c.muted}; }
     .temple-copy .t-banner .d-mono { font-size: 18px; font-weight: 700; }
     .temple-copy .t-sign-big { font-size: 13px; font-weight: 700; letter-spacing: .08em; }
+    .kneeler__halo { display: none; }
+    .kneeler__ember { fill: ${c.flame}; opacity: 1; }
+    .kneeler__stick { fill: none; stroke: ${c.muted}; stroke-width: 2.2; stroke-linecap: round; }
+    .t-hair, .t-beret { fill: ${c.ink}; stroke: none; }
+    .t-shine { fill: none; stroke: ${c['line-strong']}; stroke-width: 1.6; stroke-linecap: round; }
+    .t-sleeve { fill: none; stroke: ${c.paper}; stroke-linecap: round; stroke-linejoin: round; }
+    .t-shirtsleeve { fill: none; stroke: ${c['paper-raised']}; stroke-linecap: round; stroke-linejoin: round; }
+    .tink { fill: ${c.muted}; }
+    .t-plaid, .t-lanyard { fill: none; stroke: ${c.muted}; }
+    ${[1, 2, 3].map((n) => `[data-tone="${n}"] .t-sleeve { stroke: ${c[`tone-${n}-soft`]}; } [data-tone="${n}"] .tink { fill: ${c[`tone-${n}`]}; } [data-tone="${n}"] :is(.t-plaid, .t-lanyard) { stroke: ${c[`tone-${n}`]}; }`).join('\n    ')}
+    .t-plaid { opacity: .3; }
+    .t-twill { fill: none; stroke: ${c.ink}; stroke-width: .6; opacity: .3; }
+    .t-rib { fill: none; stroke: ${c.ink}; stroke-width: 5; stroke-dasharray: .8 2.4; opacity: .35; }
+    .t-lanyard { stroke-width: 2.6; stroke-linecap: round; }
+    .t-beads { fill: none; stroke: ${c.ink}; stroke-width: 3.6; stroke-dasharray: .01 4.4; stroke-linecap: round; }
+    .t-spinner { fill: none; stroke: ${c.ink}; stroke-width: 2; stroke-dasharray: 4 3.4; }
+    .t-pom { stroke-dasharray: 1.6 1.4; }
+    .t-print { font-family: ${MONO}; font-size: 7px; font-weight: 700; letter-spacing: .04em; }
+    .t-nines { font-family: ${MONO}; font-size: 6.5px; font-weight: 700; }
+    .t-tiny, .t-sticker { font-family: ${MONO}; font-size: 4.4px; font-weight: 700; fill: ${c.ink}; }
+    .t-sticky { font-family: ${MONO}; font-size: 4px; font-weight: 700; fill: ${c.ink}; }
+    .t-dark { fill: ${c.ink}; stroke: ${c.ink}; stroke-width: 2; stroke-linejoin: round; }
+    .t-dark-line { fill: none; stroke: ${c.paper}; stroke-width: .9; stroke-linecap: round; opacity: .55; }
+    .t-darksleeve { fill: none; stroke: ${c.ink}; stroke-linecap: round; stroke-linejoin: round; }
+    .t-pants { fill: none; stroke: ${c['paper-sunk']}; stroke-linecap: round; stroke-linejoin: round; }
+    .t-comb { fill: none; stroke: ${c.ink}; stroke-width: .9; stroke-linecap: round; }
     .brand__wot { fill: ${c.ink}; }
     .brand__shrine { color: ${c.accent}; }
     .brand__gate, .brand__sticks { stroke: ${c.ink}; }
@@ -110,7 +137,18 @@ function wrap(text, max, lines = 2) {
 }
 
 /** Strip the live altar of anything that would not survive as a standalone SVG. `plain` also clears the tablet (a picture for every room). */
-function altarMarkup(host, plain = false) {
+/**
+ * People kneeling at the altar, backs to us, incense raised, laid out as the congregation lays them
+ * (congregation.js): the closest pair either side of the middle first, in the burner's units, feet on its floor.
+ */
+function kneelersMarkup(looks = []) {
+  return looks.map((look, i) => {
+    const x = 260 + (i % 2 ? 1 : -1) * (226 + Math.floor(i / 2) * 76);
+    return `<g data-tone="${look.tone}" transform="translate(${x} 460.6) scale(1.062)">${kneeling('kneeler', { look })}</g>`;
+  }).join('');
+}
+
+function altarMarkup(host, plain = false, kneelers = []) {
   const svgs = [...host.querySelectorAll('svg.burner__svg')];
   const inner = svgs.map((svg) => {
     const copy = svg.cloneNode(true);
@@ -125,7 +163,8 @@ function altarMarkup(host, plain = false) {
   // The shrine around the altar (temple.js), in the same units, kept to the card's right side so the words stay clear.
   const temple = document.querySelector('.temple__svg');
   const around = temple ? `<svg class="temple-copy" x="-440" y="-300" width="1400" height="770" viewBox="${temple.getAttribute('viewBox')}" overflow="visible">${temple.innerHTML}</svg>` : '';
-  return `<g mask="url(#altarSide)"><svg viewBox="0 0 520 470" x="650" y="86" width="500" height="452" overflow="visible" data-level="${level}" data-resolved="${resolved}">${around}${inner}</svg></g>`;
+  const people = kneelersMarkup(kneelers);
+  return `<g mask="url(#altarSide)"><svg viewBox="0 0 520 470" x="650" y="86" width="500" height="452" overflow="visible" data-level="${level}" data-resolved="${resolved}">${around}${inner}${people}</svg></g>`;
 }
 
 /**
@@ -147,7 +186,8 @@ const fit = (text, base, width, em) => Math.min(base, Math.floor(width / (Math.m
 /**
  * Build the card. `data`:
  *   room, title, resolved, open (a vigil is on), quietDays (nothing down: whole days without an incident, else null), people (count), avatars (emoji), minutes, karma, prayers (count),
- *   incense (count), quotes [{text, name}], url (as shown), link (the full address, drawn as a QR when given);
+ *   incense (count), quotes [{text, name}], url (as shown), link (the full address, drawn as a QR when given),
+ *   kneelers (looks from devotee.js's lookOf, drawn kneeling at the altar);
  *   `eyebrow`, `headline` [line1, line2] and `facts` override
  *   what the state would say (the link preview images are drawn this way).
  */
@@ -155,7 +195,7 @@ export function cardSvg(data) {
   const c = palette();
   const brandMark = document.querySelector('.brand__mark')?.outerHTML ?? '';
   const brandWord = document.querySelector('.brand__word')?.outerHTML ?? '';
-  const altar = altarMarkup(document.querySelector('#burner-art'), Boolean(data.plain));
+  const altar = altarMarkup(document.querySelector('#burner-art'), Boolean(data.plain), data.kneelers);
 
   const eyebrow = data.eyebrow ?? say('cardEyebrow', { room: data.room });
   const title = headline(data);

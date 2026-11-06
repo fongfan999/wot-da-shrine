@@ -11,6 +11,7 @@ import { openPanel } from './settings.js';
 import { copyText, toast } from './ui.js';
 import { kamiMoodNow } from './kami.js';
 import { quietDays } from './quiet.js';
+import { lookOf } from '../scene/devotee.js';
 
 /* ---------- Share sheet: invite the team, and a picture of the shrine to post ---------- */
 const shareEl = $('#share');
@@ -81,9 +82,12 @@ const PREVIEWS = {
   down: { eyebrow: 'THE SERVERS ARE DOWN', headline: ['The servers are', 'down.'], facts: 'The team is at the shrine. Open the link, kneel, and pray with them.' },
   back: { eyebrow: 'THE SERVERS ARE BACK', headline: ['The servers are', 'back.'], facts: 'The vigil is over. Come and see what the team prayed for.' },
 };
+/** Who kneels in the pictures: the same two of the team every time, the closest mats (the next pair would sit past the card's edge). */
+const PREVIEW_CAST = [['dev', 1], ['devops', 2]];
 export async function previewCard(kind) {
   const svg = cardSvg({
     room: '', resolved: kind === 'back', people: 0, avatars: [], quotes: [], url: 'shrine.wotda.app', plain: true,
+    kneelers: PREVIEW_CAST.map(([role, tone]) => lookOf(`preview:${role}`, role, tone)),
     ...(PREVIEWS[kind] ?? PREVIEWS.down),
   });
   return cardPng(svg);
