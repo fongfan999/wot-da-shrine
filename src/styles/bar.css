@@ -106,6 +106,7 @@ body[data-conn="closed"] .presence { opacity: .45; }
   left: 0;
   z-index: 20;
   min-width: 288px;
+  width: max-content;
   display: flex;
   flex-direction: column;
   padding: 6px;
@@ -137,7 +138,7 @@ body:not([data-mode="home"]) #menu-tv { display: none; }
 .menu__item:is(:hover, :focus-visible) { background: var(--accent-soft); color: var(--note-ink); outline: 0; }
 .menu__item .ico { width: 20px; height: 20px; }
 .menu__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.menu__text b { font-size: 14px; font-weight: 600; }
+.menu__text b { font-size: 14px; font-weight: 600; white-space: nowrap; }
 .menu__text small { font-size: 12px; color: var(--muted); }
 .menu__item:is(:hover, :focus-visible) small { color: inherit; opacity: .8; }
 .menu__ext { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
@@ -152,4 +153,5 @@ body:not([data-mode="home"]) #menu-tv { display: none; }
   .room-chip__state { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   /* Both menus open from the right edge on a phone, so neither runs off the screen */
   .menu__list { position: fixed; top: calc(var(--bar-h, 52px) + 4px); left: auto; right: 12px; min-width: 0; width: min(300px, calc(100vw - 24px)); }
+  .menu__text b { white-space: normal; }
 }
