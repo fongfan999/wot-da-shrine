@@ -1,11 +1,9 @@
 /**
  * The shrine grows: the home page's own copy of the shrine around the altar (scene/temple.js) with a
- * team kneeling at it (scene/congregation.js), stepped through its six levels. Scrolling raises it: the
- * drawing stays pinned on screen while the page scrolls a stretch per level, and each stretch raises the
- * next one the way a shrine does: scaffolding, three bows, the new level inks in and everyone stands to
- * look (scrolling back up takes it down again, at once). The ladder jumps to a level, Raise the next level
- * plays one raise, Skip a day shows what neglect does to the building, and the cloud chips light a donor
- * lantern; what they show stays until the scroll reaches another level.
+ * team kneeling at it (scene/congregation.js), stepped through its six levels. While nobody touches it
+ * the section raises each level the way a shrine does: scaffolding, three bows, the new level inks in
+ * and everyone stands to look. The ladder jumps to a level, Raise the next level plays one raise, Skip
+ * a day shows what neglect does to the building, and the cloud chips light a donor lantern.
  *
  * The censer is the hero's own drawing, cloned once: the temple and the people are laid out in its
  * units, so they line up with it exactly as they do at the top of the page. It is not a `.burner`:
@@ -44,7 +42,9 @@ const ZOOM = [1.5, 1.32, 1.14, 1.08, 1, 1];
 /** How far each level reaches either side of the censer, in burner units, and the scaffolding with its sign. */
 const REACH = [400, 340, 600, 600, 600, 600];
 const SCAFFOLD_REACH = 545;
-const PACE = 0.6;    // a raise the scroll asks for goes this much quicker than one the button plays
+const PAUSE = 400;   // the tour: this long between one level standing and the next one's scaffolding
+const PACE = 0.7;    // and its raises go this much quicker than one the button plays: a level about every 2.6s
+const HOLD = 5200;   // and this long at the top before it starts over
 const UPKEEP_LOST = 2; // weeds take the last two mats, as in a shrine (kami.js)
 
 const levelName = (level) => STRINGS.shrineLevels[level]?.[1] ?? '';
@@ -81,7 +81,8 @@ export function setupGrow(censer) {
   let level = 0;
   let upkeep = 0;
   let cloud = null;
-  let run = 0; // bumped to stop a raise under way: another one, the scroll, or the visitor took over
+  let run = 0; // bumped to stop the tour: off screen, or for good once the visitor takes over
+  let touched = false;
   const wait = (ms, id) => new Promise((ok, no) => setTimeout(() => (id === run ? ok() : no()), ms));
   /** As close as the stage can come and still show all of `lv` (or its scaffolding): a narrow stage stays back. */
   const stage = $('#grow-stage');
@@ -174,61 +175,26 @@ export function setupGrow(censer) {
     crowd?.standAll(2.2);
   }
 
-  /** The visitor took over: `interrupt` stops a raise under way, which comes down. */
-  function takeOver(interrupt = true) {
-    if (!interrupt) return;
-    run++;
-    temple.setRaising(null);
-    raiseBtn.disabled = false;
+  async function tour(id) {
+    for (;;) {
+      while (level < rungs.length - 1) {
+        await wait(PAUSE, id);
+        await raise(id, PACE);
+      }
+      await wait(HOLD, id);
+      show(0, { inked: true });
+      await wait(1200, id);
+    }
   }
 
-  // Scrolling raises it. The track is the pin and a runway under it, a stretch per level; while the runway
-  // passes, the pin stays put and how far along it the page is says which level to show.
-  const track = $('#grow-track');
-  const pin = $('#grow-pin');
-  const scrolled = !reduceMotion;
-  let want = -1; // the level the scroll last asked for: only a new one moves the drawing, so a click's stays
-  track.classList.toggle('is-scrolled', scrolled);
-  track.style.setProperty('--grow-steps', String(rungs.length - 1));
-  /** Pinned centred on the screen below the page's bar (it stays at the top as the page scrolls), or right under it. */
-  const bar = $('.bar');
-  const pinTop = () => {
-    const under = (bar?.offsetHeight ?? 0) + 12;
-    return Math.max(under, Math.round(under + (innerHeight - under - pin.offsetHeight) / 2));
-  };
-  const place = () => track.style.setProperty('--grow-top', `${pinTop()}px`);
-  const levelAt = () => {
-    const runway = track.offsetHeight - pin.offsetHeight;
-    const along = runway > 0 ? (pinTop() - track.getBoundingClientRect().top) / runway : 0;
-    return Math.max(0, Math.min(rungs.length - 1, Math.floor(along * rungs.length)));
-  };
-  /** Go to what the scroll asks for: down at once, up a raise at a time, the last one only if it is far behind. */
-  async function follow() {
-    const to = want;
-    const id = ++run;
-    temple.setRaising(null);
-    raiseBtn.disabled = false;
-    if (to <= level) { if (to < level) show(to, { inked: true }); return; }
-    if (to > level + 1) show(to - 1, { inked: true });
-    try { await raise(id, PACE); } catch { /* the scroll moved on */ }
-  }
-  let ticking = false;
-  let pinH = 0; // the pin's height when it was last placed: the page lays the sections out after this runs
-  const onScroll = () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      ticking = false;
-      if (pin.offsetHeight !== pinH) { pinH = pin.offsetHeight; place(); }
-      const to = levelAt();
-      if (to !== want) { want = to; follow(); }
-    });
-  };
-  if (scrolled) {
-    place();
-    want = levelAt();
-    addEventListener('scroll', onScroll, { passive: true });
-    addEventListener('resize', () => { pinH = 0; onScroll(); });
+  /** The visitor took over: the tour stops for good; `interrupt` also stops a raise they started, which comes down. */
+  function takeOver(interrupt = true) {
+    if (!touched || interrupt) {
+      run++;
+      temple.setRaising(null);
+      raiseBtn.disabled = false;
+    }
+    touched = true;
   }
 
   raiseBtn.addEventListener('click', async () => {
@@ -258,7 +224,7 @@ export function setupGrow(censer) {
     crowd.walk(list[Math.floor(Math.random() * list.length)].id, { sticks: Math.random() < 0.7 });
   }, 5600);
 
-  show(scrolled ? Math.max(0, want) : rungs.length - 1);
+  show(reduceMotion ? rungs.length - 1 : 0);
   new IntersectionObserver(([en]) => {
     onScreen = en.isIntersecting;
     if (onScreen && !crowd) {
@@ -271,5 +237,9 @@ export function setupGrow(censer) {
     }
     // Off screen the people stop swaying (lite), so nothing animates where nobody looks; nor on a lite page.
     crowd?.setLite(!onScreen || reduceMotion || lite);
+    if (touched) return;
+    run++;
+    if (!onScreen) temple.setRaising(null);
+    if (onScreen && !reduceMotion) tour(run).catch(() => {});
   }, { rootMargin: '0px 0px -10% 0px' }).observe($('#grow-stage'));
 }
