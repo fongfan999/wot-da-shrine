@@ -44,7 +44,11 @@ class SoundKit {
     if (!this.ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
-      this.ctx = new AC();
+      // Render 40 ms at a time, not the 5 ms Chrome picks by itself: the mix runs for hours
+      // beside everything else on the machine, and when another app wakes to play its own sound
+      // (a Telegram alert) the audio thread can miss a 5 ms deadline, a dropout the ear hears as
+      // a pop in a steady drone. 40 ms absorbs such a stall, and a chime 40 ms late is not felt.
+      this.ctx = new AC({ latencyHint: 0.04 });
       this.master = this.ctx.createGain();
       this.master.gain.value = 0.9;
       // dry + a soft hall reverb (generated impulse response, no file)
