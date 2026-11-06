@@ -19,13 +19,46 @@ export async function apiHeaders(c, next) {
   await next();
 }
 
-/** Turns away an IP that has used up its share of the `binding` limiter. A missing binding (e.g. tests) means no limit. */
-export const rateLimit = (binding) => async (c, next) => {
+/**
+ * Who is asking, as far as limits go: their IPv4 address, or the /64 an IPv6 address is in, since
+ * one home or one server is handed a whole /64 and could step through it an address at a time.
+ */
+export function clientOf(request) {
+  const ip = (request.headers.get('CF-Connecting-IP') ?? '').toLowerCase();
+  if (!ip.includes(':')) return ip || 'unknown';
+  const [head, tail] = ip.split('::');
+  const left = head ? head.split(':') : [];
+  const right = tail ? tail.split(':') : [];
+  const groups = tail === undefined ? left : [...left, ...Array(Math.max(0, 8 - left.length - right.length)).fill('0'), ...right];
+  return `${groups.slice(0, 4).map((g) => g.replace(/^0+(?=.)/, '')).join(':')}::/64`;
+}
+
+/** Whether this visitor has some of the `binding` limiter's share left. A missing binding means no limit. */
+export async function allowed(c, binding) {
   const limiter = c.env[binding];
-  const key = c.req.header('CF-Connecting-IP') ?? 'unknown';
-  if (limiter && !(await limiter.limit({ key })).success) {
-    return c.text('Too many prayers at once. Breathe, then try again.', 429, { 'Retry-After': '60', 'Cache-Control': 'no-store' });
-  }
+  return !limiter || (await limiter.limit({ key: clientOf(c.req.raw) })).success;
+}
+
+export const TOO_MANY = 'Too many prayers at once. Breathe, then try again.';
+
+/**
+ * An answer every visitor shares, kept at this edge (one Cloudflare location) for `ttl` seconds under
+ * `path`: whoever asks first in that time pays for it, and everyone after reads the copy. `make` gives
+ * it (anything JSON), or null for nothing worth keeping.
+ */
+export async function shared(c, path, ttl, make) {
+  const cache = globalThis.caches?.default;
+  const key = new Request(new URL(path, c.req.url));
+  const hit = await cache?.match(key).catch(() => undefined);
+  if (hit) return hit.json();
+  const value = await make();
+  if (value != null && cache) c.executionCtx.waitUntil(cache.put(key, Response.json(value, { headers: { 'Cache-Control': `public, max-age=${ttl}` } })).catch(() => {}));
+  return value;
+}
+
+/** Turns away a visitor who has used up their share of the `binding` limiter. */
+export const rateLimit = (binding) => async (c, next) => {
+  if (!(await allowed(c, binding))) return c.text(TOO_MANY, 429, { 'Retry-After': '60', 'Cache-Control': 'no-store' });
   await next();
 };
 

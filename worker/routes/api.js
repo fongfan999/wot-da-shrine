@@ -1,5 +1,6 @@
 /** The site's own API: a health check, a status to poll, the world's totals and the push key. */
 import { Hono } from 'hono';
+import { shared } from '../middleware.js';
 import { vapid } from '../push.js';
 
 const MANTRAS = [
@@ -34,6 +35,7 @@ api.get('/api/push/key', async (c) => {
   return k ? c.json({ key: k.key }) : c.json({ error: 'push is off' }, 404);
 });
 
-api.get('/api/world', async (c) => c.json(await c.env.WORLD.getByName('world').snapshot()));
+// Every home page polls it: kept at the edge for a few seconds, so the one World object hears from each location once in that time.
+api.get('/api/world', async (c) => c.json(await shared(c, '/api/world', 5, () => c.env.WORLD.getByName('world').snapshot())));
 
 export default api;

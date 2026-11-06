@@ -1,14 +1,13 @@
 /** The page for a room, its link preview describing the room as it is right now. */
 import { describe, previewImage, previewTitle } from '../../shared/preview.js';
 
-export async function roomPage(c, room) {
+/** `st` is the room's status, or null for the plain preview. */
+export async function roomPage(c, room, st) {
   const { origin } = new URL(c.req.url);
   // The room page is r/index.html, served from the asset store at /r/. A plain request, not the
   // browser's: a conditional one could come back 304 with nothing to rewrite.
   const page = await c.env.ASSETS.fetch(new Request(`${origin}/r/`));
   if (!page.ok) return page;
-  let st = null;
-  try { st = await c.env.SHRINE.getByName(room).status(room); } catch { /* the page still works without it */ }
   const title = previewTitle(st, room);
   const description = st ? describe(st) : 'Your team is praying for the servers. Light incense, ring the bowl and send a prayer to the rack.';
   const image = previewImage(st);

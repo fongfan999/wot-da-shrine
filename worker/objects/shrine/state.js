@@ -17,9 +17,20 @@ export const LEAVE_GRACE = 5000; // a dropped socket gets this long to come back
 export const TOKEN_RE = /^[0-9a-f-]{36}$/;
 export const HOOK_AVATAR = '🔔'; // the alerting system, as the feed shows it
 
+/*
+ * What keeps a script from running up the bill. Each is far past what people do: a war room is tens
+ * of people, an office behind one address a few dozen, and nobody's hand rings the bowl 20 times a second.
+ */
+export const SAVE_EVERY = 1000; // the altar is written at most once a second: the first act at once, a busy second's in one write at its end
+export const MAX_PEOPLE = 300; // kneeling in one shrine at once (screens aside)
+export const MAX_FROM_ONE = 50; // sockets in one shrine from one address (clientOf), screens and all
+export const FLOOD_DROPS = 200; // messages one socket may have turned away within FLOOD_WINDOW before it is closed as a script
+export const FLOOD_WINDOW = 10_000;
+export const FLOOD_FOR = 60_000; // an address caught flooding can't kneel in that shrine again for this long
+export const FLOODED = 1008; // the close code for a socket sending far more than a person could
 
-/** A person as the others see them: never their resume token. */
-export const pub = ({ token, replaced, ...person }) => person;
+/** A person as the others see them: never their resume token, nor where they came from. */
+export const pub = ({ token, replaced, from, ...person }) => person;
 
 /**
  * The public demo shrine, streamed onto the landing page. Anyone can kneel

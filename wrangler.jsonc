@@ -29,7 +29,13 @@
     { "name": "SOCKET_LIMIT", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } },
     { "name": "PAIR_LIMIT", "namespace_id": "1004", "simple": { "limit": 12, "period": 60 } },
     // A room's webhook: alerting systems batch, but a flapping monitor should not drown the shrine.
-    { "name": "HOOK_LIMIT", "namespace_id": "1005", "simple": { "limit": 30, "period": 60 } }
+    { "name": "HOOK_LIMIT", "namespace_id": "1005", "simple": { "limit": 30, "period": 60 } },
+    // Acts at the altar, across every shrine (each socket is held to 4 a second besides): ten a second
+    // from one address is a whole office ringing the bowl at once, and more than that is a script.
+    { "name": "ACTION_LIMIT", "namespace_id": "1006", "simple": { "limit": 600, "period": 60 } },
+    // Asking a shrine how it is (status, badge, a room page's link preview). The demo's status, which
+    // every home page polls, is kept at the edge and costs nobody any of this.
+    { "name": "READ_LIMIT", "namespace_id": "1007", "simple": { "limit": 120, "period": 60 } }
   ],
   // Web Push: who the push services can contact about this deployment. The key itself is the
   // VAPID_KEY secret (npm run vapid); without it notifications are simply off.

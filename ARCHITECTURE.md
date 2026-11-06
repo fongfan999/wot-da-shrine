@@ -47,7 +47,7 @@ What happens when someone presses **Bow** in a shared shrine:
 2. **The Worker hands the socket to the room.** `/api/rooms/:room/ws` (`worker/routes/rooms.js`)
    checks the room's name and the rate limit, and passes the upgrade to that room's `Shrine`.
 3. **The shrine looks up the action.** `webSocketMessage` in `worker/objects/shrine/index.js`
-   rate-limits the socket (8 at once, 4 a second after), finds `bow` in its actions (a `Map`,
+   rate-limits the socket (8 at once, 4 a second after, and its address across every shrine), finds `bow` in its actions (a `Map`,
    so a message's `t` can only ever name an action) and runs it: `altar.js` checks the chorus,
    the morning bow and the scaffolding.
 4. **Every act ends the same way.** An action that returns `true` is an act the room hears:
@@ -111,8 +111,15 @@ code it holds, and `{ t: 'cast', room }` when someone casts a shrine to it.
 | `GET /api/tv/ws` | a TV's code screen | `routes/tv.js` |
 | `POST /api/tv/:code/cast` | send a shrine to the TV holding that code | `routes/tv.js` |
 
-Each IP is rate-limited per Cloudflare location: opening shrines, sockets, pairing and each
-room's webhook have their own limits (`ratelimits` in `wrangler.jsonc`).
+Each address (an IPv4 address, or an IPv6 /64: `clientOf` in `worker/middleware.js`) is
+rate-limited per Cloudflare location: opening shrines, sockets, pairing, each room's webhook,
+acts at the altar across every shrine, and asking a room how it is have their own limits
+(`ratelimits` in `wrangler.jsonc`). Every limit is far past what people do, so only scripts hit
+them. A shrine also guards itself (`guard.js`): a socket sending far past its pace is closed and its
+address kept out of that shrine for a minute, one address may hold 50 sockets in a shrine, and 300
+people may kneel in one. It writes its altar at most once a second, however busy it is. The
+demo's status and `/api/world`, which every home page polls, are kept at the edge for 5 seconds,
+and a badge for 30.
 
 ## What a shrine keeps
 
@@ -271,6 +278,7 @@ worker/objects/shrine/     Shrine Durable Object, one per room: index.js and a f
   vigils.js, deploys.js, watch.js   incidents, blessed deploys, who holds the pager
   standing.js, together.js what each person earns; the board, levels, cast and charms
   kami.js, webhook.js, notifications.js   the kami, the alerts webhook, Web Push
+  guard.js                 keeping scripts off the altar: each socket's pace, an address's acts, how many may kneel
 worker/objects/world.js    World Durable Object: totals across every shrine
 worker/objects/pairing.js  Pairing Durable Object: one per TV code
 wrangler.jsonc           Worker + Durable Object config

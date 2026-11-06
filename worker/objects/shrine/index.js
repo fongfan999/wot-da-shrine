@@ -18,6 +18,7 @@
  *   kami.js           feeding the kami, the services it watches, purifying the altar
  *   webhook.js        the room's alerts webhook (hook(), which the Worker calls)
  *   notifications.js  Web Push: who asked, what they hear, the morning and evening reminders
+ *   guard.js          keeping scripts off the altar: each socket's pace, an address's acts, how many may kneel
  *
  * Each part exports `methods`, which become the Shrine's own (`this` is the shrine), and `actions`:
  * what a message from a socket does, by its `t`. An action returns true when it is an act the room
@@ -29,9 +30,11 @@
 import { DurableObject } from 'cloudflare:workers';
 import { kamiMood } from '../../../shared/kami.js';
 import { AVATARS, BURN_SECONDS, CELEBRATE_FOR, cleanRole, cleanTone, EMPTY_FEATS, KARMA, levelOf, PRESETS, RESOLVE_UNDO } from '../../../shared/rules.js';
-import { clean, DEMO_META, DEMO_NAMES, DEMO_ROOM, ELSEWHERE, EMPTY, FORGET_AFTER, OPENS_VIGIL, pub, TOKEN_RE, TOUCH_EVERY, VIGIL_FIELD } from './state.js';
+import { clientOf } from '../../middleware.js';
+import { clean, DEMO_META, DEMO_NAMES, DEMO_ROOM, ELSEWHERE, EMPTY, FORGET_AFTER, OPENS_VIGIL, pub, SAVE_EVERY, TOKEN_RE, TOUCH_EVERY, VIGIL_FIELD } from './state.js';
 import * as altar from './altar.js';
 import * as deploys from './deploys.js';
+import * as guard from './guard.js';
 import * as kami from './kami.js';
 import * as notifications from './notifications.js';
 import * as people from './people.js';
@@ -46,6 +49,9 @@ export class Shrine extends DurableObject {
     super(ctx, env);
     this.state = { ...EMPTY };
     this.buckets = new WeakMap(); // per-socket rate limit; resets after hibernation, which is fine
+    this.flooded = new Map(); // address (clientOf) → until when it may not kneel here: it flooded the altar
+    this.savedAt = 0; // when the altar was last written, and the write waiting for the end of a busy second
+    this.saveTimer = 0;
     this.stored = false; // nothing is written until the first action, so drive-by connects leave no trace
     this.claimed = false; // opened from /new: the name is taken, though nobody has done anything yet
     this.bows = new Map(); // person's id → { at, person }: who bowed lately, for the chorus
@@ -87,6 +93,7 @@ export class Shrine extends DurableObject {
       avatar: AVATARS.includes(url.searchParams.get('avatar')) ? url.searchParams.get('avatar') : '🧘',
       role: cleanRole(url.searchParams.get('role')),
       tone: cleanTone(url.searchParams.get('tone')),
+      from: clientOf(request), // never told to anyone (pub): only what the limits go by
     };
     for (const k of ['role', 'tone']) if (person[k] === undefined) delete person[k];
     // A screen on the wall: sees everything, counts as nobody, and is never anyone's other tab.
@@ -94,6 +101,8 @@ export class Shrine extends DurableObject {
     // The browser keeps one token for everyone it is: another tab, a refresh or a dropped connection
     // comes back as the same person, not a stranger. A new token is a new person (another browser, a private window).
     const asked = watcher ? '' : url.searchParams.get('token');
+    const refused = this.refuse(person.from, asked, watcher);
+    if (refused) return refused;
     const was = this.resume(asked);
     if (was) Object.assign(person, { id: was.id, token: was.token, via: was.via, hello: was.hello });
     else if (TOKEN_RE.test(asked ?? '')) person.token = asked;
@@ -165,11 +174,12 @@ export class Shrine extends DurableObject {
   }
 
   async webSocketMessage(ws, raw) {
-    if (typeof raw !== 'string' || raw.length > 1024 || !this.allow(ws)) return;
+    if (!this.allow(ws) || typeof raw !== 'string' || raw.length > 1024) return;
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
     const self = ws.deserializeAttachment();
     if (!self || self.watcher || self.replaced) return; // a screen, or a socket its person has already left behind
+    if (this.flooding(ws, self)) return;
     const by = pub(self);
     const s = this.state;
     const out = { t: 'act', kind: msg.t, by };
@@ -235,6 +245,8 @@ export class Shrine extends DurableObject {
     const now = Date.now();
     if (now < this.sweepAt) { await this.remind(now); return this.schedule(); }
     if (this.ctx.getWebSockets().length) return this.touch();
+    clearTimeout(this.saveTimer);
+    this.saveTimer = 0;
     await this.ctx.storage.deleteAll();
     this.stored = false;
     this.claimed = false;
@@ -307,21 +319,22 @@ export class Shrine extends DurableObject {
     }
   }
 
-  /** 8 actions per second burst, refilling at 4/s. Enough for enthusiastic bowl ringing, not for scripts. */
-  allow(ws) {
-    const now = Date.now();
-    const b = this.buckets.get(ws) ?? { tokens: 8, at: now };
-    b.tokens = Math.min(8, b.tokens + ((now - b.at) / 1000) * 4);
-    b.at = now;
-    this.buckets.set(ws, b);
-    if (b.tokens < 1) return false;
-    b.tokens -= 1;
-    return true;
-  }
-
+  /**
+   * Keeps the altar, at most once a SAVE_EVERY: an act on a quiet altar is written at once, and the rest
+   * of a busy second wait to go in one write at its end. A crowd (or a script) ringing the bowl costs
+   * a write a second, not a write a ring; what a restart could lose is that second.
+   */
   async save() {
-    await this.ctx.storage.put('altar', this.state);
     this.stored = true;
+    const wait = this.savedAt + SAVE_EVERY - Date.now();
+    if (wait > 0) {
+      this.saveTimer ||= setTimeout(() => { this.saveTimer = 0; this.save().catch(() => {}); }, wait);
+      return;
+    }
+    clearTimeout(this.saveTimer);
+    this.saveTimer = 0;
+    this.savedAt = Date.now();
+    await this.ctx.storage.put('altar', this.state);
     await this.touch();
   }
 
@@ -347,7 +360,7 @@ export class Shrine extends DurableObject {
  * both use (or one the class already has) is a mistake, and the Worker would not start.
  */
 const ACTIONS = new Map(); // a Map, so a message's `t` is only ever an action: never toString or __proto__
-for (const [file, part] of Object.entries({ people, altar, vigils, deploys, watch, standing, together, kami, webhook, notifications })) {
+for (const [file, part] of Object.entries({ people, altar, vigils, deploys, watch, standing, together, kami, webhook, notifications, guard })) {
   for (const [name, fn] of Object.entries(part.methods ?? {})) {
     if (name in Shrine.prototype) throw new Error(`Shrine.${name} (${file}.js) is defined twice`);
     Object.defineProperty(Shrine.prototype, name, { value: fn, writable: true, configurable: true });

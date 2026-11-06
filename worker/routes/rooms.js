@@ -2,7 +2,8 @@
 import { Hono } from 'hono';
 import { ROOM_RE, roomName, roomTag } from '../../shared/names.js';
 import { readAlert } from '../alerts.js';
-import { rateLimit, socketOnly } from '../middleware.js';
+import { allowed, rateLimit, shared, socketOnly, TOO_MANY } from '../middleware.js';
+import { DEMO_ROOM } from '../objects/shrine/state.js';
 import { badge } from '../views/badge.js';
 import { roomPage } from '../views/roomPage.js';
 
@@ -20,6 +21,18 @@ function roomOf(c) {
 
 /** The room's Shrine object. */
 const shrine = (c) => c.env.SHRINE.getByName(c.var.room);
+
+/**
+ * The room at a glance, for its status, badge and link preview. The demo's is kept at the edge for a
+ * few seconds, since every home page polls it; any other room's costs whoever asks some of
+ * READ_LIMIT, and is null once they have asked too often (a script naming room after room).
+ */
+function statusOf(c, room) {
+  const ask = async () => ((await allowed(c, 'READ_LIMIT')) ? c.env.SHRINE.getByName(room).status(room) : null);
+  return room === DEMO_ROOM ? shared(c, `/api/rooms/${room}/status`, 5, ask) : ask();
+}
+
+const tooMany = (c) => c.json({ error: TOO_MANY }, 429, { 'Retry-After': '60' });
 
 const rooms = new Hono();
 
@@ -56,9 +69,12 @@ rooms.post('/api/rooms', rateLimit('NEW_ROOM_LIMIT'), async (c) => {
 // /r/ alone is the room page's file with no room in it: send the visitor to a room instead.
 rooms.get('/r', (c) => c.redirect('/new'));
 
-rooms.get('/r/:room', (c) => {
+// Past their READ_LIMIT a visitor still gets the page, with the plain preview rather than the room's.
+rooms.get('/r/:room', async (c) => {
   const room = roomOf(c);
-  return room ? roomPage(c, room) : c.redirect('/new');
+  if (!room) return c.redirect('/new');
+  const st = await statusOf(c, room).catch(() => null); // the page still works without it
+  return roomPage(c, room, st);
 });
 
 rooms.use('/api/rooms/:room/*', async (c, next) => {
@@ -70,7 +86,10 @@ rooms.use('/api/rooms/:room/*', async (c, next) => {
 
 rooms.get('/api/rooms/:room/ws', socketOnly, rateLimit('SOCKET_LIMIT'), (c) => shrine(c).fetch(c.req.raw));
 
-rooms.get('/api/rooms/:room/status', async (c) => c.json(await shrine(c).status(c.var.room)));
+rooms.get('/api/rooms/:room/status', async (c) => {
+  const st = await statusOf(c, c.var.room);
+  return st ? c.json(st) : tooMany(c);
+});
 
 /**
  * The room's webhook, for the team's alerting: a firing alert opens the vigil, a resolved one says
@@ -91,9 +110,15 @@ rooms.post('/api/rooms/:room/hook/:key', rateLimit('HOOK_LIMIT'), async (c) => {
   return c.json({ ok: true, room: c.var.room, ...done, link: `${new URL(c.req.url).origin}/r/${c.var.room}` });
 });
 
-rooms.get('/api/rooms/:room/badge.svg', async (c) => c.body(badge(await shrine(c).status(c.var.room)), 200, {
-  'Content-Type': 'image/svg+xml; charset=utf-8',
-  'Cache-Control': 'public, max-age=30, s-maxage=30',
-}));
+// A badge says how the room was up to 30s ago, at the edge as in the browser: a README read by many
+// (through GitHub's image proxy, from a handful of addresses) asks the shrine twice a minute at most.
+rooms.get('/api/rooms/:room/badge.svg', async (c) => {
+  const st = await shared(c, `/api/rooms/${c.var.room}/badge.svg`, 30, () => statusOf(c, c.var.room));
+  if (!st) return c.text(TOO_MANY, 429, { 'Retry-After': '60' });
+  return c.body(badge(st), 200, {
+    'Content-Type': 'image/svg+xml; charset=utf-8',
+    'Cache-Control': 'public, max-age=30, s-maxage=30',
+  });
+});
 
 export default rooms;
