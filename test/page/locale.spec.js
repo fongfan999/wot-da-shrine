@@ -45,18 +45,18 @@ test.describe('in Vietnam', () => {
   });
 });
 
-test('?lang=vi speaks Vietnamese for one visit, and Customize keeps a choice', async ({ page, room }) => {
+test('?lang=vi speaks Vietnamese for one visit, and the flag keeps a choice', async ({ page, room }) => {
   await page.goto('/?lang=vi');
   await expect(page.locator('html')).toHaveAttribute('lang', 'vi');
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en'); // the address was for that visit only
 
   await enter(page, room, 'Ann');
-  await page.locator('#btn-more').click();
-  await page.locator('#btn-settings').click();
-  await page.locator('#tab-you').click();
-  await page.locator('#lang-seg [data-lang="vi"]').click();
+  await expect(page.locator('#btn-lang')).toHaveAttribute('lang', 'vi'); // the flag shows the other language
+  await page.locator('#btn-lang').click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'vi');
   await expect(page.locator('#btn-light')).toContainText('Thắp nhang');
   await expect(page.locator('body')).toHaveAttribute('data-conn', 'open'); // back in the room after the reload
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'vi'); // and kept
 });

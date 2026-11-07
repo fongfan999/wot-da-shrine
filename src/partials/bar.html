@@ -116,6 +116,26 @@
     <button class="icon-btn" id="btn-fullscreen" type="button" hidden aria-label="Full screen" data-i18n-label="labelFullScreen" title="Full screen (F)" data-i18n-title="labelFullScreenF">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
     </button>
+    <!-- The other language, as its flag: a flag reads in any language, so whoever cannot read this one still finds
+         theirs. One tap switches, and the choice is kept (src/app/language.js). -->
+    <button class="icon-btn lang-btn" id="btn-lang" type="button" hidden>
+      <svg class="flag" aria-hidden="true"><use href="#flag-vi" /></svg>
+    </button>
+    <!-- The flags, drawn once at 3:2 so the cross runs corner to corner: an emoji flag shows as two letters on Windows -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="flag-en" viewBox="0 0 60 40">
+        <clipPath id="flag-en-x"><path d="M30 20h30v20zv20H0zH0V0zV0h30z" /></clipPath>
+        <path d="M0 0h60v40H0z" fill="#012169" />
+        <path d="M0 0l60 40m0-40L0 40" stroke="#fff" stroke-width="7" />
+        <path d="M0 0l60 40m0-40L0 40" clip-path="url(#flag-en-x)" stroke="#C8102E" stroke-width="4" />
+        <path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="12" />
+        <path d="M30 0v40M0 20h60" stroke="#C8102E" stroke-width="7" />
+      </symbol>
+      <symbol id="flag-vi" viewBox="0 0 30 20">
+        <path d="M0 0h30v20H0z" fill="#DA251D" />
+        <path d="M15 4l1.35 4.15h4.36l-3.53 2.56 1.35 4.14L15 12.29l-3.53 2.56 1.35-4.14-3.53-2.56h4.36z" fill="#FFCD00" />
+      </symbol>
+    </svg>
     <button class="icon-btn" id="btn-sound" type="button" aria-label="Sound" data-i18n-label="fTrack" aria-pressed="true" title="Sound (M)" data-i18n-title="labelSoundM">
       <svg class="ico ico--on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7"/><path class="wave" d="M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
       <svg class="ico ico--off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l5 6M21 9l-5 6"/></svg>

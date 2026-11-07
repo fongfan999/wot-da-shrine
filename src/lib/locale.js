@@ -2,8 +2,8 @@
  * Which language the page speaks. English is the page's own; another language is a pack over it
  * (src/lib/strings/vi/), loaded only by the pages that speak it.
  *
- * The order: ?lang= in the address (for one visit, never saved), what this browser chose in
- * Customize (saved), then a guess from where the browser is: Vietnamese for a browser whose first
+ * The order: ?lang= in the address (for one visit, never saved), what this browser picked from the
+ * bar's flag (saved, for good), then a guess from where the browser is: Vietnamese for a browser whose first
  * language of ours is Vietnamese, or whose clock is set to Vietnam. Everyone else gets English.
  *
  * The page's head (src/partials/head.html) makes this choice before the first paint, sets <html lang>
@@ -24,7 +24,7 @@ const VIETNAM = ['Asia/Ho_Chi_Minh', 'Asia/Saigon'];
 const known = (l) => (Object.hasOwn(LOCALES, l) ? l : null);
 
 /**
- * The language for a page, from what it knows: `asked` (?lang=), `saved` (Customize), the browser's
+ * The language for a page, from what it knows: `asked` (?lang=), `saved` (the flag), the browser's
  * `languages` in its order, and its `timeZone`. Pure, so the tests can ask it anything.
  */
 export function pickLocale({ asked, saved, languages = [], timeZone = '' } = {}) {
@@ -35,7 +35,7 @@ export function pickLocale({ asked, saved, languages = [], timeZone = '' } = {})
   return BASE;
 }
 
-/** What this browser chose in Customize: a language, or 'auto' to go by where it is. */
+/** What this browser picked from the flag: a language, or 'auto' while it has picked none. */
 export function savedLocale() {
   try { return known(localStorage.getItem(KEY)) ?? 'auto'; } catch { return 'auto'; }
 }
@@ -61,7 +61,7 @@ export const LOCALE = browserLocale();
 export const INTL = LOCALE === BASE ? [] : [{ vi: 'vi-VN' }[LOCALE] ?? LOCALE];
 
 /**
- * Speak `lang` from now on ('auto' to go by where the browser is again), and reload in it: every
+ * Speak `lang` from now on, and reload in it: every
  * part of the page reads its words as it starts. A ?lang= in the address would override the choice,
  * so it goes.
  */

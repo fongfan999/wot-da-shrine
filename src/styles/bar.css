@@ -143,6 +143,8 @@ body:not([data-mode="home"]) #menu-tv { display: none; }
 .menu__item:is(:hover, :focus-visible) small { color: inherit; opacity: .8; }
 .menu__ext { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 .menu__sep { height: 1px; margin: 4px 6px; background: var(--line); }
+/* The other language, as its flag: it reads before any word does */
+.flag { display: block; width: 21px; height: 14px; border-radius: 3px; box-shadow: 0 0 0 1px rgb(0 0 0 / .18); overflow: hidden; }
 @media (max-width: 760px) {
   #bar-github { display: none; }
   #btn-github { display: grid; }

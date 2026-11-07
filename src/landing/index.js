@@ -133,7 +133,9 @@ function setupFooter() {
   const foot = $('.foot');
   $('#foot-sign').append($('.brand__word').cloneNode(true));
   const other = Object.keys(LOCALES).find((l) => l !== LOCALE);
-  Object.assign($('#foot-lang'), { textContent: LOCALES[other], lang: other, hidden: false, onclick: () => setLocale(other) });
+  const footLang = Object.assign($('#foot-lang'), { lang: other, hidden: false, onclick: () => setLocale(other) });
+  footLang.innerHTML = `<svg class="flag" aria-hidden="true"><use href="#flag-${other}" /></svg>`;
+  footLang.append(LOCALES[other]);
   new IntersectionObserver(([en], obs) => { if (en.isIntersecting) { foot.classList.add('is-in'); obs.disconnect(); } }, { threshold: 0.2 }).observe(foot);
   $('#foot-top').addEventListener('click', () => {
     sound.unlock();

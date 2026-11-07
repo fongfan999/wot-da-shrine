@@ -20,8 +20,6 @@ export default {
   fxAuto: 'Tự động',
   fxFull: 'Đầy đủ',
   fxLite: 'Nhẹ',
-  fLang: 'Ngôn ngữ',
-  langAuto: 'Tự động',
   fxNoteLite: 'Hiệu ứng nhẹ: không làm mờ, ít hạt hơn. Mượt trên điện thoại.',
   fxNoteFull: 'Hiệu ứng đầy đủ: đủ mọi lớp mờ, hạt bay và phản chiếu.',
   fxNoteAuto: 'Tự động hạ xuống mức nhẹ trên điện thoại, hoặc khi tụt FPS. Hiện đang ở mức {fx}.',

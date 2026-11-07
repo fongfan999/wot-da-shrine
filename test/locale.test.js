@@ -1,6 +1,6 @@
 /**
  * Which language a page speaks (src/lib/locale.js): what was asked for in the address, then what was
- * chosen in Customize, then a guess from where the browser is. The head of every page (head.html)
+ * picked from the flag, then a guess from where the browser is. The head of every page (head.html)
  * makes the same guess before the first paint, so it is checked against pickLocale here too.
  */
 import assert from 'node:assert/strict';
@@ -21,14 +21,14 @@ const CASES = [
   [{ languages: ['th-TH'], timeZone: 'Asia/Bangkok' }, 'en'],
   [{ languages: [], timeZone: '' }, 'en'],
   [{ languages: [], language: 'vi', timeZone: 'UTC' }, 'vi'], // a browser that lists no languages still has one
-  [{ saved: 'en', languages: ['vi-VN'], timeZone: 'Asia/Ho_Chi_Minh' }, 'en'], // chosen in Customize
+  [{ saved: 'en', languages: ['vi-VN'], timeZone: 'Asia/Ho_Chi_Minh' }, 'en'], // picked from the flag
   [{ saved: 'vi', languages: ['en-US'], timeZone: 'UTC' }, 'vi'],
   [{ asked: 'en', saved: 'vi', languages: ['vi'], timeZone: 'Asia/Saigon' }, 'en'], // ?lang= beats them all
   [{ asked: 'vi', languages: ['en'], timeZone: 'UTC' }, 'vi'],
   [{ asked: 'klingon', saved: 'auto', languages: ['en'], timeZone: 'Asia/Saigon' }, 'vi'], // nothing we speak: the guess
 ];
 
-test('pickLocale: the address, then Customize, then where the browser is', () => {
+test('pickLocale: the address, then the flag, then where the browser is', () => {
   for (const [{ language, ...input }, want] of CASES) assert.equal(pickLocale({ ...input, languages: input.languages.length ? input.languages : [language].filter(Boolean) }), want, JSON.stringify(input));
 });
 
