@@ -7,8 +7,8 @@ import { QUICK_PRAYERS } from './prayers.js';
 
 /** Mọi chữ của bản xem trước, bằng tiếng Việt. */
 export const PREVIEW_WORDS = {
-  quietDays: '{n} ngày không sự cố',
-  quietDay: 'trọn một ngày không sự cố',
+  quietDays: '{n} ngày không sập',
+  quietDay: 'trọn một ngày không sập',
   quietHours: 'yên ả được {n} tiếng',
   quietHour: 'yên ả được một tiếng',
   kami: 'kami đang {mood}',
@@ -27,19 +27,19 @@ export const PREVIEW_WORDS = {
   guarded: 'kami canh 1 service',
   guardeds: 'kami canh {n} service',
   lastPrayer: 'Lời khấn mới nhất: “{text}”',
-  titleQuietDays: '{n} ngày không sự cố · {room}',
-  titleQuietDay: 'Trọn một ngày không sự cố · {room}',
+  titleQuietDays: '{n} ngày không sập · {room}',
+  titleQuietDay: 'Trọn một ngày không sập · {room}',
   titleDown: '{title} · vào {room} khấn cùng',
   titleBack: '{title} · sống lại rồi · {room}',
   titleQuiet: '{title} · {room}',
   plainDown: 'Server sập rồi · vào {room} khấn cùng',
   plainBack: 'Server sống lại rồi · {room}',
-  plain: 'Cầu cho server chạy ngon · {room}',
+  plain: 'Cả team cùng lạy, server lại chạy · {room}',
   /** Trang của một miếu nói gì khi chưa ai làm gì ở đó, hoặc khi đã quá giới hạn đọc. */
   idle: 'Team bạn đang cầu cho server. Thắp nhang, thỉnh chuông và gửi một lời khấn tới dàn rack.',
   altDown: 'Server đang sập. Tranh mực vẽ bàn thờ, nhang đã thắp, cả team đang khấn.',
   altBack: 'Server sống lại rồi. Tranh mực vẽ bàn thờ sau đàn cầu.',
-  alt: 'Tranh mực vẽ bát nhang trên bàn thờ trong chùa, kèm dòng chữ: cùng nhau cầu uptime. Ngày vái một lần. Cầu an cho deploy. Nhớ cho kami ăn.',
+  alt: 'Tranh mực vẽ bát nhang trên bàn thờ trong miếu, kèm dòng chữ: Cả team cùng lạy, server lại chạy. Vái mỗi ngày. Cầu an deploy. Nhớ cho kami ăn.',
   demoTitle: 'Dàn rack demo sập rồi',
   quickPrayers: QUICK_PRAYERS,
 };

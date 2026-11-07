@@ -43,7 +43,7 @@ export const PREVIEW_WORDS = {
   idle: 'Your team is praying for the servers. Light incense, ring the bowl and send a prayer to the rack.',
   altDown: 'The servers are down. An ink drawing of the altar, incense lit, the team praying.',
   altBack: 'The servers are back. An ink drawing of the altar after the vigil.',
-  alt: 'An ink drawing of an incense burner on an altar inside a temple, with the words: pray for uptime, together. Bow daily. Bless deploys. Keep the kami fed.',
+  alt: 'An ink drawing of an incense burner on an altar inside a temple, with the slogan in Vietnamese: Cả team cùng lạy, server lại chạy (the whole team bows, the servers run again). Bow daily. Bless deploys. Keep the kami fed.',
   /** The demo shrine's title (DEMO_META in the shrine is English): a preview of the demo says it in its own words. */
   demoTitle: 'The demo rack is down',
   quickPrayers: QUICK_PRAYERS,
