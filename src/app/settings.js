@@ -119,6 +119,7 @@ export function openPanel(open) {
     sound.tick(660, 0.06);
     for (const id of ['#btn-more', '#btn-settings']) $(id).removeAttribute('data-new');
     renderScenes(); applyCloud(); // "N karma to go" as of now, not as of the last time the settings changed
+    if (roomName) $('#room-badge-img').src = `${badgeUrl}?t=${Date.now()}`; // as the room is now, not as it was
   }
 }
 /* Tabs: the shrine's settings, the TV's, yours. Only yours where the shrine can't be changed (the home page, the demo, a TV). */
@@ -388,3 +389,9 @@ $('#btn-hook-reset').addEventListener('click', () => {
   state.shrine?.send('hook', { reset: true });
 });
 renderHook();
+
+/* ---------- README badge: the room's state as an image, linked to the altar ---------- */
+const badgeUrl = `${location.origin}/api/rooms/${roomName}/badge.svg`;
+const badgeMd = `[![Wot Da Shrine](${badgeUrl})](${location.origin}/r/${roomName})`;
+$('#room-badge-md').textContent = badgeMd;
+$('#btn-room-badge-copy').addEventListener('click', () => copyText(badgeMd, t('badgeCopied')));

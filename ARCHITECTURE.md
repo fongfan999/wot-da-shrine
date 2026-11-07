@@ -257,7 +257,7 @@ src/audio/
 src/lib/
   clock.js               the page's one clock, and the rules for anything timed
   config.js              settings: URL params > localStorage > defaults
-  locale.js              which language the page speaks: ?lang=, then Customize, then a guess (Vietnamese in Vietnam)
+  locale.js              which language the page speaks: ?lang=, then Settings, then a guess (Vietnamese in Vietnam)
   strings.js             every word the page says, by key: t('bowed'), data-i18n="bowed"; another language's pack laid over it
   strings/               …kept by area: dock, heading, vigils, kami, landing, tv, settings… (a key in one file only)
   strings/vi/            Tiếng Việt: the same files, the same keys, loaded only by a page that speaks it

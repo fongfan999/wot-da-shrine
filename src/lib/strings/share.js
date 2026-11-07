@@ -60,7 +60,5 @@ export default {
   retroKarma: '{n} karma earned',
   retroLink: 'Shrine: {url}',
   retroCopied: 'Markdown copied. Paste it in the postmortem.',
-  badgeLabel: 'Badge for your README or status page',
   copyMd: 'Copy Markdown',
-  badgeCopied: 'Markdown copied. Put the shrine in your README.',
 };

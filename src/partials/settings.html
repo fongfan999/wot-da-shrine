@@ -1,7 +1,7 @@
 <!-- Settings panel -->
-<aside class="panel" id="panel" aria-hidden="true" inert aria-label="Customize" data-i18n-label="panelTitle">
+<aside class="panel" id="panel" aria-hidden="true" inert aria-label="Settings" data-i18n-label="panelTitle">
   <div class="panel__head">
-    <h2 data-i18n="panelTitle">Customize</h2>
+    <h2 data-i18n="panelTitle">Settings</h2>
     <button class="icon-btn" id="btn-close-panel" type="button" aria-label="Close" data-i18n-label="labelClose">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
@@ -154,6 +154,16 @@
             <button class="btn btn--glass btn--sm" type="button" id="btn-hook-test" data-i18n="hookTest">Copy a test command</button>
             <button class="btn btn--glass btn--sm" type="button" id="btn-hook-reset" data-i18n="hookReset">Replace the link</button>
           </div>
+        </div>
+      </div>
+      <!-- The room's README badge: not a secret, so it is just there to copy -->
+      <div class="field badge">
+        <span class="field__label" data-i18n="fBadge">README badge</span>
+        <p class="field__note" data-i18n="badgeNote">One line of Markdown puts this shrine in a README or status page: down for how long, who is praying, whether the incense burns.</p>
+        <div class="linkbox linkbox--badge">
+          <img class="badge-preview" id="room-badge-img" alt="" height="20" />
+          <code class="linkbox__code" id="room-badge-md"></code>
+          <button class="btn btn--accent btn--sm" id="btn-room-badge-copy" type="button" data-i18n="copyMd">Copy Markdown</button>
         </div>
       </div>
     </section>

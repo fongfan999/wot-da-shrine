@@ -2,7 +2,7 @@
 
 export default {
   // Settings
-  panelTitle: 'Customize',
+  panelTitle: 'Settings',
   fTitle: 'Title',
   fSubtitle: 'Subtitle',
   fScreen: 'On the TV',
@@ -61,8 +61,8 @@ export default {
   lockedLevel: 'Opens at {name} · {n} karma to go',
   lockedCharm: 'Earn the {name} charm',
   lockedTip: 'Locked. {how}.',
-  unlockSound: 'New sound: {name}. Find it in Customize.',
-  unlockScene: 'New scene: {name}. Find it in Customize.',
+  unlockSound: 'New sound: {name}. Find it in Settings.',
+  unlockScene: 'New scene: {name}. Find it in Settings.',
   fUnlock: 'The shrine opened {name}',
   fScene: 'Scene',
   sceneNote: 'What falls past the altar, and the colour of the paper.',
@@ -83,7 +83,7 @@ export default {
   unlockSince: 'New since you were last here',
   unlockPlay: 'Play it',
   unlockShow: 'Show it',
-  unlockTried: 'The whole shrine hears {name} now. Change the mix in Customize.',
+  unlockTried: 'The whole shrine hears {name} now. Change the mix in Settings.',
   unlockShown: 'The whole shrine sees {name} now.',
   unlockDismiss: 'Not now',
   tvUnlocked: 'The shrine opened',
@@ -108,6 +108,10 @@ export default {
   hookResetAsk: 'Replace the webhook link? The old one stops working, so your monitoring needs the new one.',
   hookResetDone: 'New webhook link. The old one no longer works.',
   hookStale: '{name} replaced the webhook link. The one you had stopped working.',
+  // The room's README badge
+  fBadge: 'README badge',
+  badgeNote: 'One line of Markdown puts this shrine in a README or status page: down for how long, who is praying, whether the incense burns.',
+  badgeCopied: 'Markdown copied. Put the shrine in your README.',
   // Notifications: this shrine, on this device, while it is closed
   fPush: 'Notifications',
   pushMain: 'This shrine, on this device',

@@ -25,7 +25,7 @@
   nobody swaying, and the ornaments that only breathe stand still). Desktops
   start with the full set and drop to lite if the frame rate falls below 40 fps
   after the intro (at once below 24), and that device starts lite for the next
-  month. Pick one yourself under Customize, or with `?fx=lite` / `?fx=full`.
+  month. Pick one yourself under Settings, or with `?fx=lite` / `?fx=full`.
   Lite mode, and any shrine nobody has touched for 90 seconds, runs the whole
   scene at 30 fps; a cold altar draws nothing at all.
 - **Atmosphere**: a camera push down the server corridor on load, dust over
@@ -37,7 +37,7 @@
   painted at runtime, and the ambient music is synthesized in the browser.
 - **Light and dark**: paper by day, a night vigil after dark. It follows the
   system setting unless you pick one.
-- **Sound for the room**: a mixer under Customize, heard by everyone in the
+- **Sound for the room**: a mixer under Settings, heard by everyone in the
   shrine, the TV too, so the altar is worth leaving on when nothing is down.
   Six synthesized layers, each with its own slider: Sacred (drone, slow chords,
   temple bells), Chant (a voice singing "om" over a hand drum), Rain (on the

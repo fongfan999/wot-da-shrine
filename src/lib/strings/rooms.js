@@ -13,7 +13,7 @@ export default {
   menuCastHint: 'Type the code the war-room screen shows',
   menuCard: 'Share a picture',
   menuCardHint: 'The altar as it is right now',
-  menuCustomizeHint: 'Theme, sound, what is down',
+  menuCustomizeHint: 'Sound, alerts, README badge',
   menuRenameHint: 'And your avatar at the altar',
   menuTvHint: 'Shows a code to cast to',
   linkCopied: 'Link copied.',

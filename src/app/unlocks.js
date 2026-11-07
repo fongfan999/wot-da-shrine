@@ -139,7 +139,7 @@ function showCard(ids, since) {
     return b;
   }) : [];
   $('#unlock-card-actions').replaceChildren(...actions);
-  for (const id of ['#btn-more', '#btn-settings']) $(id)?.setAttribute('data-new', '1'); // a dot until Customize is opened
+  for (const id of ['#btn-more', '#btn-settings']) $(id)?.setAttribute('data-new', '1'); // a dot until Settings is opened
   card.hidden = false;
   cardTl?.kill();
   cardTl = gsap.timeline()

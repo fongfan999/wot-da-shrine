@@ -1,7 +1,7 @@
 # Straight from your alerting
 
 Every shrine has a webhook, so the vigil can open before anyone thinks of
-it. In a shrine, Customize → **Alerts** → Get the link gives
+it. In a shrine, Settings → **Alerts** → Get the link gives
 `/api/rooms/<room>/hook/<key>`. Point your alerting at it: a firing alert
 opens the vigil, named after the alert, and a resolved one says the servers
 are back, bells and all. The feed shows who raised it (🔔 Grafana said

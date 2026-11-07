@@ -159,15 +159,13 @@ export function openShare(open, celebrate = false) {
   }
   openTray(false);
   openPanel(false);
+  $('#share-invite').hidden = !roomName; // the home page's demo altar has no link to hand out
   $('#btn-share-native').hidden = typeof navigator.share !== 'function';
   $('#btn-card-copy').hidden = !canCopyImage();
   $('#btn-card-share').hidden = !canShareFiles();
   $('#card-label').textContent = celebrate || body.dataset.resolved ? t('resolvedTitle') : t('cardLabel');
   $('#share-url').value = roomUrl();
   $('#btn-share-x').href = `https://x.com/intent/post?${new URLSearchParams({ text: inviteText() })}`;
-  const badge = `${location.origin}/api/rooms/${roomName}/badge.svg`;
-  $('#badge-img').src = `${badge}?t=${Date.now()}`;
-  $('#badge-md').textContent = `[![Wot Da Shrine](${badge})](${roomUrl()})`;
   shareEl.hidden = false;
   gsap.fromTo(shareEl, { opacity: 0 }, { opacity: 1, duration: 0.3 });
   gsap.fromTo('.sheet__card', { y: 24, opacity: 0, scale: 0.98 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' });
@@ -190,7 +188,6 @@ $('#btn-share-slack').addEventListener('click', () => copyText(inviteText(), t('
 $('#btn-share-native').addEventListener('click', async () => {
   try { await navigator.share({ title: BRAND, text: inviteText(), url: roomUrl() }); } catch { /* cancelled */ }
 });
-$('#btn-badge-copy').addEventListener('click', () => copyText($('#badge-md').textContent, t('badgeCopied')));
 $('#btn-card-share').addEventListener('click', async () => {
   if (!cardBlob) return;
   const shared = await shareFile(cardBlob, cardName(), { title: BRAND, text: cardText(), url: roomUrl() });

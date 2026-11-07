@@ -3,7 +3,7 @@
 An incident is a *vigil*, and it begins when someone says something is down:
 **Something's down** in the top bar, or **Yes, start the vigil** when the
 incense is lit in a quiet room (lighting asks "Is something down?"). Naming what
-is down in Customize while the room is quiet opens one too, and so does lighting
+is down in Settings while the room is quiet opens one too, and so does lighting
 in a shrine whose name says it (`prod-is-down`, `payments-outage`), without
 asking. On a quiet day incense, bows, prayers and music are only that: the
 "All quiet" streak goes on and nothing is filed. A vigil ends when someone
@@ -53,7 +53,7 @@ outside the order of the mats. The share card carries the shrine around the
 altar too.
 
 Title, subtitle and "back at" are shared by the whole room: click the title
-and type what is down, click "back at" to pick a time, set them in Customize,
+and type what is down, click "back at" to pick a time, set them in Settings,
 or open `/new?title=Payments+API+is+down&eta=…` and the first person in sets
 them for everyone.
 

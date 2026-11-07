@@ -13,7 +13,7 @@ export default {
   menuCastHint: 'Nhập mã hiện trên màn hình war room',
   menuCard: 'Chia sẻ ảnh',
   menuCardHint: 'Bàn thờ ngay lúc này',
-  menuCustomizeHint: 'Giao diện, âm thanh, cái gì sập',
+  menuCustomizeHint: 'Âm thanh, cảnh báo, badge README',
   menuRenameHint: 'Và avatar của bạn trước bàn thờ',
   menuTvHint: 'Hiện mã để chiếu lên',
   linkCopied: 'Đã copy link.',

@@ -120,7 +120,7 @@ export function onPush(msg) {
   render();
 }
 
-/* ---------- In Customize, Just for you: one switch, and what to hear about under it ---------- */
+/* ---------- In Settings, Just for you: one switch, and what to hear about under it ---------- */
 const field = $('#push-field');
 const note = $('#push-note');
 const toggle = $('#push-on');

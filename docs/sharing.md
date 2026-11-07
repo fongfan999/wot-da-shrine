@@ -33,7 +33,7 @@ The shrine is built to travel from one incident channel to the next:
 - **For the retro**: the share sheet also hands out the vigil as a few lines
   of Markdown (down for how long, people at the peak, prayers, blames,
   fortunes, karma, the link) for the postmortem doc.
-- **A badge for the README or status page**:
+- **A badge for the README or status page**, under Settings → **README badge**:
   `[![Wot Da Shrine](https://shrine.wotda.app/api/rooms/serene-rack-42/badge.svg)](https://shrine.wotda.app/r/serene-rack-42)`
   shows "shrine | down 12m · 3 praying" while a vigil is open, "back · 3
   praying" for the hour after, and otherwise who is there and whether the

@@ -67,7 +67,7 @@ export default {
   quietLast: 'The last vigil lasted {t}.',
   quietSurvived: '{n} vigils survived here.',
   quietSurvivedOne: 'One vigil survived here.',
-  quietChange: 'Mix it from any phone: Customize, Sound',
+  quietChange: 'Mix it from any phone: Settings, Sound',
   quietTapForSound: 'Press any key or click for sound',
   quietMusicOff: 'Music is off on this screen',
 };

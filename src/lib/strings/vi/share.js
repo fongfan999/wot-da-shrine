@@ -60,7 +60,5 @@ export default {
   retroKarma: '{n} công đức tích được',
   retroLink: 'Miếu: {url}',
   retroCopied: 'Đã copy Markdown. Dán vào postmortem nhé.',
-  badgeLabel: 'Badge cho README hoặc status page',
   copyMd: 'Copy Markdown',
-  badgeCopied: 'Đã copy Markdown. Rước miếu vào README thôi.',
 };

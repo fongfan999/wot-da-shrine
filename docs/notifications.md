@@ -1,6 +1,6 @@
 # Notifications
 
-A shrine can call people back while it is closed. In a shrine, Customize →
+A shrine can call people back while it is closed. In a shrine, Settings →
 Just for you → **Turn on notifications** subscribes this browser to this
 shrine, and the shrine offers it once at the moments it matters: when you
 take the watch, right after your morning bow (the very first one already,

@@ -14,6 +14,6 @@
 `title`, `subtitle`, `eta`, `track` and `mix` seed a room that has none yet, e.g.
 `/r/serene-rack-42?title=Payments+API`. The rest work everywhere.
 
-`lang` is for that visit only. Without it the page speaks what was chosen in Customize (Just for
+`lang` is for that visit only. Without it the page speaks what was chosen in Settings (Just for
 you → Language), or else guesses: Vietnamese for a browser whose first language of ours is
 Vietnamese, or whose clock is set to Vietnam, and English for everyone else.

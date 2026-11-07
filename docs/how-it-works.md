@@ -15,7 +15,7 @@
 - There is no solo page: praying alone is a shrine with one person in it.
   For planned downtime the landing page's builder makes a shrine of its own,
   `/r/<slug>?title=…&eta=…`, whose first visit gives the room that title and
-  time. Customize has three tabs: This shrine (title, subtitle, sound, scene, alerts),
+  time. Settings has three tabs: This shrine (title, subtitle, sound, scene, alerts, README badge),
   On the TV (how every screen showing the shrine looks and sounds) and Just for
   you (this browser). On the home page, the demo and a TV it is the last only.
 - `/r/demo` is the public demo shrine, streamed onto the landing page in TV

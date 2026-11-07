@@ -153,6 +153,7 @@
 /* Inside the link box the pill is the field: no box of its own, the box lights up instead. 16px: an iPhone zooms into anything smaller. */
 .field .linkbox .linkbox__input { min-height: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; font-family: var(--font-mono); font-size: 16px; text-overflow: ellipsis; }
 .hook .linkbox:focus-within { border-color: var(--accent); }
+.badge .linkbox--badge { background: var(--paper); }
 .hook__how { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; color: var(--ink); }
 
 /* A layer the shrine has not opened yet: there to see, with how to open it, not to move */
@@ -194,7 +195,7 @@
 [data-scene="hotaru"] > .scene-pick__swatch { --sw-paper: #0f1418; --sw-fall: #e4f07a; --sw-edge: #b5c63c55; --sw-shape: 50%; }
 [data-scene="kin"] > .scene-pick__swatch { --sw-paper: #f8f3e3; --sw-fall: #d4a72c; --sw-edge: #a77f15; --sw-shape: 1px; }
 
-/* Something opened: a dot on More, and on Customize inside it, until the panel is opened */
+/* Something opened: a dot on More, and on Settings inside it, until the panel is opened */
 #btn-more[data-new="1"], #btn-settings[data-new="1"] { position: relative; }
 #btn-more[data-new="1"]::after, #btn-settings[data-new="1"]::after {
   content: "";

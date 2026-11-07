@@ -67,7 +67,7 @@ export default {
   quietLast: 'Đàn cầu gần nhất kéo dài {t}.',
   quietSurvived: 'Miếu này đã qua được {n} đàn cầu.',
   quietSurvivedOne: 'Miếu này đã qua được một đàn cầu.',
-  quietChange: 'Chỉnh từ điện thoại nào cũng được: Tùy chỉnh, Âm thanh',
+  quietChange: 'Chỉnh từ điện thoại nào cũng được: Cài đặt, Âm thanh',
   quietTapForSound: 'Bấm phím bất kỳ hoặc click để bật tiếng',
   quietMusicOff: 'Màn hình này đang tắt nhạc',
 };

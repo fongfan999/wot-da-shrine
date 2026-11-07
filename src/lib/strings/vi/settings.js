@@ -2,7 +2,7 @@
 
 export default {
   // Cài đặt
-  panelTitle: 'Tùy chỉnh',
+  panelTitle: 'Cài đặt',
   fTitle: 'Tiêu đề',
   fSubtitle: 'Tiêu đề phụ',
   fScreen: 'Trên TV',
@@ -61,8 +61,8 @@ export default {
   lockedLevel: 'Mở khi miếu lên {name} · còn thiếu {n} công đức',
   lockedCharm: 'Kiếm bùa {name}',
   lockedTip: 'Chưa mở. {how}.',
-  unlockSound: 'Âm thanh mới: {name}. Tìm trong Tùy chỉnh.',
-  unlockScene: 'Cảnh mới: {name}. Tìm trong Tùy chỉnh.',
+  unlockSound: 'Âm thanh mới: {name}. Tìm trong Cài đặt.',
+  unlockScene: 'Cảnh mới: {name}. Tìm trong Cài đặt.',
   fUnlock: 'Miếu vừa mở khóa {name}',
   fScene: 'Cảnh',
   sceneNote: 'Thứ gì rơi ngang bàn thờ, và giấy màu gì.',
@@ -83,7 +83,7 @@ export default {
   unlockSince: 'Mới có từ lần trước bạn ghé',
   unlockPlay: 'Nghe thử',
   unlockShow: 'Xem thử',
-  unlockTried: 'Giờ cả miếu đều nghe {name}. Đổi bản phối trong Tùy chỉnh.',
+  unlockTried: 'Giờ cả miếu đều nghe {name}. Đổi bản phối trong Cài đặt.',
   unlockShown: 'Giờ cả miếu đều thấy {name}.',
   unlockDismiss: 'Để sau',
   tvUnlocked: 'Miếu vừa mở khóa',
@@ -108,6 +108,10 @@ export default {
   hookResetAsk: 'Đổi link webhook? Link cũ sẽ ngừng hoạt động, nên monitoring phải dùng link mới.',
   hookResetDone: 'Đã có link webhook mới. Link cũ hết hiệu lực.',
   hookStale: '{name} vừa đổi link webhook. Link bạn đang có không còn dùng được nữa.',
+  // Badge README của phòng
+  fBadge: 'Badge README',
+  badgeNote: 'Một dòng Markdown là README hay status page nào cũng có miếu: sập bao lâu, ai đang khấn, nhang còn cháy không.',
+  badgeCopied: 'Đã copy Markdown. Rước miếu vào README thôi.',
   // Thông báo: miếu này, trên máy này, cả khi đã đóng
   fPush: 'Thông báo',
   pushMain: 'Miếu này, trên máy này',
