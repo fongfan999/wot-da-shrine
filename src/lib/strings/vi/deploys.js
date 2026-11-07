@@ -28,7 +28,7 @@ export default {
   omen_bowed: 'Hôm nay đã có người vái',
   omen_pleased: 'Kami đang vui vẻ',
   omen_run: 'Chuỗi deploy êm vẫn đang giữ',
-  omenShort_friday: 'thứ Sáu', omenShort_weekend: 'cuối tuần', omenShort_late: 'quá 16:00', omenShort_unbowed: 'chưa ai vái', omenShort_hungry: 'kami đói', omenShort_broke: 'lần trước sập', omenShort_recent: 'hôm qua mới sập', omenShort_moon: 'trăng rằm', omenShort_mercury: 'sao Thủy nghịch hành',
+  omenShort_friday: 'thứ Sáu', omenShort_weekend: 'cuối tuần', omenShort_late: 'quá 16:00', omenShort_unbowed: 'chưa ai vái', omenShort_hungry: 'kami đói', omenShort_broke: 'lần trước sập', omenShort_recent: 'hôm qua mới sập', omenShort_moon: 'trăng rằm', omenShort_mercury: 'sao Thủy nghịch hành', omenShort_storm: 'bão sắp vào',
   blessAgainst: 'Bất chấp điềm báo: {omens}.',
   blessAgainstRemote: 'Bất chấp {n} điềm xấu.',
   shipDefiedToast: 'Lên prod êm ru bất chấp {n} điềm xấu. Kami gật gù thán phục.',

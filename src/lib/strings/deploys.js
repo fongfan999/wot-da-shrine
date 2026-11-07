@@ -28,7 +28,7 @@ export default {
   omen_bowed: 'Someone bowed today',
   omen_pleased: 'The kami is pleased',
   omen_run: 'The clean run is going',
-  omenShort_friday: 'a Friday', omenShort_weekend: 'a weekend', omenShort_late: 'after 4 pm', omenShort_unbowed: 'no bow today', omenShort_hungry: 'a hungry kami', omenShort_broke: 'the last one broke', omenShort_recent: 'an outage yesterday', omenShort_moon: 'a full moon', omenShort_mercury: 'Mercury retrograde',
+  omenShort_friday: 'a Friday', omenShort_weekend: 'a weekend', omenShort_late: 'after 4 pm', omenShort_unbowed: 'no bow today', omenShort_hungry: 'a hungry kami', omenShort_broke: 'the last one broke', omenShort_recent: 'an outage yesterday', omenShort_moon: 'a full moon', omenShort_mercury: 'Mercury retrograde', omenShort_storm: 'a storm warning',
   blessAgainst: 'Against the omens: {omens}.',
   blessAgainstRemote: 'Against {n} omens.',
   shipDefiedToast: 'Shipped clean against {n} omens. The kami is impressed.',
