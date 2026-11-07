@@ -111,11 +111,11 @@ export default {
   charm_vow: 'Nói là làm', charmHow_vow: 'Giữ trọn một lời nguyện tuần',
   charm_week: 'Bảy buổi sáng', charmHow_week: 'Có người vái sáng bảy ngày liền',
   charm_blameless: 'Sạch tội', charmHow_blameless: 'Đốt mười tờ sớ',
-  charm_clean: 'Tay sạch', charmHow_clean: 'Deploy êm mười lần liền',
+  charm_clean: 'Tay không dính bug', charmHow_clean: 'Deploy êm mười lần liền',
   charm_lantern: 'Người giữ đèn', charmHow_lantern: 'Trực mười ca yên ả',
   charm_grateful: 'Biết ơn', charmHow_grateful: 'Cảm ơn 25 lần',
   charm_veteran: 'Lão làng', charmHow_veteran: 'Qua được mười đàn cầu',
-  charm_night: 'Thức trắng', charmHow_night: 'Qua một đàn cầu dài ba tiếng',
+  charm_night: 'Cú đêm', charmHow_night: 'Qua một đàn cầu dài ba tiếng',
   charm_month: 'Tròn tuần trăng', charmHow_month: 'Có người vái sáng ba mươi ngày liền',
   charm_defiant: 'Nghịch thiên', charmHow_defiant: 'Deploy êm bất chấp từ ba điềm xấu trở lên',
   // Lời nguyện tuần
