@@ -25,10 +25,7 @@ const SCALE = 2; // retina PNG
 
 const TOKENS = ['paper', 'paper-raised', 'paper-sunk', 'ink', 'muted', 'line', 'line-strong', 'sheet-line', 'accent', 'accent-soft', 'note-ink', 'ember', 'ember-soft', 'ember-ink', 'flame', 'live', 'sheet-label', 'tone-1-soft', 'tone-2-soft', 'tone-3-soft', 'tone-1', 'tone-2', 'tone-3'];
 const SANS = `ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`;
-const SERIF_EN = `'Iowan Old Style', 'Palatino Linotype', Palatino, Charter, Georgia, 'Times New Roman', serif`;
-// Iowan and Charter draw Vietnamese ơ and ư without their horn, so a card drawn in Vietnamese leads with Palatino (as tokens.css does)
-const SERIF_VI = `'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif`;
-const serifFor = () => (globalThis.document?.documentElement.lang === 'vi' ? SERIF_VI : SERIF_EN);
+const SERIF = `'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif`; // as tokens.css: Palatino draws Vietnamese ơ and ư
 const MONO = `ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace`;
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -227,7 +224,7 @@ export function cardSvg(data) {
   const quoteSvg = quotes.map((q) => {
     const lines = wrap(q.text, 44, 1);
     const by = q.name ? `  — ${q.name}` : '';
-    const s = `<text x="72" y="${y}" font-family="${serifFor()}" font-style="italic" font-size="26" fill="${c.ink}">“${esc(lines[0])}”<tspan font-family="${MONO}" font-style="normal" font-size="15" fill="${c.muted}">${esc(by)}</tspan></text>`;
+    const s = `<text x="72" y="${y}" font-family="${SERIF}" font-style="italic" font-size="26" fill="${c.ink}">“${esc(lines[0])}”<tspan font-family="${MONO}" font-style="normal" font-size="15" fill="${c.muted}">${esc(by)}</tspan></text>`;
     y += 40;
     return s;
   }).join('');
@@ -255,7 +252,7 @@ export function cardSvg(data) {
   <text x="94" y="84" font-family="${MONO}" font-size="16" letter-spacing="2" fill="${c.muted}">${esc(eyebrow)}</text>
 
   <text x="68" y="172" font-family="${SANS}" font-size="${size1}" font-weight="500" letter-spacing="${-size1 / 26}" fill="${c.ink}">${esc(title[0])}</text>
-  <text x="68" y="256" font-family="${serifFor()}" font-style="italic" font-size="${size2}" letter-spacing="${-size2 / 41}" fill="${c.accent}">${esc(title[1])}</text>
+  <text x="68" y="256" font-family="${SERIF}" font-style="italic" font-size="${size2}" letter-spacing="${-size2 / 41}" fill="${c.accent}">${esc(title[1])}</text>
   <text x="72" y="296" font-family="${SANS}" font-size="22" fill="${c.muted}">${esc(factsLine)}</text>
 
   ${quoteSvg}
