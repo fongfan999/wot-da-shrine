@@ -275,12 +275,9 @@ body[data-blink="1"] .t-led { opacity: .15; }
 .light-cue__text--bow { display: none; }
 .light-cue[data-mode="bow"] :is(.light-cue__text--click, .light-cue__text--tap) { display: none; }
 .light-cue[data-mode="bow"] .light-cue__text--bow { display: inline; }
-.light-cue[data-mode="bow"] { border-color: var(--accent); background: var(--accent-soft); color: var(--note-ink); }
-.light-cue[data-mode="bow"]::after { background: var(--accent); }
-.light-cue[data-mode="bow"] .light-cue__dot { background: var(--accent); }
+/* it keeps the cue's ember rather than the accent: the chips and the Light incense key below are cobalt already */
 /* the censer still lights the incense, so hovering it doesn't light up a cue that bows */
-.burner:has(.burner__svg > path:hover) .light-cue[data-mode="bow"] { background: var(--accent-soft); color: var(--note-ink); }
-.light-cue[data-mode="bow"]:hover { background: var(--accent); color: var(--paper); }
+.burner:has(.burner__svg > path:hover) .light-cue[data-mode="bow"]:not(:hover) { background: var(--ember-soft); color: var(--ember-ink); }
 /* A phone has no room above the sticks: the cue sits on them instead */
 @media (max-width: 760px) {
   .light-cue { top: 24%; transform: translate(-50%, -50%); padding: 5px 12px 5px 10px; font-size: 13px; }
