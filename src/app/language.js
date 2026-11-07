@@ -14,8 +14,18 @@ if (langBtn && other) {
   // Named in itself, as the flag's own speakers would read it
   Object.assign(langBtn, { lang: other, title: LOCALES[other], hidden: false });
   langBtn.setAttribute('aria-label', LOCALES[other]);
-  langBtn.addEventListener('click', () => {
+  const pick = () => {
     sound.tick(740, 0.06);
     setLocale(other);
-  });
+  };
+  langBtn.addEventListener('click', pick);
+  // On a phone in a shrine the flag waits in More, as a line with its name
+  const item = $('#menu-lang');
+  if (item) {
+    item.querySelector('use').setAttribute('href', `#flag-${other}`);
+    item.querySelector('b').textContent = LOCALES[other];
+    item.lang = other;
+    item.hidden = false;
+    item.addEventListener('click', pick);
+  }
 }

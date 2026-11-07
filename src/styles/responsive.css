@@ -212,6 +212,8 @@
   #eta-text { font-family: var(--font-mono); font-size: 12px; }
   #btn-cast { display: none; }
   .bar:has(#btn-cast:not([hidden])) #menu-cast { display: grid; }
+  body[data-mode="room"] #btn-lang { display: none; }
+  body[data-mode="room"] .bar:has(#btn-lang:not([hidden])) #menu-lang { display: grid; }
   /* the watch and the kami: one row, the kami's meter giving way first when it is tight */
   .heading__lines { flex-wrap: wrap; }
   .kami { min-width: 0; }

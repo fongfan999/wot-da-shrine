@@ -201,7 +201,7 @@ src/main.js              what every page runs: loads the modules, keyboard short
 src/home.js, src/room.js the pages' entries: the home page adds the landing and the world line
 src/partials/            the pages' markup
   head.html              the head both pages share
-  scene.html, bar.html, breath.html, tv.html, settings.html
+  scene.html, bar.html (its flags in flags.html), breath.html, tv.html, settings.html
   shrine/                heading, altar, live card, shrine card, credit, TV join, the dock
   sheets/                join, open a shrine, cast, blame, fortune, share
   landing/               the home page's hero pieces, open card and sections, and the footer
