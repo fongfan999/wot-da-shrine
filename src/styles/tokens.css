@@ -59,6 +59,9 @@ body {
   --ease: cubic-bezier(.2, .7, .2, 1);
   color-scheme: light;
 }
+/* Iowan Old Style and Charter, a Mac's, draw Vietnamese ơ and ư without their horn (hơi reads hỏi, đỡ
+   reads đõ); a page in Vietnamese leads with Palatino, which draws them right and looks much the same */
+body:lang(vi) { --font-serif: "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif; }
 
 /* Night vigil: follows the system unless the visitor picked a theme */
 @media (prefers-color-scheme: dark) {

@@ -84,8 +84,8 @@ const PREVIEWS = {
   down: { eyebrow: 'THE SERVERS ARE DOWN', headline: ['The servers are', 'down.'], facts: 'The team is at the shrine. Open the link, kneel, and pray with them.' },
   back: { eyebrow: 'THE SERVERS ARE BACK', headline: ['The servers are', 'back.'], facts: 'The vigil is over. Come and see what the team prayed for.' },
   // What og-down.png and og-back.png are for the Vietnamese launch, drawn like 'down' and 'back' on a page in Vietnamese
-  'down-vi': { eyebrow: 'SERVER ĐANG SẬP', headline: ['Server sập rồi,', 'vào khấn đi thôi.'], facts: 'Cả team đang ở miếu. Mở link, quỳ xuống, khấn cùng anh em.' },
-  'back-vi': { eyebrow: 'SERVER SỐNG LẠI RỒI', headline: ['Server sống lại,', 'nhờ cả team vái.'], facts: 'Đàn cầu đã xong. Vào xem cả team đã khấn những gì.' },
+  'down-vi': { eyebrow: 'SERVER ĐANG SẬP', headline: ['Một server đau,', 'cả tàu vào mau.'], facts: 'Cả team đang ở miếu. Mở link, quỳ xuống, khấn cùng anh em.' },
+  'back-vi': { eyebrow: 'SERVER SỐNG LẠI RỒI', headline: ['Server hồi sinh,', 'miếu này hơi linh.'], facts: 'Đàn cầu đã xong. Vào xem cả team đã khấn những gì.' },
 };
 /** Who kneels in the pictures: the same four of the team every time, as many as the home page's chat card says are praying. */
 const PREVIEW_CAST = [['dev', 1], ['devops', 2], ['boss', 3], ['pm', 0]];
