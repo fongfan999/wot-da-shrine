@@ -10,7 +10,7 @@ const THINGS = [
   'con Postgres của bạn', 'cái DNS', 'con máy chạy cron', 'cái load balancer', 'con Redis không ai dám restart',
   'cái cert sắp hết hạn', 'con server duy nhất không có runbook', 'con staging thật ra là prod',
   'cụm Kafka', 'cái NFS mount', 'cái message queue', 'vụ deploy chiều thứ Sáu', 'file config vô chủ',
-  'cái VPN', 'job backup', 'con primary', 'con máy Jenkins', 'cái rate limiter',
+  'cái VPN công ty', 'job backup chưa ai từng restore', 'con primary', 'con máy Jenkins từ thời tiền sử', 'cái rate limiter',
 ];
 
 /** Kami nói gì theo tâm trạng. {thing} và {when} được điền vào; câu có thể mở đầu bằng {Thing}. */
